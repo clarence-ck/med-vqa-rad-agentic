@@ -1,0 +1,17 @@
+name: clariscan
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+      - fastapi
+      - uvicorn
+      - python-dotenv
+      - openai
+      - Pillow
+      - python-multipart
+      - httpx
+      - datasets
+      - haystack-ai
