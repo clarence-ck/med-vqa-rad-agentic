@@ -162,6 +162,15 @@ export default function CaseExplorer({
                 </div>
               </div>
               <button
+                className="btn btn-secondary btn-full"
+                type="button"
+                onClick={onRefresh}
+                disabled={analysisLoading}
+                style={{ marginTop: 'var(--space-4)' }}
+              >
+                Refresh analysis
+              </button>
+              <button
                 className="btn btn-ghost btn-full"
                 type="button"
                 onClick={handleClear}
