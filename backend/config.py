@@ -20,5 +20,5 @@ if not OPENAI_API_KEY:
     print("WARNING: OPENAI_API_KEY not set. Set it in .env file.")
 
 if not OPENAI_MODEL:
-    print("WARNING: OPENAI_MODEL not set. Defaulting to 'gpt-4o'.")
-    OPENAI_MODEL = "gpt-4o"
+    print("WARNING: OPENAI_MODEL not set. Defaulting to 'gpt-5-mini-2025-08-07'.")
+    OPENAI_MODEL = "gpt-5-mini-2025-08-07"
