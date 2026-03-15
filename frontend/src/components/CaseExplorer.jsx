@@ -161,14 +161,12 @@ export default function CaseExplorer({
                   <span className="tag tag-blue">{selectedSample.split || 'unknown'}</span>
                 </div>
               </div>
-              <button className="btn btn-secondary btn-full" onClick={() => onRefresh?.()} disabled={analysisLoading}>
-                {analysisLoading ? 'Loading case analysis...' : 'Run / Refresh Analysis'}
-              </button>
               <button
                 className="btn btn-ghost btn-full"
                 type="button"
                 onClick={handleClear}
                 disabled={analysisLoading}
+                style={{ marginTop: 'var(--space-4)' }}
               >
                 Clear selection
               </button>
