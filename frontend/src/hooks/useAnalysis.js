@@ -1,6 +1,20 @@
 import { useState, useCallback } from 'react';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+const REQUEST_TIMEOUT_MS = 90000; // safety timeout to avoid stuck loading state
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timer);
+    return response;
+  } catch (err) {
+    clearTimeout(timer);
+    throw err;
+  }
+}
 
 export function useAnalysis() {
   const [agenticLoading, setAgenticLoading] = useState(false);
@@ -33,7 +47,7 @@ export function useAnalysis() {
     formData.append('question', question);
 
     try {
-      const response = await fetch(`${API_BASE}/api/analyze`, {
+      const response = await fetchWithTimeout(`${API_BASE}/api/analyze`, {
         method: 'POST',
         body: formData,
       });
@@ -62,7 +76,7 @@ export function useAnalysis() {
     formData.append('question', question);
 
     try {
-      const response = await fetch(`${API_BASE}/api/analyze/baseline`, {
+      const response = await fetchWithTimeout(`${API_BASE}/api/analyze/baseline`, {
         method: 'POST',
         body: formData,
       });
@@ -92,7 +106,7 @@ export function useAnalysis() {
     formData.append('question', question);
 
     try {
-      const response = await fetch(`${API_BASE}/api/analyze/workflow`, {
+      const response = await fetchWithTimeout(`${API_BASE}/api/analyze/workflow`, {
         method: 'POST',
         body: formData,
       });
