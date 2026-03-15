@@ -199,6 +199,21 @@ export default function CaseExplorer({
           )}
         </div>
         <div className="panel-body">
+          {analysisData && (
+            <div className="baseline-note" style={{ marginBottom: 'var(--space-4)', marginTop: 0 }}>
+              <div className="baseline-note-text">
+                {comparisonMode === 'agentic' && (
+                  <><strong>Agentic Pipeline:</strong> Full architecture using 5 LLM agents for interpretation, question analysis, knowledge retrieval, reasoning, and verification.</>
+                )}
+                {comparisonMode === 'workflow' && (
+                  <><strong>Workflow Baseline:</strong> A deterministic, rule-based approach wrapping independent image and text LLM calls, without medical knowledge retrieval or verification.</>
+                )}
+                {comparisonMode === 'baseline' && (
+                  <><strong>Single-shot Baseline:</strong> A standard blank-slate LLM prompting strategy, passing the image and text directly to a single multimodal generation call.</>
+                )}
+              </div>
+            </div>
+          )}
           {analysisData?.sample?.image_base64 ? (
             <div className="image-viewer">
               <img
