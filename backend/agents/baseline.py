@@ -2,8 +2,17 @@ import base64
 import json
 from openai import OpenAI
 from config import OPENAI_API_KEY, OPENAI_MODEL
+from utils.json_utils import strip_json_fences
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+_client: OpenAI | None = None
+
+
+def _get_client() -> OpenAI:
+    """Lazily initialize the OpenAI client to avoid failures at import time."""
+    global _client
+    if _client is None:
+        _client = OpenAI(api_key=OPENAI_API_KEY)
+    return _client
 
 
 def baseline_answer(image_bytes: bytes, question: str,
@@ -29,7 +38,7 @@ Return a JSON object with:
 Return ONLY the JSON object, no additional text."""
 
     try:
-        response = client.chat.completions.create(
+        response = _get_client().chat.completions.create(
             model=OPENAI_MODEL,
             messages=[
                 {
@@ -49,15 +58,7 @@ Return ONLY the JSON object, no additional text."""
 
         )
 
-        raw = response.choices[0].message.content.strip()
-        if raw.startswith("```"):
-            raw = raw.split("\n", 1)[1] if "\n" in raw else raw[3:]
-            raw = raw.strip()
-        if raw.endswith("```"):
-            raw = raw[:-3].strip()
-        if raw.startswith("json"):
-            raw = raw[4:].strip()
-
+        raw = strip_json_fences(response.choices[0].message.content or "")
         result = json.loads(raw)
         result["status"] = "success"
         return result

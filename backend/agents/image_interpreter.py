@@ -6,6 +6,7 @@ from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage, TextContent, ImageContent
 from haystack.utils import Secret
 from config import OPENAI_API_KEY, OPENAI_MODEL
+from utils.json_utils import strip_json_fences
 
 
 @component
@@ -57,15 +58,7 @@ Return ONLY the JSON object, no additional text."""
             reply_msg = response["replies"][0]
             raw = (reply_msg.text or "").strip()
 
-            # Strip markdown code fences if present
-            if raw.startswith("```"):
-                raw = raw.split("\n", 1)[1] if "\n" in raw else raw[3:]
-                raw = raw.strip()
-            if raw.endswith("```"):
-                raw = raw[:-3].strip()
-            if raw.startswith("json"):
-                raw = raw[4:].strip()
-
+            raw = strip_json_fences(raw)
             result = json.loads(raw)
             result["status"] = "success"
             return {"result": result}

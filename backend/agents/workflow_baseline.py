@@ -66,8 +66,19 @@ def _derive_presence_answer(question: str, target_entity: str, evidence_text: st
     return ("No", "low") if image_status == "success" else ("Unable to determine", "low")
 
 
-def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/png") -> dict:
-    image_result = interpret_image(image_bytes, mime_type)
+def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/png",
+                    precomputed_image_result: dict | None = None) -> dict:
+    """Run the hand-designed non-agentic workflow baseline.
+
+    Args:
+        image_bytes: Raw image bytes.
+        question: The user question.
+        mime_type: MIME type of the image.
+        precomputed_image_result: Optional pre-computed image interpretation dict.
+            Pass this to avoid a second LLM call when the caller already has one
+            (e.g. from the agentic pipeline run).
+    """
+    image_result = precomputed_image_result if precomputed_image_result is not None else interpret_image(image_bytes, mime_type)
     question_result = analyze_question(question, image_result.get("visual_summary", ""))
 
     modality = _clean_value(image_result.get("modality"))

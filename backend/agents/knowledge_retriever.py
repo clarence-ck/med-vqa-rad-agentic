@@ -5,6 +5,7 @@ from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage
 from haystack.utils import Secret
 from config import OPENAI_API_KEY, OPENAI_MODEL
+from utils.json_utils import strip_json_fences
 
 
 @component
@@ -20,39 +21,35 @@ class KnowledgeRetriever:
         )
 
     @component.output_types(result=Dict[str, Any])
-    def run(self, 
+    def run(self,
             image_interpretation: dict = None,
             question_analysis: dict = None,
+            original_question: str = "",
             question_type: str = "",
             body_region: str = "",
             modality: str = "",
             visual_cues: list = None,
             target_entity: str = ""):
         
-        # Support extracting properties directly from upstream components
-        if question_analysis and "result" in question_analysis:
-            qa = question_analysis["result"]
+        # The Haystack pipeline always delivers result-wrapped dicts from upstream components.
+        # Unwrap them directly; the bare-dict elif branches were dead code.
+        if question_analysis:
+            qa = question_analysis.get("result", question_analysis)
             question_type = question_type or qa.get("question_type", "")
             target_entity = target_entity or qa.get("target_entity", "")
-        elif question_analysis:
-            question_type = question_type or question_analysis.get("question_type", "")
-            target_entity = target_entity or question_analysis.get("target_entity", "")
 
-        if image_interpretation and "result" in image_interpretation:
-            ii = image_interpretation["result"]
+        if image_interpretation:
+            ii = image_interpretation.get("result", image_interpretation)
             body_region = body_region or ii.get("body_region", "")
             modality = modality or ii.get("modality", "")
             visual_cues = visual_cues or ii.get("visible_structures", [])
-        elif image_interpretation:
-            body_region = body_region or image_interpretation.get("body_region", "")
-            modality = modality or image_interpretation.get("modality", "")
-            visual_cues = visual_cues if visual_cues is not None else image_interpretation.get("visible_structures", [])
 
         cues_str = ", ".join(visual_cues) if visual_cues else "none"
 
         prompt = f"""You are a medical knowledge support agent. Provide concise, relevant medical context to help answer a question about a medical image.
 
 Context:
+- Original question: {original_question if original_question else "not provided"}
 - Question type: {question_type}
 - Body region: {body_region}
 - Imaging modality: {modality}
@@ -79,15 +76,7 @@ Return ONLY the JSON object, no additional text."""
                 }
             )
 
-            raw = (response["replies"][0].text or "").strip()
-            if raw.startswith("```"):
-                raw = raw.split("\n", 1)[1] if "\n" in raw else raw[3:]
-                raw = raw.strip()
-            if raw.endswith("```"):
-                raw = raw[:-3].strip()
-            if raw.startswith("json"):
-                raw = raw[4:].strip()
-
+            raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
             result["status"] = "success"
             return {"result": result}

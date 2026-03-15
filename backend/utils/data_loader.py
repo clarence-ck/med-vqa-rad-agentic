@@ -34,7 +34,8 @@ def get_sample_cases(limit: int = 20, split: str | None = None) -> list:
     for i, item in enumerate(data):
         q_type = _classify_question(item.get("question", ""))
         image_name = item.get("image_name", item.get("image", ""))
-        sample_split = infer_split(image_name)
+        # Prefer the split field stored by the download script; fall back to filename inference.
+        sample_split = item.get("split") or infer_split(image_name)
         if split and sample_split != split:
             continue
         sample = {

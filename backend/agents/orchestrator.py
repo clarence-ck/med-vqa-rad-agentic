@@ -49,6 +49,7 @@ class TimedKnowledgeRetriever:
     def run(self,
             image_interpretation: dict = None,
             question_analysis: dict = None,
+            original_question: str = "",
             question_type: str = "",
             body_region: str = "",
             modality: str = "",
@@ -58,6 +59,7 @@ class TimedKnowledgeRetriever:
         output = self.inner.run(
             image_interpretation=image_interpretation,
             question_analysis=question_analysis,
+            original_question=original_question,
             question_type=question_type,
             body_region=body_region,
             modality=modality,
@@ -122,6 +124,7 @@ class TimedVerificationAgent:
 
 
 def create_pipeline() -> Pipeline:
+    """Create a fresh pipeline instance. Called per-request to avoid shared mutable state."""
     pipeline = Pipeline()
     pipeline.add_component("image_interpreter", TimedImageInterpreter())
     pipeline.add_component("question_analyzer", TimedQuestionAnalyzer())
@@ -138,9 +141,6 @@ def create_pipeline() -> Pipeline:
     pipeline.connect("knowledge_retriever.result", "reasoning_agent.knowledge")
     pipeline.connect("reasoning_agent.result", "verification_agent.answer_data")
     return pipeline
-
-
-pipeline = create_pipeline()
 
 
 def _categorize_failure_modes(knowledge_result: dict, answer_result: dict, verification_result: dict) -> list:
@@ -263,7 +263,11 @@ def _build_self_consistency_signal(verification_result: dict) -> dict:
 
     if verification_status == "verified" and total_checks and passed_checks == total_checks:
         level = "high"
-    elif verification_status in {"verified", "partially_verified"} and passed_checks >= max(2, total_checks - 1):
+    elif (
+        total_checks > 0
+        and verification_status in {"verified", "partially_verified"}
+        and passed_checks >= max(1, total_checks - 1)
+    ):
         level = "medium"
     else:
         level = "low"
@@ -361,6 +365,8 @@ def _build_agent_trace(image_result: dict, question_result: dict, knowledge_resu
 
 
 def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png") -> dict:
+    # Create a fresh pipeline per request — prevents shared mutable state under concurrency.
+    pipeline = create_pipeline()
     pipeline_start = time.time()
     results = pipeline.run(
         {
@@ -370,6 +376,9 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
             },
             "question_analyzer": {
                 "question": question,
+            },
+            "knowledge_retriever": {
+                "original_question": question,
             },
             "reasoning_agent": {
                 "original_question": question,

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+import { API_BASE } from '../config';
 
 export function useDataset(initialSplit = 'all') {
   const [samples, setSamples] = useState([]);
@@ -41,14 +41,16 @@ export function useDataset(initialSplit = 'all') {
     }
   }, []);
 
-  const changeSplit = useCallback(async (split) => {
-    setActiveSplit(split);
-    await fetchSamples(split);
+  // Fetch on mount or when activeSplit changes organically
+  useEffect(() => {
+    fetchSamples();
   }, [fetchSamples]);
 
-  useEffect(() => {
-    fetchSamples(activeSplit);
-  }, [activeSplit, fetchSamples]);
+  // Expose changeSplit for manual UI triggers
+  const changeSplit = useCallback(async (split) => {
+    setActiveSplit(split);
+    // Explicit return to allow chaining, react will batch the state update
+  }, []);
 
   return {
     samples,

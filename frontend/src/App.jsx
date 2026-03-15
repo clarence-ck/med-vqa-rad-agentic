@@ -15,7 +15,7 @@ import { useAnalysis } from './hooks/useAnalysis';
 import { useDataset } from './hooks/useDataset';
 import { useEvaluation } from './hooks/useEvaluation';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+import { API_BASE } from './config';
 
 function App() {
   const { loading, loadingMessage, result, baselineResult, workflowResult, error, analyze, analyzeBaseline, analyzeWorkflow, reset } = useAnalysis();
@@ -183,16 +183,7 @@ function App() {
 
       {/* Error Display */}
       {error && (
-        <div style={{
-          padding: 'var(--space-3) var(--space-6)',
-          background: 'var(--color-error-bg)',
-          borderBottom: '1px solid rgba(239, 68, 68, 0.2)',
-          color: 'var(--color-error)',
-          fontSize: 'var(--font-size-sm)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'var(--space-2)'
-        }}>
+        <div className="error-banner">
           <span>⚠️</span>
           <span>{error}</span>
         </div>
@@ -219,7 +210,7 @@ function App() {
           </aside>
 
           <section className="panel" style={{ borderRight: '1px solid var(--color-border)' }}>
-            <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="panel-header panel-header-action">
               <h2><span className="icon">🖼️</span> Image Workspace</h2>
               {hasAnyResult && (
                 <ComparisonToggle mode={comparisonMode} onToggle={handleComparisonToggle} />
@@ -244,7 +235,7 @@ function App() {
               )}
 
               {loading && (
-                <div className="loading-container" style={{ padding: 'var(--space-8)' }}>
+                <div className="loading-container loading-container-padded">
                   <div className="loading-spinner"></div>
                   <div className="loading-text">{loadingMessage || 'Running analyses...'}</div>
                   <AgentTrace loading={true} />
@@ -286,8 +277,8 @@ function App() {
                           </div>
                         )}
                       </div>
-                      <div style={{ marginTop: 'var(--space-4)', padding: 'var(--space-3)', background: 'var(--color-bg-input)', borderRadius: 'var(--radius-sm)' }}>
-                        <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+                      <div className="baseline-note">
+                        <div className="baseline-note-text">
                           ℹ️ This is a single-shot result without agent decomposition, knowledge support, or verification.
                           Switch to <strong>Agentic Pipeline</strong> to see the full analysis.
                         </div>

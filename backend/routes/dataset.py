@@ -51,10 +51,11 @@ async def get_sample(sample_id: int):
     return sample
 
 
-def _get_sample_with_image(sample_id: int):
+def _get_sample_with_image(sample_id: int) -> tuple[dict | None, bytes | None]:
+    """Always returns a (sample, image_bytes) 2-tuple; (None, None) if not found."""
     sample = get_sample_by_id(sample_id)
     if sample is None:
-        return None
+        return None, None
 
     if sample.get("image_name"):
         image_bytes = get_image_bytes(sample["image_name"])
@@ -84,10 +85,46 @@ def _get_cache_path(sample_id: int, question: str) -> str:
     return os.path.join(CACHE_DIR, f"sample_{sample_id}_{question_hash}.json")
 
 
+_YES_TOKENS = {"yes", "true", "present", "positive", "abnormal", "found", "visible", "seen"}
+_NO_TOKENS = {"no", "false", "absent", "negative", "normal", "not found", "not visible", "not seen"}
+
+
 def _normalize_answer(text: str) -> str:
+    """Normalize an answer string for comparison."""
     if text is None:
         return ""
     return " ".join(str(text).strip().lower().replace("\n", " ").split())
+
+
+def _normalize_yes_no(text: str) -> str:
+    """Collapse common yes/no synonyms to a canonical 'yes' or 'no' token."""
+    tokens = set(_normalize_answer(text).split())
+    if tokens & _YES_TOKENS:
+        return "yes"
+    if tokens & _NO_TOKENS:
+        return "no"
+    return _normalize_answer(text)
+
+
+def _token_f1(prediction: str, ground_truth: str) -> float:
+    """Compute token-level F1 between two normalized answer strings."""
+    pred_tokens = set(prediction.split())
+    gt_tokens = set(ground_truth.split())
+    if not pred_tokens or not gt_tokens:
+        return 1.0 if pred_tokens == gt_tokens else 0.0
+    common = pred_tokens & gt_tokens
+    if not common:
+        return 0.0
+    precision = len(common) / len(pred_tokens)
+    recall = len(common) / len(gt_tokens)
+    return 2 * precision * recall / (precision + recall)
+
+
+def _answers_match(predicted: str, ground_truth: str) -> bool:
+    """Return True if the predicted answer is correct by exact match OR yes/no normalization."""
+    if predicted == ground_truth:
+        return True
+    return _normalize_yes_no(predicted) == _normalize_yes_no(ground_truth)
 
 
 def _build_evaluation_row(payload: dict) -> dict:
@@ -103,9 +140,9 @@ def _build_evaluation_row(payload: dict) -> dict:
     workflow_normalized = _normalize_answer(workflow_answer_text)
     agentic_normalized = _normalize_answer(agentic_answer_text)
     ground_truth_normalized = _normalize_answer(ground_truth)
-    baseline_correct = baseline_normalized == ground_truth_normalized
-    workflow_correct = workflow_normalized == ground_truth_normalized
-    agentic_correct = agentic_normalized == ground_truth_normalized
+    baseline_correct = _answers_match(baseline_normalized, ground_truth_normalized)
+    workflow_correct = _answers_match(workflow_normalized, ground_truth_normalized)
+    agentic_correct = _answers_match(agentic_normalized, ground_truth_normalized)
     candidates = {
         "baseline": baseline_correct,
         "workflow": workflow_correct,
@@ -119,10 +156,16 @@ def _build_evaluation_row(payload: dict) -> dict:
     else:
         winner = "tie_all_wrong"
 
+    # Prefer the agentic pipeline's question_type (from LLM) over the heuristic (#17)
+    question_type = (
+        agentic_result.get("question_analysis", {}).get("question_type")
+        or sample.get("question_type", "unknown")
+    )
+
     return {
         "sample_id": sample.get("id"),
         "question": sample.get("question", ""),
-        "question_type": sample.get("question_type", "unknown"),
+        "question_type": question_type,
         "split": sample.get("split", "unknown"),
         "ground_truth_answer": ground_truth,
         "baseline_answer": baseline_answer_text,
@@ -131,6 +174,9 @@ def _build_evaluation_row(payload: dict) -> dict:
         "baseline_correct": baseline_correct,
         "workflow_correct": workflow_correct,
         "agentic_correct": agentic_correct,
+        "baseline_token_f1": round(_token_f1(baseline_normalized, ground_truth_normalized), 4),
+        "workflow_token_f1": round(_token_f1(workflow_normalized, ground_truth_normalized), 4),
+        "agentic_token_f1": round(_token_f1(agentic_normalized, ground_truth_normalized), 4),
         "winner": winner,
         "disagreement": len({baseline_normalized, workflow_normalized, agentic_normalized}) > 1,
         "verification_status": agentic_result.get("verification_status", "unknown"),
@@ -219,11 +265,10 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
 
 @router.get("/sample/{sample_id}/analysis")
 async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=False)):
-    sample_and_image = _get_sample_with_image(sample_id)
-    if sample_and_image is None:
+    sample, image_bytes = _get_sample_with_image(sample_id)
+    if sample is None:
         return JSONResponse(status_code=404, content={"error": "Sample not found"})
 
-    sample, image_bytes = sample_and_image
     if not image_bytes:
         return JSONResponse(status_code=404, content={"error": "Sample image not found"})
 
@@ -270,6 +315,7 @@ async def get_evaluation_summary(split: str | None = Query(default=None)):
     ]
 
     rows = []
+    skipped = 0
     for cache_file in cache_files:
         try:
             with open(cache_file, "r", encoding="utf-8") as f:
@@ -278,7 +324,9 @@ async def get_evaluation_summary(split: str | None = Query(default=None)):
             if split and row.get("split") != split:
                 continue
             rows.append(row)
-        except Exception:
+        except Exception as exc:
+            print(f"WARNING: Skipping cache file {os.path.basename(cache_file)}: {exc}")
+            skipped += 1
             continue
 
     rows.sort(key=lambda row: (
@@ -291,4 +339,5 @@ async def get_evaluation_summary(split: str | None = Query(default=None)):
     return {
         "summary": _build_evaluation_summary(rows),
         "rows": rows,
+        "skipped_files": skipped,
     }
