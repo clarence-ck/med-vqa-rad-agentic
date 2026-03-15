@@ -88,6 +88,13 @@ function App() {
     setComparisonMode(mode);
   }, []);
 
+  const handleClear = useCallback(() => {
+    setImageSrc(null);
+    setImageFile(null);
+    setCurrentQuestion('');
+    reset();
+  }, [reset]);
+
   const handleLoadCaseAnalysis = useCallback(async (sampleId, refresh = false) => {
     if (!sampleId) return;
     setCaseAnalysisLoading(true);
@@ -104,6 +111,11 @@ function App() {
       setCaseAnalysisData(null);
     }
   }, [handleLoadCaseAnalysis]);
+
+  const handleExplorerClear = useCallback(() => {
+    setSelectedExplorerSampleId('');
+    setCaseAnalysisData(null);
+  }, []);
 
   const handleTabChange = useCallback(async (tab) => {
     setActiveTab(tab);
@@ -201,6 +213,8 @@ function App() {
               currentImage={imageFile}
               currentQuestion={currentQuestion}
               onQuestionChange={setCurrentQuestion}
+              onClear={handleClear}
+              locked={loading || hasAnyResult}
             />
           </aside>
 
@@ -343,6 +357,7 @@ function App() {
           analysisLoading={caseAnalysisLoading}
           analysisData={caseAnalysisData}
           onRefresh={() => handleLoadCaseAnalysis(selectedExplorerSampleId, true)}
+          onClearSelection={handleExplorerClear}
         />
       ) : (
         <EvaluationView

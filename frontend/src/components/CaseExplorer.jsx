@@ -55,6 +55,7 @@ export default function CaseExplorer({
   analysisLoading,
   analysisData,
   onRefresh,
+  onClearSelection,
 }) {
   const [comparisonMode, setComparisonMode] = useState('agentic');
   const selectedResult = useMemo(
@@ -70,6 +71,13 @@ export default function CaseExplorer({
     () => samples.find((sample) => String(sample.id) === String(selectedSampleId)) || null,
     [samples, selectedSampleId],
   );
+
+  const sampleSelectDisabled = Boolean((analysisData || analysisLoading) && selectedSampleId);
+
+  const handleClear = () => {
+    setComparisonMode('agentic');
+    onClearSelection?.();
+  };
 
   return (
     <main className="case-explorer-layout">
@@ -112,6 +120,7 @@ export default function CaseExplorer({
               className="form-select"
               value={selectedSampleId ?? ''}
               onChange={(e) => onSelectSample?.(e.target.value)}
+              disabled={sampleSelectDisabled}
             >
               <option value="">— Select a sample —</option>
               {samples.map((sample) => (
@@ -121,6 +130,11 @@ export default function CaseExplorer({
                 </option>
               ))}
             </select>
+            {sampleSelectDisabled && (
+              <div className="split-guidance-text" style={{ marginTop: 'var(--space-2)' }}>
+                Clear the current case before selecting another.
+              </div>
+            )}
           </div>
 
           {selectedSample && (
@@ -149,6 +163,14 @@ export default function CaseExplorer({
               </div>
               <button className="btn btn-secondary btn-full" onClick={() => onRefresh?.()} disabled={analysisLoading}>
                 {analysisLoading ? 'Loading case analysis...' : 'Run / Refresh Analysis'}
+              </button>
+              <button
+                className="btn btn-ghost btn-full"
+                type="button"
+                onClick={handleClear}
+                disabled={analysisLoading}
+              >
+                Clear selection
               </button>
             </div>
           )}

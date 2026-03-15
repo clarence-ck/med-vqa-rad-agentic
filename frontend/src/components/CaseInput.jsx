@@ -9,10 +9,13 @@ export default function CaseInput({
   currentImage,
   currentQuestion,
   onQuestionChange,
+  onClear,
+  locked = false,
 }) {
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
+    if (locked) return;
     const file = e.target.files?.[0];
     if (file) {
       onImageSelect?.(file);
@@ -21,6 +24,7 @@ export default function CaseInput({
 
   const handleDrop = (e) => {
     e.preventDefault();
+    if (locked) return;
     const file = e.dataTransfer.files?.[0];
     if (file && file.type.startsWith('image/')) {
       onImageSelect?.(file);
@@ -46,6 +50,13 @@ export default function CaseInput({
     onSubmit(currentImage, currentQuestion.trim());
   };
 
+  const handleClear = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    onClear?.();
+  };
+
   return (
     <div className="panel-body">
       {/* Image Upload */}
@@ -56,6 +67,7 @@ export default function CaseInput({
           onClick={() => fileInputRef.current?.click()}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
+          style={locked ? { opacity: 0.6, pointerEvents: 'none' } : undefined}
         >
           <input
             ref={fileInputRef}
@@ -64,6 +76,7 @@ export default function CaseInput({
             onChange={handleFileChange}
             style={{ display: 'none' }}
             id="image-upload-input"
+            disabled={locked}
           />
           {currentImage ? (
             <>
@@ -79,6 +92,11 @@ export default function CaseInput({
               </span>
             </>
           )}
+          {locked && (
+            <div className="split-guidance-text" style={{ marginTop: 'var(--space-2)' }}>
+              Clear the current case before uploading another.
+            </div>
+          )}
         </div>
       </div>
 
@@ -90,6 +108,7 @@ export default function CaseInput({
           onChange={handleSampleChange}
           defaultValue=""
           id="sample-case-select"
+          disabled={locked}
         >
           <option value="">— Select a sample —</option>
           {samples.map((s) => (
@@ -99,6 +118,11 @@ export default function CaseInput({
             </option>
           ))}
         </select>
+        {locked && (
+          <div className="split-guidance-text" style={{ marginTop: 'var(--space-2)' }}>
+            Clear the current case before selecting or uploading another.
+          </div>
+        )}
       </div>
 
       {/* Question Input */}
@@ -114,22 +138,35 @@ export default function CaseInput({
         />
       </div>
 
-      {/* Submit Button */}
-      <button
-        className="btn btn-primary btn-full"
-        onClick={handleSubmit}
-        disabled={loading || !currentImage || !currentQuestion?.trim()}
-        id="analyze-button"
-      >
-        {loading ? (
-          <>
-            <span className="loading-spinner" style={{ width: 16, height: 16, borderWidth: 2 }}></span>
-            Analyzing...
-          </>
-        ) : (
-          <>🔬 Analyze Case</>
-        )}
-      </button>
+      {/* Actions */}
+      <div className="button-row" style={{ display: 'flex', gap: 8 }}>
+        <button
+          className="btn btn-secondary"
+          onClick={handleClear}
+          disabled={loading || (!currentImage && !currentQuestion)}
+          type="button"
+          id="clear-button"
+          style={{ flex: 1 }}
+        >
+          Clear
+        </button>
+        <button
+          className="btn btn-primary"
+          onClick={handleSubmit}
+          disabled={loading || !currentImage || !currentQuestion?.trim()}
+          id="analyze-button"
+          style={{ flex: 2 }}
+        >
+          {loading ? (
+            <>
+              <span className="loading-spinner" style={{ width: 16, height: 16, borderWidth: 2 }}></span>
+              Analyzing...
+            </>
+          ) : (
+            <>🔬 Analyze Case</>
+          )}
+        </button>
+      </div>
 
       {/* Disclaimer */}
       <div className="disclaimer-bar" style={{ marginTop: 'auto' }}>
