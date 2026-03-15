@@ -1,10 +1,4 @@
 export default function ComparisonToggle({ mode, onToggle }) {
-  const descriptions = {
-    agentic: 'Multi-stage pipeline with image interpretation, question analysis, knowledge support, reasoning, and verification.',
-    workflow: 'Hand-designed non-agentic workflow that uses structured intermediate steps but no verifier-driven agent loop.',
-    baseline: 'Single multimodal prompt that answers directly from the image and question without decomposition or verification.',
-  };
-
   return (
     <div className="comparison-toggle-group">
       <div className="comparison-toggle">

@@ -44,6 +44,45 @@ function getSummaryBadge(mode, result) {
   };
 }
 
+function MethodologyLabels() {
+  return (
+    <div className="methodology-compact" style={{ 
+      marginBottom: 'var(--space-4)', 
+      paddingBottom: 'var(--space-4)', 
+      borderBottom: '1px solid var(--color-border)', 
+      fontSize: 'var(--font-size-xs)',
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      gap: 'var(--space-4)'
+    }}>
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
+          <span style={{ color: 'var(--color-accent)', fontWeight: 'bold' }}>🔗 Agentic Pipeline</span>
+        </div>
+        <p style={{ color: 'var(--color-text-secondary)', lineHeight: '1.4' }}>
+          Decomposes queries into visual interpretation, context retrieval, and iterative reasoning with a final verification loop.
+        </p>
+      </div>
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
+          <span style={{ color: 'var(--color-warning)', fontWeight: 'bold' }}>🧭 Workflow Baseline</span>
+        </div>
+        <p style={{ color: 'var(--color-text-secondary)', lineHeight: '1.4' }}>
+          A deterministic sequence of analysis steps that follows a fixed path without agentic self-correction or feedback.
+        </p>
+      </div>
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
+          <span style={{ color: 'var(--color-error)', fontWeight: 'bold' }}>⚡ Baseline (Single-shot)</span>
+        </div>
+        <p style={{ color: 'var(--color-text-secondary)', lineHeight: '1.4' }}>
+          A direct, single-prompt approach where the LLM answers from the image without any intermediate decomposition.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function CaseExplorer({
   samples,
   loading,
@@ -199,6 +238,7 @@ export default function CaseExplorer({
           )}
         </div>
         <div className="panel-body">
+          <MethodologyLabels />
           {analysisData?.sample?.image_base64 ? (
             <div className="image-viewer">
               <img
@@ -311,19 +351,13 @@ export default function CaseExplorer({
                 )}
                 {analysisData.baseline_result?.confidence && (
                   <div style={{ marginTop: 'var(--space-3)' }}>
-                    <span className={`tag ${
-                      analysisData.baseline_result.confidence === 'high' ? 'tag-green' :
-                      analysisData.baseline_result.confidence === 'medium' ? 'tag-amber' : 'tag-red'
-                    }`}>
+                    <span className={`tag ${analysisData.baseline_result.confidence === 'high' ? 'tag-green' :
+                        analysisData.baseline_result.confidence === 'medium' ? 'tag-amber' : 'tag-red'
+                      }`}>
                       {analysisData.baseline_result.confidence} confidence
                     </span>
                   </div>
                 )}
-              </div>
-              <div className="baseline-note">
-                <div className="baseline-note-text">
-                  ℹ️ <strong>Single-shot Baseline:</strong> A standard blank-slate LLM prompting strategy, passing the image and text directly to a single multimodal generation call without decomposition.
-                </div>
               </div>
             </div>
           )}
@@ -342,19 +376,13 @@ export default function CaseExplorer({
                 )}
                 {analysisData.workflow_result?.confidence && (
                   <div style={{ marginTop: 'var(--space-3)' }}>
-                    <span className={`tag ${
-                      analysisData.workflow_result.confidence === 'high' ? 'tag-green' :
-                      analysisData.workflow_result.confidence === 'medium' ? 'tag-amber' : 'tag-red'
-                    }`}>
+                    <span className={`tag ${analysisData.workflow_result.confidence === 'high' ? 'tag-green' :
+                        analysisData.workflow_result.confidence === 'medium' ? 'tag-amber' : 'tag-red'
+                      }`}>
                       {analysisData.workflow_result.confidence} confidence
                     </span>
                   </div>
                 )}
-              </div>
-              <div className="baseline-note">
-                <div className="baseline-note-text">
-                  ℹ️ <strong>Workflow Baseline:</strong> A deterministic, rule-based approach wrapping independent image and text LLM calls, without an agentic verification loop.
-                </div>
               </div>
             </div>
           )}

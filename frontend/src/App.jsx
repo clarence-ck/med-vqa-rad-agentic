@@ -279,7 +279,8 @@ function App() {
                       </div>
                       <div className="baseline-note">
                         <div className="baseline-note-text">
-                          ℹ️ <strong>Single-shot Baseline:</strong> A standard blank-slate LLM prompting strategy, passing the image and text directly to a single multimodal generation call without decomposition.
+                          ℹ️ This is a single-shot result without agent decomposition, knowledge support, or verification.
+                          Switch to <strong>Agentic Pipeline</strong> to see the full analysis.
                         </div>
                       </div>
                     </div>
@@ -319,11 +320,6 @@ function App() {
                             </span>
                           </div>
                         )}
-                      </div>
-                      <div className="baseline-note">
-                        <div className="baseline-note-text">
-                          ℹ️ <strong>Workflow Baseline:</strong> A deterministic, rule-based approach wrapping independent image and text LLM calls, without an agentic verification loop.
-                        </div>
                       </div>
                     </div>
                   ) : (
