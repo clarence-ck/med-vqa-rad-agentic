@@ -27,9 +27,6 @@ export default function ComparisonToggle({ mode, onToggle }) {
           ⚡ Baseline (Single-shot)
         </button>
       </div>
-      <div className="comparison-toggle-help">
-        {descriptions[mode]}
-      </div>
     </div>
   );
 }

@@ -216,21 +216,6 @@ function App() {
                 <ComparisonToggle mode={comparisonMode} onToggle={handleComparisonToggle} />
               )}
             </div>
-            {hasAnyResult && (
-              <div className="baseline-note" style={{ margin: '0 var(--space-5) var(--space-4)', borderRadius: '0' }}>
-                <div className="baseline-note-text">
-                  {comparisonMode === 'agentic' && (
-                    <><strong>Agentic Pipeline:</strong> Full architecture using 5 LLM agents for interpretation, question analysis, knowledge retrieval, reasoning, and verification.</>
-                  )}
-                  {comparisonMode === 'workflow' && (
-                    <><strong>Workflow Baseline:</strong> A deterministic, rule-based approach wrapping independent image and text LLM calls, without medical knowledge retrieval or verification.</>
-                  )}
-                  {comparisonMode === 'baseline' && (
-                    <><strong>Single-shot Baseline:</strong> A standard blank-slate LLM prompting strategy, passing the image and text directly to a single multimodal generation call.</>
-                  )}
-                </div>
-              </div>
-            )}
             <ImageViewer imageSrc={imageSrc} result={result} />
           </section>
 
@@ -292,6 +277,11 @@ function App() {
                           </div>
                         )}
                       </div>
+                      <div className="baseline-note">
+                        <div className="baseline-note-text">
+                          ℹ️ <strong>Single-shot Baseline:</strong> A standard blank-slate LLM prompting strategy, passing the image and text directly to a single multimodal generation call without decomposition.
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     !loading && hasAnyResult && (
@@ -329,6 +319,11 @@ function App() {
                             </span>
                           </div>
                         )}
+                      </div>
+                      <div className="baseline-note">
+                        <div className="baseline-note-text">
+                          ℹ️ <strong>Workflow Baseline:</strong> A deterministic, rule-based approach wrapping independent image and text LLM calls, without an agentic verification loop.
+                        </div>
                       </div>
                     </div>
                   ) : (
