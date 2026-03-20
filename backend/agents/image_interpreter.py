@@ -1,11 +1,11 @@
 import base64
 import json
 from typing import Dict, Any
+
+import httpx
 from haystack import component
-from haystack.components.generators.chat import OpenAIChatGenerator
-from haystack.dataclasses import ChatMessage, TextContent, ImageContent
-from haystack.utils import Secret
-from config import OPENAI_API_KEY, OPENAI_MODEL
+
+from config import LLAVA_API_BASE_URL, LLAVA_API_KEY, LLAVA_MODEL_ID, LLAVA_TIMEOUT_SECONDS
 from utils.json_utils import strip_json_fences
 
 
@@ -16,10 +16,86 @@ class ImageInterpreter:
     Takes a medical image and extracts modality, anatomy, visible structures.
     """
     def __init__(self):
-        self.generator = OpenAIChatGenerator(
-            api_key=Secret.from_token(OPENAI_API_KEY),
-            model=OPENAI_MODEL,
-        )
+        self.api_base_url = LLAVA_API_BASE_URL.rstrip("/")
+        self.api_key = LLAVA_API_KEY
+        self.model_id = LLAVA_MODEL_ID
+        self.timeout_seconds = LLAVA_TIMEOUT_SECONDS
+
+    def _extract_text(self, payload: dict) -> str:
+        """Handle common OpenAI-compatible and inference-server response shapes."""
+        if not isinstance(payload, dict):
+            return ""
+
+        choices = payload.get("choices") or []
+        if choices:
+            message = choices[0].get("message", {}) or {}
+            content = message.get("content", "")
+            if isinstance(content, str):
+                return content
+            if isinstance(content, list):
+                return "".join(
+                    part.get("text", "") for part in content if isinstance(part, dict)
+                )
+
+        for key in ("generated_text", "output", "text"):
+            value = payload.get(key)
+            if isinstance(value, str):
+                return value
+            if isinstance(value, list) and value:
+                first = value[0]
+                if isinstance(first, str):
+                    return first
+                if isinstance(first, dict):
+                    return first.get("generated_text") or first.get("text") or ""
+
+        return ""
+
+    def _call_llava_api(self, prompt: str, image_bytes: bytes, mime_type: str) -> str:
+        b64_image = base64.b64encode(image_bytes).decode("utf-8")
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+
+        payload = {
+            "model": self.model_id,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:{mime_type};base64,{b64_image}"
+                            },
+                        },
+                    ],
+                }
+            ],
+            "temperature": 0,
+            "max_tokens": 3000,
+        }
+
+        chat_completions_url = f"{self.api_base_url}/v1/chat/completions"
+        legacy_generate_url = self.api_base_url
+
+        with httpx.Client(timeout=self.timeout_seconds) as client:
+            response = client.post(chat_completions_url, headers=headers, json=payload)
+            if response.status_code == 404:
+                legacy_payload = {
+                    "inputs": {
+                        "image": f"data:{mime_type};base64,{b64_image}",
+                        "prompt": prompt,
+                    },
+                    "parameters": {
+                        "max_new_tokens": 3000,
+                        "temperature": 0,
+                    },
+                }
+                response = client.post(legacy_generate_url, headers=headers, json=legacy_payload)
+
+            response.raise_for_status()
+            return self._extract_text(response.json())
 
     @component.output_types(result=Dict[str, Any])
     def run(self, image_bytes: bytes, mime_type: str = "image/png"):
@@ -36,28 +112,8 @@ class ImageInterpreter:
 
 Return ONLY the JSON object, no additional text."""
 
-        b64_image = base64.b64encode(image_bytes).decode("utf-8")
-        # construct multimodal message
-        message = ChatMessage.from_user(
-            content_parts=[
-                TextContent(text=prompt),
-                ImageContent(base64_image=b64_image, mime_type=mime_type)
-            ]
-        )
-
         try:
-            # Note: We append generation_kwargs to enforce the same behavior as before
-            response = self.generator.run(
-                messages=[message],
-                generation_kwargs={
-                    "max_completion_tokens": 3000,
-                }
-            )
-
-            # Extract the first reply message
-            reply_msg = response["replies"][0]
-            raw = (reply_msg.text or "").strip()
-
+            raw = self._call_llava_api(prompt, image_bytes, mime_type).strip()
             raw = strip_json_fences(raw)
             result = json.loads(raw)
             result["status"] = "success"
@@ -67,7 +123,7 @@ Return ONLY the JSON object, no additional text."""
             return {"result": {
                 "status": "error",
                 "error": "Failed to parse image interpretation response",
-                "raw_response": raw if 'raw' in dir() else "",
+                "raw_response": raw if 'raw' in locals() else "",
                 "modality": "unknown",
                 "body_region": "unknown",
                 "visible_structures": [],
