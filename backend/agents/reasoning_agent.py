@@ -25,7 +25,8 @@ class ReasoningAgent:
             image_interpretation: dict = None, 
             question_analysis: dict = None,
             knowledge: dict = None, 
-            original_question: str = ""):
+            original_question: str = "",
+            retry_context: dict = None):
 
         # Default fallback values
         vs = image_interpretation.get("result", image_interpretation) if image_interpretation else {}
@@ -36,6 +37,33 @@ class ReasoningAgent:
         if not isinstance(vs, dict): vs = {}
         if not isinstance(qa, dict): qa = {}
         if not isinstance(kn, dict): kn = {}
+        rc = retry_context if isinstance(retry_context, dict) else {}
+
+        failure_categories = rc.get('failure_categories', []) if rc else []
+        if isinstance(failure_categories, list):
+            formatted_failure_categories = []
+            for category in failure_categories:
+                if isinstance(category, dict):
+                    code = category.get('code') or category.get('label') or str(category)
+                    severity = category.get('severity')
+                    formatted_failure_categories.append(f"{code} ({severity})" if severity else str(code))
+                else:
+                    formatted_failure_categories.append(str(category))
+            failure_categories_text = ', '.join(formatted_failure_categories) if formatted_failure_categories else 'none'
+        else:
+            failure_categories_text = str(failure_categories)
+
+        retry_guidance = ""
+        if rc:
+            retry_guidance = f"""
+
+RETRY CONTEXT:
+- Previous verification status: {rc.get('verification_status', 'unknown')}
+- Previous confidence: {rc.get('confidence', 'unknown')}
+- Previous fallback recommendation: {rc.get('fallback_recommendation', 'none')}
+- Previous failure categories: {failure_categories_text}
+- Retry instruction: Re-evaluate the answer with extra caution. If the evidence is still insufficient, produce a more conservative answer or explicitly abstain.
+"""
 
         prompt = f"""You are a medical VQA reasoning agent. Synthesize the following information to answer a medical image question.
 
@@ -58,6 +86,7 @@ SUPPORTING KNOWLEDGE:
 - Context: {kn.get('contextual_notes', 'Not available')}
 - Key facts: {', '.join(kn.get('key_facts', []))}
 - Normal findings: {kn.get('expected_normal_findings', 'Not available')}
+{retry_guidance}
 
 Return a JSON object with:
 {{
@@ -110,11 +139,12 @@ Return ONLY the JSON object, no additional text."""
 
 # Wrapper function for compatibility
 def generate_answer(visual_summary: dict, question_analysis: dict,
-                    knowledge: dict, original_question: str) -> dict:
+                    knowledge: dict, original_question: str, retry_context: dict = None) -> dict:
     agent = ReasoningAgent()
     return agent.run(
         image_interpretation={"result": visual_summary},
         question_analysis={"result": question_analysis},
         knowledge={"result": knowledge},
-        original_question=original_question
+        original_question=original_question,
+        retry_context=retry_context,
     )["result"]

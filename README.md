@@ -89,12 +89,12 @@ flowchart LR
     B2 --> CACHE
     CACHE --> EVAL
 
-    A1 --> OPENAI[Multimodal Foundation Model]
-    A2 --> OPENAI
-    A3 --> OPENAI
-    A4 --> OPENAI
-    A5 --> OPENAI
-    B1 --> OPENAI
+    A1 --> OPENAI_TEXT[OpenAI Chat Model]
+    A2 --> OPENAI_TEXT[OpenAI Chat Model]
+    A3 --> OPENAI_TEXT
+    A4 --> OPENAI_TEXT
+    A5 --> OPENAI_TEXT
+    B1 --> OPENAI_TEXT
 ```
 
 ### Agent Roles
@@ -112,9 +112,10 @@ flowchart LR
 
 ### Model and Tool Choices
 
-- **OpenAI multimodal model**
-  - used because the task requires direct image + text reasoning
-  - supports structured JSON-oriented prompting
+- **OpenAI chat model**
+  - used for image interpretation, question analysis, knowledge support, reasoning, and verification
+  - supports structured JSON-oriented prompting and easy prompt refinement
+  - keeps the implementation simple and consistent across all agents
 
 - **Haystack Pipeline**
   - used for explicit stage orchestration
@@ -181,7 +182,11 @@ The system includes several explicit control mechanisms:
   - guarded-answer presentation
   - explicit review recommendation
 
-The current implementation emphasizes **verification and fallback** over automated retry loops.
+- **automatic retry**
+  - the agentic pipeline performs one prompt-aware retry when the first pass is low confidence, unsupported, or flagged for review
+  - the second pass receives retry context so the reasoning stage can self-correct instead of blindly repeating the same answer
+
+The current implementation emphasizes **verification, fallback, and a single retry pass** rather than multi-sample voting.
 
 ## Evaluation Design
 
@@ -294,6 +299,7 @@ cp .env.example .env
 ```
 
 Add your `OPENAI_API_KEY` to `.env`.
+No additional image model settings are required.
 
 ### 2. Install Python dependencies
 

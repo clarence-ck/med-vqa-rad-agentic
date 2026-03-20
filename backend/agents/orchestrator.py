@@ -83,13 +83,15 @@ class TimedReasoningAgent:
             image_interpretation: dict = None,
             question_analysis: dict = None,
             knowledge: dict = None,
-            original_question: str = ""):
+            original_question: str = "",
+            retry_context: dict = None):
         started_at = time.time()
         output = self.inner.run(
             image_interpretation=image_interpretation,
             question_analysis=question_analysis,
             knowledge=knowledge,
             original_question=original_question,
+            retry_context=retry_context,
         )
         duration_ms = int((time.time() - started_at) * 1000)
         return {
@@ -364,38 +366,8 @@ def _build_agent_trace(image_result: dict, question_result: dict, knowledge_resu
     ]
 
 
-def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png") -> dict:
-    # Create a fresh pipeline per request — prevents shared mutable state under concurrency.
-    pipeline = create_pipeline()
-    pipeline_start = time.time()
-    results = pipeline.run(
-        {
-            "image_interpreter": {
-                "image_bytes": image_bytes,
-                "mime_type": mime_type,
-            },
-            "question_analyzer": {
-                "question": question,
-            },
-            "knowledge_retriever": {
-                "original_question": question,
-            },
-            "reasoning_agent": {
-                "original_question": question,
-            },
-            "verification_agent": {
-                "original_question": question,
-            },
-        },
-        include_outputs_from={
-            "image_interpreter",
-            "question_analyzer",
-            "knowledge_retriever",
-            "reasoning_agent",
-            "verification_agent",
-        },
-    )
-
+def _assemble_pipeline_payload(results: dict, question: str, started_at: float, retry_attempts: int = 0,
+                               retry_reason: str = "") -> dict:
     image_result = results.get("image_interpreter", {}).get("result", {})
     image_duration_ms = results.get("image_interpreter", {}).get("duration_ms", 0)
     question_result = results.get("question_analyzer", {}).get("result", {})
@@ -430,7 +402,7 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
         answer_duration_ms=answer_duration_ms,
         verification_duration_ms=verification_duration_ms,
     )
-    total_ms = int((time.time() - pipeline_start) * 1000)
+    total_ms = int((time.time() - started_at) * 1000)
     return {
         "answer": answer_result.get("answer", "Unable to generate an answer."),
         "guarded_answer": guardrail_payload.get("guarded_answer", answer_result.get("answer", "Unable to generate an answer.")),
@@ -466,4 +438,103 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
         },
         "agent_trace": agent_trace,
         "total_duration_ms": total_ms,
+        "retry_attempts": retry_attempts,
+        "retry_reason": retry_reason,
     }
+
+
+def _should_retry_pipeline(payload: dict) -> bool:
+    verification_status = payload.get("verification_status", "low_confidence")
+    if verification_status in {"low_confidence", "unsupported"}:
+        return True
+    if payload.get("should_flag_for_review"):
+        return True
+    failure_categories = payload.get("failure_categories", []) or []
+    return any(category.get("severity") == "high" for category in failure_categories)
+
+
+def _payload_score(payload: dict) -> tuple[int, int, int, int]:
+    verification_status = payload.get("verification_status", "low_confidence")
+    verification_rank = {
+        "verified": 4,
+        "partially_verified": 3,
+        "low_confidence": 2,
+        "unsupported": 1,
+    }.get(verification_status, 0)
+    confidence_rank = {
+        "High": 3,
+        "Medium": 2,
+        "Low": 1,
+    }.get(str(payload.get("confidence", "Low")), 1)
+    failure_categories = payload.get("failure_categories", []) or []
+    high_severity_count = sum(1 for category in failure_categories if category.get("severity") == "high")
+    review_flag = 1 if payload.get("should_flag_for_review") else 0
+    return verification_rank, confidence_rank, -high_severity_count, -review_flag
+
+
+def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png") -> dict:
+    # Create a fresh pipeline per request — prevents shared mutable state under concurrency.
+    pipeline_start = time.time()
+
+    def _run_once(retry_context: dict | None = None) -> dict:
+        pipeline = create_pipeline()
+        return pipeline.run(
+            {
+                "image_interpreter": {
+                    "image_bytes": image_bytes,
+                    "mime_type": mime_type,
+                },
+                "question_analyzer": {
+                    "question": question,
+                },
+                "knowledge_retriever": {
+                    "original_question": question,
+                },
+                "reasoning_agent": {
+                    "original_question": question,
+                    "retry_context": retry_context,
+                },
+                "verification_agent": {
+                    "original_question": question,
+                },
+            },
+            include_outputs_from={
+                "image_interpreter",
+                "question_analyzer",
+                "knowledge_retriever",
+                "reasoning_agent",
+                "verification_agent",
+            },
+        )
+
+    first_results = _run_once()
+    first_payload = _assemble_pipeline_payload(first_results, question, pipeline_start)
+
+    retry_reason = ""
+    retry_attempts = 0
+    best_payload = first_payload
+
+    if _should_retry_pipeline(first_payload):
+        retry_attempts = 1
+        retry_reason = (
+            f"verification_status={first_payload.get('verification_status', 'unknown')}; "
+            f"fallback={first_payload.get('fallback_recommendation', 'none')}; "
+            f"flag_for_review={first_payload.get('should_flag_for_review', False)}"
+        )
+        retry_context = {
+            "verification_status": first_payload.get("verification_status", "unknown"),
+            "confidence": first_payload.get("confidence", "Low"),
+            "fallback_recommendation": first_payload.get("fallback_recommendation", "none"),
+            "failure_categories": first_payload.get("failure_categories", []),
+        }
+        second_results = _run_once(retry_context=retry_context)
+        second_payload = _assemble_pipeline_payload(second_results, question, pipeline_start, retry_attempts=1, retry_reason=retry_reason)
+
+        if _payload_score(second_payload) > _payload_score(first_payload):
+            best_payload = second_payload
+        else:
+            best_payload = first_payload
+
+    best_payload["retry_attempts"] = retry_attempts
+    best_payload["retry_reason"] = retry_reason
+    return best_payload
