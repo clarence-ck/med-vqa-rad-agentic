@@ -7,12 +7,11 @@ export function useEvaluation() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
-  const fetchEvaluation = useCallback(async (split = 'all') => {
+  const fetchEvaluation = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const splitParam = split && split !== 'all' ? `?split=${split}` : '';
-      const response = await fetch(`${API_BASE}/api/dataset/evaluation${splitParam}`);
+      const response = await fetch(`${API_BASE}/api/dataset/evaluation`);
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
       }

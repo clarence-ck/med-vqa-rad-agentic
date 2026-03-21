@@ -57,7 +57,6 @@ Return ONLY the JSON object, no additional text."""
             ]
             response = self.generator.run(messages=messages, generation_kwargs={"max_completion_tokens": 3000})
             raw = strip_json_fences(response["replies"][0].text or "")
-            raw = strip_json_fences(raw)
             result = json.loads(raw)
             result["status"] = "success"
             return {"result": result}

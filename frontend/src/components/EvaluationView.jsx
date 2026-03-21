@@ -9,7 +9,7 @@ function getWinnerTagClass(winner) {
   return 'tag-gray';
 }
 
-export default function EvaluationView({ loading, evaluationData, activeSplit, onSplitChange, onRefresh }) {
+export default function EvaluationView({ loading, evaluationData, onRefresh }) {
   const summary = evaluationData?.summary;
   const rows = evaluationData?.rows || [];
 
@@ -21,40 +21,10 @@ export default function EvaluationView({ loading, evaluationData, activeSplit, o
           <p className="evaluation-subtitle">Aggregate exact-match metrics from cached Case Explorer runs.</p>
         </div>
         <div className="evaluation-actions">
-          <select
-            className="form-select evaluation-split-select"
-            value={activeSplit || 'all'}
-            onChange={(e) => onSplitChange?.(e.target.value)}
-          >
-            <option value="test">Test — recommended final reporting split</option>
-            <option value="train">Train — development-only evaluation</option>
-            <option value="all">All — mixed / not for reporting</option>
-          </select>
           <button className="btn btn-secondary" onClick={onRefresh} disabled={loading}>
             {loading ? 'Refreshing...' : 'Refresh Metrics'}
           </button>
         </div>
-      </section>
-
-      <section className="split-callout-card">
-        {activeSplit === 'test' && (
-          <div className="split-warning-banner split-warning-green">
-            <span>✅</span>
-            <span>You are evaluating on the <strong>test</strong> split, which is the recommended mode for final reporting.</span>
-          </div>
-        )}
-        {activeSplit === 'train' && (
-          <div className="split-warning-banner split-warning-amber">
-            <span>⚠️</span>
-            <span>You are viewing <strong>development-only</strong> metrics. Use the <strong>test</strong> split for final benchmark numbers.</span>
-          </div>
-        )}
-        {activeSplit === 'all' && (
-          <div className="split-warning-banner">
-            <span>ℹ️</span>
-            <span>You are mixing <strong>train</strong> and <strong>test</strong> results. This is useful for monitoring, but not for final reporting.</span>
-          </div>
-        )}
       </section>
 
       {!summary && !loading && (
@@ -108,14 +78,6 @@ export default function EvaluationView({ loading, evaluationData, activeSplit, o
               <div className="card-header"><span className="card-title">Avg Duration</span></div>
               <div className="evaluation-metric-value">{summary.avg_duration_ms}ms</div>
             </div>
-            <div className="card">
-              <div className="card-header"><span className="card-title">Split Counts</span></div>
-              <div className="evaluation-metric-stack">
-                {Object.entries(summary.split_counts || {}).map(([split, count]) => (
-                  <span key={split} className="tag tag-gray">{split} {count}</span>
-                ))}
-              </div>
-            </div>
           </section>
 
           <section className="evaluation-two-col animate-fade-in">
@@ -153,7 +115,6 @@ export default function EvaluationView({ loading, evaluationData, activeSplit, o
                       <th>ID</th>
                       <th>Type</th>
                       <th>Winner</th>
-                      <th>Split</th>
                       <th>Verify</th>
                       <th>Consistency</th>
                       <th>Cross-modal</th>
@@ -166,7 +127,6 @@ export default function EvaluationView({ loading, evaluationData, activeSplit, o
                         <td>{row.sample_id}</td>
                         <td>{row.question_type?.replace(/_/g, ' ')}</td>
                         <td><span className={`tag ${getWinnerTagClass(row.winner)}`}>{row.winner.replace(/_/g, ' ')}</span></td>
-                        <td>{row.split}</td>
                         <td>{row.verification_status?.replace(/_/g, ' ')}</td>
                         <td>{row.self_consistency_level}</td>
                         <td>{row.cross_modal_agreement_level}</td>

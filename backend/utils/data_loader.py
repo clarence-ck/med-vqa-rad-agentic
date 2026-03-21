@@ -24,7 +24,7 @@ def infer_split(image_name: str) -> str:
     return "unknown"
 
 
-def get_sample_cases(limit: int = 20, split: str | None = None) -> list:
+def get_sample_cases(limit: int = 20) -> list:
     """Return a curated set of sample cases for the UI dropdown."""
     data = load_dataset()
     if not data:
@@ -34,10 +34,7 @@ def get_sample_cases(limit: int = 20, split: str | None = None) -> list:
     for i, item in enumerate(data):
         q_type = _classify_question(item.get("question", ""))
         image_name = item.get("image_name", item.get("image", ""))
-        # Prefer the split field stored by the download script; fall back to filename inference.
         sample_split = item.get("split") or infer_split(image_name)
-        if split and sample_split != split:
-            continue
         sample = {
             "id": i,
             "question": item.get("question", ""),
@@ -79,7 +76,7 @@ def get_sample_by_id(sample_id: int) -> dict | None:
         "image_name": image_name,
         "image_path": image_path if os.path.exists(image_path) else None,
         "question_type": _classify_question(item.get("question", "")),
-        "split": infer_split(image_name),
+        "split": item.get("split") or infer_split(image_name),
     }
 
 

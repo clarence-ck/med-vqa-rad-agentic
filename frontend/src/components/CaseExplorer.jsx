@@ -86,9 +86,6 @@ function MethodologyLabels() {
 export default function CaseExplorer({
   samples,
   loading,
-  activeSplit,
-  onSplitChange,
-  testAccessEnabled,
   selectedSampleId,
   onSelectSample,
   analysisLoading,
@@ -125,34 +122,6 @@ export default function CaseExplorer({
           <h2><span className="icon">🗂️</span> Sample Cases</h2>
         </div>
         <div className="panel-body">
-          <div className="form-group">
-            <label className="form-label">Dataset split</label>
-            <select
-              className="form-select"
-              value={activeSplit || 'all'}
-              onChange={(e) => onSplitChange?.(e.target.value)}
-            >
-              <option value="train">Train — development only</option>
-              <option value="test">Test — final evaluation only</option>
-              <option value="all">All — mixed / not for reporting</option>
-            </select>
-            <div className="split-guidance-text">
-              Case Explorer is mainly for debugging. Use <strong>train</strong> during development and avoid opening
-              <strong> test</strong> unless you intentionally want to inspect held-out cases.
-            </div>
-            {activeSplit === 'test' && testAccessEnabled && (
-              <div className="split-warning-banner split-warning-amber">
-                <span>⚠️</span>
-                <span>You are browsing test cases in a debugging view. Avoid tuning the system based on what you see here.</span>
-              </div>
-            )}
-            {activeSplit === 'all' && (
-              <div className="split-warning-banner">
-                <span>ℹ️</span>
-                <span>`All` mixes development and held-out cases. Use it only for exploration, not for final reporting.</span>
-              </div>
-            )}
-          </div>
           <div className="form-group">
             <label className="form-label">Choose a dataset case</label>
             <select
@@ -194,10 +163,6 @@ export default function CaseExplorer({
                 <div className="explorer-meta-item">
                   <span className="explorer-meta-label">Question type</span>
                   <span className="tag tag-gray">{selectedSample.question_type?.replace(/_/g, ' ')}</span>
-                </div>
-                <div className="explorer-meta-item">
-                  <span className="explorer-meta-label">Split</span>
-                  <span className="tag tag-blue">{selectedSample.split || 'unknown'}</span>
                 </div>
               </div>
               <button

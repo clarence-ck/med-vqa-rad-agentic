@@ -2,19 +2,17 @@ import { useState, useEffect, useCallback } from 'react';
 
 import { API_BASE } from '../config';
 
-export function useDataset(initialSplit = 'all') {
+export function useDataset() {
   const [samples, setSamples] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [activeSplit, setActiveSplit] = useState(initialSplit);
 
-  const fetchSamples = useCallback(async (split = activeSplit) => {
+  const fetchSamples = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const splitParam = split && split !== 'all' ? `&split=${split}` : '';
-      const response = await fetch(`${API_BASE}/api/dataset/samples?limit=30${splitParam}`);
+      const response = await fetch(`${API_BASE}/api/dataset/samples?limit=30`);
       if (!response.ok) throw new Error('Failed to fetch samples');
 
       const data = await response.json();
@@ -25,7 +23,7 @@ export function useDataset(initialSplit = 'all') {
     } finally {
       setLoading(false);
     }
-  }, [activeSplit]);
+  }, []);
 
   const fetchSampleAnalysis = useCallback(async (sampleId, refresh = false) => {
     try {
@@ -41,24 +39,15 @@ export function useDataset(initialSplit = 'all') {
     }
   }, []);
 
-  // Fetch on mount or when activeSplit changes organically
   useEffect(() => {
     fetchSamples();
   }, [fetchSamples]);
-
-  // Expose changeSplit for manual UI triggers
-  const changeSplit = useCallback(async (split) => {
-    setActiveSplit(split);
-    // Explicit return to allow chaining, react will batch the state update
-  }, []);
 
   return {
     samples,
     loading,
     error,
-    activeSplit,
     fetchSampleAnalysis,
-    changeSplit,
     refetch: fetchSamples,
   };
 }

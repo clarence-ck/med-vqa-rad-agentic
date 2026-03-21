@@ -15,18 +15,13 @@ import { useAnalysis } from './hooks/useAnalysis';
 import { useDataset } from './hooks/useDataset';
 import { useEvaluation } from './hooks/useEvaluation';
 
-import { API_BASE } from './config';
-
 function App() {
   const { loading, loadingMessage, result, baselineResult, workflowResult, error, analyze, analyzeBaseline, analyzeWorkflow, reset } = useAnalysis();
-  const { samples: dashboardSamples } = useDataset('all');
   const {
     samples: explorerSamples,
     loading: samplesLoading,
     fetchSampleAnalysis,
-    activeSplit: explorerSplit,
-    changeSplit: changeExplorerSplit,
-  } = useDataset('train');
+  } = useDataset();
   const { loading: evaluationLoading, data: evaluationData, fetchEvaluation } = useEvaluation();
   const [imageSrc, setImageSrc] = useState(null);
   const [imageFile, setImageFile] = useState(null);
@@ -36,41 +31,12 @@ function App() {
   const [selectedExplorerSampleId, setSelectedExplorerSampleId] = useState('');
   const [caseAnalysisLoading, setCaseAnalysisLoading] = useState(false);
   const [caseAnalysisData, setCaseAnalysisData] = useState(null);
-  const [evaluationSplit, setEvaluationSplit] = useState('test');
-  const [explorerTestUnlocked, setExplorerTestUnlocked] = useState(false);
   const hasAnyResult = Boolean(result || workflowResult || baselineResult);
 
   const handleImageSelect = useCallback((file) => {
     setImageFile(file);
     const url = URL.createObjectURL(file);
     setImageSrc(url);
-  }, []);
-
-  const handleSampleSelect = useCallback(async (sample) => {
-    // If sample has an id >= 0, try fetching from backend
-    if (sample.id >= 0) {
-      try {
-        const response = await fetch(`${API_BASE}/api/dataset/sample/${sample.id}`);
-        const data = await response.json();
-
-        if (data.image_base64 && data.image_mime) {
-          // Convert base64 to blob/file
-          const byteChars = atob(data.image_base64);
-          const byteArray = new Uint8Array(byteChars.length);
-          for (let i = 0; i < byteChars.length; i++) {
-            byteArray[i] = byteChars.charCodeAt(i);
-          }
-          const blob = new Blob([byteArray], { type: data.image_mime });
-          const file = new File([blob], data.image_name || 'sample.png', { type: data.image_mime });
-
-          setImageFile(file);
-          setImageSrc(`data:${data.image_mime};base64,${data.image_base64}`);
-        }
-      } catch (err) {
-        console.warn('Could not load sample image:', err);
-      }
-    }
-    setCurrentQuestion(sample.question);
   }, []);
 
   const handleSubmit = useCallback(async (file, question) => {
@@ -120,29 +86,9 @@ function App() {
   const handleTabChange = useCallback(async (tab) => {
     setActiveTab(tab);
     if (tab === 'evaluation') {
-      await fetchEvaluation(evaluationSplit);
+      await fetchEvaluation();
     }
-  }, [evaluationSplit, fetchEvaluation]);
-
-  const handleExplorerSplitChange = useCallback(async (split) => {
-    if (split === 'test' && !explorerTestUnlocked) {
-      const confirmed = window.confirm(
-        'Test cases should usually be reserved for final evaluation. Open test cases in Case Explorer anyway?'
-      );
-      if (!confirmed) return;
-      setExplorerTestUnlocked(true);
-    }
-    setSelectedExplorerSampleId('');
-    setCaseAnalysisData(null);
-    await changeExplorerSplit(split);
-  }, [changeExplorerSplit, explorerTestUnlocked]);
-
-  const handleEvaluationSplitChange = useCallback(async (split) => {
-    setEvaluationSplit(split);
-    if (activeTab === 'evaluation') {
-      await fetchEvaluation(split);
-    }
-  }, [activeTab, fetchEvaluation]);
+  }, [fetchEvaluation]);
 
   return (
     <div className="app-container">
@@ -150,7 +96,7 @@ function App() {
         <div className="app-logo">
           <div className="app-logo-icon">🔬</div>
           <div>
-            <div className="app-logo-text">ClariScan</div>
+            <div className="app-logo-text">MedVisionQuery</div>
             <div className="app-logo-subtitle">Medical Image QA Assistant</div>
           </div>
         </div>
@@ -196,11 +142,9 @@ function App() {
               <h2><span className="icon">📁</span> Case Input</h2>
             </div>
             <CaseInput
-              samples={dashboardSamples}
               onSubmit={handleSubmit}
               loading={loading}
               onImageSelect={handleImageSelect}
-              onSampleSelect={handleSampleSelect}
               currentImage={imageFile}
               currentQuestion={currentQuestion}
               onQuestionChange={setCurrentQuestion}
@@ -340,9 +284,6 @@ function App() {
         <CaseExplorer
           samples={explorerSamples}
           loading={samplesLoading}
-          activeSplit={explorerSplit}
-          onSplitChange={handleExplorerSplitChange}
-          testAccessEnabled={explorerTestUnlocked}
           selectedSampleId={selectedExplorerSampleId}
           onSelectSample={handleExplorerSelect}
           analysisLoading={caseAnalysisLoading}
@@ -354,9 +295,7 @@ function App() {
         <EvaluationView
           loading={evaluationLoading}
           evaluationData={evaluationData}
-          activeSplit={evaluationSplit}
-          onSplitChange={handleEvaluationSplitChange}
-          onRefresh={() => fetchEvaluation(evaluationSplit)}
+          onRefresh={() => fetchEvaluation()}
         />
       )}
     </div>

@@ -16,8 +16,8 @@ CACHE_DIR = os.path.join(os.path.dirname(__file__), "..", ".case_explorer_cache"
 
 
 @router.get("/samples")
-async def list_samples(limit: int = 20, split: str | None = Query(default=None)):
-    samples = get_sample_cases(limit, split=split)
+async def list_samples(limit: int = 20):
+    samples = get_sample_cases(limit)
     return {"samples": samples, "count": len(samples)}
 
 
@@ -203,7 +203,6 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
             "agentic_wins": 0,
             "ties": 0,
             "avg_duration_ms": 0,
-            "split_counts": {},
             "by_question_type": [],
         }
 
@@ -216,13 +215,10 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
     agentic_wins = sum(1 for row in rows if row["winner"] == "agentic")
     ties = sum(1 for row in rows if row["winner"].startswith("tie"))
     avg_duration_ms = int(sum(row.get("duration_ms", 0) for row in rows) / total)
-    split_counts = {}
 
     by_question_type = {}
     for row in rows:
         question_type = row.get("question_type", "unknown")
-        split_name = row.get("split", "unknown")
-        split_counts[split_name] = split_counts.get(split_name, 0) + 1
         bucket = by_question_type.setdefault(question_type, {
             "question_type": question_type,
             "count": 0,
@@ -248,7 +244,6 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
         "agentic_wins": agentic_wins,
         "ties": ties,
         "avg_duration_ms": avg_duration_ms,
-        "split_counts": split_counts,
         "by_question_type": [
             {
                 "question_type": bucket["question_type"],
@@ -306,7 +301,7 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
 
 
 @router.get("/evaluation")
-async def get_evaluation_summary(split: str | None = Query(default=None)):
+async def get_evaluation_summary():
     os.makedirs(CACHE_DIR, exist_ok=True)
     cache_files = [
         os.path.join(CACHE_DIR, filename)
@@ -321,8 +316,6 @@ async def get_evaluation_summary(split: str | None = Query(default=None)):
             with open(cache_file, "r", encoding="utf-8") as f:
                 payload = json.load(f)
             row = _build_evaluation_row(payload)
-            if split and row.get("split") != split:
-                continue
             rows.append(row)
         except Exception as exc:
             print(f"WARNING: Skipping cache file {os.path.basename(cache_file)}: {exc}")

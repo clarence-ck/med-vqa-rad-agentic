@@ -5,7 +5,7 @@ from routes.analyze import router as analyze_router
 from routes.dataset import router as dataset_router
 
 app = FastAPI(
-    title="ClariScan API",
+    title="MedVisionQuery API",
     description="Medical VQA Explanation Agent — 5-agent pipeline for medical image question answering",
     version="1.0.0",
 )
@@ -26,7 +26,7 @@ app.include_router(dataset_router)
 @app.get("/")
 async def root():
     return {
-        "name": "ClariScan API",
+        "name": "MedVisionQuery API",
         "version": "1.0.0",
         "status": "running",
         "endpoints": {

@@ -1,11 +1,9 @@
 import { useRef } from 'react';
 
 export default function CaseInput({
-  samples,
   onSubmit,
   loading,
   onImageSelect,
-  onSampleSelect,
   currentImage,
   currentQuestion,
   onQuestionChange,
@@ -33,16 +31,6 @@ export default function CaseInput({
 
   const handleDragOver = (e) => {
     e.preventDefault();
-  };
-
-  const handleSampleChange = async (e) => {
-    const sampleId = e.target.value;
-    if (sampleId === '') return;
-
-    const sample = samples.find(s => String(s.id) === sampleId);
-    if (sample) {
-      onSampleSelect?.(sample);
-    }
   };
 
   const handleSubmit = () => {
@@ -98,31 +86,6 @@ export default function CaseInput({
             </div>
           )}
         </div>
-      </div>
-
-      {/* Sample Case Selector */}
-      <div className="form-group">
-        <label className="form-label">Or select a sample case</label>
-        <select
-          className="form-select"
-          onChange={handleSampleChange}
-          defaultValue=""
-          id="sample-case-select"
-          disabled={locked}
-        >
-          <option value="">— Select a sample —</option>
-          {samples.map((s) => (
-            <option key={s.id} value={s.id}>
-              [{s.question_type?.replace(/_/g, ' ')}] {s.question.slice(0, 60)}
-              {s.question.length > 60 ? '...' : ''}
-            </option>
-          ))}
-        </select>
-        {locked && (
-          <div className="split-guidance-text" style={{ marginTop: 'var(--space-2)' }}>
-            Clear the current case before selecting or uploading another.
-          </div>
-        )}
       </div>
 
       {/* Question Input */}

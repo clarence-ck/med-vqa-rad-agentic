@@ -1,4 +1,4 @@
-name: clariscan
+name: medvisionquery
 channels:
   - defaults
   - conda-forge

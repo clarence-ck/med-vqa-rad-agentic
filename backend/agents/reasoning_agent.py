@@ -4,7 +4,7 @@ from haystack import component
 from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage
 from haystack.utils import Secret
-from config import OPENAI_API_KEY, OPENAI_MODEL
+from config import HF_TOKEN, TEXT_MODEL, TEXT_MODEL_BASE_URL
 from utils.json_utils import strip_json_fences
 
 
@@ -16,8 +16,9 @@ class ReasoningAgent:
     """
     def __init__(self):
         self.generator = OpenAIChatGenerator(
-            api_key=Secret.from_token(OPENAI_API_KEY),
-            model=OPENAI_MODEL,
+            api_key=Secret.from_token(HF_TOKEN),
+            model=TEXT_MODEL,
+            api_base_url=TEXT_MODEL_BASE_URL,
         )
 
     @component.output_types(result=Dict[str, Any])
@@ -65,6 +66,27 @@ RETRY CONTEXT:
 - Retry instruction: Re-evaluate the answer with extra caution. If the evidence is still insufficient, produce a more conservative answer or explicitly abstain.
 """
 
+        question_type = qa.get('question_type', '')
+        expected_format = qa.get('expected_answer_format', '')
+        is_yes_no = question_type in ('yes_no', 'presence_absence') or expected_format == 'yes_no'
+
+        yes_no_constraint = ""
+        if is_yes_no:
+            yes_no_constraint = """
+ANSWER CONSTRAINT — YES/NO QUESTION:
+The question requires a yes or no answer.
+- The "answer" field MUST be exactly "yes" or "no" (lowercase, no punctuation, no other words).
+- Do NOT answer with "yes, ..." or "no, ..." or any sentence.
+- Do NOT use synonyms such as "present", "absent", "true", "false", "positive", "negative".
+- If the visual evidence is genuinely insufficient to decide, use "answer_confidence": "low" and set "answer" to whichever is more defensible, stating the uncertainty in "limitations".
+"""
+
+        answer_field_desc = (
+            '"answer": "MUST be exactly \\"yes\\" or \\"no\\" — no other words, no punctuation."'
+            if is_yes_no else
+            '"answer": "The direct answer to the question. Keep it concise and match the expected answer format."'
+        )
+
         prompt = f"""You are a medical VQA reasoning agent. Synthesize the following information to answer a medical image question.
 
 ORIGINAL QUESTION: "{original_question}"
@@ -86,11 +108,11 @@ SUPPORTING KNOWLEDGE:
 - Context: {kn.get('contextual_notes', 'Not available')}
 - Key facts: {', '.join(kn.get('key_facts', []))}
 - Normal findings: {kn.get('expected_normal_findings', 'Not available')}
-{retry_guidance}
+{yes_no_constraint}{retry_guidance}
 
 Return a JSON object with:
 {{
-  "answer": "The direct answer to the question. Keep it concise and match the expected answer format.",
+  {answer_field_desc},
   "explanation": "A 2-4 sentence explanation justifying the answer. Ground it in visual evidence from the image analysis. Do not speculate beyond what was observed.",
   "reasoning_trace": "Brief step-by-step description of how you arrived at the answer",
   "evidence_used": ["List of specific visual/knowledge evidence that supports the answer"],
@@ -105,7 +127,7 @@ Return ONLY the JSON object, no additional text."""
             response = self.generator.run(
                 messages=[ChatMessage.from_user(prompt)],
                 generation_kwargs={
-                    "max_completion_tokens": 3000,
+                    "max_tokens": 3000,
                 }
             )
 

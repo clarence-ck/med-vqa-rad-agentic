@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import APIRouter, UploadFile, File, Form
 from agents.orchestrator import run_pipeline
 from agents.baseline import baseline_answer
@@ -15,7 +16,7 @@ async def analyze(image: UploadFile = File(...), question: str = Form(...)):
     image_bytes = await image.read()
     mime_type = image.content_type or "image/png"
 
-    result = run_pipeline(image_bytes, question, mime_type)
+    result = await asyncio.to_thread(run_pipeline, image_bytes, question, mime_type)
     return result
 
 
@@ -27,7 +28,7 @@ async def analyze_baseline(image: UploadFile = File(...), question: str = Form(.
     image_bytes = await image.read()
     mime_type = image.content_type or "image/png"
 
-    result = baseline_answer(image_bytes, question, mime_type)
+    result = await asyncio.to_thread(baseline_answer, image_bytes, question, mime_type)
     return result
 
 
@@ -35,5 +36,5 @@ async def analyze_baseline(image: UploadFile = File(...), question: str = Form(.
 async def analyze_workflow(image: UploadFile = File(...), question: str = Form(...)):
     image_bytes = await image.read()
     mime_type = image.content_type or "image/png"
-    result = workflow_answer(image_bytes, question, mime_type)
+    result = await asyncio.to_thread(workflow_answer, image_bytes, question, mime_type)
     return result

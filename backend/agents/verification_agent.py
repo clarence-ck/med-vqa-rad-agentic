@@ -4,7 +4,7 @@ from haystack import component
 from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage
 from haystack.utils import Secret
-from config import OPENAI_API_KEY, OPENAI_MODEL
+from config import HF_TOKEN, TEXT_MODEL, TEXT_MODEL_BASE_URL
 from utils.json_utils import strip_json_fences
 
 
@@ -16,8 +16,9 @@ class VerificationAgent:
     """
     def __init__(self):
         self.generator = OpenAIChatGenerator(
-            api_key=Secret.from_token(OPENAI_API_KEY),
-            model=OPENAI_MODEL,
+            api_key=Secret.from_token(HF_TOKEN),
+            model=TEXT_MODEL,
+            api_base_url=TEXT_MODEL_BASE_URL,
         )
 
     @component.output_types(result=Dict[str, Any])
@@ -83,7 +84,7 @@ Return ONLY the JSON object, no additional text."""
             response = self.generator.run(
                 messages=[ChatMessage.from_user(prompt)],
                 generation_kwargs={
-                    "max_completion_tokens": 3000,
+                    "max_tokens": 3000,
                 }
             )
 
