@@ -127,6 +127,18 @@ def _answers_match(predicted: str, ground_truth: str) -> bool:
     return _normalize_yes_no(predicted) == _normalize_yes_no(ground_truth)
 
 
+def _is_close_ended_answer(text: str) -> bool:
+    normalized = _normalize_yes_no(text)
+    return normalized in {"yes", "no"}
+
+
+def _subset_accuracy(subset_rows: list[dict], key: str) -> float:
+    total = len(subset_rows)
+    if total == 0:
+        return 0.0
+    return sum(1 for row in subset_rows if row.get(key)) / total
+
+
 def _build_evaluation_row(payload: dict) -> dict:
     sample = payload.get("sample", {})
     baseline_result = payload.get("baseline_result", {})
@@ -161,12 +173,14 @@ def _build_evaluation_row(payload: dict) -> dict:
         agentic_result.get("question_analysis", {}).get("question_type")
         or sample.get("question_type", "unknown")
     )
+    answer_style = "close_ended" if _is_close_ended_answer(ground_truth_normalized) else "open_ended"
 
     return {
         "sample_id": sample.get("id"),
         "question": sample.get("question", ""),
         "question_type": question_type,
         "split": sample.get("split", "unknown"),
+        "answer_style": answer_style,
         "ground_truth_answer": ground_truth,
         "baseline_answer": baseline_answer_text,
         "workflow_answer": workflow_answer_text,
@@ -197,6 +211,14 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
             "baseline_accuracy": 0.0,
             "workflow_accuracy": 0.0,
             "agentic_accuracy": 0.0,
+            "close_ended_cases": 0,
+            "open_ended_cases": 0,
+            "baseline_close_ended_accuracy": 0.0,
+            "workflow_close_ended_accuracy": 0.0,
+            "agentic_close_ended_accuracy": 0.0,
+            "baseline_open_ended_accuracy": 0.0,
+            "workflow_open_ended_accuracy": 0.0,
+            "agentic_open_ended_accuracy": 0.0,
             "disagreement_rate": 0.0,
             "baseline_wins": 0,
             "workflow_wins": 0,
@@ -215,6 +237,8 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
     agentic_wins = sum(1 for row in rows if row["winner"] == "agentic")
     ties = sum(1 for row in rows if row["winner"].startswith("tie"))
     avg_duration_ms = int(sum(row.get("duration_ms", 0) for row in rows) / total)
+    close_ended_rows = [row for row in rows if row.get("answer_style") == "close_ended"]
+    open_ended_rows = [row for row in rows if row.get("answer_style") == "open_ended"]
 
     by_question_type = {}
     for row in rows:
@@ -238,6 +262,14 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
         "baseline_accuracy": baseline_correct / total,
         "workflow_accuracy": workflow_correct / total,
         "agentic_accuracy": agentic_correct / total,
+        "close_ended_cases": len(close_ended_rows),
+        "open_ended_cases": len(open_ended_rows),
+        "baseline_close_ended_accuracy": _subset_accuracy(close_ended_rows, "baseline_correct"),
+        "workflow_close_ended_accuracy": _subset_accuracy(close_ended_rows, "workflow_correct"),
+        "agentic_close_ended_accuracy": _subset_accuracy(close_ended_rows, "agentic_correct"),
+        "baseline_open_ended_accuracy": _subset_accuracy(open_ended_rows, "baseline_correct"),
+        "workflow_open_ended_accuracy": _subset_accuracy(open_ended_rows, "workflow_correct"),
+        "agentic_open_ended_accuracy": _subset_accuracy(open_ended_rows, "agentic_correct"),
         "disagreement_rate": disagreement_count / total,
         "baseline_wins": baseline_wins,
         "workflow_wins": workflow_wins,

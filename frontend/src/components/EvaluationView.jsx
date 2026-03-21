@@ -9,6 +9,16 @@ function getWinnerTagClass(winner) {
   return 'tag-gray';
 }
 
+function AccuracyMetricStack({ baseline, workflow, agentic }) {
+  return (
+    <div className="evaluation-metric-stack">
+      <span className="tag tag-amber">B {formatPercent(baseline)}</span>
+      <span className="tag tag-blue">W {formatPercent(workflow)}</span>
+      <span className="tag tag-green">A {formatPercent(agentic)}</span>
+    </div>
+  );
+}
+
 export default function EvaluationView({ loading, evaluationData, onRefresh }) {
   const summary = evaluationData?.summary;
   const rows = evaluationData?.rows || [];
@@ -60,6 +70,28 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
             <div className="card">
               <div className="card-header"><span className="card-title">Agentic Exact-Match</span></div>
               <div className="evaluation-metric-value">{formatPercent(summary.agentic_accuracy)}</div>
+            </div>
+            <div className="card">
+              <div className="card-header">
+                <span className="card-title">Close-ended Accuracy</span>
+                <span className="tag tag-gray">{summary.close_ended_cases} yes/no</span>
+              </div>
+              <AccuracyMetricStack
+                baseline={summary.baseline_close_ended_accuracy}
+                workflow={summary.workflow_close_ended_accuracy}
+                agentic={summary.agentic_close_ended_accuracy}
+              />
+            </div>
+            <div className="card">
+              <div className="card-header">
+                <span className="card-title">Open-ended Accuracy</span>
+                <span className="tag tag-gray">{summary.open_ended_cases} open</span>
+              </div>
+              <AccuracyMetricStack
+                baseline={summary.baseline_open_ended_accuracy}
+                workflow={summary.workflow_open_ended_accuracy}
+                agentic={summary.agentic_open_ended_accuracy}
+              />
             </div>
             <div className="card">
               <div className="card-header"><span className="card-title">3-System Disagreement</span></div>

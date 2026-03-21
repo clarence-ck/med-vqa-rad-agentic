@@ -103,8 +103,8 @@ flowchart LR
 | `ImageInterpreter` | `image_interpreter.py` | Perception — multimodal vision, extracts visual findings | Vision (OpenAI) |
 | `QuestionAnalyzer` | `question_analyzer.py` | Task understanding — classifies question type and intent | Text (HF) |
 | `KnowledgeRetriever` | `knowledge_retriever.py` | Context — retrieves medical background; **dynamically skipped** for simple questions | Text (HF) |
-| `ReasoningAgent` | `reasoning_agent.py` | Synthesis — generates answer and explanation from all prior context | Text (HF) |
-| `VerificationAgent` | `verification_agent.py` | Evaluator — runs 5 structured checks on the answer | Text (HF) |
+| `ReasoningAgent` | `reasoning_agent.py` | Synthesis — generates answer and explanation from all prior context | OpenAI |
+| `VerificationAgent` | `verification_agent.py` | Evaluator — runs 5 structured checks on the answer | OpenAI |
 | Agent Controller | `orchestrator.py` | Haystack `Agent` — routes tool calls via LLM, manages shared state | Text (HF) |
 | Workflow Baseline | `workflow_baseline.py` | Deterministic rule-based answer logic using image + question analysis outputs | Rules only |
 | Single-shot Baseline | `baseline.py` | Direct image+question prompt with no decomposition | Vision (OpenAI) |
@@ -135,10 +135,10 @@ Two separate model configs are required:
 
 | Role | Env vars | Used by |
 |---|---|---|
-| **Vision model** — processes images | `OPENAI_API_KEY`, `OPENAI_MODEL` | `ImageInterpreter`, `baseline.py` |
-| **Text model** — all reasoning stages | `HF_TOKEN`, `TEXT_MODEL`, `TEXT_MODEL_BASE_URL` | `QuestionAnalyzer`, `KnowledgeRetriever`, `ReasoningAgent`, `VerificationAgent`, orchestrator |
+| **OpenAI model** — quality-critical stages | `OPENAI_API_KEY`, `OPENAI_MODEL` | `ImageInterpreter`, `ReasoningAgent`, `VerificationAgent`, `baseline.py` |
+| **HF text model** — structured / support stages | `HF_TOKEN`, `TEXT_MODEL`, `TEXT_MODEL_BASE_URL` | `QuestionAnalyzer`, `KnowledgeRetriever`, orchestrator |
 
-All text agents and the orchestrator use `OpenAIChatGenerator` from Haystack pointed at the Hugging Face Inference Router (`TEXT_MODEL_BASE_URL`). The vision model uses a multimodal-capable OpenAI endpoint directly.
+OpenAI handles the stages whose output quality is most visible — vision grounding, final answer synthesis, and the verification quality gate. The HF router handles the more structured, lower-stakes tasks: question classification, background context retrieval, and tool-call orchestration.
 
 ### Other Technology Choices
 
@@ -442,8 +442,8 @@ Medical-VQA-Explanation-Agent/
 │   │   ├── image_interpreter.py     # Agent 1: vision model → structured visual findings
 │   │   ├── question_analyzer.py     # Agent 2: question classification and intent (text model)
 │   │   ├── knowledge_retriever.py   # Agent 3: medical background retrieval — conditional (text model)
-│   │   ├── reasoning_agent.py       # Agent 4: answer synthesis with retry context support (text model)
-│   │   ├── verification_agent.py    # Agent 5: 5-check structured verification (text model)
+│   │   ├── reasoning_agent.py       # Agent 4: answer synthesis with retry context support (OpenAI model)
+│   │   ├── verification_agent.py    # Agent 5: 5-check structured verification (OpenAI model)
 │   │   ├── baseline.py              # Single-shot multimodal baseline (vision model)
 │   │   └── workflow_baseline.py     # Deterministic rule-based workflow baseline (no synthesis LLM)
 │   ├── routes/
@@ -511,7 +511,7 @@ The download script processes both splits and writes a flat `vqa_rad.json` with 
 
 ### Limitations
 
-- 4–6 serial LLM calls per request — slower and more expensive than single-shot inference
+- ~8–10 serial LLM calls per pass (one controller dispatch + one tool call per stage) — up to ~20 with automatic retry; significantly slower and more expensive than single-shot inference
 - Knowledge support is LLM-synthesized, not retrieved from a real knowledge base
 - Token F1 is brittle for open-ended answers; exact match misses near-correct responses
 - Self-consistency signal is lightweight (single verifier pass) rather than multi-sample voting
