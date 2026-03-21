@@ -4,5 +4,6 @@ python-dotenv
 openai
 Pillow
 python-multipart
+httpx
 datasets
 haystack-ai

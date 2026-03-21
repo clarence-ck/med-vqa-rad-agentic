@@ -1,148 +1,218 @@
 import time
 from typing import Any, Dict
-from haystack import Pipeline, component
+from haystack.components.agents import Agent
+from haystack.components.generators.chat import OpenAIChatGenerator
+from haystack.dataclasses import ChatMessage
+from haystack.tools import Tool
+from haystack.utils import Secret
 from agents.image_interpreter import ImageInterpreter
 from agents.question_analyzer import QuestionAnalyzer
 from agents.knowledge_retriever import KnowledgeRetriever
 from agents.reasoning_agent import ReasoningAgent
 from agents.verification_agent import VerificationAgent
+from config import OPENAI_API_KEY, OPENAI_MODEL
 
 
-@component
-class TimedImageInterpreter:
-    def __init__(self):
-        self.inner = ImageInterpreter()
+# ---------------------------------------------------------------------------
+# Tool implementation functions — thin wrappers around each agent
+# ---------------------------------------------------------------------------
 
-    @component.output_types(result=Dict[str, Any], duration_ms=int)
-    def run(self, image_bytes: bytes, mime_type: str = "image/png"):
-        started_at = time.time()
-        output = self.inner.run(image_bytes=image_bytes, mime_type=mime_type)
-        duration_ms = int((time.time() - started_at) * 1000)
-        return {
-            "result": output["result"],
-            "duration_ms": duration_ms,
-        }
+def _tool_interpret_image(image_bytes: bytes, mime_type: str = "image/png") -> dict:
+    started = time.time()
+    result = ImageInterpreter().run(image_bytes=image_bytes, mime_type=mime_type)["result"]
+    return {"result": result, "duration_ms": int((time.time() - started) * 1000)}
 
 
-@component
-class TimedQuestionAnalyzer:
-    def __init__(self):
-        self.inner = QuestionAnalyzer()
-
-    @component.output_types(result=Dict[str, Any], duration_ms=int)
-    def run(self, question: str, image_interpretation: dict = None):
-        started_at = time.time()
-        output = self.inner.run(question=question, image_interpretation=image_interpretation)
-        duration_ms = int((time.time() - started_at) * 1000)
-        return {
-            "result": output["result"],
-            "duration_ms": duration_ms,
-        }
+def _tool_analyze_question(question: str, image_interpretation: dict = None) -> dict:
+    started = time.time()
+    result = QuestionAnalyzer().run(question=question, image_interpretation=image_interpretation)["result"]
+    return {"result": result, "duration_ms": int((time.time() - started) * 1000)}
 
 
-@component
-class TimedKnowledgeRetriever:
-    def __init__(self):
-        self.inner = KnowledgeRetriever()
-
-    @component.output_types(result=Dict[str, Any], duration_ms=int)
-    def run(self,
-            image_interpretation: dict = None,
-            question_analysis: dict = None,
-            original_question: str = "",
-            question_type: str = "",
-            body_region: str = "",
-            modality: str = "",
-            visual_cues: list = None,
-            target_entity: str = ""):
-        started_at = time.time()
-        output = self.inner.run(
-            image_interpretation=image_interpretation,
-            question_analysis=question_analysis,
-            original_question=original_question,
-            question_type=question_type,
-            body_region=body_region,
-            modality=modality,
-            visual_cues=visual_cues,
-            target_entity=target_entity,
-        )
-        duration_ms = int((time.time() - started_at) * 1000)
-        return {
-            "result": output["result"],
-            "duration_ms": duration_ms,
-        }
+def _tool_retrieve_knowledge(image_interpretation: dict = None, question_analysis: dict = None,
+                             question: str = "") -> dict:
+    started = time.time()
+    result = KnowledgeRetriever().run(
+        image_interpretation=image_interpretation,
+        question_analysis=question_analysis,
+        original_question=question,
+    )["result"]
+    return {"result": result, "duration_ms": int((time.time() - started) * 1000)}
 
 
-@component
-class TimedReasoningAgent:
-    def __init__(self):
-        self.inner = ReasoningAgent()
-
-    @component.output_types(result=Dict[str, Any], duration_ms=int)
-    def run(self,
-            image_interpretation: dict = None,
-            question_analysis: dict = None,
-            knowledge: dict = None,
-            original_question: str = "",
-            retry_context: dict = None):
-        started_at = time.time()
-        output = self.inner.run(
-            image_interpretation=image_interpretation,
-            question_analysis=question_analysis,
-            knowledge=knowledge,
-            original_question=original_question,
-            retry_context=retry_context,
-        )
-        duration_ms = int((time.time() - started_at) * 1000)
-        return {
-            "result": output["result"],
-            "duration_ms": duration_ms,
-        }
+def _tool_reason_answer(image_interpretation: dict = None, question_analysis: dict = None,
+                        knowledge: dict = None, question: str = "",
+                        retry_context: dict = None) -> dict:
+    started = time.time()
+    result = ReasoningAgent().run(
+        image_interpretation=image_interpretation,
+        question_analysis=question_analysis,
+        knowledge=knowledge,
+        original_question=question,
+        retry_context=retry_context,
+    )["result"]
+    return {"result": result, "duration_ms": int((time.time() - started) * 1000)}
 
 
-@component
-class TimedVerificationAgent:
-    def __init__(self):
-        self.inner = VerificationAgent()
-
-    @component.output_types(result=Dict[str, Any], duration_ms=int)
-    def run(self,
-            answer_data: dict = None,
-            image_interpretation: dict = None,
-            question_analysis: dict = None,
-            original_question: str = ""):
-        started_at = time.time()
-        output = self.inner.run(
-            answer_data=answer_data,
-            image_interpretation=image_interpretation,
-            question_analysis=question_analysis,
-            original_question=original_question,
-        )
-        duration_ms = int((time.time() - started_at) * 1000)
-        return {
-            "result": output["result"],
-            "duration_ms": duration_ms,
-        }
+def _tool_verify_answer(answer_data: dict = None, image_interpretation: dict = None,
+                        question_analysis: dict = None, question: str = "") -> dict:
+    started = time.time()
+    result = VerificationAgent().run(
+        answer_data=answer_data,
+        image_interpretation=image_interpretation,
+        question_analysis=question_analysis,
+        original_question=question,
+    )["result"]
+    return {"result": result, "duration_ms": int((time.time() - started) * 1000)}
 
 
-def create_pipeline() -> Pipeline:
-    """Create a fresh pipeline instance. Called per-request to avoid shared mutable state."""
-    pipeline = Pipeline()
-    pipeline.add_component("image_interpreter", TimedImageInterpreter())
-    pipeline.add_component("question_analyzer", TimedQuestionAnalyzer())
-    pipeline.add_component("knowledge_retriever", TimedKnowledgeRetriever())
-    pipeline.add_component("reasoning_agent", TimedReasoningAgent())
-    pipeline.add_component("verification_agent", TimedVerificationAgent())
-    pipeline.connect("image_interpreter.result", "question_analyzer.image_interpretation")
-    pipeline.connect("image_interpreter.result", "knowledge_retriever.image_interpretation")
-    pipeline.connect("image_interpreter.result", "reasoning_agent.image_interpretation")
-    pipeline.connect("image_interpreter.result", "verification_agent.image_interpretation")
-    pipeline.connect("question_analyzer.result", "knowledge_retriever.question_analysis")
-    pipeline.connect("question_analyzer.result", "reasoning_agent.question_analysis")
-    pipeline.connect("question_analyzer.result", "verification_agent.question_analysis")
-    pipeline.connect("knowledge_retriever.result", "reasoning_agent.knowledge")
-    pipeline.connect("reasoning_agent.result", "verification_agent.answer_data")
-    return pipeline
+# ---------------------------------------------------------------------------
+# Haystack Tool definitions — LLM-callable with state I/O bindings
+# ---------------------------------------------------------------------------
+
+_INTERPRET_IMAGE_TOOL = Tool(
+    name="interpret_image",
+    description=(
+        "Analyze the medical image to extract modality, body region, visible structures, "
+        "and a visual summary. Always call this first before any other tool."
+    ),
+    parameters={"type": "object", "properties": {}, "required": []},
+    function=_tool_interpret_image,
+    inputs_from_state={"image_bytes": "image_bytes", "mime_type": "mime_type"},
+    outputs_to_state={
+        "image_interpretation": {"source": "result"},
+        "image_duration_ms": {"source": "duration_ms"},
+    },
+)
+
+_ANALYZE_QUESTION_TOOL = Tool(
+    name="analyze_question",
+    description=(
+        "Analyze the medical VQA question to classify its type, identify the target entity, "
+        "and determine the expected answer format. Always call after interpret_image."
+    ),
+    parameters={"type": "object", "properties": {}, "required": []},
+    function=_tool_analyze_question,
+    inputs_from_state={"question": "question", "image_interpretation": "image_interpretation"},
+    outputs_to_state={
+        "question_analysis": {"source": "result"},
+        "question_duration_ms": {"source": "duration_ms"},
+    },
+)
+
+_RETRIEVE_KNOWLEDGE_TOOL = Tool(
+    name="retrieve_knowledge",
+    description=(
+        "Retrieve supporting medical context and background knowledge relevant to the question. "
+        "Call this when requires_medical_knowledge is true or question_type is one of: "
+        "abnormality_description, explanation_request. "
+        "Skip for simple visual questions: anatomy_identification, modality_identification, "
+        "presence_absence, location, counting, yes_no."
+    ),
+    parameters={"type": "object", "properties": {}, "required": []},
+    function=_tool_retrieve_knowledge,
+    inputs_from_state={
+        "image_interpretation": "image_interpretation",
+        "question_analysis": "question_analysis",
+        "question": "question",
+    },
+    outputs_to_state={
+        "knowledge": {"source": "result"},
+        "knowledge_duration_ms": {"source": "duration_ms"},
+    },
+)
+
+_REASON_ANSWER_TOOL = Tool(
+    name="reason_answer",
+    description=(
+        "Synthesize image analysis, question understanding, and any retrieved knowledge "
+        "to produce a final answer with explanation and confidence level. "
+        "Call after analyze_question (and after retrieve_knowledge if it was invoked)."
+    ),
+    parameters={"type": "object", "properties": {}, "required": []},
+    function=_tool_reason_answer,
+    inputs_from_state={
+        "image_interpretation": "image_interpretation",
+        "question_analysis": "question_analysis",
+        "knowledge": "knowledge",
+        "question": "question",
+        "retry_context": "retry_context",
+    },
+    outputs_to_state={
+        "answer_data": {"source": "result"},
+        "answer_duration_ms": {"source": "duration_ms"},
+    },
+)
+
+_VERIFY_ANSWER_TOOL = Tool(
+    name="verify_answer",
+    description=(
+        "Critically evaluate whether the generated answer is consistent, grounded in visual "
+        "evidence, and appropriate for the question type. Always call this last to finalize."
+    ),
+    parameters={"type": "object", "properties": {}, "required": []},
+    function=_tool_verify_answer,
+    inputs_from_state={
+        "answer_data": "answer_data",
+        "image_interpretation": "image_interpretation",
+        "question_analysis": "question_analysis",
+        "question": "question",
+    },
+    outputs_to_state={
+        "verification_result": {"source": "result"},
+        "verification_duration_ms": {"source": "duration_ms"},
+    },
+)
+
+_AGENT_SYSTEM_PROMPT = (
+    "You are a medical visual question answering (VQA) orchestrator. "
+    "You coordinate specialized tools to answer questions about medical images accurately and safely.\n\n"
+    "PROCEDURE (follow in order):\n"
+    "1. interpret_image — always required first.\n"
+    "2. analyze_question — always required second.\n"
+    "3. retrieve_knowledge — call ONLY when requires_medical_knowledge is true "
+    "or question_type is abnormality_description or explanation_request. "
+    "Skip for anatomy_identification, modality_identification, presence_absence, "
+    "location, counting, and yes_no questions.\n"
+    "4. reason_answer — always required.\n"
+    "5. verify_answer — always required last; finalizes the session."
+)
+
+_STATE_SCHEMA = {
+    "image_bytes": {"type": Any},
+    "mime_type": {"type": str},
+    "question": {"type": str},
+    "image_interpretation": {"type": dict},
+    "question_analysis": {"type": dict},
+    "knowledge": {"type": dict},
+    "answer_data": {"type": dict},
+    "verification_result": {"type": dict},
+    "image_duration_ms": {"type": int},
+    "question_duration_ms": {"type": int},
+    "knowledge_duration_ms": {"type": int},
+    "answer_duration_ms": {"type": int},
+    "verification_duration_ms": {"type": int},
+    "retry_context": {"type": dict},
+}
+
+
+def _create_agent() -> Agent:
+    return Agent(
+        chat_generator=OpenAIChatGenerator(
+            api_key=Secret.from_token(OPENAI_API_KEY),
+            model=OPENAI_MODEL,
+        ),
+        system_prompt=_AGENT_SYSTEM_PROMPT,
+        tools=[
+            _INTERPRET_IMAGE_TOOL,
+            _ANALYZE_QUESTION_TOOL,
+            _RETRIEVE_KNOWLEDGE_TOOL,
+            _REASON_ANSWER_TOOL,
+            _VERIFY_ANSWER_TOOL,
+        ],
+        exit_conditions=["verify_answer"],
+        state_schema=_STATE_SCHEMA,
+    )
 
 
 def _categorize_failure_modes(knowledge_result: dict, answer_result: dict, verification_result: dict) -> list:
@@ -473,39 +543,39 @@ def _payload_score(payload: dict) -> tuple[int, int, int, int]:
 
 
 def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png") -> dict:
-    # Create a fresh pipeline per request — prevents shared mutable state under concurrency.
     pipeline_start = time.time()
 
     def _run_once(retry_context: dict | None = None) -> dict:
-        pipeline = create_pipeline()
-        return pipeline.run(
-            {
-                "image_interpreter": {
-                    "image_bytes": image_bytes,
-                    "mime_type": mime_type,
-                },
-                "question_analyzer": {
-                    "question": question,
-                },
-                "knowledge_retriever": {
-                    "original_question": question,
-                },
-                "reasoning_agent": {
-                    "original_question": question,
-                    "retry_context": retry_context,
-                },
-                "verification_agent": {
-                    "original_question": question,
-                },
-            },
-            include_outputs_from={
-                "image_interpreter",
-                "question_analyzer",
-                "knowledge_retriever",
-                "reasoning_agent",
-                "verification_agent",
-            },
+        agent = _create_agent()
+        response = agent.run(
+            messages=[ChatMessage.from_user(question)],
+            image_bytes=image_bytes,
+            mime_type=mime_type,
+            question=question,
+            retry_context=retry_context,
         )
+        return {
+            "image_interpreter": {
+                "result": response.get("image_interpretation") or {},
+                "duration_ms": response.get("image_duration_ms") or 0,
+            },
+            "question_analyzer": {
+                "result": response.get("question_analysis") or {},
+                "duration_ms": response.get("question_duration_ms") or 0,
+            },
+            "knowledge_retriever": {
+                "result": response.get("knowledge") or {},
+                "duration_ms": response.get("knowledge_duration_ms") or 0,
+            },
+            "reasoning_agent": {
+                "result": response.get("answer_data") or {},
+                "duration_ms": response.get("answer_duration_ms") or 0,
+            },
+            "verification_agent": {
+                "result": response.get("verification_result") or {},
+                "duration_ms": response.get("verification_duration_ms") or 0,
+            },
+        }
 
     first_results = _run_once()
     first_payload = _assemble_pipeline_payload(first_results, question, pipeline_start)
@@ -528,8 +598,9 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
             "failure_categories": first_payload.get("failure_categories", []),
         }
         second_results = _run_once(retry_context=retry_context)
-        second_payload = _assemble_pipeline_payload(second_results, question, pipeline_start, retry_attempts=1, retry_reason=retry_reason)
-
+        second_payload = _assemble_pipeline_payload(
+            second_results, question, pipeline_start, retry_attempts=1, retry_reason=retry_reason
+        )
         if _payload_score(second_payload) > _payload_score(first_payload):
             best_payload = second_payload
         else:
