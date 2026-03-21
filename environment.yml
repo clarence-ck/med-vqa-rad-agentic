@@ -5,6 +5,7 @@ channels:
 dependencies:
   - python=3.12
   - pip
+  - faiss-cpu
   - pip:
       - fastapi
       - uvicorn
@@ -15,3 +16,7 @@ dependencies:
       - httpx
       - datasets
       - haystack-ai
+      - sentence-transformers
+      - rank-bm25
+      - scikit-learn
+      - numpy
