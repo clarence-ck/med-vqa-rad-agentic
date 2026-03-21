@@ -310,11 +310,19 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
             return cached_payload
 
     started_at = time.time()
-    baseline_result, workflow_result, agentic_result = await asyncio.gather(
-        asyncio.to_thread(baseline_answer, image_bytes, question, mime_type),
-        asyncio.to_thread(workflow_answer, image_bytes, question, mime_type),
-        asyncio.to_thread(run_pipeline, image_bytes, question, mime_type),
-    )
+
+    async def timed(fn, *args):
+        t0 = time.time()
+        result = await asyncio.to_thread(fn, *args)
+        return result, int((time.time() - t0) * 1000)
+
+    (baseline_result, baseline_ms), (workflow_result, workflow_ms), (agentic_result, agentic_ms) = \
+        await asyncio.gather(
+            timed(baseline_answer, image_bytes, question, mime_type),
+            timed(workflow_answer, image_bytes, question, mime_type),
+            timed(run_pipeline, image_bytes, question, mime_type),
+        )
+
     payload = {
         "sample": sample,
         "baseline_result": baseline_result,
@@ -324,6 +332,9 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
         "cached": False,
         "cached_at": int(time.time()),
         "duration_ms": int((time.time() - started_at) * 1000),
+        "baseline_duration_ms": baseline_ms,
+        "workflow_duration_ms": workflow_ms,
+        "agentic_duration_ms": agentic_ms,
     }
 
     with open(cache_path, "w", encoding="utf-8") as f:

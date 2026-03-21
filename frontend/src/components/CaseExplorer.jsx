@@ -199,7 +199,13 @@ export default function CaseExplorer({
         <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2><span className="icon">🖼️</span> Case Preview</h2>
           {analysisData && (
-            <ComparisonToggle mode={comparisonMode} onToggle={setComparisonMode} />
+            <ComparisonToggle
+            mode={comparisonMode}
+            onToggle={setComparisonMode}
+            agenticMs={analysisData.agentic_duration_ms ?? analysisData.agentic_result?.total_duration_ms}
+            workflowMs={analysisData.workflow_duration_ms}
+            baselineMs={analysisData.baseline_duration_ms}
+          />
           )}
         </div>
         <div className="panel-body">
@@ -237,8 +243,24 @@ export default function CaseExplorer({
                   <span className="explorer-meta-value">{analysisData.cached ? 'Yes' : 'No'}</span>
                 </div>
                 <div className="explorer-meta-item">
-                  <span className="explorer-meta-label">Combined run time</span>
-                  <span className="explorer-meta-value">{analysisData.duration_ms}ms</span>
+                  <span className="explorer-meta-label">⚡ Baseline time</span>
+                  <span className="explorer-meta-value">
+                    {analysisData.baseline_duration_ms != null ? `${analysisData.baseline_duration_ms}ms` : '—'}
+                  </span>
+                </div>
+                <div className="explorer-meta-item">
+                  <span className="explorer-meta-label">🧭 Workflow time</span>
+                  <span className="explorer-meta-value">
+                    {analysisData.workflow_duration_ms != null ? `${analysisData.workflow_duration_ms}ms` : '—'}
+                  </span>
+                </div>
+                <div className="explorer-meta-item">
+                  <span className="explorer-meta-label">🔗 Agentic time</span>
+                  <span className="explorer-meta-value">
+                    {(analysisData.agentic_duration_ms ?? analysisData.agentic_result?.total_duration_ms) != null
+                      ? `${analysisData.agentic_duration_ms ?? analysisData.agentic_result?.total_duration_ms}ms`
+                      : '—'}
+                  </span>
                 </div>
                 <div className="explorer-meta-item">
                   <span className="explorer-meta-label">Baseline answer</span>
