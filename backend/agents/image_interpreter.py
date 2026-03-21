@@ -9,7 +9,7 @@ from haystack.dataclasses import ChatMessage, TextContent, ImageContent
 from haystack.utils import Secret
 from PIL import Image
 
-from config import OPENAI_API_KEY, OPENAI_MODEL
+from config import OPENAI_API_KEY, VISION_MODEL
 from utils.json_utils import strip_json_fences
 
 
@@ -20,7 +20,7 @@ class ImageInterpreter:
     Takes a medical image and extracts modality, anatomy, visible structures.
     """
     def __init__(self):
-        self.generator = OpenAIChatGenerator(api_key=Secret.from_token(OPENAI_API_KEY), model=OPENAI_MODEL)
+        self.generator = OpenAIChatGenerator(api_key=Secret.from_token(OPENAI_API_KEY), model=VISION_MODEL)
 
     @component.output_types(result=Dict[str, Any])
     def run(self, image_bytes: bytes, mime_type: str = "image/png"):

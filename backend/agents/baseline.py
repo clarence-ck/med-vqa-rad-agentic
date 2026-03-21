@@ -1,7 +1,7 @@
 import base64
 import json
 from openai import OpenAI
-from config import OPENAI_API_KEY, OPENAI_MODEL
+from config import OPENAI_API_KEY, VISION_MODEL
 from utils.json_utils import strip_json_fences
 
 _client: OpenAI | None = None
@@ -39,7 +39,7 @@ Return ONLY the JSON object, no additional text."""
 
     try:
         response = _get_client().chat.completions.create(
-            model=OPENAI_MODEL,
+            model=VISION_MODEL,
             messages=[
                 {
                     "role": "user",

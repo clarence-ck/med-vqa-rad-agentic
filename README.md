@@ -134,7 +134,9 @@ The current runtime uses a single OpenAI configuration across the full agentic p
 
 | Env vars | Used by |
 |---|---|
-| `OPENAI_API_KEY`, `OPENAI_MODEL` | `ImageInterpreter`, `QuestionAnalyzer`, `KnowledgeRetriever`, `ReasoningAgent`, `VerificationAgent`, Haystack controller, `baseline.py` |
+| `OPENAI_API_KEY` | All agents, Haystack controller, `baseline.py` |
+| `VISION_MODEL` | `ImageInterpreter`, `baseline.py` |
+| `OPENAI_MODEL` | `QuestionAnalyzer`, `KnowledgeRetriever`, `ReasoningAgent`, `VerificationAgent`, Haystack controller |
 
 All agentic steps strictly utilize OpenAI. Hugging Face is only used to download the raw dataset via scripts.
 
@@ -373,7 +375,8 @@ cp .env.example .env
 Edit `.env`:
 ```env
 OPENAI_API_KEY=sk-...
-OPENAI_MODEL=gpt-5.4-mini-2026-03-17
+VISION_MODEL=gpt-5.4-mini-2026-03-17
+OPENAI_MODEL=oss120b
 
 # Frontend origin allowed by CORS
 BACKEND_CORS_ORIGINS=http://localhost:5173
