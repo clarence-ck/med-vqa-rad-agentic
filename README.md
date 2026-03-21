@@ -136,7 +136,7 @@ The current runtime uses a single OpenAI configuration across the full agentic p
 |---|---|
 | `OPENAI_API_KEY`, `OPENAI_MODEL` | `ImageInterpreter`, `QuestionAnalyzer`, `KnowledgeRetriever`, `ReasoningAgent`, `VerificationAgent`, Haystack controller, `baseline.py` |
 
-All agentic steps strictly utilize OpenAI; any legacy mentions of `HF_TOKEN` or `TEXT_MODEL` in `.env.example` or `config.py` are deprecated, and Hugging Face is only used to download the data via scripts.
+All agentic steps strictly utilize OpenAI. Hugging Face is only used to download the raw dataset via scripts.
 
 ### Other Technology Choices
 
@@ -432,7 +432,7 @@ Navigate to `http://localhost:5173`.
 
 ```text
 Medical-VQA-Explanation-Agent/
-├── .env.example                     # env template (currently includes a few legacy HF vars)
+├── .env.example                     # env template (OpenAI credentials and CORS)
 ├── environment.yml                  # conda environment (Python 3.12 + pip dependencies)
 ├── backend/
 │   ├── main.py                      # FastAPI app, CORS middleware, router registration
