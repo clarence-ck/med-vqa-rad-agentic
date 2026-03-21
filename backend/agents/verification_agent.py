@@ -83,7 +83,7 @@ Return ONLY the JSON object, no additional text."""
             response = self.generator.run(
                 messages=[ChatMessage.from_user(prompt)],
                 generation_kwargs={
-                    "max_tokens": 3000,
+                    "max_completion_tokens": 3000,
                 }
             )
 
