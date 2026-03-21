@@ -43,7 +43,7 @@ Return ONLY the JSON object, no additional text."""
             image.save(buffered, format="PNG")
             image_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
             messages = [
-                ChatMessage.from_user([
+                ChatMessage.from_user(content_parts=[
                     TextContent(text=prompt),
                     ImageContent(base64_image=image_base64, mime_type=mime_type)
                 ])
