@@ -346,7 +346,7 @@ label(
     italic=True,
 )
 
-box(ax, 8, 13.35, 5.45, 1.10, PURPLE, PURPLE, "Haystack Agent Controller", "HF text model · planner and router", tc="white", sc="#F1EDFF", lw=2.2)
+box(ax, 8, 13.35, 5.45, 1.10, PURPLE, PURPLE, "Haystack Agent Controller", "OpenAI model · planner and router", tc="white", sc="#F1EDFF", lw=2.2)
 arrow(ax, (8, 14.42), (8, 13.95), color=PURPLE, lw=2.45)
 
 img_x, img_y, img_w, img_h = box(
@@ -371,13 +371,13 @@ qa_x, qa_y, qa_w, qa_h = box(
     4.65,
     1.10,
     PURPLE_SOFT,
-    HF,
+    OPENAI,
     "QuestionAnalyzer",
     "question type · target · answer format",
     align="left",
     lw=2.1,
 )
-pill(ax, qa_x + qa_w - 0.86, qa_y + qa_h - 0.24, "HF Text", HF)
+pill(ax, qa_x + qa_w - 0.86, qa_y + qa_h - 0.24, "OpenAI", OPENAI)
 
 kr_x, kr_y, kr_w, kr_h = box(
     ax,
@@ -386,14 +386,14 @@ kr_x, kr_y, kr_w, kr_h = box(
     4.65,
     1.10,
     PURPLE_SOFT,
-    HF,
+    OPENAI,
     "KnowledgeRetriever",
     "medical background context",
     align="left",
     lw=2.1,
     ls="--",
 )
-pill(ax, kr_x + kr_w - 0.86, kr_y + kr_h - 0.24, "HF Text", HF)
+pill(ax, kr_x + kr_w - 0.86, kr_y + kr_h - 0.24, "OpenAI", OPENAI)
 pill(ax, kr_x + kr_w - 0.50, kr_y + 0.20, "optional", AMBER_SOFT, tc="#8A5A00", ec=AMBER, fs=5.8, w_override=0.64, h_override=0.22, pad=0.005)
 
 circle_node(ax, 8, 9.68, 1.18, "white", PURPLE, "Shared State", "image · question\nintermediate outputs", tc=PURPLE_DARK, sc="#6C61A8")
@@ -500,8 +500,7 @@ arrow(ax, (4.82, 2.04), (6.75, 2.84), color=TEAL, lw=1.95, rad=-0.04)
 arrow(ax, (11.18, 2.04), (9.25, 2.84), color=TEAL, lw=1.95, rad=0.04)
 
 legend_items = [
-    mpatches.Patch(color=OPENAI, label="OpenAI — vision, reasoning, verification"),
-    mpatches.Patch(color=HF, label="HF text model — classification, retrieval, orchestration"),
+    mpatches.Patch(color=OPENAI, label="OpenAI — vision, reasoning, verification, orchestration"),
     mpatches.Patch(color=GREEN, label="grounded / verified response"),
     mpatches.Patch(color=AMBER, label="guarded answer with disclaimer"),
     mpatches.Patch(color=RED, label="flagged for review"),
@@ -525,5 +524,5 @@ out_path = os.path.join(out_dir, "system_diagram.png")
 
 plt.tight_layout(pad=0.6)
 plt.savefig(out_path, dpi=240, bbox_inches="tight", facecolor=fig.get_facecolor())
-print("Saved →", os.path.abspath(out_path))
+print("Saved ->", os.path.abspath(out_path))
 plt.show()

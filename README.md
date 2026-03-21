@@ -136,7 +136,7 @@ The current runtime uses a single OpenAI configuration across the full agentic p
 |---|---|
 | `OPENAI_API_KEY`, `OPENAI_MODEL` | `ImageInterpreter`, `QuestionAnalyzer`, `KnowledgeRetriever`, `ReasoningAgent`, `VerificationAgent`, Haystack controller, `baseline.py` |
 
-`backend/config.py` and `.env.example` still include `HF_TOKEN`, `TEXT_MODEL`, and `TEXT_MODEL_BASE_URL`, but those variables are currently legacy and are not imported by the active request path.
+All agentic steps strictly utilize OpenAI; any legacy mentions of `HF_TOKEN` or `TEXT_MODEL` in `.env.example` or `config.py` are deprecated, and Hugging Face is only used to download the data via scripts.
 
 ### Other Technology Choices
 
@@ -384,7 +384,7 @@ Optional: create `frontend/.env` if the frontend should point to a non-default b
 VITE_API_BASE=http://localhost:8000
 ```
 
-Note: `.env.example` still includes legacy HF-related variables, but the current runtime path only requires `OPENAI_API_KEY`, `OPENAI_MODEL`, and `BACKEND_CORS_ORIGINS`.
+Note: The current runtime path only requires `OPENAI_API_KEY`, `OPENAI_MODEL`, and `BACKEND_CORS_ORIGINS`.
 
 ### 2. Install Python dependencies
 
