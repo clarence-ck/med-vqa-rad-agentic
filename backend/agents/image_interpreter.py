@@ -5,6 +5,7 @@ from typing import Dict, Any
 
 from haystack import component
 from haystack.components.generators.chat import OpenAIChatGenerator
+from haystack.dataclasses import ChatMessage, TextContent, ImageContent
 from haystack.utils import Secret
 from PIL import Image
 
@@ -42,18 +43,10 @@ Return ONLY the JSON object, no additional text."""
             image.save(buffered, format="PNG")
             image_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
             messages = [
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": prompt},
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:{mime_type};base64,{image_base64}"
-                            }
-                        }
-                    ],
-                },
+                ChatMessage.from_user([
+                    TextContent(text=prompt),
+                    ImageContent(base64_image=image_base64, mime_type=mime_type)
+                ])
             ]
             response = self.generator.run(messages=messages, generation_kwargs={"max_completion_tokens": 3000})
             raw = strip_json_fences(response["replies"][0].text or "")
