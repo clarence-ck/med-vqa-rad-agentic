@@ -35,6 +35,7 @@ export default function AgentTrace({ agentTrace, loading }) {
         {steps.map((step, i) => {
           const status = step.status || (loading ? 'pending' : 'pending');
           const dotClass = agentTrace ? (
+            status === 'skipped' ? 'skipped' :
             status === 'pass' ? 'completed' :
             status === 'warning' ? 'completed' :
             status === 'fail' ? 'completed' : 'pending'
@@ -44,7 +45,8 @@ export default function AgentTrace({ agentTrace, loading }) {
             <span key={i} style={{ display: 'contents' }}>
               <span className={`timeline-dot ${dotClass}`}
                     style={status === 'fail' ? { background: 'var(--color-error)' } :
-                           status === 'warning' ? { background: 'var(--color-warning)' } : {}} />
+                           status === 'warning' ? { background: 'var(--color-warning)' } :
+                           status === 'skipped' ? { background: 'var(--color-text-muted)', opacity: 0.4 } : {}} />
               {i < steps.length - 1 && (
                 <span className={`timeline-line ${dotClass === 'completed' ? 'completed' : ''}`}
                       style={status === 'fail' ? { background: 'var(--color-error)' } :
@@ -68,10 +70,12 @@ export default function AgentTrace({ agentTrace, loading }) {
               onClick={() => step.summary && toggleStep(step.agent_id)}
               style={{ animationDelay: `${step.agent_id * 0.08}s` }}
             >
-              <span className={`agent-step-number ${status}`}>
+              <span className={`agent-step-number ${status}`}
+                    style={status === 'skipped' ? { opacity: 0.45 } : {}}>
                 {status === 'pass' ? '✓' :
                  status === 'warning' ? '!' :
                  status === 'fail' ? '✗' :
+                 status === 'skipped' ? '–' :
                  loading ? '⋯' : step.agent_id}
               </span>
 
@@ -80,7 +84,7 @@ export default function AgentTrace({ agentTrace, loading }) {
                   {step.agent}
                   {status !== 'pending' && (
                     <span className={`tag tag-${status === 'pass' ? 'green' : status === 'warning' ? 'amber' : status === 'fail' ? 'red' : 'gray'}`}
-                          style={{ fontSize: '10px', padding: '0 6px' }}>
+                          style={{ fontSize: '10px', padding: '0 6px', opacity: status === 'skipped' ? 0.6 : 1 }}>
                       {status}
                     </span>
                   )}

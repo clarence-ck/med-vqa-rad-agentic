@@ -403,8 +403,8 @@ def _build_agent_trace(image_result: dict, question_result: dict, knowledge_resu
         {
             "agent": "Knowledge Support",
             "agent_id": 3,
-            "status": "pass" if knowledge_result.get("status") == "success" else "warning",
-            "summary": knowledge_result.get("contextual_notes", "No context retrieved."),
+            "status": "skipped" if (knowledge_duration_ms == 0 and not knowledge_result.get("key_facts")) else ("pass" if knowledge_result.get("status") == "success" else "warning"),
+            "summary": "Skipped — not needed for this question type." if (knowledge_duration_ms == 0 and not knowledge_result.get("key_facts")) else knowledge_result.get("contextual_notes", "No context retrieved."),
             "output": {
                 "key_facts": knowledge_result.get("key_facts", []),
             },
