@@ -2,6 +2,11 @@ function formatPercent(value) {
   return `${Math.round((value || 0) * 100)}%`;
 }
 
+function fmtMs(ms) {
+  if (ms == null) return '—';
+  return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`;
+}
+
 function getWinnerTagClass(winner) {
   if (winner === 'agentic') return 'tag-green';
   if (winner === 'workflow') return 'tag-blue';
@@ -107,8 +112,16 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
               </div>
             </div>
             <div className="card">
-              <div className="card-header"><span className="card-title">Avg Duration</span></div>
-              <div className="evaluation-metric-value">{summary.avg_duration_ms}ms</div>
+              <div className="card-header"><span className="card-title">⚡ Avg Baseline Time</span></div>
+              <div className="evaluation-metric-value">{fmtMs(summary.avg_baseline_duration_ms)}</div>
+            </div>
+            <div className="card">
+              <div className="card-header"><span className="card-title">🧭 Avg Workflow Time</span></div>
+              <div className="evaluation-metric-value">{fmtMs(summary.avg_workflow_duration_ms)}</div>
+            </div>
+            <div className="card">
+              <div className="card-header"><span className="card-title">🔗 Avg Agentic Time</span></div>
+              <div className="evaluation-metric-value">{fmtMs(summary.avg_agentic_duration_ms)}</div>
             </div>
           </section>
 
@@ -162,7 +175,11 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                         <td>{row.verification_status?.replace(/_/g, ' ')}</td>
                         <td>{row.self_consistency_level}</td>
                         <td>{row.cross_modal_agreement_level}</td>
-                        <td>{row.duration_ms}ms</td>
+                        <td>
+                            <div style={{fontSize:'11px', whiteSpace:'nowrap'}}>B {fmtMs(row.baseline_duration_ms)}</div>
+                            <div style={{fontSize:'11px', whiteSpace:'nowrap'}}>W {fmtMs(row.workflow_duration_ms)}</div>
+                            <div style={{fontSize:'11px', whiteSpace:'nowrap'}}>A {fmtMs(row.agentic_duration_ms)}</div>
+                          </td>
                       </tr>
                     ))}
                   </tbody>
