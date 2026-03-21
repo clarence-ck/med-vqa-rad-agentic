@@ -17,9 +17,9 @@ function getWinnerTagClass(winner) {
 function AccuracyMetricStack({ baseline, workflow, agentic }) {
   return (
     <div className="evaluation-metric-stack">
-      <span className="tag tag-amber">B {formatPercent(baseline)}</span>
-      <span className="tag tag-blue">W {formatPercent(workflow)}</span>
-      <span className="tag tag-green">A {formatPercent(agentic)}</span>
+      <span className="tag tag-amber">Baseline {formatPercent(baseline)}</span>
+      <span className="tag tag-blue">Workflow {formatPercent(workflow)}</span>
+      <span className="tag tag-green">Agentic {formatPercent(agentic)}</span>
     </div>
   );
 }
@@ -139,10 +139,10 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                       <div className="evaluation-list-subtitle">{item.count} cases</div>
                     </div>
                     <div className="evaluation-list-metrics">
-                      <span className="tag tag-amber">B {formatPercent(item.baseline_accuracy)}</span>
-                      <span className="tag tag-blue">W {formatPercent(item.workflow_accuracy)}</span>
-                      <span className="tag tag-green">A {formatPercent(item.agentic_accuracy)}</span>
-                      <span className="tag tag-gray">D {formatPercent(item.disagreement_rate)}</span>
+                      <span className="tag tag-amber">Baseline {formatPercent(item.baseline_accuracy)}</span>
+                      <span className="tag tag-blue">Workflow {formatPercent(item.workflow_accuracy)}</span>
+                      <span className="tag tag-green">Agentic {formatPercent(item.agentic_accuracy)}</span>
+                      <span className="tag tag-gray">Disagree {formatPercent(item.disagreement_rate)}</span>
                     </div>
                   </div>
                 ))}
@@ -175,10 +175,10 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                         <td>{row.verification_status?.replace(/_/g, ' ')}</td>
                         <td>{row.self_consistency_level}</td>
                         <td>{row.cross_modal_agreement_level}</td>
-                        <td>
-                            <div style={{fontSize:'11px', whiteSpace:'nowrap'}}>B {fmtMs(row.baseline_duration_ms)}</div>
-                            <div style={{fontSize:'11px', whiteSpace:'nowrap'}}>W {fmtMs(row.workflow_duration_ms)}</div>
-                            <div style={{fontSize:'11px', whiteSpace:'nowrap'}}>A {fmtMs(row.agentic_duration_ms)}</div>
+                          <td>
+                            <div style={{fontSize:'11px', whiteSpace:'nowrap'}}>Baseline {fmtMs(row.baseline_duration_ms)}</div>
+                            <div style={{fontSize:'11px', whiteSpace:'nowrap'}}>Workflow {fmtMs(row.workflow_duration_ms)}</div>
+                            <div style={{fontSize:'11px', whiteSpace:'nowrap'}}>Agentic {fmtMs(row.agentic_duration_ms)}</div>
                           </td>
                       </tr>
                     ))}
