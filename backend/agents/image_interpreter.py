@@ -61,7 +61,9 @@ Return ONLY the JSON object, no additional text."""
             result["status"] = "success"
             return {"result": result}
 
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
+            print(f"[ImageInterpreter] JSON parse error: {e}")
+            print(f"[ImageInterpreter] Raw response: {raw if 'raw' in locals() else 'N/A'}")
             return {"result": {
                 "status": "error",
                 "error": "Failed to parse image interpretation response",
@@ -74,6 +76,7 @@ Return ONLY the JSON object, no additional text."""
                 "notable_findings": []
             }}
         except Exception as e:
+            print(f"[ImageInterpreter] Exception: {type(e).__name__}: {e}")
             return {"result": {
                 "status": "error",
                 "error": str(e),
