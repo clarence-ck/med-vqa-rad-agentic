@@ -10,7 +10,7 @@ from agents.question_analyzer import QuestionAnalyzer
 from agents.knowledge_retriever import KnowledgeRetriever
 from agents.reasoning_agent import ReasoningAgent
 from agents.verification_agent import VerificationAgent
-from config import HF_TOKEN, TEXT_MODEL, TEXT_MODEL_BASE_URL
+from config import OPENAI_API_KEY, OPENAI_MODEL
 
 
 # ---------------------------------------------------------------------------
@@ -199,9 +199,8 @@ _STATE_SCHEMA = {
 def _create_agent() -> Agent:
     return Agent(
         chat_generator=OpenAIChatGenerator(
-            api_key=Secret.from_token(HF_TOKEN),
-            model=TEXT_MODEL,
-            api_base_url=TEXT_MODEL_BASE_URL,
+            api_key=Secret.from_token(OPENAI_API_KEY),
+            model=OPENAI_MODEL,
         ),
         system_prompt=_AGENT_SYSTEM_PROMPT,
         tools=[

@@ -25,6 +25,3 @@ if not OPENAI_API_KEY:
 if not OPENAI_MODEL:
     print("WARNING: OPENAI_MODEL not set. Defaulting to 'gpt-5.4-mini-2026-03-17'.")
     OPENAI_MODEL = "gpt-5.4-mini-2026-03-17"
-
-if not HF_TOKEN:
-    print("WARNING: HF_TOKEN not set. Text agents (gpt-oss-120b) will fail. Set it in .env file.")

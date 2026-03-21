@@ -11,11 +11,11 @@ MedVisionQuery is an **agentic multimodal system** for medical visual question a
 | Property | Implementation |
 |---|---|
 | Problem decomposition | 5 distinct agent stages with explicit roles |
-| Agent architecture | Named agents wrapped as Haystack Tools; LLM controller decides execution order |
-| Multimodal grounding | Vision model for image interpretation; text model for all downstream reasoning |
-| Dynamic tool selection | `retrieve_knowledge` skipped for simple questions by the controller |
-| Control & failure handling | Verification, guardrails, disclaimers, review flags, automatic retry |
-| Evaluation | Against two baselines with exact match, token F1, and disagreement analysis |
+| Agent architecture | Named agents wrapped as Haystack Tools; the controller decides tool use over shared state |
+| Multimodal grounding | The image is interpreted once, then downstream stages consume structured visual state; the current runtime uses OpenAI-backed generators throughout |
+| Dynamic tool selection | `retrieve_knowledge` is optional and skipped for simple visual question types by the controller |
+| Control & failure handling | Verification, guardrails, disclaimers, review flags, failure categories, and automatic retry |
+| Evaluation | Against two baselines with exact match, token F1, close/open-ended accuracy, and disagreement analysis |
 
 ---
 
@@ -25,7 +25,7 @@ MedVisionQuery is an **agentic multimodal system** for medical visual question a
 
 | Input | Type |
 |---|---|
-| Medical image | Radiology / pathology image (JPEG / PNG) |
+| Medical image | User-uploaded medical image (JPEG / PNG); evaluated on VQA-RAD radiology cases |
 | Natural language question | Any question about the image |
 
 **Output:** structured JSON with answer, explanation, evidence, verification status, confidence, failure signals, and per-stage agent trace.
@@ -59,7 +59,7 @@ flowchart LR
     EXP --> API
     EVAL --> API
 
-    API --> ORCH[Haystack Agent Controller\nHF text model]
+    API --> ORCH[Haystack Agent Controller\nOpenAI chat model]
 
     ORCH -->|tool call| T1[Tool: interpret_image\nImageInterpreter]
     ORCH -->|tool call| T2[Tool: analyze_question\nQuestionAnalyzer]
@@ -86,28 +86,27 @@ flowchart LR
     B2 --> CACHE
     CACHE --> EVAL
 
-    T1 --> VISION[OpenAI Vision Model\nOPENAI_MODEL]
-    B1 --> VISION
-
-    ORCH --> TEXT[HF Text Model\nTEXT_MODEL]
-    T2 --> TEXT
-    T3 --> TEXT
-    T4 --> TEXT
-    T5 --> TEXT
+    T1 --> LLM[OpenAI API\nOPENAI_MODEL]
+    T2 --> LLM
+    T3 --> LLM
+    T4 --> LLM
+    T5 --> LLM
+    ORCH --> LLM
+    B1 --> LLM
 ```
 
 ### Agent Roles
 
 | Component | File | Role | Model |
 |---|---|---|---|
-| `ImageInterpreter` | `image_interpreter.py` | Perception — multimodal vision, extracts visual findings | Vision (OpenAI) |
-| `QuestionAnalyzer` | `question_analyzer.py` | Task understanding — classifies question type and intent | Text (HF) |
-| `KnowledgeRetriever` | `knowledge_retriever.py` | Context — retrieves medical background; **dynamically skipped** for simple questions | Text (HF) |
+| `ImageInterpreter` | `image_interpreter.py` | Perception — multimodal image interpretation (OpenAI) | OpenAI |
+| `QuestionAnalyzer` | `question_analyzer.py` | Task understanding — question classification and intent analysis (OpenAI) | OpenAI |
+| `KnowledgeRetriever` | `knowledge_retriever.py` | Context — optional medical background retrieval (OpenAI) | OpenAI |
 | `ReasoningAgent` | `reasoning_agent.py` | Synthesis — generates answer and explanation from all prior context | OpenAI |
 | `VerificationAgent` | `verification_agent.py` | Evaluator — runs 5 structured checks on the answer | OpenAI |
-| Agent Controller | `orchestrator.py` | Haystack `Agent` — routes tool calls via LLM, manages shared state | Text (HF) |
-| Workflow Baseline | `workflow_baseline.py` | Deterministic rule-based answer logic using image + question analysis outputs | Rules only |
-| Single-shot Baseline | `baseline.py` | Direct image+question prompt with no decomposition | Vision (OpenAI) |
+| Agent Controller | `orchestrator.py` | Haystack `Agent` — routes tool calls via LLM, manages shared state | OpenAI |
+| Workflow Baseline | `workflow_baseline.py` | Deterministic answer derivation over image/question analysis outputs | Rules + OpenAI intermediates |
+| Single-shot Baseline | `baseline.py` | Direct image+question prompt with no decomposition | OpenAI |
 
 ### Tool-calling and Shared State
 
@@ -129,22 +128,23 @@ The controller uses `question_type` from `QuestionAnalyzer` to decide whether to
 | `abnormality_description`, `explanation_request` | Yes |
 | When `requires_medical_knowledge` is true | Yes |
 
-### Model Split
+### Current runtime model configuration
 
-Two separate model configs are required:
+The current runtime uses a single OpenAI configuration across the full agentic pipeline and the single-shot baseline.
 
-| Role | Env vars | Used by |
-|---|---|---|
-| **OpenAI model** — quality-critical stages | `OPENAI_API_KEY`, `OPENAI_MODEL` | `ImageInterpreter`, `ReasoningAgent`, `VerificationAgent`, `baseline.py` |
-| **HF text model** — structured / support stages | `HF_TOKEN`, `TEXT_MODEL`, `TEXT_MODEL_BASE_URL` | `QuestionAnalyzer`, `KnowledgeRetriever`, orchestrator |
+| Env vars | Used by |
+|---|---|
+| `OPENAI_API_KEY`, `OPENAI_MODEL` | `ImageInterpreter`, `QuestionAnalyzer`, `KnowledgeRetriever`, `ReasoningAgent`, `VerificationAgent`, Haystack controller, `baseline.py` |
 
-OpenAI handles the stages whose output quality is most visible — vision grounding, final answer synthesis, and the verification quality gate. The HF router handles the more structured, lower-stakes tasks: question classification, background context retrieval, and tool-call orchestration.
+`backend/config.py` and `.env.example` still include `HF_TOKEN`, `TEXT_MODEL`, and `TEXT_MODEL_BASE_URL`, but those variables are currently legacy and are not imported by the active request path.
 
 ### Other Technology Choices
 
-- **Haystack `Agent` + `Tool`** — controller LLM decides tool calls; `inputs_from_state` / `outputs_to_state` replaces explicit data-wiring; per-tool timing via `time.time()`
-- **FastAPI** — async backend; all blocking LLM calls run in `asyncio.to_thread()` to avoid event-loop blocking
-- **React 19 + Vite** — frontend UI, custom CSS only (no UI framework)
+- **Haystack `Agent` + `Tool`** — controller-managed tool calls with `inputs_from_state` / `outputs_to_state` bindings and per-tool timing
+- **FastAPI** — async backend; blocking LLM calls run in `asyncio.to_thread()` to avoid event-loop blocking
+- **React 19 + Vite** — frontend UI with Dashboard, Case Explorer, and Evaluation views
+- **Hugging Face `datasets`** — used only by `scripts/download_dataset.py` to materialize the local VQA-RAD data folder
+- **Matplotlib** — `scripts/system_diagram.py` regenerates `scripts/docs/system_diagram.png`
 
 ---
 
@@ -157,11 +157,11 @@ OpenAI handles the stages whose output quality is most visible — vision ground
 
 | Stage | Image used? | Text used? |
 |---|---|---|
-| Image Interpretation | ✅ Base64 vision prompt | ✅ Extraction instructions |
-| Question Understanding | ❌ | ✅ Question + visual summary from stage 1 |
-| Knowledge Support | ❌ | ✅ `body_region` + `modality` + `visual_cues` from stages 1–2 |
-| Reasoning & Answer | ❌ | ✅ All prior structured outputs |
-| Verification | ❌ | ✅ Answer + image analysis + question analysis |
+| Image Interpretation | Base64 vision prompt | Extraction instructions |
+| Question Understanding | No | Question + visual summary from stage 1 |
+| Knowledge Support | No | `body_region` + `modality` + `visual_cues` from stages 1–2 |
+| Reasoning & Answer | No | All prior structured outputs |
+| Verification | No | Answer + image analysis + question analysis |
 
 The image is consumed only once (stage 1); all downstream stages operate on the **structured visual summary** extracted from it.
 
@@ -288,9 +288,10 @@ The image is consumed only once (stage 1); all downstream stages operate on the 
 
 ### Aggregate evaluation summary
 - Overall exact-match accuracy per system (baseline / workflow / agentic)
-- Win counts and disagreement rate
-- Average duration (ms)
+- Close-ended and open-ended accuracy per system
+- Win counts, disagreement rate, and average duration (ms)
 - Per-question-type accuracy breakdown
+- Recent-case rows including verification status, self-consistency, and cross-modal agreement
 
 ### Cache and evaluation workflow
 1. Selecting a sample in Case Explorer runs all 3 systems concurrently via `asyncio.gather` and writes results to `backend/.case_explorer_cache/sample_{id}_{question_hash}.json`
@@ -301,7 +302,7 @@ The image is consumed only once (stage 1); all downstream stages operate on the 
 | System | File | Approach |
 |---|---|---|
 | Single-shot baseline | `baseline.py` | One multimodal prompt, no decomposition — answer + explanation + confidence |
-| Workflow baseline | `workflow_baseline.py` | Deterministic rule-based logic per question type; reuses LLM image + question outputs only |
+| Workflow baseline | `workflow_baseline.py` | Deterministic answer derivation over image/question analysis outputs |
 | Agentic pipeline | `orchestrator.py` | 5-tool Haystack Agent with LLM controller, verification, guardrails, retry |
 
 ---
@@ -338,8 +339,8 @@ Purpose: **ad-hoc analysis of any uploaded image**.
 ### Case Explorer
 Purpose: **systematic browsing and analysis of the VQA-RAD dataset**.
 
-- Browse all dataset samples with question type labels
-- Select a sample to load its image and pre-filled question
+- Browse a curated set of dataset samples (default 30) with question type labels
+- Select a sample to load its image, question, and ground-truth answer
 - Run full 3-system analysis with cache awareness (Refresh to force re-run)
 - Inspect ground truth, all 3 answers, agent trace, verification, and failure modes side-by-side
 
@@ -347,8 +348,8 @@ Purpose: **systematic browsing and analysis of the VQA-RAD dataset**.
 Purpose: **aggregate performance comparison across all cached analyses**.
 
 - Reads all cached Case Explorer results automatically
-- Displays exact-match accuracy, win counts, disagreement rate, and average duration per system
-- Per-question-type accuracy breakdown table
+- Displays exact-match accuracy, close/open-ended accuracy, win counts, disagreement rate, and average duration per system
+- Shows a per-question-type breakdown and recent evaluated-case table with verification signals
 - Hit **Refresh** to re-aggregate after running new cases in Case Explorer
 
 ---
@@ -359,8 +360,7 @@ Purpose: **aggregate performance comparison across all cached analyses**.
 
 - Python 3.12
 - Node.js 18+
-- OpenAI API key (vision-capable model)
-- Hugging Face token (for text model routing)
+- OpenAI API key with access to the selected `OPENAI_MODEL`
 
 ### 1. Clone and configure
 
@@ -372,18 +372,19 @@ cp .env.example .env
 
 Edit `.env`:
 ```env
-# Vision model — ImageInterpreter and single-shot baseline
 OPENAI_API_KEY=sk-...
-OPENAI_MODEL=gpt-4o-mini
-
-# Text model — all reasoning agents and orchestrator (via HF Inference Router)
-HF_TOKEN=hf_...
-TEXT_MODEL=openai/gpt-oss-120b:fastest
-TEXT_MODEL_BASE_URL=https://router.huggingface.co/v1
+OPENAI_MODEL=gpt-5.4-mini-2026-03-17
 
 # Frontend origin allowed by CORS
 BACKEND_CORS_ORIGINS=http://localhost:5173
 ```
+
+Optional: create `frontend/.env` if the frontend should point to a non-default backend URL.
+```env
+VITE_API_BASE=http://localhost:8000
+```
+
+Note: `.env.example` still includes legacy HF-related variables, but the current runtime path only requires `OPENAI_API_KEY`, `OPENAI_MODEL`, and `BACKEND_CORS_ORIGINS`.
 
 ### 2. Install Python dependencies
 
@@ -431,21 +432,21 @@ Navigate to `http://localhost:5173`.
 
 ```text
 Medical-VQA-Explanation-Agent/
-├── .env.example                     # environment variable template
-├── environment.yml                  # conda environment (Python 3.12)
+├── .env.example                     # env template (currently includes a few legacy HF vars)
+├── environment.yml                  # conda environment (Python 3.12 + pip dependencies)
 ├── backend/
 │   ├── main.py                      # FastAPI app, CORS middleware, router registration
-│   ├── config.py                    # loads .env: OPENAI_*, HF_TOKEN, TEXT_MODEL*, DATA_DIR, CORS
+│   ├── config.py                    # loads .env: OPENAI_*, legacy TEXT_MODEL*, DATA_DIR, CORS
 │   ├── requirements.txt             # pip dependencies
 │   ├── agents/
-│   │   ├── orchestrator.py          # Haystack Agent controller, 5 tools, retry logic, guardrails
-│   │   ├── image_interpreter.py     # Agent 1: vision model → structured visual findings
-│   │   ├── question_analyzer.py     # Agent 2: question classification and intent (text model)
-│   │   ├── knowledge_retriever.py   # Agent 3: medical background retrieval — conditional (text model)
-│   │   ├── reasoning_agent.py       # Agent 4: answer synthesis with retry context support (OpenAI model)
-│   │   ├── verification_agent.py    # Agent 5: 5-check structured verification (OpenAI model)
-│   │   ├── baseline.py              # Single-shot multimodal baseline (vision model)
-│   │   └── workflow_baseline.py     # Deterministic rule-based workflow baseline (no synthesis LLM)
+│   │   ├── orchestrator.py          # Haystack Agent controller, tool routing, retry logic, guardrails
+│   │   ├── image_interpreter.py     # Agent 1: multimodal image interpretation (OpenAI)
+│   │   ├── question_analyzer.py     # Agent 2: question classification and intent analysis (OpenAI)
+│   │   ├── knowledge_retriever.py   # Agent 3: optional medical background retrieval (OpenAI)
+│   │   ├── reasoning_agent.py       # Agent 4: answer synthesis with retry context support (OpenAI)
+│   │   ├── verification_agent.py    # Agent 5: structured verification and fallback recommendations (OpenAI)
+│   │   ├── baseline.py              # Single-shot multimodal baseline (OpenAI)
+│   │   └── workflow_baseline.py     # Deterministic answer derivation over image/question analysis outputs
 │   ├── routes/
 │   │   ├── analyze.py               # POST /api/analyze, /baseline, /workflow
 │   │   └── dataset.py               # GET /api/dataset/* — samples, analysis, evaluation, cache
@@ -453,33 +454,36 @@ Medical-VQA-Explanation-Agent/
 │       ├── data_loader.py           # VQA-RAD JSON loader, sample bucketing, question classification
 │       └── json_utils.py            # strip_json_fences() — removes markdown code fences from LLM output
 ├── frontend/
-│   ├── package.json                 # React 19, Vite
+│   ├── package.json                 # React 19 + Vite app
 │   └── src/
 │       ├── App.jsx                  # root component, tab routing (Dashboard / Case Explorer / Evaluation)
-│       ├── config.js                # API_BASE URL
+│       ├── config.js                # API base URL (`VITE_API_BASE` override)
 │       ├── index.css                # custom CSS (no framework)
 │       ├── components/
-│       │   ├── AgentTrace.jsx       # per-stage timing and expandable output
-│       │   ├── AnswerCard.jsx       # final answer, guarded answer, verification badge
-│       │   ├── CaseExplorer.jsx     # dataset browser, sample selection, analysis display
+│       │   ├── AgentTrace.jsx       # stage timeline, status badges, expandable outputs
+│       │   ├── AnswerCard.jsx       # final answer, guarded answer, confidence, disclaimer
+│       │   ├── CaseExplorer.jsx     # dataset browser and cached 3-system case comparison
 │       │   ├── CaseHeader.jsx       # case metadata summary bar
 │       │   ├── CaseInput.jsx        # image upload + question input (Dashboard)
 │       │   ├── ComparisonToggle.jsx # switch between agentic / workflow / baseline result views
 │       │   ├── ConfidenceBadge.jsx  # High / Medium / Low confidence badge
-│       │   ├── EvaluationView.jsx   # aggregate metrics, win counts, question-type table
-│       │   ├── ExplanationCard.jsx  # explanation text + evidence used
-│       │   ├── FailureModeDrawer.jsx# collapsible failure category list with severity
-│       │   ├── ImageViewer.jsx      # medical image display with zoom and analysis tags
-│       │   └── VerificationPanel.jsx# verification checks, notes, disclaimer, review flag
+│       │   ├── EvaluationView.jsx   # aggregate metrics, close/open-ended accuracy, recent cases
+│       │   ├── ExplanationCard.jsx  # explanation text, evidence used, reasoning trace
+│       │   ├── FailureModeDrawer.jsx# collapsible failure category list and failure hints
+│       │   ├── ImageViewer.jsx      # image display with zoom and predicted tags
+│       │   └── VerificationPanel.jsx# verification checks, notes, fallback, review flag
 │       └── hooks/
 │           ├── useAnalysis.js       # analyze / analyzeBaseline / analyzeWorkflow API calls
 │           ├── useDataset.js        # sample listing + fetchSampleAnalysis
 │           └── useEvaluation.js     # evaluation summary fetch
 ├── scripts/
-│   └── download_dataset.py          # downloads VQA-RAD from Hugging Face, writes JSON + images
+│   ├── download_dataset.py          # downloads VQA-RAD from Hugging Face, writes JSON + images
+│   ├── system_diagram.py            # regenerates the architecture figure
+│   └── docs/
+│       └── system_diagram.png       # rendered system diagram asset
 └── data/
     └── vqa-rad/                     # gitignored — created by download_dataset.py
-        ├── vqa_rad.json             # all QA pairs with split labels and image filenames
+        ├── vqa_rad.json             # flattened QA manifest with split labels and image filenames
         └── images/                  # PNG images named {split}_{index:04d}.png
 ```
 
@@ -491,12 +495,13 @@ Medical-VQA-Explanation-Agent/
 
 | Field | Value |
 |---|---|
-| Images | 315 radiology images |
-| QA pairs | 3,515 total (3,064 train / 451 test) |
-| Image types | X-ray, CT, MRI |
-| Question types | Yes/no (closed-ended) and open-ended |
+| QA pairs in local manifest | 2,244 total |
+| Split breakdown | 1,793 train / 451 test |
+| Generated image files | 2,244 PNGs under `data/vqa-rad/images/` |
+| Image types | Radiology images |
+| Question styles | Yes/no (close-ended) and open-ended |
 
-The download script processes both splits and writes a flat `vqa_rad.json` with each item tagged by its split. Images are saved as `{split}_{index:04d}.png`.
+The current download script flattens the Hugging Face dataset into one local PNG per QA item and writes a flat `vqa_rad.json` with split labels. Local image filenames are saved as `{split}_{index:04d}.png`, so the number of generated image files matches the number of manifest rows.
 
 ---
 
