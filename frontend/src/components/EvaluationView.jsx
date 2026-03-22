@@ -160,6 +160,8 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                       <th>ID</th>
                       <th>Type</th>
                       <th>Winner</th>
+                      <th>Retriever</th>
+                      <th>Facts</th>
                       <th>Verify</th>
                       <th>Consistency</th>
                       <th>Cross-modal</th>
@@ -172,6 +174,14 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                         <td>{row.sample_id}</td>
                         <td>{row.question_type?.replace(/_/g, ' ')}</td>
                         <td><span className={`tag ${getWinnerTagClass(row.winner)}`}>{row.winner.replace(/_/g, ' ')}</span></td>
+                        <td>
+                          <span className={`tag ${row.knowledge_retriever_triggered ? 'tag-green' : 'tag-gray'}`}>
+                            {row.knowledge_retriever_triggered
+                              ? (row.knowledge_retriever_status || 'triggered')
+                              : 'skipped'}
+                          </span>
+                        </td>
+                        <td>{row.knowledge_key_facts_count ?? 0}</td>
                         <td>{row.verification_status?.replace(/_/g, ' ')}</td>
                         <td>{row.self_consistency_level}</td>
                         <td>{row.cross_modal_agreement_level}</td>

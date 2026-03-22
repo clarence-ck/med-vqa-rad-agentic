@@ -307,7 +307,7 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
             response = client.chat.completions.create(
                 model=OPENAI_MODEL or "gpt-4",
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=150,
+                max_completion_tokens=150,
                 temperature=0.3
             )
             
@@ -591,7 +591,7 @@ Respond with ONLY a JSON object:
             response = client.chat.completions.create(
                 model=OPENAI_MODEL or "gpt-4",
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=200,
+                max_completion_tokens=200,
                 temperature=0.1
             )
             

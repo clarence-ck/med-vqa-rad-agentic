@@ -141,6 +141,28 @@ def _subset_accuracy(subset_rows: list[dict], key: str) -> float:
     return sum(1 for row in subset_rows if row.get(key)) / total
 
 
+def _extract_knowledge_retriever_details(agentic_result: dict) -> dict:
+    trace = agentic_result.get("agent_trace", []) or []
+    knowledge_step = next(
+        (
+            step for step in trace
+            if str(step.get("agent", "")).strip().lower() == "knowledge support"
+        ),
+        {},
+    )
+    status = str(knowledge_step.get("status", "unknown")).strip().lower()
+    key_facts = knowledge_step.get("output", {}).get("key_facts", []) or []
+    summary = knowledge_step.get("summary", "")
+    triggered = status not in {"", "unknown", "skipped"}
+
+    return {
+        "knowledge_retriever_triggered": triggered,
+        "knowledge_retriever_status": status or "unknown",
+        "knowledge_key_facts_count": len(key_facts),
+        "knowledge_summary": summary,
+    }
+
+
 def _build_evaluation_row(payload: dict) -> dict:
     sample = payload.get("sample", {})
     baseline_result = payload.get("baseline_result", {})
@@ -176,6 +198,7 @@ def _build_evaluation_row(payload: dict) -> dict:
         or sample.get("question_type", "unknown")
     )
     answer_style = "close_ended" if _is_close_ended_answer(ground_truth_normalized) else "open_ended"
+    knowledge_details = _extract_knowledge_retriever_details(agentic_result)
 
     return {
         "sample_id": sample.get("id"),
@@ -200,6 +223,10 @@ def _build_evaluation_row(payload: dict) -> dict:
         "issues_found": agentic_result.get("issues_found", []),
         "self_consistency_level": agentic_result.get("self_consistency_signal", {}).get("level", "low"),
         "cross_modal_agreement_level": agentic_result.get("cross_modal_agreement", {}).get("level", "medium"),
+        "knowledge_retriever_triggered": knowledge_details["knowledge_retriever_triggered"],
+        "knowledge_retriever_status": knowledge_details["knowledge_retriever_status"],
+        "knowledge_key_facts_count": knowledge_details["knowledge_key_facts_count"],
+        "knowledge_summary": knowledge_details["knowledge_summary"],
         "duration_ms": payload.get("duration_ms", 0),
         "baseline_duration_ms": payload.get("baseline_duration_ms"),
         "workflow_duration_ms": payload.get("workflow_duration_ms"),

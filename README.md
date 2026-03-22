@@ -98,6 +98,8 @@ flowchart LR
     B1 --> LLM
 ```
 
+![System Diagram](system_diagram.png)
+
 ### Agent Roles
 
 | Component | File | Role | Model |
@@ -398,6 +400,7 @@ Edit `.env`:
 OPENAI_API_KEY=sk-...
 VISION_MODEL=gpt-5.4-mini-2026-03-17
 OPENAI_MODEL=oss120b
+HF_TOKEN=hf_...
 
 # Frontend origin allowed by CORS
 BACKEND_CORS_ORIGINS=http://localhost:5173
@@ -408,7 +411,7 @@ Optional: create `frontend/.env` if the frontend should point to a non-default b
 VITE_API_BASE=http://localhost:8000
 ```
 
-Note: The current runtime path only requires `OPENAI_API_KEY`, `OPENAI_MODEL`, and `BACKEND_CORS_ORIGINS`.
+Note: The current runtime path requires `OPENAI_API_KEY`, `OPENAI_MODEL`, and `BACKEND_CORS_ORIGINS`. `HF_TOKEN` is optional but recommended to avoid Hugging Face Hub unauthenticated-rate-limit warnings and speed up model downloads.
 
 ### 2. Install Python dependencies
 

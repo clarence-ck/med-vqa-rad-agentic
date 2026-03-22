@@ -22,6 +22,32 @@ function getStatusTagClass(status) {
   return 'tag-red';
 }
 
+function getKnowledgeSupportDetails(agenticResult) {
+  const trace = agenticResult?.agent_trace || [];
+  const knowledgeStep = trace.find(
+    (step) => String(step?.agent || '').toLowerCase() === 'knowledge support',
+  );
+
+  if (!knowledgeStep) {
+    return {
+      triggered: false,
+      status: 'unknown',
+      keyFactsCount: 0,
+      summary: '',
+    };
+  }
+
+  const status = String(knowledgeStep.status || 'unknown').toLowerCase();
+  const keyFacts = knowledgeStep.output?.key_facts || [];
+
+  return {
+    triggered: status !== 'skipped',
+    status,
+    keyFactsCount: keyFacts.length,
+    summary: knowledgeStep.summary || '',
+  };
+}
+
 function getModeLabel(mode) {
   if (mode === 'baseline') return 'Single-shot Baseline';
   if (mode === 'workflow') return 'Workflow Baseline';
@@ -112,6 +138,10 @@ export default function CaseExplorer({
     () => getSummaryBadge(comparisonMode, selectedResult),
     [comparisonMode, selectedResult],
   );
+  const knowledgeSupport = useMemo(
+    () => getKnowledgeSupportDetails(analysisData?.agentic_result),
+    [analysisData],
+  );
 
   const selectedSample = useMemo(
     () => samples.find((sample) => String(sample.id) === String(selectedSampleId)) || null,
@@ -174,7 +204,7 @@ export default function CaseExplorer({
                 <optgroup key={group.key} label={group.label}>
                   {group.items.map((sample) => (
                     <option key={sample.id} value={sample.id}>
-                      {sample.question.slice(0, 70)}
+                      [{sample.id}] {sample.question.slice(0, 62)}
                       {sample.question.length > 70 ? '...' : ''}
                     </option>
                   ))}
@@ -331,6 +361,28 @@ export default function CaseExplorer({
                     </span>
                   )}
                 </div>
+                <div className="explorer-meta-item">
+                  <span className="explorer-meta-label">Knowledge retriever</span>
+                  <span className={`tag ${knowledgeSupport.triggered ? 'tag-green' : 'tag-gray'}`}>
+                    {knowledgeSupport.triggered ? 'triggered' : 'skipped'}
+                  </span>
+                </div>
+                {knowledgeSupport.triggered && (
+                  <>
+                    <div className="explorer-meta-item">
+                      <span className="explorer-meta-label">Knowledge status</span>
+                      <span className="explorer-meta-value">{knowledgeSupport.status}</span>
+                    </div>
+                    <div className="explorer-meta-item">
+                      <span className="explorer-meta-label">Retrieved key facts</span>
+                      <span className="explorer-meta-value">{knowledgeSupport.keyFactsCount}</span>
+                    </div>
+                    <div className="explorer-meta-item">
+                      <span className="explorer-meta-label">Knowledge summary</span>
+                      <span className="explorer-meta-value">{knowledgeSupport.summary || '—'}</span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
