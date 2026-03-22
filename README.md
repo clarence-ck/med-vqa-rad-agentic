@@ -1,6 +1,6 @@
 # MedVisionQuery — Agentic Multimodal Medical VQA System
 
-MedVisionQuery is an **agentic multimodal system** for medical visual question answering (VQA) over radiology images. It decomposes the task into 5 specialized agent stages — image interpretation, question understanding, knowledge support, reasoning, and verification — orchestrated by a **Haystack Agent** with LLM-driven tool selection. Results are exposed through a demo UI with **Dashboard**, **Case Explorer**, and **Evaluation** views.
+MedVisionQuery is an **agentic multimodal system** for medical visual question answering (VQA) over radiology images. It decomposes the task into 5 specialized agent stages — image interpretation, question understanding, knowledge support, reasoning, and verification — orchestrated by a **Haystack Agent** with LLM-driven tool selection. The knowledge stage now uses an **Advanced RAG pipeline** (query rewriting, hybrid retrieval, reranking, and self-reflection). Results are exposed through a demo UI with **Dashboard**, **Case Explorer**, and **Evaluation** views.
 
 > ⚠️ **For educational and research purposes only. Not for clinical use.**
 
@@ -81,6 +81,9 @@ flowchart LR
     API --> B1[Baseline 1\nSingle-shot Multimodal Prompt]
     API --> B2[Baseline 2\nHand-designed Workflow]
 
+    T3 --> RAG[Advanced RAG Engine\nquery rewrite + FAISS/BM25 + rerank + reflection]
+    RAG --> TRAIN[(VQA-RAD train split\nretrieval corpus)]
+
     T5 --> CACHE[Case Analysis Cache\n.case_explorer_cache/]
     B1 --> CACHE
     B2 --> CACHE
@@ -101,7 +104,7 @@ flowchart LR
 |---|---|---|---|
 | `ImageInterpreter` | `image_interpreter.py` | Perception — multimodal image interpretation (OpenAI) | OpenAI |
 | `QuestionAnalyzer` | `question_analyzer.py` | Task understanding — question classification and intent analysis (OpenAI) | OpenAI |
-| `KnowledgeRetriever` | `knowledge_retriever.py` | Context — optional medical background retrieval (OpenAI) | OpenAI |
+| `KnowledgeRetriever` | `knowledge_retriever.py` | Context — optional Advanced RAG retrieval over VQA-RAD train split + LLM synthesis | OpenAI + local retrieval stack |
 | `ReasoningAgent` | `reasoning_agent.py` | Synthesis — generates answer and explanation from all prior context | OpenAI |
 | `VerificationAgent` | `verification_agent.py` | Evaluator — runs 5 structured checks on the answer | OpenAI |
 | Agent Controller | `orchestrator.py` | Haystack `Agent` — routes tool calls via LLM, manages shared state | OpenAI |
@@ -128,6 +131,20 @@ The controller uses `question_type` from `QuestionAnalyzer` to decide whether to
 | `abnormality_description`, `explanation_request` | Yes |
 | When `requires_medical_knowledge` is true | Yes |
 
+### Knowledge Retrieval (Advanced RAG)
+
+`KnowledgeRetriever` integrates `advanced_rag.py` to ground context in retrieved examples before synthesis.
+
+1. Rewrite retrieval query from the original question (+ modality/body-region context)
+2. Apply metadata pre-filtering (`modality`, `body_region`)
+3. Run hybrid retrieval: dense vectors (FAISS) + sparse BM25
+4. Fuse candidates via reciprocal rank fusion (RRF)
+5. Rerank with cross-encoder and keep top-k similar cases
+6. Run self-reflection on retrieval quality
+7. Inject retrieved cases into the knowledge prompt
+
+Retrieval corpus is built from the **train split** of `data/vqa-rad/vqa_rad.json`.
+
 ### Current runtime model configuration
 
 The current runtime uses a single OpenAI configuration across the full agentic pipeline and the single-shot baseline.
@@ -145,6 +162,9 @@ All agentic steps strictly utilize OpenAI. Hugging Face is only used to download
 - **Haystack `Agent` + `Tool`** — controller-managed tool calls with `inputs_from_state` / `outputs_to_state` bindings and per-tool timing
 - **FastAPI** — async backend; blocking LLM calls run in `asyncio.to_thread()` to avoid event-loop blocking
 - **React 19 + Vite** — frontend UI with Dashboard, Case Explorer, and Evaluation views
+- **FAISS (`faiss-cpu`)** — dense vector index for fast semantic retrieval in Advanced RAG
+- **SentenceTransformers + CrossEncoder** — dense embeddings and cross-encoder reranking
+- **BM25 (`rank-bm25`)** — sparse lexical retrieval for hybrid search
 - **Hugging Face `datasets`** — used only by `scripts/download_dataset.py` to materialize the local VQA-RAD data folder
 - **Matplotlib** — `scripts/system_diagram.py` regenerates `scripts/docs/system_diagram.png`
 
@@ -319,7 +339,7 @@ All endpoints served at `http://localhost:8000`.
 | `POST` | `/api/analyze` | Run full agentic pipeline |
 | `POST` | `/api/analyze/baseline` | Run single-shot baseline |
 | `POST` | `/api/analyze/workflow` | Run workflow baseline |
-| `GET` | `/api/dataset/samples?limit=N` | List dataset samples (balanced across question types) |
+| `GET` | `/api/dataset/samples?limit=N` | List **test-split only** dataset samples (balanced across question-type categories) |
 | `GET` | `/api/dataset/sample/{id}` | Get sample with base64-encoded image |
 | `GET` | `/api/dataset/sample/{id}/analysis?refresh=false` | Run all 3 systems on a sample, cache result |
 | `GET` | `/api/dataset/evaluation` | Aggregate evaluation metrics from all cached analyses |
@@ -341,7 +361,8 @@ Purpose: **ad-hoc analysis of any uploaded image**.
 ### Case Explorer
 Purpose: **systematic browsing and analysis of the VQA-RAD dataset**.
 
-- Browse a curated set of dataset samples (default 30) with question type labels
+- Browse a curated set of **test-split only** samples (default 30)
+- Sample selector is grouped by question-type categories with deterministic ordering
 - Select a sample to load its image, question, and ground-truth answer
 - Run full 3-system analysis with cache awareness (Refresh to force re-run)
 - Inspect ground truth, all 3 answers, agent trace, verification, and failure modes side-by-side
@@ -445,7 +466,8 @@ Medical-VQA-Explanation-Agent/
 │   │   ├── orchestrator.py          # Haystack Agent controller, tool routing, retry logic, guardrails
 │   │   ├── image_interpreter.py     # Agent 1: multimodal image interpretation (OpenAI)
 │   │   ├── question_analyzer.py     # Agent 2: question classification and intent analysis (OpenAI)
-│   │   ├── knowledge_retriever.py   # Agent 3: optional medical background retrieval (OpenAI)
+│   │   ├── advanced_rag.py          # Advanced RAG engine: query rewrite, FAISS+BM25 retrieval, reranking, reflection
+│   │   ├── knowledge_retriever.py   # Agent 3: optional medical context retrieval with Advanced RAG grounding
 │   │   ├── reasoning_agent.py       # Agent 4: answer synthesis with retry context support (OpenAI)
 │   │   ├── verification_agent.py    # Agent 5: structured verification and fallback recommendations (OpenAI)
 │   │   ├── baseline.py              # Single-shot multimodal baseline (OpenAI)
@@ -520,7 +542,7 @@ The current download script flattens the Hugging Face dataset into one local PNG
 ### Limitations
 
 - ~8–10 serial LLM calls per pass (one controller dispatch + one tool call per stage) — up to ~20 with automatic retry; significantly slower and more expensive than single-shot inference
-- Knowledge support is LLM-synthesized, not retrieved from a real knowledge base
+- Retrieval is grounded to VQA-RAD train examples, but coverage is still limited to dataset distribution (not a comprehensive medical knowledge base)
 - Token F1 is brittle for open-ended answers; exact match misses near-correct responses
 - Self-consistency signal is lightweight (single verifier pass) rather than multi-sample voting
 - Research and demonstration use only — not suitable for clinical deployment

@@ -1,7 +1,6 @@
 import os
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-from matplotlib.patches import Circle, Ellipse, FancyArrowPatch, FancyBboxPatch, Polygon
+from matplotlib.patches import Circle, FancyArrowPatch, FancyBboxPatch, Polygon
 
 SCALE = 1.24
 BG = "#F8FAFC"
@@ -21,6 +20,7 @@ RED_SOFT = "#FDECEC"
 SLATE = "#5B7280"
 SLATE_SOFT = "#EAF0F4"
 ORANGE = "#F59E0B"
+ORANGE_SOFT = "#FFF7E6"
 TEAL = "#4E7AB5"
 TEAL_SOFT = "#EAF2FF"
 SHADOW = "#0F172A"
@@ -292,226 +292,72 @@ def label(ax, x, y, text, color=MUTED, fs=7.8, ha="center", va="center", italic=
     )
 
 
-fig, ax = plt.subplots(figsize=(16.6, 18.8))
+fig, ax = plt.subplots(figsize=(15.0, 9.8))
 fig.patch.set_facecolor(BG)
 ax.set_facecolor(BG)
-ax.set_xlim(0, 16)
-ax.set_ylim(0, 18)
+ax.set_xlim(0, 15)
+ax.set_ylim(0, 10)
 ax.axis("off")
 
-ax.text(
-    8,
-    17.45,
-    "MedVisionQuery — Agentic Multimodal Medical VQA",
-    ha="center",
-    va="center",
-    fontsize=scaled(14.8),
-    color=TEXT,
-    fontweight="bold",
+outer = FancyBboxPatch(
+    (0.35, 0.35),
+    14.3,
+    9.25,
+    boxstyle="round,pad=0.08,rounding_size=0.22",
+    facecolor="none",
+    edgecolor=ORANGE,
+    linewidth=1.9,
+    linestyle=(0, (4, 4)),
+    zorder=0,
 )
-ax.text(
-    8,
-    17.00,
-    "Controller-centric orchestration with shared state, guardrails, and baseline comparisons",
-    ha="center",
-    va="center",
-    fontsize=scaled(8.6),
-    color=MUTED,
-)
+ax.add_patch(outer)
 
-box(ax, 8, 16.10, 4.1, 0.84, GREEN_SOFT, GREEN, "User", "medical image + question", tc="#14532D", sc="#2F6E43")
-box(ax, 8, 14.92, 6.05, 0.98, GREEN, GREEN, "React UI", "Dashboard · Case Explorer · Evaluation", tc="white", sc="#E7F8EC")
-arrow(ax, (8, 15.67), (8, 15.36), color=GREEN, lw=2.5)
+pill(ax, 2.2, 9.25, "Agentic Process Map", ORANGE_SOFT, tc="#B45309", ec=ORANGE, fs=7.2, w_override=2.35, h_override=0.38, pad=0.01)
+ax.text(7.5, 9.45, "MedVisionQuery — Agentic Multimodal Medical VQA", ha="center", va="center", fontsize=scaled(15.2), color=TEXT, fontweight="bold")
+ax.text(7.5, 9.1, "Reimagined layout: left-to-right orchestration with parallel agent workspace", ha="center", va="center", fontsize=scaled(8.7), color=MUTED)
 
-frame(ax, 1.0, 5.22, 14.0, 9.03, "Agentic orchestration", PURPLE, fill="#FBF9FF", label_fc="#F5F2FF")
-ax.add_patch(
-    Ellipse(
-        (8, 10.00),
-        11.2,
-        6.4,
-        facecolor="none",
-        edgecolor="#E6DEFF",
-        linewidth=1.7,
-        linestyle=(0, (7, 5)),
-        zorder=1,
-    )
-)
-label(
-    ax,
-    8,
-    14.02,
-    "Controller dynamically selects tools and reads from shared state",
-    color=PURPLE_DARK,
-    fs=8.1,
-    italic=True,
-)
+frame(ax, 0.75, 2.2, 2.95, 6.35, "Input Lane", GREEN, fill="#F6FCF8", label_fc=GREEN_SOFT)
+box(ax, 2.22, 7.5, 2.35, 0.95, GREEN_SOFT, GREEN, "User", "medical image + question", tc="#14532D", sc="#2F6E43", title_fs=9.6, subtitle_fs=7.0)
+box(ax, 2.22, 6.0, 2.7, 1.0, GREEN, GREEN, "React UI", "upload + inspect", tc="white", sc="#E7F8EC", title_fs=9.8, subtitle_fs=6.9)
+box(ax, 2.22, 4.55, 2.35, 0.95, PURPLE_SOFT, PURPLE, "FastAPI", "/api/analyze", tc=PURPLE_DARK, sc="#6C61A8", title_fs=9.4, subtitle_fs=6.9)
+arrow(ax, (2.22, 7.0), (2.22, 6.55), color=GREEN, lw=2.0)
+arrow(ax, (2.22, 5.48), (2.22, 5.03), color=GREEN, lw=2.0)
 
-box(ax, 8, 13.35, 5.45, 1.10, PURPLE, PURPLE, "Haystack Agent Controller", "OpenAI model · planner and router", tc="white", sc="#F1EDFF", lw=2.2)
-arrow(ax, (8, 14.42), (8, 13.95), color=PURPLE, lw=2.45)
+frame(ax, 4.2, 2.15, 6.75, 6.4, "Agent Workspace", PURPLE, fill="#F8F7FF", label_fc=PURPLE_SOFT)
+box(ax, 7.58, 7.6, 3.7, 1.02, PURPLE, PURPLE, "Haystack Agent Controller", "routes tools and manages shared state", tc="white", sc="#F1EDFF", title_fs=10.0, subtitle_fs=7.0)
+pill(ax, 9.98, 7.95, "controller", OPENAI, fs=6.2, w_override=1.32, h_override=0.27, pad=0.01)
 
-img_x, img_y, img_w, img_h = box(
-    ax,
-    8,
-    11.90,
-    5.0,
-    1.14,
-    TEAL_SOFT,
-    OPENAI,
-    "ImageInterpreter",
-    "extracts modality, region, and findings",
-    align="left",
-    lw=2.1,
-)
-pill(ax, img_x + img_w - 1.02, img_y + img_h - 0.24, "OpenAI Vision", OPENAI)
+box(ax, 5.65, 6.15, 2.9, 1.05, TEAL_SOFT, OPENAI, "ImageInterpreter", "modality + findings", title_fs=9.6, subtitle_fs=6.9, lw=2.0)
+box(ax, 5.65, 4.45, 2.9, 1.05, PURPLE_SOFT, OPENAI, "QuestionAnalyzer", "intent + answer format", title_fs=9.6, subtitle_fs=6.9, lw=2.0)
+box(ax, 8.95, 6.15, 2.9, 1.05, TEAL_SOFT, OPENAI, "ReasoningAgent", "synthesize answer", title_fs=9.6, subtitle_fs=6.9, lw=2.0)
+box(ax, 8.95, 4.45, 2.9, 1.05, TEAL_SOFT, OPENAI, "VerificationAgent", "grounding + confidence", title_fs=9.6, subtitle_fs=6.9, lw=2.0)
 
-qa_x, qa_y, qa_w, qa_h = box(
-    ax,
-    3.95,
-    10.40,
-    4.65,
-    1.10,
-    PURPLE_SOFT,
-    OPENAI,
-    "QuestionAnalyzer",
-    "question type · target · answer format",
-    align="left",
-    lw=2.1,
-)
-pill(ax, qa_x + qa_w - 0.86, qa_y + qa_h - 0.24, "OpenAI", OPENAI)
+pill(ax, 7.3, 3.45, "optional", AMBER_SOFT, tc="#8A5A00", ec=AMBER, fs=6.1, w_override=0.9, h_override=0.26, pad=0.01)
+label(ax, 7.3, 3.15, "KnowledgeRetriever", color=PURPLE_DARK, fs=6.8, ha="center")
 
-kr_x, kr_y, kr_w, kr_h = box(
-    ax,
-    12.05,
-    10.40,
-    4.65,
-    1.10,
-    PURPLE_SOFT,
-    OPENAI,
-    "KnowledgeRetriever",
-    "medical background context",
-    align="left",
-    lw=2.1,
-    ls="--",
-)
-pill(ax, kr_x + kr_w - 0.86, kr_y + kr_h - 0.24, "OpenAI", OPENAI)
-pill(ax, kr_x + kr_w - 0.50, kr_y + 0.20, "optional", AMBER_SOFT, tc="#8A5A00", ec=AMBER, fs=5.8, w_override=0.64, h_override=0.22, pad=0.005)
+arrow(ax, (3.4, 4.55), (5.95, 7.25), color=SLATE, lw=2.0, rad=0.03)
+arrow(ax, (7.0, 7.08), (5.65, 6.72), color=SLATE, lw=2.0)
+arrow(ax, (5.65, 5.62), (5.65, 4.98), color=SLATE, lw=2.0)
+arrow(ax, (5.65, 6.15), (8.95, 6.15), color=SLATE, lw=2.0)
+arrow(ax, (5.9, 4.45), (8.7, 6.0), color=SLATE, lw=2.0, rad=0.04)
+arrow(ax, (8.95, 5.62), (8.95, 4.98), color=SLATE, lw=2.0)
+arrow(ax, (5.65, 5.0), (7.3, 3.72), color=HF, lw=1.6, dashed=True, rad=-0.05)
+arrow(ax, (7.3, 3.72), (8.95, 5.58), color=HF, lw=1.6, dashed=True, rad=-0.03)
 
-circle_node(ax, 8, 9.68, 1.18, "white", PURPLE, "Shared State", "image · question\nintermediate outputs", tc=PURPLE_DARK, sc="#6C61A8")
+frame(ax, 11.35, 2.15, 2.9, 6.4, "Decision", AMBER, fill="#FFFCF2", label_fc=AMBER_SOFT)
+box(ax, 12.8, 5.1, 2.25, 1.05, AMBER_SOFT, AMBER, "Guardrail", "verified / disclaimer / review", tc="#8A5A00", sc="#9A6D00", title_fs=9.6, subtitle_fs=6.8)
+arrow(ax, (9.95, 4.45), (11.7, 5.1), color=AMBER, lw=2.1, rad=-0.04)
 
-ra_x, ra_y, ra_w, ra_h = box(
-    ax,
-    4.55,
-    7.78,
-    4.9,
-    1.14,
-    TEAL_SOFT,
-    OPENAI,
-    "ReasoningAgent",
-    "synthesizes answer + explanation",
-    align="left",
-    lw=2.1,
-)
-pill(ax, ra_x + ra_w - 0.80, ra_y + ra_h - 0.24, "OpenAI", OPENAI)
+ax.text(8.0, 1.35, "OUTPUT", ha="left", va="center", fontsize=scaled(8.2), color=MUTED, fontweight="bold")
+box(ax, 8.6, 1.0, 2.35, 0.95, GREEN_SOFT, GREEN, "Verified", "grounded response", tc="#14532D", sc="#2F6E43", title_fs=9.0, subtitle_fs=6.5)
+box(ax, 11.2, 1.0, 2.35, 0.95, AMBER_SOFT, AMBER, "Disclaimer", "guarded response", tc="#8A5A00", sc="#9A6D00", title_fs=9.0, subtitle_fs=6.5)
+box(ax, 13.8, 1.0, 2.35, 0.95, RED_SOFT, RED, "Review", "flagged response", tc="#9B1C1C", sc="#B63A3A", title_fs=9.0, subtitle_fs=6.5)
+arrow(ax, (12.8, 4.56), (12.8, 3.05), color=AMBER, lw=2.0)
+arrow(ax, (12.8, 2.75), (8.6, 1.52), color=GREEN, lw=1.9, rad=0.06)
+arrow(ax, (12.8, 2.75), (11.2, 1.52), color=AMBER, lw=1.9, rad=0.04)
+arrow(ax, (12.8, 2.75), (13.8, 1.52), color=RED, lw=1.9, rad=-0.04)
 
-va_x, va_y, va_w, va_h = box(
-    ax,
-    11.45,
-    7.78,
-    5.05,
-    1.14,
-    TEAL_SOFT,
-    OPENAI,
-    "VerificationAgent",
-    "checks grounding, confidence, and safety",
-    align="left",
-    lw=2.1,
-)
-pill(ax, va_x + va_w - 0.82, va_y + va_h - 0.24, "OpenAI", OPENAI)
-
-arrow(ax, (8, 12.78), (8, 12.46), color=PURPLE, lw=2.2)
-arrow(ax, (6.95, 12.90), (5.62, 10.92), color=PURPLE, lw=2.1, rad=0.12)
-arrow(ax, (9.05, 12.90), (10.38, 10.92), color=PURPLE, lw=2.1, rad=-0.12)
-
-arrow(ax, (8, 11.30), (8, 10.98), color=SLATE, lw=2.0)
-arrow(ax, (6.35, 10.08), (7.02, 9.98), color=SLATE, lw=2.0, rad=-0.06)
-arrow(ax, (9.65, 10.08), (8.98, 9.98), color=SLATE, lw=2.0, rad=0.06)
-label(ax, 12.08, 11.38, "skip for simple questions", color=AMBER, fs=7.2, italic=True, ha="left")
-
-arrow(ax, (7.02, 8.95), (5.82, 8.28), color=SLATE, lw=2.1, rad=0.1)
-arrow(ax, (8.98, 8.95), (10.18, 8.28), color=SLATE, lw=2.1, rad=-0.1)
-label(ax, 8, 8.78, "shared evidence and context", color=SLATE, fs=7.2, italic=True)
-
-arrow(ax, (7.20, 7.78), (8.80, 7.78), color=SLATE, lw=2.15)
-label(ax, 8, 8.16, "draft answer", color=SLATE, fs=7.0, italic=True)
-
-diamond(ax, 8, 6.05, 2.5, 1.38, AMBER_SOFT, AMBER, "Guardrail", "select final response", tc="#8A5A00", sc="#9A6D00")
-arrow(ax, (11.10, 7.22), (8.92, 6.30), color=SLATE, lw=2.25)
-
-arrow(ax, (13.72, 8.08), (10.15, 13.10), color=RED, lw=2.05, rad=0.38, dashed=True, alpha=0.95)
-label(ax, 13.1, 10.50, "retry / revise", color=RED, fs=7.1, italic=True, ha="left")
-
-box(ax, 3.2, 4.62, 3.18, 0.94, GREEN_SOFT, GREEN, "Verified Answer", "high-confidence grounded response", tc="#14532D", sc="#2F6E43")
-box(ax, 8.0, 4.62, 3.34, 0.94, AMBER_SOFT, AMBER, "Answer + Disclaimer", "guarded response under uncertainty", tc="#8A5A00", sc="#9A6D00")
-box(ax, 12.8, 4.62, 3.28, 0.94, RED_SOFT, RED, "Flag for Review", "unsupported or risky response", tc="#9B1C1C", sc="#B63A3A")
-
-arrow(ax, (7.15, 5.65), (4.10, 4.98), color=GREEN, lw=2.15, rad=0.05)
-arrow(ax, (8, 5.40), (8, 5.10), color=AMBER, lw=2.15)
-arrow(ax, (8.85, 5.65), (11.90, 4.98), color=RED, lw=2.15, rad=-0.05)
-
-box(ax, 8, 2.90, 5.35, 0.98, TEAL, TEAL, "Case Explorer Cache + Evaluation", "metrics, disagreement, close/open-ended accuracy", tc="white", sc="#E9F2FF")
-arrow(ax, (8, 5.35), (8, 3.47), color=TEAL, lw=2.25)
-
-frame(ax, 1.0, 0.45, 14.0, 2.20, "Non-agentic baselines", SLATE, fill="#F7FAFC", label_fc="#F8FBFD")
-
-b1_x, b1_y, b1_w, b1_h = box(
-    ax,
-    4.1,
-    1.52,
-    5.02,
-    1.10,
-    "white",
-    OPENAI,
-    "Baseline 1 — Single-shot",
-    "one multimodal prompt · direct answer",
-    align="left",
-    lw=2.0,
-)
-pill(ax, b1_x + b1_w - 0.90, b1_y + b1_h - 0.24, "OpenAI", OPENAI)
-
-b2_x, b2_y, b2_w, b2_h = box(
-    ax,
-    11.9,
-    1.52,
-    5.16,
-    1.10,
-    "white",
-    SLATE,
-    "Baseline 2 — Workflow",
-    "deterministic rules · no synthesis LLM",
-    align="left",
-    lw=2.0,
-)
-pill(ax, b2_x + b2_w - 0.98, b2_y + b2_h - 0.24, "Rules", SLATE)
-
-arrow(ax, (6.15, 14.48), (4.12, 2.05), color=SLATE, lw=1.65, rad=0.33, dashed=True, alpha=0.85)
-arrow(ax, (9.85, 14.48), (11.88, 2.05), color=SLATE, lw=1.65, rad=-0.33, dashed=True, alpha=0.85)
-
-arrow(ax, (4.82, 2.04), (6.75, 2.84), color=TEAL, lw=1.95, rad=-0.04)
-arrow(ax, (11.18, 2.04), (9.25, 2.84), color=TEAL, lw=1.95, rad=0.04)
-
-legend_items = [
-    mpatches.Patch(color=OPENAI, label="OpenAI — vision, reasoning, verification, orchestration"),
-    mpatches.Patch(color=GREEN, label="grounded / verified response"),
-    mpatches.Patch(color=AMBER, label="guarded answer with disclaimer"),
-    mpatches.Patch(color=RED, label="flagged for review"),
-]
-ax.legend(
-    handles=legend_items,
-    loc="lower right",
-    fontsize=scaled(7.8),
-    framealpha=0.95,
-    bbox_to_anchor=(1.0, -0.01),
-)
+label(ax, 7.5, 0.46, "returned to the UI as structured JSON", color=MUTED, fs=6.8, italic=True)
 
 try:
     base_dir = os.path.dirname(os.path.abspath(__file__))
