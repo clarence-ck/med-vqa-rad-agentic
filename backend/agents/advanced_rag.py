@@ -107,9 +107,12 @@ class AdvancedRAGRetriever:
             if isinstance(item, RetrievalResult):
                 idx = item.metadata.get("id", "n/a")
                 score = item.score
+                softmax_score = item.metadata.get("rerank_softmax")
                 question = item.question
                 answer = item.answer
                 method = f" method={item.retrieval_method}"
+                if softmax_score is not None:
+                    method += f" softmax={softmax_score:.4f}"
             else:
                 idx, score = item
                 example = self._train_examples[idx]
@@ -629,11 +632,19 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
         ]
         
         # Get reranking scores
-        scores = model.predict(pairs)
+        scores = np.asarray(model.predict(pairs), dtype=np.float32)
+        shifted_scores = scores - float(np.max(scores))
+        exp_scores = np.exp(shifted_scores)
+        score_sum = float(np.sum(exp_scores))
+        if score_sum > 0.0:
+            softmax_scores = exp_scores / score_sum
+        else:
+            softmax_scores = np.full_like(exp_scores, 1.0 / len(exp_scores))
         
         # Attach scores and sort
         for i, candidate in enumerate(candidates):
             candidate.score = float(scores[i])
+            candidate.metadata["rerank_softmax"] = float(softmax_scores[i])
             candidate.retrieval_method = 'reranked'
         
         reranked = sorted(candidates, key=lambda x: x.score, reverse=True)

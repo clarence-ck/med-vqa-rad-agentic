@@ -80,6 +80,18 @@ function getSummaryBadge(mode, result) {
   };
 }
 
+function getConfidenceTagClass(confidence) {
+  const normalized = (confidence || 'low').toLowerCase();
+  return normalized === 'high' ? 'tag-green' : normalized === 'medium' ? 'tag-amber' : 'tag-red';
+}
+
+function getVerificationTagClass(status) {
+  const normalized = (status || 'unknown').toLowerCase();
+  if (normalized === 'verified') return 'tag-green';
+  if (normalized === 'partially_verified') return 'tag-amber';
+  return 'tag-gray';
+}
+
 function MethodologyLabels() {
   return (
     <div className="methodology-compact" style={{ 
@@ -147,6 +159,21 @@ export default function CaseExplorer({
     () => samples.find((sample) => String(sample.id) === String(selectedSampleId)) || null,
     [samples, selectedSampleId],
   );
+
+  const selectedConfidence = selectedResult?.confidence || 'low';
+  const selectedExplanation = selectedResult?.explanation || '';
+  const overallVerification = analysisData?.agentic_result?.verification_status || 'unknown';
+  const hasRetrieverDetails = knowledgeSupport.triggered;
+  const selfConsistencyLevel = analysisData?.agentic_result?.self_consistency_signal?.level || 'low';
+  const showAgenticDetails = comparisonMode === 'agentic';
+  const questionAnalysis = analysisData?.agentic_result?.question_analysis || {};
+  const questionType = questionAnalysis.question_type?.replace(/_/g, ' ') || '—';
+  const questionClarity = questionAnalysis.question_clarity || 'unknown';
+  const reasoningType = questionAnalysis.reasoning_type?.replace(/_/g, ' ') || '—';
+  const expectedAnswerFormat = questionAnalysis.expected_answer_format || '—';
+  const reviewRecommended = Boolean(analysisData?.agentic_result?.should_flag_for_review);
+  const issueCount = analysisData?.agentic_result?.issues_found?.length || 0;
+  const crossModalAgreement = analysisData?.agentic_result?.cross_modal_agreement?.level || 'unknown';
 
   const groupedSamples = useMemo(() => {
     const groups = samples.reduce((acc, sample) => {
@@ -299,90 +326,131 @@ export default function CaseExplorer({
           )}
 
           {analysisData && (
-            <div className="card animate-fade-in">
+            <div className="card animate-fade-in case-summary-card">
               <div className="card-header">
                 <span className="card-title">📊 Case Summary</span>
-                <span className={`tag ${summaryBadge.className}`}>
-                  {summaryBadge.label}
-                </span>
+                <div className="case-summary-header-tags">
+                  <span className={`tag ${summaryBadge.className}`}>
+                    {summaryBadge.label}
+                  </span>
+                </div>
               </div>
-              <div className="card-content">
-                <div className="explorer-meta-item">
-                  <span className="explorer-meta-label">Selected view</span>
-                  <span className="explorer-meta-value">{getModeLabel(comparisonMode)}</span>
-                </div>
-                <div className="explorer-meta-item">
-                  <span className="explorer-meta-label">Cached</span>
-                  <span className="explorer-meta-value">{analysisData.cached ? 'Yes' : 'No'}</span>
-                </div>
-                <div className="explorer-meta-item">
-                  <span className="explorer-meta-label">⚡ Baseline time</span>
-                  <span className="explorer-meta-value">
-                    {analysisData.baseline_duration_ms != null ? `${analysisData.baseline_duration_ms}ms` : '—'}
-                  </span>
-                </div>
-                <div className="explorer-meta-item">
-                  <span className="explorer-meta-label">🧭 Workflow time</span>
-                  <span className="explorer-meta-value">
-                    {analysisData.workflow_duration_ms != null ? `${analysisData.workflow_duration_ms}ms` : '—'}
-                  </span>
-                </div>
-                <div className="explorer-meta-item">
-                  <span className="explorer-meta-label">🔗 Agentic time</span>
-                  <span className="explorer-meta-value">
-                    {(analysisData.agentic_duration_ms ?? analysisData.agentic_result?.total_duration_ms) != null
-                      ? `${analysisData.agentic_duration_ms ?? analysisData.agentic_result?.total_duration_ms}ms`
-                      : '—'}
-                  </span>
-                </div>
-                <div className="explorer-meta-item">
-                  <span className="explorer-meta-label">Baseline answer</span>
-                  <span className="explorer-meta-value">{analysisData.baseline_result?.answer || '—'}</span>
-                </div>
-                <div className="explorer-meta-item">
-                  <span className="explorer-meta-label">Workflow answer</span>
-                  <span className="explorer-meta-value">{analysisData.workflow_result?.answer || '—'}</span>
-                </div>
-                <div className="explorer-meta-item">
-                  <span className="explorer-meta-label">Agentic answer</span>
-                  <span className="explorer-meta-value">{analysisData.agentic_result?.answer || '—'}</span>
-                </div>
-                <div className="explorer-meta-item">
-                  <span className="explorer-meta-label">
-                    {comparisonMode === 'agentic' ? 'Self-consistency' : 'Selected confidence'}
-                  </span>
-                  {comparisonMode === 'agentic' ? (
-                    <span className="tag tag-gray">
-                      {analysisData.agentic_result?.self_consistency_signal?.level || 'low'}
+
+              <div className="card-content case-summary-content">
+                <section className="summary-hero">
+                  <div className="summary-hero-meta">
+                    <span className="summary-hero-label">Current view</span>
+                    <span className="summary-hero-view">{getModeLabel(comparisonMode)}</span>
+                  </div>
+                  <div className="summary-hero-answer">
+                    {selectedResult?.answer || 'No answer available'}
+                  </div>
+                  <div className="summary-hero-footer">
+                    <span className={`tag ${getConfidenceTagClass(selectedConfidence)}`}>
+                      {selectedConfidence} confidence
                     </span>
+                    {showAgenticDetails && selfConsistencyLevel !== selectedConfidence && (
+                      <span className={`tag ${getConfidenceTagClass(selfConsistencyLevel)}`}>
+                        self-consistency {selfConsistencyLevel}
+                      </span>
+                    )}
+                  </div>
+                </section>
+
+                <div className={`summary-section-grid ${showAgenticDetails ? 'summary-section-grid-agentic' : 'summary-section-grid-baseline'}`}>
+                  <section className="summary-section">
+                    <div className="summary-section-title">Overview</div>
+                    <div className="summary-stat-list">
+                      <div className="summary-stat-row">
+                        <span className="summary-stat-label">Selected sample</span>
+                        <span className="summary-stat-value">ID {selectedSample?.id ?? '—'}</span>
+                      </div>
+                      <div className="summary-stat-row">
+                        <span className="summary-stat-label">Selected view</span>
+                        <span className="summary-stat-value">{getModeLabel(comparisonMode)}</span>
+                      </div>
+                      <div className="summary-stat-row summary-stat-row-inline">
+                        <span className="summary-stat-label">Selected confidence</span>
+                        <span className={`tag ${getConfidenceTagClass(selectedConfidence)}`}>
+                          {selectedConfidence}
+                        </span>
+                      </div>
+                      <div className="summary-summary-text">
+                        {showAgenticDetails
+                          ? 'Agentic mode includes question understanding, retrieval, and verification metadata.'
+                          : 'This view shows the selected baseline answer path for direct comparison.'}
+                      </div>
+                    </div>
+                  </section>
+
+                  {showAgenticDetails ? (
+                    <>
+                      <section className="summary-section">
+                        <div className="summary-section-title">Agentic Quality</div>
+                        <div className="summary-stat-list">
+                          <div className="summary-stat-row summary-stat-row-inline">
+                            <span className="summary-stat-label">Verification</span>
+                            <span className={`tag ${getVerificationTagClass(overallVerification)}`}>
+                              {overallVerification.replace(/_/g, ' ')}
+                            </span>
+                          </div>
+                          <div className="summary-stat-row">
+                            <span className="summary-stat-label">Cross-modal agreement</span>
+                            <span className="summary-stat-value">{crossModalAgreement}</span>
+                          </div>
+                          <div className="summary-stat-row summary-stat-row-inline">
+                            <span className="summary-stat-label">Review recommended</span>
+                            <span className={`tag ${reviewRecommended ? 'tag-red' : 'tag-gray'}`}>
+                              {reviewRecommended ? 'yes' : 'no'}
+                            </span>
+                          </div>
+                          <div className="summary-stat-row">
+                            <span className="summary-stat-label">Issues found</span>
+                            <span className="summary-stat-value">{issueCount}</span>
+                          </div>
+                        </div>
+                      </section>
+
+                      <section className="summary-section">
+                        <div className="summary-section-title">Retrieval</div>
+                        <div className="summary-stat-list">
+                          <div className="summary-stat-row summary-stat-row-inline">
+                            <span className="summary-stat-label">Knowledge retriever</span>
+                            <span className={`tag ${hasRetrieverDetails ? 'tag-green' : 'tag-gray'}`}>
+                              {hasRetrieverDetails ? 'triggered' : 'skipped'}
+                            </span>
+                          </div>
+                          <div className="summary-stat-row">
+                            <span className="summary-stat-label">Key facts</span>
+                            <span className="summary-stat-value">{knowledgeSupport.keyFactsCount}</span>
+                          </div>
+                          <div className="summary-summary-text">
+                            {hasRetrieverDetails ? knowledgeSupport.summary : 'No retrieval context was added for this case.'}
+                          </div>
+                        </div>
+                      </section>
+                    </>
                   ) : (
-                    <span className="tag tag-gray">
-                      {selectedResult?.confidence || 'low'}
-                    </span>
+                    <section className="summary-section summary-section-wide">
+                      <div className="summary-section-title">Selected Result</div>
+                      <div className="summary-stat-list">
+                        <div className="summary-stat-row summary-stat-row-inline">
+                          <span className="summary-stat-label">Selected confidence</span>
+                          <span className={`tag ${getConfidenceTagClass(selectedConfidence)}`}>
+                            {selectedConfidence}
+                          </span>
+                        </div>
+                        <div className="summary-stat-row summary-stat-row-inline">
+                          <span className="summary-stat-label">Result type</span>
+                          <span className="summary-stat-value">{comparisonMode === 'workflow' ? 'workflow baseline' : 'single-shot baseline'}</span>
+                        </div>
+                        <div className="summary-summary-text">
+                          {selectedExplanation || 'No explanation was returned for this result.'}
+                        </div>
+                      </div>
+                    </section>
                   )}
                 </div>
-                <div className="explorer-meta-item">
-                  <span className="explorer-meta-label">Knowledge retriever</span>
-                  <span className={`tag ${knowledgeSupport.triggered ? 'tag-green' : 'tag-gray'}`}>
-                    {knowledgeSupport.triggered ? 'triggered' : 'skipped'}
-                  </span>
-                </div>
-                {knowledgeSupport.triggered && (
-                  <>
-                    <div className="explorer-meta-item">
-                      <span className="explorer-meta-label">Knowledge status</span>
-                      <span className="explorer-meta-value">{knowledgeSupport.status}</span>
-                    </div>
-                    <div className="explorer-meta-item">
-                      <span className="explorer-meta-label">Retrieved key facts</span>
-                      <span className="explorer-meta-value">{knowledgeSupport.keyFactsCount}</span>
-                    </div>
-                    <div className="explorer-meta-item">
-                      <span className="explorer-meta-label">Knowledge summary</span>
-                      <span className="explorer-meta-value">{knowledgeSupport.summary || '—'}</span>
-                    </div>
-                  </>
-                )}
               </div>
             </div>
           )}
@@ -419,52 +487,16 @@ export default function CaseExplorer({
             </>
           )}
 
-          {analysisData && comparisonMode === 'baseline' && (
+          {analysisData && comparisonMode !== 'agentic' && (
             <div className="card animate-fade-in">
               <div className="card-header">
-                <span className="card-title">⚡ Baseline (Single-shot) Result</span>
+                <span className="card-title">ℹ️ Comparison Mode Note</span>
               </div>
               <div className="card-content">
-                <p className="answer-text">{analysisData.baseline_result?.answer || 'No answer'}</p>
-                {analysisData.baseline_result?.explanation && (
-                  <p className="explanation-text" style={{ marginTop: 'var(--space-3)' }}>
-                    {analysisData.baseline_result.explanation}
-                  </p>
-                )}
-                {analysisData.baseline_result?.confidence && (
-                  <div style={{ marginTop: 'var(--space-3)' }}>
-                    <span className={`tag ${analysisData.baseline_result.confidence === 'high' ? 'tag-green' :
-                        analysisData.baseline_result.confidence === 'medium' ? 'tag-amber' : 'tag-red'
-                      }`}>
-                      {analysisData.baseline_result.confidence} confidence
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {analysisData && comparisonMode === 'workflow' && (
-            <div className="card animate-fade-in">
-              <div className="card-header">
-                <span className="card-title">🧭 Workflow Baseline Result</span>
-              </div>
-              <div className="card-content">
-                <p className="answer-text">{analysisData.workflow_result?.answer || 'No answer'}</p>
-                {analysisData.workflow_result?.explanation && (
-                  <p className="explanation-text" style={{ marginTop: 'var(--space-3)' }}>
-                    {analysisData.workflow_result.explanation}
-                  </p>
-                )}
-                {analysisData.workflow_result?.confidence && (
-                  <div style={{ marginTop: 'var(--space-3)' }}>
-                    <span className={`tag ${analysisData.workflow_result.confidence === 'high' ? 'tag-green' :
-                        analysisData.workflow_result.confidence === 'medium' ? 'tag-amber' : 'tag-red'
-                      }`}>
-                      {analysisData.workflow_result.confidence} confidence
-                    </span>
-                  </div>
-                )}
+                <p className="explanation-text">
+                  The selected {comparisonMode === 'workflow' ? 'workflow baseline' : 'single-shot baseline'} result is summarized in Case Summary.
+                  Switch to Agentic Pipeline to inspect step-by-step reasoning, retrieval usage, and verification details.
+                </p>
               </div>
             </div>
           )}

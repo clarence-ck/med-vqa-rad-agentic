@@ -14,6 +14,35 @@ function getWinnerTagClass(winner) {
   return 'tag-gray';
 }
 
+function getLevelTagClass(level) {
+  const normalized = String(level || 'unknown').toLowerCase();
+  if (normalized === 'high' || normalized === 'verified') return 'tag-green';
+  if (normalized === 'medium' || normalized === 'partially_verified') return 'tag-amber';
+  if (normalized === 'low' || normalized === 'unsupported' || normalized === 'low_confidence') return 'tag-red';
+  return 'tag-gray';
+}
+
+function SystemPerformanceCard({ title, icon, accuracy, avgDuration, toneClass }) {
+  return (
+    <div className="card evaluation-system-card">
+      <div className="card-header">
+        <span className="card-title">{icon} {title}</span>
+        <span className={`tag ${toneClass}`}>{formatPercent(accuracy)}</span>
+      </div>
+      <div className="evaluation-system-stats">
+        <div>
+          <div className="evaluation-list-subtitle">Exact-match</div>
+          <div className="evaluation-metric-value">{formatPercent(accuracy)}</div>
+        </div>
+        <div>
+          <div className="evaluation-list-subtitle">Avg runtime</div>
+          <div className="evaluation-system-runtime">{fmtMs(avgDuration)}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AccuracyMetricStack({ baseline, workflow, agentic }) {
   return (
     <div className="evaluation-metric-stack">
@@ -59,48 +88,42 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
 
       {summary && !loading && (
         <>
+          <section className="evaluation-system-grid animate-fade-in">
+            <SystemPerformanceCard
+              title="Baseline"
+              icon="⚡"
+              accuracy={summary.baseline_accuracy}
+              avgDuration={summary.avg_baseline_duration_ms}
+              toneClass="tag-amber"
+            />
+            <SystemPerformanceCard
+              title="Workflow"
+              icon="🧭"
+              accuracy={summary.workflow_accuracy}
+              avgDuration={summary.avg_workflow_duration_ms}
+              toneClass="tag-blue"
+            />
+            <SystemPerformanceCard
+              title="Agentic"
+              icon="🔗"
+              accuracy={summary.agentic_accuracy}
+              avgDuration={summary.avg_agentic_duration_ms}
+              toneClass="tag-green"
+            />
+          </section>
+
           <section className="evaluation-metric-grid animate-fade-in">
             <div className="card">
               <div className="card-header"><span className="card-title">Total Cases</span></div>
               <div className="evaluation-metric-value">{summary.total_cases}</div>
             </div>
             <div className="card">
-              <div className="card-header"><span className="card-title">Baseline Exact-Match</span></div>
-              <div className="evaluation-metric-value">{formatPercent(summary.baseline_accuracy)}</div>
-            </div>
-            <div className="card">
-              <div className="card-header"><span className="card-title">Workflow Exact-Match</span></div>
-              <div className="evaluation-metric-value">{formatPercent(summary.workflow_accuracy)}</div>
-            </div>
-            <div className="card">
-              <div className="card-header"><span className="card-title">Agentic Exact-Match</span></div>
-              <div className="evaluation-metric-value">{formatPercent(summary.agentic_accuracy)}</div>
-            </div>
-            <div className="card">
-              <div className="card-header">
-                <span className="card-title">Close-ended Accuracy</span>
-                <span className="tag tag-gray">{summary.close_ended_cases} yes/no</span>
-              </div>
-              <AccuracyMetricStack
-                baseline={summary.baseline_close_ended_accuracy}
-                workflow={summary.workflow_close_ended_accuracy}
-                agentic={summary.agentic_close_ended_accuracy}
-              />
-            </div>
-            <div className="card">
-              <div className="card-header">
-                <span className="card-title">Open-ended Accuracy</span>
-                <span className="tag tag-gray">{summary.open_ended_cases} open</span>
-              </div>
-              <AccuracyMetricStack
-                baseline={summary.baseline_open_ended_accuracy}
-                workflow={summary.workflow_open_ended_accuracy}
-                agentic={summary.agentic_open_ended_accuracy}
-              />
-            </div>
-            <div className="card">
               <div className="card-header"><span className="card-title">3-System Disagreement</span></div>
               <div className="evaluation-metric-value">{formatPercent(summary.disagreement_rate)}</div>
+            </div>
+            <div className="card">
+              <div className="card-header"><span className="card-title">Avg End-to-End Runtime</span></div>
+              <div className="evaluation-metric-value">{fmtMs(summary.avg_duration_ms)}</div>
             </div>
             <div className="card">
               <div className="card-header"><span className="card-title">Wins</span></div>
@@ -112,16 +135,26 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
               </div>
             </div>
             <div className="card">
-              <div className="card-header"><span className="card-title">⚡ Avg Baseline Time</span></div>
-              <div className="evaluation-metric-value">{fmtMs(summary.avg_baseline_duration_ms)}</div>
+              <div className="card-header">
+                <span className="card-title">Close-ended Accuracy</span>
+                <span className="tag tag-gray">{summary.close_ended_cases} cases</span>
+              </div>
+              <AccuracyMetricStack
+                baseline={summary.baseline_close_ended_accuracy}
+                workflow={summary.workflow_close_ended_accuracy}
+                agentic={summary.agentic_close_ended_accuracy}
+              />
             </div>
             <div className="card">
-              <div className="card-header"><span className="card-title">🧭 Avg Workflow Time</span></div>
-              <div className="evaluation-metric-value">{fmtMs(summary.avg_workflow_duration_ms)}</div>
-            </div>
-            <div className="card">
-              <div className="card-header"><span className="card-title">🔗 Avg Agentic Time</span></div>
-              <div className="evaluation-metric-value">{fmtMs(summary.avg_agentic_duration_ms)}</div>
+              <div className="card-header">
+                <span className="card-title">Open-ended Accuracy</span>
+                <span className="tag tag-gray">{summary.open_ended_cases} cases</span>
+              </div>
+              <AccuracyMetricStack
+                baseline={summary.baseline_open_ended_accuracy}
+                workflow={summary.workflow_open_ended_accuracy}
+                agentic={summary.agentic_open_ended_accuracy}
+              />
             </div>
           </section>
 
@@ -158,38 +191,57 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                   <thead>
                     <tr>
                       <th>ID</th>
-                      <th>Type</th>
+                      <th>Question</th>
                       <th>Winner</th>
                       <th>Retriever</th>
-                      <th>Facts</th>
                       <th>Verify</th>
-                      <th>Consistency</th>
-                      <th>Cross-modal</th>
-                      <th>Duration</th>
+                      <th>Signals</th>
+                      <th>Runtime</th>
                     </tr>
                   </thead>
                   <tbody>
                     {rows.slice(0, 12).map((row) => (
                       <tr key={`${row.sample_id}-${row.cached_at || 'na'}`}>
                         <td>{row.sample_id}</td>
-                        <td>{row.question_type?.replace(/_/g, ' ')}</td>
+                        <td>
+                          <div className="evaluation-question-cell">
+                            <div className="evaluation-list-title">{row.question || '—'}</div>
+                            <div className="evaluation-list-subtitle">{row.question_type?.replace(/_/g, ' ') || 'unknown'}</div>
+                          </div>
+                        </td>
                         <td><span className={`tag ${getWinnerTagClass(row.winner)}`}>{row.winner.replace(/_/g, ' ')}</span></td>
                         <td>
-                          <span className={`tag ${row.knowledge_retriever_triggered ? 'tag-green' : 'tag-gray'}`}>
-                            {row.knowledge_retriever_triggered
-                              ? (row.knowledge_retriever_status || 'triggered')
-                              : 'skipped'}
+                          <div className="evaluation-signal-stack">
+                            <span className={`tag ${row.knowledge_retriever_triggered ? 'tag-green' : 'tag-gray'}`}>
+                              {row.knowledge_retriever_triggered
+                                ? (row.knowledge_retriever_status || 'triggered')
+                                : 'skipped'}
+                            </span>
+                            <span className="evaluation-list-subtitle">facts {row.knowledge_key_facts_count ?? 0}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <span className={`tag ${getLevelTagClass(row.verification_status)}`}>
+                            {row.verification_status?.replace(/_/g, ' ') || 'unknown'}
                           </span>
                         </td>
-                        <td>{row.knowledge_key_facts_count ?? 0}</td>
-                        <td>{row.verification_status?.replace(/_/g, ' ')}</td>
-                        <td>{row.self_consistency_level}</td>
-                        <td>{row.cross_modal_agreement_level}</td>
-                          <td>
-                            <div style={{fontSize:'11px', whiteSpace:'nowrap'}}>Baseline {fmtMs(row.baseline_duration_ms)}</div>
-                            <div style={{fontSize:'11px', whiteSpace:'nowrap'}}>Workflow {fmtMs(row.workflow_duration_ms)}</div>
-                            <div style={{fontSize:'11px', whiteSpace:'nowrap'}}>Agentic {fmtMs(row.agentic_duration_ms)}</div>
-                          </td>
+                        <td>
+                          <div className="evaluation-signal-stack">
+                            <span className={`tag ${getLevelTagClass(row.self_consistency_level)}`}>
+                              consistency {row.self_consistency_level}
+                            </span>
+                            <span className={`tag ${getLevelTagClass(row.cross_modal_agreement_level)}`}>
+                              cross-modal {row.cross_modal_agreement_level}
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="evaluation-runtime-stack">
+                            <div>⚡ {fmtMs(row.baseline_duration_ms)}</div>
+                            <div>🧭 {fmtMs(row.workflow_duration_ms)}</div>
+                            <div>🔗 {fmtMs(row.agentic_duration_ms)}</div>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

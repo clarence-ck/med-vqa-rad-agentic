@@ -1,5 +1,17 @@
 import { useState } from 'react';
 
+const STEP_META = {
+  'Image Interpretation': { stage: 'Perception', subtitle: 'visual grounding', className: 'perception' },
+  'Question Understanding': { stage: 'Perception', subtitle: 'intent + format', className: 'perception' },
+  'Knowledge Support': { stage: 'Retrieval', subtitle: 'Advanced RAG context', className: 'retrieval' },
+  'Reasoning & Answer': { stage: 'Reasoning', subtitle: 'final synthesis', className: 'reasoning' },
+  'Verification': { stage: 'Safety', subtitle: 'support + confidence gate', className: 'verification' },
+};
+
+function getStepMeta(step) {
+  return STEP_META[step.agent] || { stage: 'Stage', subtitle: '', className: 'default' };
+}
+
 export default function AgentTrace({ agentTrace, loading }) {
   const [expandedStep, setExpandedStep] = useState(null);
 
@@ -17,6 +29,12 @@ export default function AgentTrace({ agentTrace, loading }) {
 
   const toggleStep = (id) => {
     setExpandedStep(expandedStep === id ? null : id);
+  };
+
+  const handleStepDoubleClick = (step) => {
+    if (step.summary) {
+      toggleStep(step.agent_id);
+    }
   };
 
   return (
@@ -62,13 +80,15 @@ export default function AgentTrace({ agentTrace, loading }) {
         {steps.map((step) => {
           const isExpanded = expandedStep === step.agent_id;
           const status = step.status || 'pending';
+          const meta = getStepMeta(step);
 
           return (
             <div
               key={step.agent_id}
-              className={`agent-step ${isExpanded ? 'expanded' : ''}`}
-              onClick={() => step.summary && toggleStep(step.agent_id)}
+              className={`agent-step stage-${meta.className} ${isExpanded ? 'expanded' : ''}`}
+              onDoubleClick={() => handleStepDoubleClick(step)}
               style={{ animationDelay: `${step.agent_id * 0.08}s` }}
+              title={step.summary ? 'Double-click to expand or collapse' : undefined}
             >
               <span className={`agent-step-number ${status}`}
                     style={status === 'skipped' ? { opacity: 0.45 } : {}}>
@@ -88,6 +108,10 @@ export default function AgentTrace({ agentTrace, loading }) {
                       {status}
                     </span>
                   )}
+                </div>
+                <div className="agent-step-subtitle">
+                  <span className={`agent-step-stage stage-${meta.className}`}>{meta.stage}</span>
+                  {meta.subtitle && <span>{meta.subtitle}</span>}
                 </div>
                 {step.summary && (
                   <div className="agent-step-summary">
