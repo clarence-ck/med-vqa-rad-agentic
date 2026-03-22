@@ -418,8 +418,16 @@ conda env create -f environment.yml
 conda activate medvisionquery
 ```
 
-**Option B — pip**
+This path installs native ML dependencies (`numpy`, `faiss-cpu`, `pytorch`) from conda first, then installs Python-level packages with pip. This is the recommended setup to avoid OpenMP runtime conflicts on Windows.
+
+**Option B — pip (fallback, more fragile for native deps on Windows)**
 ```bash
+pip install -r backend/requirements.txt
+```
+
+If you use the pip fallback, install native packages from conda first in the same environment:
+```bash
+conda install -c conda-forge numpy faiss-cpu pytorch
 pip install -r backend/requirements.txt
 ```
 

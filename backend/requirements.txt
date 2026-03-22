@@ -10,5 +10,3 @@ haystack-ai
 sentence-transformers
 rank-bm25
 scikit-learn
-numpy
-faiss-cpu

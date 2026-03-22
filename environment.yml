@@ -1,11 +1,13 @@
 name: medvisionquery
 channels:
-  - defaults
   - conda-forge
+  - defaults
 dependencies:
   - python=3.12
   - pip
+  - numpy
   - faiss-cpu
+  - pytorch
   - pip:
       - fastapi
       - uvicorn
@@ -19,4 +21,3 @@ dependencies:
       - sentence-transformers
       - rank-bm25
       - scikit-learn
-      - numpy
