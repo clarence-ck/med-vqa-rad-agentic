@@ -176,18 +176,20 @@ def build_diagram(output_path="system_diagram.png"):
                color=SLATE)
 
     # Stage-1 label
-    lbl(ax, 8.50, 8.65, "stage 1: parallel understanding",
+    lbl(ax, 8.50, 8.65, "stage 1: sequential understanding",
         fs=8.5, c=PURPLE, weight="bold")
 
-    # Controller → stage-1 boxes
+    # Controller → stage-1 entry
     orth_arrow(ax, [(6.50, 8.90), (6.10, 8.90), (6.10, 7.85)], color=SLATE)
-    orth_arrow(ax, [(10.90, 8.90), (10.90, 7.85)], color=SLATE)
 
     # Stage-1 boxes  (y 6.75 – 7.85)
     box(ax, 4.30, 6.75, 3.60, 1.10, BLUE_SOFT, BLUE,
         "Image Interpreter", "visual evidence / findings", fs1=13, fs2=8.8)
     box(ax, 9.10, 6.75, 3.60, 1.10, PURPLE_SOFT, BLUE,
         "Question Analyzer", "intent / type / answer format", fs1=13, fs2=8.7)
+
+    # Sequential flow: image interpretation feeds question analysis
+    orth_arrow(ax, [(7.90, 7.30), (9.10, 7.30)], color=SLATE)
 
     # Stage-2 label  (clear gap between stage-1 bottom 6.75 and diamond top 6.00)
     lbl(ax, 8.50, 6.48, "stage 2: synthesis + validation",
