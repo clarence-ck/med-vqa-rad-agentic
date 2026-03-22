@@ -6,6 +6,16 @@ import ExplanationCard from './ExplanationCard';
 import VerificationPanel from './VerificationPanel';
 import FailureModeDrawer from './FailureModeDrawer';
 
+const QUESTION_TYPE_ORDER = [
+  'anatomy_identification',
+  'modality_identification',
+  'yes_no',
+  'counting',
+  'location',
+  'abnormality_description',
+  'other',
+];
+
 function getStatusTagClass(status) {
   if (status === 'verified') return 'tag-green';
   if (status === 'partially_verified') return 'tag-amber';
@@ -108,6 +118,32 @@ export default function CaseExplorer({
     [samples, selectedSampleId],
   );
 
+  const groupedSamples = useMemo(() => {
+    const groups = samples.reduce((acc, sample) => {
+      const key = sample.question_type || 'other';
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(sample);
+      return acc;
+    }, {});
+
+    Object.values(groups).forEach((group) => {
+      group.sort((a, b) => (a.question || '').localeCompare(b.question || ''));
+    });
+
+    const orderedKeys = [
+      ...QUESTION_TYPE_ORDER.filter((key) => groups[key]?.length),
+      ...Object.keys(groups)
+        .filter((key) => !QUESTION_TYPE_ORDER.includes(key))
+        .sort(),
+    ];
+
+    return orderedKeys.map((key) => ({
+      key,
+      label: key.replace(/_/g, ' '),
+      items: groups[key],
+    }));
+  }, [samples]);
+
   const sampleSelectDisabled = Boolean((analysisData || analysisLoading) && selectedSampleId);
 
   const handleClear = () => {
@@ -124,6 +160,9 @@ export default function CaseExplorer({
         <div className="panel-body">
           <div className="form-group">
             <label className="form-label">Choose a dataset case</label>
+            <div className="split-guidance-text" style={{ marginBottom: 'var(--space-2)' }}>
+              Dataset split: test only
+            </div>
             <select
               className="form-select"
               value={selectedSampleId ?? ''}
@@ -131,11 +170,15 @@ export default function CaseExplorer({
               disabled={sampleSelectDisabled}
             >
               <option value="">— Select a sample —</option>
-              {samples.map((sample) => (
-                <option key={sample.id} value={sample.id}>
-                  [{sample.question_type?.replace(/_/g, ' ')}] {sample.question.slice(0, 70)}
-                  {sample.question.length > 70 ? '...' : ''}
-                </option>
+              {groupedSamples.map((group) => (
+                <optgroup key={group.key} label={group.label}>
+                  {group.items.map((sample) => (
+                    <option key={sample.id} value={sample.id}>
+                      {sample.question.slice(0, 70)}
+                      {sample.question.length > 70 ? '...' : ''}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
             {sampleSelectDisabled && (

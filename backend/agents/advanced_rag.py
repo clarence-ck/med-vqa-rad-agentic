@@ -60,7 +60,9 @@ class AdvancedRAGRetriever:
         
         # Data directory
         if data_dir is None:
-            self.data_dir = os.path.join(os.path.dirname(__file__), '..', 'data', 'vqa-rad')
+            self.data_dir = os.path.normpath(
+                os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'vqa-rad')
+            )
         else:
             self.data_dir = data_dir
         
@@ -80,6 +82,7 @@ class AdvancedRAGRetriever:
         # Metadata indices for filtering
         self._modality_index: Dict[str, List[int]] = defaultdict(list)
         self._body_region_index: Dict[str, List[int]] = defaultdict(list)
+        self._last_query_rewritten: bool = False
         
         self._is_indexed = False
     
@@ -295,10 +298,12 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
         # 1. Query Rewriting
         if use_query_rewrite:
             query = self.rewrite_query(question, modality, body_region)
+            self._last_query_rewritten = query.strip() != question.strip()
             print(f"[AdvancedRAG] Original: {question}")
             print(f"[AdvancedRAG] Rewritten: {query}")
         else:
             query = question
+            self._last_query_rewritten = False
         
         # 2. Metadata Filtering
         candidate_indices = self._apply_metadata_filter(modality, body_region)
@@ -617,5 +622,5 @@ def retrieve_knowledge_advanced(
             for r in results
         ],
         "count": len(results),
-        "query_rewritten": kwargs.get('use_query_rewrite', True)
+        "query_rewritten": retriever._last_query_rewritten
     }

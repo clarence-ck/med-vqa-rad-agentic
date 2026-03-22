@@ -3,6 +3,17 @@ import os
 from config import DATA_DIR
 
 
+QUESTION_TYPE_ORDER = [
+    "anatomy_identification",
+    "modality_identification",
+    "yes_no",
+    "counting",
+    "location",
+    "abnormality_description",
+    "other",
+]
+
+
 def load_dataset():
     """Load VQA-RAD dataset from the data directory."""
     json_path = os.path.join(DATA_DIR, "vqa_rad.json")
@@ -24,6 +35,10 @@ def infer_split(image_name: str) -> str:
     return "unknown"
 
 
+def _resolve_split(item: dict, image_name: str) -> str:
+    return (item.get("split") or infer_split(image_name) or "unknown").lower()
+
+
 def get_sample_cases(limit: int = 20) -> list:
     """Return a curated set of sample cases for the UI dropdown."""
     data = load_dataset()
@@ -34,7 +49,9 @@ def get_sample_cases(limit: int = 20) -> list:
     for i, item in enumerate(data):
         q_type = _classify_question(item.get("question", ""))
         image_name = item.get("image_name", item.get("image", ""))
-        sample_split = item.get("split") or infer_split(image_name)
+        sample_split = _resolve_split(item, image_name)
+        if sample_split != "test":
+            continue
         sample = {
             "id": i,
             "question": item.get("question", ""),
@@ -45,8 +62,19 @@ def get_sample_cases(limit: int = 20) -> list:
         }
         buckets.setdefault(q_type, []).append(sample)
 
+    if not buckets:
+        return []
+
+    for question_type, samples_for_type in buckets.items():
+        samples_for_type.sort(key=lambda sample: (sample.get("question") or "").lower())
+
     samples = []
-    bucket_order = list(buckets.keys())
+    bucket_order = [question_type for question_type in QUESTION_TYPE_ORDER if buckets.get(question_type)]
+    unknown_order = sorted(
+        [question_type for question_type in buckets.keys() if question_type not in QUESTION_TYPE_ORDER]
+    )
+    bucket_order.extend(unknown_order)
+
     while len(samples) < limit and any(buckets.get(question_type) for question_type in bucket_order):
         for question_type in bucket_order:
             bucket = buckets.get(question_type) or []
@@ -67,6 +95,9 @@ def get_sample_by_id(sample_id: int) -> dict | None:
 
     item = data[sample_id]
     image_name = item.get("image_name", item.get("image", ""))
+    sample_split = _resolve_split(item, image_name)
+    if sample_split != "test":
+        return None
     image_path = os.path.join(DATA_DIR, "images", image_name)
 
     return {
@@ -76,7 +107,7 @@ def get_sample_by_id(sample_id: int) -> dict | None:
         "image_name": image_name,
         "image_path": image_path if os.path.exists(image_path) else None,
         "question_type": _classify_question(item.get("question", "")),
-        "split": item.get("split") or infer_split(image_name),
+        "split": sample_split,
     }
 
 
