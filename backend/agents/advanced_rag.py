@@ -90,6 +90,39 @@ class AdvancedRAGRetriever:
         
         self._is_indexed = False
 
+    def _shorten_text(self, text: str, limit: int = 120) -> str:
+        clean_text = " ".join(str(text or "").split())
+        if len(clean_text) <= limit:
+            return clean_text
+        return clean_text[: max(0, limit - 1)].rstrip() + "…"
+
+    def _log_top_hits(self, label: str, hits: list, limit: int = 3) -> None:
+        if not hits:
+            print(f"[AdvancedRAG] {label}: no hits")
+            return
+
+        preview_count = min(limit, len(hits))
+        print(f"[AdvancedRAG] {label}: showing top {preview_count}/{len(hits)}")
+        for rank, item in enumerate(hits[:preview_count], start=1):
+            if isinstance(item, RetrievalResult):
+                idx = item.metadata.get("id", "n/a")
+                score = item.score
+                question = item.question
+                answer = item.answer
+                method = f" method={item.retrieval_method}"
+            else:
+                idx, score = item
+                example = self._train_examples[idx]
+                question = example.get("question", "")
+                answer = example.get("answer", "")
+                method = ""
+
+            print(
+                f"[AdvancedRAG]   {rank}. id={idx} score={score:.4f}{method} | "
+                f"Q: {self._shorten_text(question, 100)} | "
+                f"A: {self._shorten_text(answer, 90)}"
+            )
+
     def _resolve_device(self) -> str:
         """Pick a safe runtime device for sentence-transformers models."""
         requested = os.getenv("ADVANCED_RAG_DEVICE", "cpu").strip().lower()
@@ -333,6 +366,13 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
         if not self._is_indexed:
             if not self.build_index():
                 return []
+
+        print(
+            "[AdvancedRAG] Retrieval pipeline started | "
+            f"question={self._shorten_text(question, 140)} | "
+            f"modality={modality or 'unknown'} | body_region={body_region or 'unknown'} | "
+            f"rewrite={use_query_rewrite} rerank={use_reranking} reflection={use_self_reflection}"
+        )
         
         # 1. Query Rewriting
         if use_query_rewrite:
@@ -340,34 +380,63 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
             self._last_query_rewritten = query.strip() != question.strip()
             print(f"[AdvancedRAG] Original: {question}")
             print(f"[AdvancedRAG] Rewritten: {query}")
+            if self._last_query_rewritten:
+                print("[AdvancedRAG] Query rewrite: changed")
+            else:
+                print("[AdvancedRAG] Query rewrite: unchanged")
         else:
             query = question
             self._last_query_rewritten = False
+            print("[AdvancedRAG] Query rewrite disabled; using original question")
         
         # 2. Metadata Filtering
         candidate_indices = self._apply_metadata_filter(modality, body_region)
+        if candidate_indices is None:
+            print("[AdvancedRAG] Metadata filter: none applied (full corpus search)")
+        else:
+            print(f"[AdvancedRAG] Metadata filter: {len(candidate_indices)} candidates retained")
         
         # 3. Hybrid Retrieval
+        print(f"[AdvancedRAG] Dense retrieval: top_k={self.top_k_dense}")
         dense_results = self._dense_retrieval(query, candidate_indices)
+        self._log_top_hits("Dense retrieval results", dense_results)
+
+        print(f"[AdvancedRAG] Sparse retrieval: top_k={self.top_k_sparse}")
         sparse_results = self._sparse_retrieval(query, candidate_indices)
+        self._log_top_hits("Sparse retrieval results", sparse_results)
         
         # Merge and deduplicate
         merged = self._merge_results(dense_results, sparse_results)
+        print(f"[AdvancedRAG] Hybrid merge produced {len(merged)} unique candidates")
+        self._log_top_hits("Merged candidates", merged)
         
         # 4. Reranking (if enabled)
         if use_reranking and len(merged) > self.top_k_final:
+            print(
+                f"[AdvancedRAG] Reranking enabled: reranking {len(merged)} candidates "
+                f"down to top_k_final={self.top_k_final}"
+            )
             reranked = self._rerank(query, merged)
         else:
             reranked = merged[:self.top_k_final]
+            print(f"[AdvancedRAG] Reranking skipped; using first {len(reranked)} merged candidates")
+        self._log_top_hits("Reranked candidates", reranked)
         
         # 5. Self-Reflection Validation (if enabled)
         if use_self_reflection:
+            print("[AdvancedRAG] Self-reflection enabled: validating retrieved candidates")
             validated = self._self_reflect(question, reranked, modality, body_region)
             if validated is None:  # Reflection indicated poor quality
                 print("[AdvancedRAG] Self-reflection flagged low quality, returning best available")
                 validated = reranked[:self.top_k_final]
+            else:
+                print("[AdvancedRAG] Self-reflection accepted retrieved candidates")
         else:
             validated = reranked[:self.top_k_final]
+            print("[AdvancedRAG] Self-reflection disabled")
+
+        print(f"[AdvancedRAG] Retrieval complete: returning {len(validated)} final candidates")
+        self._log_top_hits("Final retrieved cases", validated)
         
         return validated
     
@@ -378,6 +447,7 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
     ) -> Optional[List[int]]:
         """Apply metadata pre-filtering to reduce search space"""
         if not modality and not body_region:
+            print("[AdvancedRAG] Metadata filter inputs empty; skipping filter")
             return None  # No filtering
         
         candidates = None
@@ -393,7 +463,10 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
                         matching = indices
                         break
             if matching:
+                print(f"[AdvancedRAG] Metadata filter modality='{modality_lower}': {len(matching)} matches")
                 candidates = set(matching)
+            else:
+                print(f"[AdvancedRAG] Metadata filter modality='{modality_lower}': no exact matches")
         
         if body_region and body_region != 'unknown':
             region_lower = body_region.lower()
@@ -404,15 +477,21 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
                         matching = indices
                         break
             if matching:
+                print(f"[AdvancedRAG] Metadata filter body_region='{region_lower}': {len(matching)} matches")
                 if candidates is not None:
                     candidates = candidates.intersection(set(matching))
                 else:
                     candidates = set(matching)
+            else:
+                print(f"[AdvancedRAG] Metadata filter body_region='{region_lower}': no exact matches")
         
         if candidates:
             result = list(candidates)
             print(f"[AdvancedRAG] Metadata filter: {len(result)} candidates")
             return result
+
+        if modality or body_region:
+            print("[AdvancedRAG] Metadata filter found no intersection; falling back to full corpus")
         
         return None
     
@@ -427,6 +506,11 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
         
         # Normalize query embedding for cosine similarity
         faiss.normalize_L2(query_embedding)
+
+        if candidate_indices is not None:
+            print(f"[AdvancedRAG] Dense retrieval using filtered subset of {len(candidate_indices)} candidates")
+        else:
+            print(f"[AdvancedRAG] Dense retrieval searching full FAISS index with {self._faiss_index.ntotal} vectors")
         
         if candidate_indices is not None:
             # For filtered subsets, fall back to numpy search
@@ -457,6 +541,11 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
     ) -> List[Tuple[int, float]]:
         """Sparse retrieval using BM25"""
         tokenized_query = self._tokenize(query)
+
+        if candidate_indices is not None:
+            print(f"[AdvancedRAG] Sparse retrieval using filtered subset of {len(candidate_indices)} candidates")
+        else:
+            print(f"[AdvancedRAG] Sparse retrieval searching full BM25 corpus of {len(self._tokenized_corpus)} documents")
         
         if candidate_indices is not None:
             # Rebuild BM25 for filtered subset
@@ -487,6 +576,8 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
         # Reciprocal rank fusion
         k = 60  # RRF constant
         fused_scores: Dict[int, float] = defaultdict(float)
+
+        print(f"[AdvancedRAG] Merging results: dense={len(dense)} sparse={len(sparse)}")
         
         # Add dense scores
         for rank, (idx, _) in enumerate(dense):
@@ -524,6 +615,7 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
     ) -> List[RetrievalResult]:
         """Cross-encoder reranking"""
         if len(candidates) <= self.top_k_final:
+            print("[AdvancedRAG] Reranking skipped because candidate count is already within top_k_final")
             return candidates
         
         print(f"[AdvancedRAG] Reranking {len(candidates)} candidates...")
@@ -560,6 +652,7 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
         """
         try:
             client = self._get_openai_client()
+            print(f"[AdvancedRAG] Self-reflection evaluating {len(retrieved)} retrieved candidates")
             
             # Prepare context for reflection
             context = f"""Original question: {original_question}
@@ -603,8 +696,15 @@ Respond with ONLY a JSON object:
                 
                 is_relevant = result.get('is_relevant', True)
                 recommendation = result.get('recommendation', 'use')
+                confidence = result.get('confidence', 'unknown')
+                issues = result.get('issues', [])
                 
-                print(f"[AdvancedRAG] Self-reflection: relevant={is_relevant}, rec={recommendation}")
+                print(
+                    f"[AdvancedRAG] Self-reflection: relevant={is_relevant}, "
+                    f"confidence={confidence}, recommendation={recommendation}"
+                )
+                if issues:
+                    print(f"[AdvancedRAG] Self-reflection issues: {issues}")
                 
                 if not is_relevant or recommendation == 'reject':
                     return None
