@@ -13,6 +13,8 @@ from dataclasses import dataclass
 from collections import defaultdict
 import re
 
+import torch
+
 # FAISS is required for vector search
 import faiss
 
@@ -83,21 +85,58 @@ class AdvancedRAGRetriever:
         self._modality_index: Dict[str, List[int]] = defaultdict(list)
         self._body_region_index: Dict[str, List[int]] = defaultdict(list)
         self._last_query_rewritten: bool = False
+        self._device = self._resolve_device()
+        print(f"[AdvancedRAG] Using device: {self._device}")
         
         self._is_indexed = False
+
+    def _resolve_device(self) -> str:
+        """Pick a safe runtime device for sentence-transformers models."""
+        requested = os.getenv("ADVANCED_RAG_DEVICE", "cpu").strip().lower()
+
+        if requested == "cpu":
+            return "cpu"
+
+        if requested.startswith("cuda"):
+            if torch.cuda.is_available():
+                return requested
+            print("[AdvancedRAG] ADVANCED_RAG_DEVICE requests CUDA but CUDA is unavailable, falling back to CPU")
+            return "cpu"
+
+        if requested != "auto":
+            print(f"[AdvancedRAG] Unrecognized ADVANCED_RAG_DEVICE='{requested}', defaulting to CPU")
+            return "cpu"
+
+        if not torch.cuda.is_available():
+            return "cpu"
+
+        try:
+            major, minor = torch.cuda.get_device_capability(0)
+            if major < 7:
+                print(
+                    "[AdvancedRAG] GPU compute capability "
+                    f"{major}.{minor} is below recommended threshold for this PyTorch build; using CPU"
+                )
+                return "cpu"
+
+            _ = torch.zeros(1, device="cuda")
+            return "cuda"
+        except Exception as exc:
+            print(f"[AdvancedRAG] CUDA probe failed ({exc}); using CPU")
+            return "cpu"
     
     def _get_embedding_model(self) -> SentenceTransformer:
         """Lazy load embedding model"""
         if self._embedding_model is None:
-            print(f"[AdvancedRAG] Loading embedding model: {self.embedding_model_name}")
-            self._embedding_model = SentenceTransformer(self.embedding_model_name)
+            print(f"[AdvancedRAG] Loading embedding model: {self.embedding_model_name} on {self._device}")
+            self._embedding_model = SentenceTransformer(self.embedding_model_name, device=self._device)
         return self._embedding_model
     
     def _get_cross_encoder(self) -> CrossEncoder:
         """Lazy load cross-encoder for reranking"""
         if self._cross_encoder is None:
-            print(f"[AdvancedRAG] Loading cross-encoder: {self.cross_encoder_name}")
-            self._cross_encoder = CrossEncoder(self.cross_encoder_name)
+            print(f"[AdvancedRAG] Loading cross-encoder: {self.cross_encoder_name} on {self._device}")
+            self._cross_encoder = CrossEncoder(self.cross_encoder_name, device=self._device)
         return self._cross_encoder
     
     def _get_openai_client(self) -> OpenAI:
