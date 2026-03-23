@@ -24,7 +24,7 @@ data/
 !data/.gitkeep
 
 # App cache
-backend/.case_explorer_cache/
+#backend/.case_explorer_cache/
 
 # OS
 .DS_Store
