@@ -163,7 +163,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
             <div className="card">
               <div className="card-header">
                 <span className="card-title">Wins</span>
-                <span className="tag tag-gray" data-tooltip="Number of cases where a specific system uniquely produced the correct answer, or tied for the correct answer." data-tooltip-align="left">info</span>
+                <span className="tag tag-gray" data-tooltip="A 'Win' happens when one system uniquely finds the correct answer. 'Ties' occur when multiple systems are correct, or when all systems fail." data-tooltip-align="left">info</span>
               </div>
               <div className="evaluation-metric-stack">
                 <span className="tag tag-amber">Baseline {summary.baseline_wins}</span>
