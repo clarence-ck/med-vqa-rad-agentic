@@ -6,6 +6,11 @@ import ExplanationCard from './ExplanationCard';
 import VerificationPanel from './VerificationPanel';
 import FailureModeDrawer from './FailureModeDrawer';
 
+function fmtMs(ms) {
+  if (ms == null) return '—';
+  return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`;
+}
+
 const QUESTION_TYPE_ORDER = [
   'anatomy_identification',
   'modality_identification',
@@ -64,20 +69,9 @@ function getSummaryBadge(mode, result) {
   if (!result) {
     return { className: 'tag-gray', label: 'pending' };
   }
-
-  if (mode === 'agentic') {
-    const status = result.verification_status || 'pending';
-    return {
-      className: getStatusTagClass(status),
-      label: status.replace(/_/g, ' '),
-    };
-  }
-
-  const confidence = result.confidence || 'low';
-  return {
-    className: confidence === 'high' ? 'tag-green' : confidence === 'medium' ? 'tag-amber' : 'tag-red',
-    label: `${confidence} confidence`,
-  };
+  if (mode === 'baseline') return { className: 'tag-amber', label: 'Baseline' };
+  if (mode === 'workflow') return { className: 'tag-blue', label: 'Workflow' };
+  return { className: 'tag-green', label: 'Agentic' };
 }
 
 function getConfidenceTagClass(confidence) {
@@ -349,10 +343,18 @@ export default function CaseExplorer({
                     <span className={`tag ${getConfidenceTagClass(selectedConfidence)}`}>
                       {selectedConfidence} confidence
                     </span>
-                    {showAgenticDetails && selfConsistencyLevel !== selectedConfidence && (
-                      <span className={`tag ${getConfidenceTagClass(selfConsistencyLevel)}`}>
-                        self-consistency {selfConsistencyLevel}
-                      </span>
+                    {showAgenticDetails && (
+                      <>
+                        <span className={`tag ${getVerificationTagClass(overallVerification)}`}>
+                          {overallVerification.replace(/_/g, ' ')}
+                        </span>
+                        <span className={`tag ${getConfidenceTagClass(selfConsistencyLevel)}`}>
+                          consistency {selfConsistencyLevel}
+                        </span>
+                        <span className={`tag ${getConfidenceTagClass(crossModalAgreement)}`}>
+                          cross-modal {crossModalAgreement}
+                        </span>
+                      </>
                     )}
                   </div>
                 </section>
@@ -369,12 +371,19 @@ export default function CaseExplorer({
                         <span className="summary-stat-label">Selected view</span>
                         <span className="summary-stat-value">{getModeLabel(comparisonMode)}</span>
                       </div>
-                      <div className="summary-stat-row summary-stat-row-inline">
-                        <span className="summary-stat-label">Selected confidence</span>
-                        <span className={`tag ${getConfidenceTagClass(selectedConfidence)}`}>
-                          {selectedConfidence}
+                      <div className="summary-stat-row">
+                        <span className="summary-stat-label">Duration</span>
+                        <span className="summary-stat-value">
+                          {fmtMs(
+                            comparisonMode === 'agentic'
+                              ? (analysisData?.agentic_duration_ms ?? analysisData?.agentic_result?.total_duration_ms)
+                              : comparisonMode === 'workflow'
+                                ? analysisData?.workflow_duration_ms
+                                : analysisData?.baseline_duration_ms
+                          )}
                         </span>
                       </div>
+
                       <div className="summary-summary-text">
                         {showAgenticDetails
                           ? 'Agentic mode includes question understanding, retrieval, and verification metadata.'
@@ -389,24 +398,36 @@ export default function CaseExplorer({
                         <div className="summary-section-title">Agentic Quality</div>
                         <div className="summary-stat-list">
                           <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label">Verification</span>
+                            <span className="summary-stat-label" data-tooltip="The model's self-reported confidence in its final answer, based on the currently selected methodology (Agentic, Workflow, or Baseline).">Selected confidence</span>
+                            <span className={`tag ${getConfidenceTagClass(selectedConfidence)}`}>
+                              {selectedConfidence}
+                            </span>
+                          </div>
+                          <div className="summary-stat-row summary-stat-row-inline">
+                            <span className="summary-stat-label" data-tooltip="Based on the Verification Agent's checks. 'Verified' means it passed all checks (question matched, evidence grounded, strength appropriate, no contradictions, format correct). 'Partially_verified' means it passed most but not all checks.">Verification</span>
                             <span className={`tag ${getVerificationTagClass(overallVerification)}`}>
                               {overallVerification.replace(/_/g, ' ')}
                             </span>
                           </div>
-                          <div className="summary-stat-row">
-                            <span className="summary-stat-label">Cross-modal agreement</span>
-                            <span className="summary-stat-value">{crossModalAgreement}</span>
+                          <div className="summary-stat-row summary-stat-row-inline">
+                            <span className="summary-stat-label" data-tooltip="Derived from the proportion of verification checks passed. 'High' means all checks passed; 'medium' means at most 1 check failed; 'low' otherwise.">Self-consistency</span>
+                            <span className={`tag ${getConfidenceTagClass(selfConsistencyLevel)}`}>
+                              {selfConsistencyLevel}
+                            </span>
                           </div>
                           <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label">Review recommended</span>
-                            <span className={`tag ${reviewRecommended ? 'tag-red' : 'tag-gray'}`}>
+                            <span className="summary-stat-label" data-tooltip="Evaluates whether the answer is grounded in the visual evidence AND free of contradictions with the image interpretation. 'High' = both true; 'low' = either false; 'medium' otherwise.">Cross-modal agreement</span>
+                            <span className={`tag ${getConfidenceTagClass(crossModalAgreement)}`}>{crossModalAgreement}</span>
+                          </div>
+                          <div className="summary-stat-row summary-stat-row-inline">
+                            <span className="summary-stat-label" data-tooltip="Set to 'yes' if the pipeline encountered 'unsupported claims', 'visual contradictions', a 'parser failure', or if the Verification Agent explicitly recommended flagging for review.">Review recommended</span>
+                            <span className={`tag ${reviewRecommended ? 'tag-red' : 'tag-green'}`}>
                               {reviewRecommended ? 'yes' : 'no'}
                             </span>
                           </div>
-                          <div className="summary-stat-row">
-                            <span className="summary-stat-label">Issues found</span>
-                            <span className="summary-stat-value">{issueCount}</span>
+                          <div className="summary-stat-row summary-stat-row-inline">
+                            <span className="summary-stat-label" data-tooltip="Number of explicit flaws identified by the Verification Agent during the final review phase.">Issues found</span>
+                            <span className={`tag ${issueCount === 0 ? 'tag-green' : 'tag-amber'}`}>{issueCount}</span>
                           </div>
                         </div>
                       </section>
@@ -415,13 +436,13 @@ export default function CaseExplorer({
                         <div className="summary-section-title">Retrieval</div>
                         <div className="summary-stat-list">
                           <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label">Knowledge retriever</span>
+                            <span className="summary-stat-label" data-tooltip="Whether the Knowledge Retriever agent was invoked. It is only triggered for abnormality descriptions, explanation requests, or when medical knowledge is explicitly required.">Knowledge retriever</span>
                             <span className={`tag ${hasRetrieverDetails ? 'tag-green' : 'tag-gray'}`}>
                               {hasRetrieverDetails ? 'triggered' : 'skipped'}
                             </span>
                           </div>
                           <div className="summary-stat-row">
-                            <span className="summary-stat-label">Key facts</span>
+                            <span className="summary-stat-label" data-tooltip="Number of specific 'key facts' extracted by the Knowledge Support agent from external context to assist the reasoning phase.">Key facts</span>
                             <span className="summary-stat-value">{knowledgeSupport.keyFactsCount}</span>
                           </div>
                           <div className="summary-summary-text">
@@ -435,7 +456,7 @@ export default function CaseExplorer({
                       <div className="summary-section-title">Selected Result</div>
                       <div className="summary-stat-list">
                         <div className="summary-stat-row summary-stat-row-inline">
-                          <span className="summary-stat-label">Selected confidence</span>
+                          <span className="summary-stat-label" data-tooltip="The model's self-reported confidence in its final answer, based on the currently selected methodology (Agentic, Workflow, or Baseline).">Selected confidence</span>
                           <span className={`tag ${getConfidenceTagClass(selectedConfidence)}`}>
                             {selectedConfidence}
                           </span>

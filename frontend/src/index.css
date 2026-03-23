@@ -89,7 +89,9 @@
 }
 
 /* ---- Reset & Base ---- */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -701,6 +703,47 @@ body {
   flex-shrink: 0;
 }
 
+/* ---- Tooltip (data-tooltip) ---- */
+[data-tooltip] {
+  position: relative;
+  cursor: default;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: var(--color-text-primary);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-hover);
+  width: 240px;
+  white-space: normal;
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  z-index: 999;
+}
+
+[data-tooltip][data-tooltip-align="left"]::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+}
+
 .summary-stat-value {
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
@@ -927,7 +970,7 @@ body {
   align-items: center;
   gap: var(--space-1);
   padding: 2px var(--space-3);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-xs);
   font-weight: 500;
   letter-spacing: 0.3px;
@@ -986,28 +1029,40 @@ body {
   color: var(--color-confidence-high);
   border: 1px solid rgba(34, 197, 94, 0.25);
 }
-.confidence-high .dot { background: var(--color-confidence-high); }
+
+.confidence-high .dot {
+  background: var(--color-confidence-high);
+}
 
 .confidence-medium {
   background: var(--color-warning-bg);
   color: var(--color-confidence-medium);
   border: 1px solid rgba(245, 158, 11, 0.25);
 }
-.confidence-medium .dot { background: var(--color-confidence-medium); }
+
+.confidence-medium .dot {
+  background: var(--color-confidence-medium);
+}
 
 .confidence-low {
   background: var(--color-error-bg);
   color: var(--color-confidence-low);
   border: 1px solid rgba(239, 68, 68, 0.25);
 }
-.confidence-low .dot { background: var(--color-confidence-low); }
+
+.confidence-low .dot {
+  background: var(--color-confidence-low);
+}
 
 .confidence-unverified {
   background: rgba(107, 114, 128, 0.1);
   color: var(--color-confidence-unverified);
   border: 1px solid rgba(107, 114, 128, 0.25);
 }
-.confidence-unverified .dot { background: var(--color-confidence-unverified); }
+
+.confidence-unverified .dot {
+  background: var(--color-confidence-unverified);
+}
 
 /* ---- Agent Trace ---- */
 .agent-trace {
@@ -1159,11 +1214,25 @@ body {
   color: var(--color-text-muted);
 }
 
-.agent-step-stage.stage-perception { background: rgba(59, 130, 246, 0.10); }
-.agent-step-stage.stage-retrieval { background: rgba(245, 158, 11, 0.10); }
-.agent-step-stage.stage-reasoning { background: rgba(59, 130, 246, 0.12); }
-.agent-step-stage.stage-verification { background: rgba(34, 197, 94, 0.10); }
-.agent-step-stage.stage-default { background: rgba(107, 114, 128, 0.10); }
+.agent-step-stage.stage-perception {
+  background: rgba(59, 130, 246, 0.10);
+}
+
+.agent-step-stage.stage-retrieval {
+  background: rgba(245, 158, 11, 0.10);
+}
+
+.agent-step-stage.stage-reasoning {
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.agent-step-stage.stage-verification {
+  background: rgba(34, 197, 94, 0.10);
+}
+
+.agent-step-stage.stage-default {
+  background: rgba(107, 114, 128, 0.10);
+}
 
 .agent-step-summary {
   font-size: var(--font-size-xs);
@@ -1424,9 +1493,19 @@ body {
   flex-shrink: 0;
 }
 
-.timeline-dot.completed { background: var(--color-success); }
-.timeline-dot.active { background: var(--color-accent); animation: pulse-dot 1.5s infinite; }
-.timeline-dot.pending { background: var(--color-text-muted); opacity: 0.3; }
+.timeline-dot.completed {
+  background: var(--color-success);
+}
+
+.timeline-dot.active {
+  background: var(--color-accent);
+  animation: pulse-dot 1.5s infinite;
+}
+
+.timeline-dot.pending {
+  background: var(--color-text-muted);
+  opacity: 0.3;
+}
 
 .timeline-line {
   flex: 1;
@@ -1434,9 +1513,12 @@ body {
   background: var(--color-border);
 }
 
-.timeline-line.completed { background: var(--color-success); }
+.timeline-line.completed {
+  background: var(--color-success);
+}
 
 @media (max-width: 1400px) {
+
   .evaluation-system-grid,
   .evaluation-metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1448,6 +1530,7 @@ body {
 }
 
 @media (max-width: 1100px) {
+
   .evaluation-system-grid,
   .evaluation-metric-grid,
   .evaluation-two-col,
@@ -1462,32 +1545,69 @@ body {
 
 /* ---- Animations ---- */
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.85); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.85);
+  }
 }
 
 @keyframes pulse-text {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 @keyframes skeleton-shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideInRight {
-  from { opacity: 0; transform: translateX(12px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .animate-fade-in {
@@ -1539,21 +1659,26 @@ body {
   .dashboard {
     grid-template-columns: 1fr;
   }
+
   .case-explorer-layout {
     grid-template-columns: 1fr;
   }
+
   .evaluation-metric-grid {
     grid-template-columns: 1fr;
   }
+
   .evaluation-header-strip {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .evaluation-actions {
     width: 100%;
     flex-direction: column;
     align-items: stretch;
   }
+
   .panel {
     height: auto;
     border-right: none;
