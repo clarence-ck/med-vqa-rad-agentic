@@ -487,18 +487,45 @@ export default function CaseExplorer({
             </>
           )}
 
-          {analysisData && comparisonMode !== 'agentic' && (
-            <div className="card animate-fade-in">
-              <div className="card-header">
-                <span className="card-title">ℹ️ Comparison Mode Note</span>
+          {analysisData && comparisonMode !== 'agentic' && selectedResult && (
+            <>
+              <div className="card animate-fade-in">
+                <div className="card-header">
+                  <span className="card-title">💡 Answer</span>
+                  <span className={`tag ${getConfidenceTagClass(selectedResult.confidence)}`}>
+                    {(selectedResult.confidence || 'low')} confidence
+                  </span>
+                </div>
+                <div className="card-content">
+                  <p className="answer-text">{selectedResult.answer || 'No answer available.'}</p>
+                </div>
               </div>
-              <div className="card-content">
-                <p className="explanation-text">
-                  The selected {comparisonMode === 'workflow' ? 'workflow baseline' : 'single-shot baseline'} result is summarized in Case Summary.
-                  Switch to Agentic Pipeline to inspect step-by-step reasoning, retrieval usage, and verification details.
-                </p>
+
+              {selectedResult.explanation && (
+                <div className="card animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                  <div className="card-header">
+                    <span className="card-title">📋 Explanation</span>
+                  </div>
+                  <div className="card-content">
+                    <p className="explanation-text">{selectedResult.explanation}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="card animate-fade-in" style={{ animationDelay: '0.15s' }}>
+                <div className="card-header">
+                  <span className="card-title">ℹ️ About This Mode</span>
+                </div>
+                <div className="card-content">
+                  <p className="explanation-text">
+                    {comparisonMode === 'workflow'
+                      ? 'Workflow Baseline: a deterministic sequence of analysis steps without agentic self-correction.'
+                      : 'Single-shot Baseline: a direct, single-prompt approach without intermediate decomposition.'}
+                    {' '}Switch to Agentic Pipeline to inspect step-by-step reasoning, retrieval, and verification details.
+                  </p>
+                </div>
               </div>
-            </div>
+            </>
           )}
         </div>
       </aside>
