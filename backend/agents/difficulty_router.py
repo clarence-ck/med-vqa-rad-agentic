@@ -74,15 +74,26 @@ Return a JSON object with:
   "verification_policy": "One of: standard, strict",
   "fallback_policy": "One of: none, add_disclaimer, flag_for_review",
   "routing_rationale": "One sentence summarizing the overall routing decision"
-}}
-
 ROUTING RULES:
-- difficulty=easy: simple visual recognition questions (modality_identification, anatomy_identification, counting, yes_no with clear visual evidence). Set needs_retrieval=false, verification_policy=standard, fallback_policy=none.
-- difficulty=medium: presence_absence or location questions with some clinical context. Set needs_retrieval based on requires_medical_knowledge, verification_policy=standard, fallback_policy=add_disclaimer if question_clarity is ambiguous.
-- difficulty=hard: abnormality_description, explanation_request, or any question that requires clinical background knowledge. Set needs_retrieval=true, verification_policy=strict, fallback_policy=add_disclaimer.
-- If question_clarity is ambiguous or unclear, increase difficulty by one level.
-- If requires_medical_knowledge is true, always set needs_retrieval=true.
-- If difficulty=hard and verification_policy=strict, set fallback_policy=flag_for_review.
+1. HOLISTIC DIFFICULTY LEVEL (Combine Question + Image Context)
+- "easy": Straightforward questions (e.g. modality, basic anatomy, simple counting) on clear, unambiguous images.
+- "medium": Requires focused clinical inspection (e.g. finding a specific lesion or abnormality) OR a simpler question on a degraded or ambiguous image.
+- "hard": Complex clinical reasoning (e.g. differential diagnosis, detailed pathophysiological explanation) OR a medium question on a highly ambiguous/complex case.
+
+2. STRICT POLICY MAPPING
+Policies are strictly determined by the holistic difficulty level:
+- If difficulty="easy":
+   -> needs_retrieval=false
+   -> verification_policy="standard"
+   -> fallback_policy="none"
+- If difficulty="medium":
+   -> needs_retrieval=true
+   -> verification_policy="standard"
+   -> fallback_policy="add_disclaimer"
+- If difficulty="hard":
+   -> needs_retrieval=true
+   -> verification_policy="strict"
+   -> fallback_policy="flag_for_review"
 
 Return ONLY the JSON object, no additional text."""
 
