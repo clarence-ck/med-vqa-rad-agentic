@@ -1,5 +1,7 @@
+import os
 import time
 from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from config import BACKEND_CORS_ORIGINS
 from routes.analyze import router as analyze_router
@@ -24,21 +26,39 @@ app.add_middleware(
 )
 
 
+# Paths that are too noisy to log (browser auto-requests, OpenAPI docs)
+_SKIP_LOG_PATHS = {"/favicon.ico", "/docs", "/redoc", "/openapi.json"}
+
+
 @app.middleware("http")
 async def _log_requests(request: Request, call_next):
     """Log every HTTP request with method, path, status code, and duration."""
+    path = request.url.path
+    skip = path in _SKIP_LOG_PATHS
     started = time.perf_counter()
-    _log.info("→ %s %s", request.method, request.url.path)
+    if not skip:
+        _log.info("→ %s %s", request.method, path)
     response = await call_next(request)
     elapsed_ms = int((time.perf_counter() - started) * 1000)
-    _log.info(
-        "← %s %s  status=%d  duration=%dms",
-        request.method,
-        request.url.path,
-        response.status_code,
-        elapsed_ms,
-    )
+    if not skip:
+        _log.info(
+            "← %s %s  status=%d  duration=%dms",
+            request.method,
+            path,
+            response.status_code,
+            elapsed_ms,
+        )
     return response
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+@app.get("/favicon.png", include_in_schema=False)
+async def favicon():
+    """Serve the MEDVQA AGENTIC logo as the favicon."""
+    favicon_path = os.path.join(os.path.dirname(__file__), "static", "favicon.png")
+    if os.path.exists(favicon_path):
+        return FileResponse(favicon_path, media_type="image/png")
+    return Response(status_code=204)
 
 
 @app.on_event("startup")
