@@ -367,6 +367,43 @@ def _categorize_failure_modes(knowledge_result: dict, answer_result: dict, verif
     return categories
 
 
+def _build_guardrail_payload(answer_result: dict, verification_result: dict, failure_categories: list) -> dict:
+    """Build guardrail output: guarded answer, disclaimer, flag-for-review signal."""
+    answer = answer_result.get("answer", "Unable to generate an answer.")
+    verification_status = verification_result.get("verification_status", "low_confidence")
+    confidence_label = verification_result.get("confidence_label", "Low")
+    fallback_recommendation = verification_result.get("fallback_recommendation", "none")
+    suggested_disclaimer = verification_result.get("suggested_disclaimer", "")
+    high_severity = any(c.get("severity") == "high" for c in (failure_categories or []))
+
+    # Surface a flag if the answer is untrustworthy
+    should_flag_for_review = (
+        verification_status in {"low_confidence", "unsupported"}
+        or high_severity
+    )
+
+    # Add a default disclaimer when the answer is flagged and none was supplied
+    if should_flag_for_review and not suggested_disclaimer:
+        suggested_disclaimer = (
+            "This answer has low verification confidence. "
+            "Please review with a qualified medical professional."
+        )
+
+    # The guarded_answer is the same as answer unless the verification outright rejected it
+    if verification_status == "unsupported":
+        guarded_answer = (
+            f"{answer} [Note: This answer could not be fully verified against the image evidence.]"
+        )
+    else:
+        guarded_answer = answer
+
+    return {
+        "guarded_answer": guarded_answer,
+        "fallback_recommendation": fallback_recommendation,
+        "suggested_disclaimer": suggested_disclaimer,
+        "should_flag_for_review": should_flag_for_review,
+    }
+
 def _build_self_consistency_signal(verification_result: dict) -> dict:
     checks = verification_result.get("checks", {}) or {}
     total_checks = len(checks)
