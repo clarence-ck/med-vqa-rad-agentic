@@ -29,9 +29,9 @@ except ImportError:
     _HAVE_COLORLOG = False
 
 _ROOT_LOGGER_NAME = "medvqa"
-_LOG_FORMAT_PLAIN = "%(asctime)s  %(levelname)-8s  %(name)s  %(message)s"
+_LOG_FORMAT_PLAIN = "%(asctime)s %(sample_ctx)s %(levelname)-8s  %(name)s  %(message)s"
 _LOG_FORMAT_COLOR = (
-    "%(log_color)s%(asctime)s  %(levelname)-8s%(reset)s  "
+    "%(log_color)s%(asctime)s %(reset)s%(yellow)s%(sample_ctx)s%(reset)s%(log_color)s%(levelname)-8s%(reset)s  "
     "%(cyan)s%(name)s%(reset)s  %(message)s"
 )
 _DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
@@ -43,6 +43,16 @@ _COLOR_MAP = {
     "ERROR": "red",
     "CRITICAL": "bold_red",
 }
+
+from contextvars import ContextVar
+sample_id_var: ContextVar[Optional[str]] = ContextVar('sample_id', default=None)
+
+class SampleContextFilter(logging.Filter):
+    """Injects sample_ctx into the log record."""
+    def filter(self, record):
+        sid = sample_id_var.get()
+        record.sample_ctx = f"[Sample #{sid}]" if sid else ""
+        return True
 
 # Generate a unique session identity once at import time
 _SESSION_TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -86,6 +96,8 @@ def _configure_root() -> None:
     else:
         console_formatter = plain_formatter
 
+    filter_instance = SampleContextFilter()
+    console_handler.addFilter(filter_instance)
     console_handler.setFormatter(console_formatter)
     root.addHandler(console_handler)
 
@@ -100,6 +112,7 @@ def _configure_root() -> None:
         encoding="utf-8",
     )
     file_handler.setLevel(logging.DEBUG)
+    file_handler.addFilter(filter_instance)
     file_handler.setFormatter(plain_formatter)
     root.addHandler(file_handler)
 
