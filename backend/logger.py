@@ -5,11 +5,16 @@ Provides a pre-configured logger with:
   - Timestamps (ISO-8601)
   - Level-coloring (via colorlog if installed, plain otherwise)
   - Consistent name prefixes per module / agent
+  - Per-session log file named: medvqa_<YYYYMMDD_HHMMSS>_<short-id>.log
   - A get_logger() factory for per-component loggers
 """
 
 import logging
+import os
 import sys
+import uuid
+from datetime import datetime
+from logging.handlers import RotatingFileHandler
 from typing import Optional
 
 # ---------------------------------------------------------------------------
@@ -39,6 +44,14 @@ _COLOR_MAP = {
     "CRITICAL": "bold_red",
 }
 
+# Generate a unique session identity once at import time
+_SESSION_TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
+_SESSION_ID = uuid.uuid4().hex[:8]
+_SESSION_LOG_FILENAME = f"medvqa_{_SESSION_TIMESTAMP}_{_SESSION_ID}.log"
+
+# Log directory sits next to this file i.e. backend/logs/
+_LOG_DIR = os.path.join(os.path.dirname(__file__), "logs")
+
 _configured = False
 
 
@@ -56,11 +69,14 @@ def _configure_root() -> None:
         # Already configured (e.g. imported twice)
         return
 
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(logging.DEBUG)
+    plain_formatter = logging.Formatter(_LOG_FORMAT_PLAIN, datefmt=_DATE_FORMAT)
+
+    # ── Console handler (coloured if colorlog is available) ──────────────────
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(logging.DEBUG)
 
     if _HAVE_COLORLOG:
-        formatter = colorlog.ColoredFormatter(
+        console_formatter = colorlog.ColoredFormatter(
             _LOG_FORMAT_COLOR,
             datefmt=_DATE_FORMAT,
             log_colors=_COLOR_MAP,
@@ -68,10 +84,31 @@ def _configure_root() -> None:
             style="%",
         )
     else:
-        formatter = logging.Formatter(_LOG_FORMAT_PLAIN, datefmt=_DATE_FORMAT)
+        console_formatter = plain_formatter
 
-    handler.setFormatter(formatter)
-    root.addHandler(handler)
+    console_handler.setFormatter(console_formatter)
+    root.addHandler(console_handler)
+
+    # ── File handler (plain text, one file per server session) ───────────────
+    os.makedirs(_LOG_DIR, exist_ok=True)
+    log_file_path = os.path.join(_LOG_DIR, _SESSION_LOG_FILENAME)
+
+    file_handler = RotatingFileHandler(
+        log_file_path,
+        maxBytes=10 * 1024 * 1024,  # 10 MB per file
+        backupCount=5,
+        encoding="utf-8",
+    )
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(plain_formatter)
+    root.addHandler(file_handler)
+
+    # Emit the session header so it's easy to find session boundaries in logs
+    root.info(
+        "Session started  file=%s  session_id=%s",
+        _SESSION_LOG_FILENAME,
+        _SESSION_ID,
+    )
 
     # Suppress noisy third-party loggers
     for noisy in ("httpx", "httpcore", "openai", "haystack"):
