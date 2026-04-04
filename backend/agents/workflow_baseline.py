@@ -1,6 +1,10 @@
 import re
+import time
 from agents.image_interpreter import interpret_image
 from agents.question_analyzer import analyze_question
+from logger import get_logger
+
+_log = get_logger("agents.workflow_baseline")
 
 STOPWORDS = {
     "a", "an", "the", "of", "in", "on", "at", "to", "for", "and", "or",
@@ -80,6 +84,15 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
     """
     image_result = precomputed_image_result if precomputed_image_result is not None else interpret_image(image_bytes, mime_type)
     question_result = analyze_question(question, image_result.get("visual_summary", ""))
+
+    _log.info(
+        "Workflow baseline  question=%r  modality=%s  body_region=%s  question_type=%s",
+        question[:100],
+        image_result.get("modality", "unknown"),
+        image_result.get("body_region", "unknown"),
+        question_result.get("question_type", "unknown"),
+    )
+    started = time.perf_counter()
 
     modality = _clean_value(image_result.get("modality"))
     body_region = _clean_value(image_result.get("body_region"))
@@ -185,6 +198,14 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
     elif visible_structures:
         explanation_parts.append(f"visible structures: {', '.join(visible_structures[:4])}")
 
+    elapsed_ms = int((time.perf_counter() - started) * 1000)
+    _log.info(
+        "Workflow baseline done  answer=%r  confidence=%s  question_type=%s  duration=%dms",
+        answer[:80],
+        confidence,
+        question_type,
+        elapsed_ms,
+    )
     return {
         "status": "success" if image_status == "success" else "warning",
         "answer": answer,

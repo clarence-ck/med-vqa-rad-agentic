@@ -1,5 +1,6 @@
 import base64
 import json
+import time
 from io import BytesIO
 from typing import Dict, Any
 
@@ -11,6 +12,9 @@ from PIL import Image
 
 from config import OPENAI_API_KEY, VISION_MODEL
 from utils.json_utils import strip_json_fences
+from logger import get_logger
+
+_log = get_logger("agents.image_interpreter")
 
 
 @component
@@ -37,6 +41,8 @@ class ImageInterpreter:
 
 Return ONLY the JSON object, no additional text."""
 
+        _log.info("Running image interpretation (mime_type=%s, size=%d bytes)", mime_type, len(image_bytes))
+        started = time.perf_counter()
         try:
             image = Image.open(BytesIO(image_bytes)).convert("RGB")
             buffered = BytesIO()
@@ -52,11 +58,21 @@ Return ONLY the JSON object, no additional text."""
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
             result["status"] = "success"
+            elapsed_ms = int((time.perf_counter() - started) * 1000)
+            _log.info(
+                "Image interpretation done  modality=%s  body_region=%s  quality=%s  "
+                "findings=%d  duration=%dms",
+                result.get("modality", "unknown"),
+                result.get("body_region", "unknown"),
+                result.get("image_quality", "unknown"),
+                len(result.get("notable_findings", [])),
+                elapsed_ms,
+            )
             return {"result": result}
 
         except json.JSONDecodeError as e:
-            print(f"[ImageInterpreter] JSON parse error: {e}")
-            print(f"[ImageInterpreter] Raw response: {raw if 'raw' in locals() else 'N/A'}")
+            _log.error("JSON parse error: %s", e)
+            _log.debug("Raw response: %s", raw if 'raw' in locals() else 'N/A')
             return {"result": {
                 "status": "error",
                 "error": "Failed to parse image interpretation response",
@@ -69,7 +85,7 @@ Return ONLY the JSON object, no additional text."""
                 "notable_findings": []
             }}
         except Exception as e:
-            print(f"[ImageInterpreter] Exception: {type(e).__name__}: {e}")
+            _log.error("Unexpected error: %s: %s", type(e).__name__, e)
             return {"result": {
                 "status": "error",
                 "error": str(e),

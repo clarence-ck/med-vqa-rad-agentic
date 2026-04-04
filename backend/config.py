@@ -1,3 +1,4 @@
+import logging
 import os
 from dotenv import load_dotenv
 
@@ -18,13 +19,15 @@ BACKEND_CORS_ORIGINS = [
     if origin.strip()
 ]
 
+_cfg_log = logging.getLogger("medvqa.config")
+
 if not OPENAI_API_KEY:
-    print("WARNING: OPENAI_API_KEY not set. Set it in .env file.")
+    _cfg_log.warning("OPENAI_API_KEY not set — set it in the .env file")
 
 if not OPENAI_MODEL:
-    print("WARNING: OPENAI_MODEL not set. Defaulting to 'oss120b'.")
+    _cfg_log.warning("OPENAI_MODEL not set — defaulting to 'gpt-5.4-mini-2026-03-17'")
     OPENAI_MODEL = "gpt-5.4-mini-2026-03-17"
 
 if not VISION_MODEL:
-    print("WARNING: VISION_MODEL not set. Defaulting to 'gpt-5.4-mini-2026-03-17'.")
+    _cfg_log.warning("VISION_MODEL not set — defaulting to 'gpt-5.4-mini-2026-03-17'")
     VISION_MODEL = "gpt-5.4-mini-2026-03-17"

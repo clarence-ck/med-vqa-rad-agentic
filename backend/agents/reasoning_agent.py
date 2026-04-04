@@ -1,4 +1,5 @@
 import json
+import time
 from typing import Dict, Any
 from haystack import component
 from haystack.components.generators.chat import OpenAIChatGenerator
@@ -6,6 +7,9 @@ from haystack.dataclasses import ChatMessage
 from haystack.utils import Secret
 from config import OPENAI_API_KEY, OPENAI_MODEL
 from utils.json_utils import strip_json_fences
+from logger import get_logger
+
+_log = get_logger("agents.reasoning_agent")
 
 
 @component
@@ -38,6 +42,24 @@ class ReasoningAgent:
         if not isinstance(qa, dict): qa = {}
         if not isinstance(kn, dict): kn = {}
         rc = retry_context if isinstance(retry_context, dict) else {}
+
+        is_retry = bool(rc)
+        _log.info(
+            "Reasoning agent starting  question=%r  is_retry=%s  "
+            "question_type=%s  yes_no=%s",
+            original_question[:100] if original_question else "",
+            is_retry,
+            qa.get("question_type", "unknown"),
+            qa.get("question_type", "") in ("yes_no", "presence_absence"),
+        )
+        if is_retry:
+            _log.info(
+                "Retry context  prev_status=%s  prev_confidence=%s  fallback=%s",
+                rc.get("verification_status", "unknown"),
+                rc.get("confidence", "unknown"),
+                rc.get("fallback_recommendation", "none"),
+            )
+        started = time.perf_counter()
 
         failure_categories = rc.get('failure_categories', []) if rc else []
         if isinstance(failure_categories, list):
@@ -133,9 +155,17 @@ Return ONLY the JSON object, no additional text."""
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
             result["status"] = "success"
+            elapsed_ms = int((time.perf_counter() - started) * 1000)
+            _log.info(
+                "Reasoning done  answer=%r  confidence=%s  duration=%dms",
+                str(result.get("answer", ""))[:80],
+                result.get("answer_confidence", "unknown"),
+                elapsed_ms,
+            )
             return {"result": result}
 
         except json.JSONDecodeError:
+            _log.error("Failed to parse reasoning response JSON")
             return {"result": {
                 "status": "error",
                 "error": "Failed to parse reasoning response",

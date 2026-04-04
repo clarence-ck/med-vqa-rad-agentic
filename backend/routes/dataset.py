@@ -10,14 +10,17 @@ from agents.baseline import baseline_answer
 from agents.orchestrator import run_pipeline
 from agents.workflow_baseline import workflow_answer
 from utils.data_loader import get_sample_cases, get_sample_by_id, get_image_bytes
+from logger import get_logger
 
 router = APIRouter(prefix="/api/dataset")
 CACHE_DIR = os.path.join(os.path.dirname(__file__), "..", ".case_explorer_cache")
+_log = get_logger("routes.dataset")
 
 
 @router.get("/samples")
 async def list_samples(limit: int = 20):
     samples = get_sample_cases(limit)
+    _log.info("Listing samples  limit=%d  returned=%d", limit, len(samples))
     return {"samples": samples, "count": len(samples)}
 
 
@@ -337,9 +340,11 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
 async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=False)):
     sample, image_bytes = _get_sample_with_image(sample_id)
     if sample is None:
+        _log.warning("Sample %d not found", sample_id)
         return JSONResponse(status_code=404, content={"error": "Sample not found"})
 
     if not image_bytes:
+        _log.warning("Image bytes missing for sample %d", sample_id)
         return JSONResponse(status_code=404, content={"error": "Sample image not found"})
 
     question = sample.get("question", "")
@@ -347,11 +352,16 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
     cache_path = _get_cache_path(sample_id, question)
 
     if not refresh and os.path.exists(cache_path):
+        _log.info("Cache HIT for sample %d (question=%r)", sample_id, question[:80])
         with open(cache_path, "r", encoding="utf-8") as f:
             cached_payload = json.load(f)
             cached_payload["cached"] = True
             return cached_payload
 
+    _log.info(
+        "Cache MISS for sample %d  question=%r  refresh=%s  running all 3 pipelines in parallel",
+        sample_id, question[:80], refresh,
+    )
     started_at = time.time()
 
     async def timed(fn, *args):
@@ -365,6 +375,20 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
             timed(workflow_answer, image_bytes, question, mime_type),
             timed(run_pipeline, image_bytes, question, mime_type),
         )
+
+    total_ms = int((time.time() - started_at) * 1000)
+    _log.info(
+        "Sample %d analysis complete  baseline=%dms  workflow=%dms  agentic=%dms  total=%dms",
+        sample_id, baseline_ms, workflow_ms, agentic_ms, total_ms,
+    )
+    _log.info(
+        "Sample %d answers  baseline=%r  workflow=%r  agentic=%r  ground_truth=%r",
+        sample_id,
+        str(baseline_result.get("answer", ""))[:60],
+        str(workflow_result.get("answer", ""))[:60],
+        str(agentic_result.get("answer", ""))[:60],
+        str(sample.get("answer", ""))[:60],
+    )
 
     payload = {
         "sample": sample,
@@ -394,6 +418,7 @@ async def get_evaluation_summary():
         for filename in os.listdir(CACHE_DIR)
         if filename.endswith(".json")
     ]
+    _log.info("Evaluation summary requested  cache_files=%d", len(cache_files))
 
     rows = []
     skipped = 0
@@ -404,7 +429,7 @@ async def get_evaluation_summary():
             row = _build_evaluation_row(payload)
             rows.append(row)
         except Exception as exc:
-            print(f"WARNING: Skipping cache file {os.path.basename(cache_file)}: {exc}")
+            _log.warning("Skipping cache file %s: %s", os.path.basename(cache_file), exc)
             skipped += 1
             continue
 
@@ -415,6 +440,10 @@ async def get_evaluation_summary():
         row.get("sample_id") or 0,
     ))
 
+    _log.info(
+        "Evaluation summary built  total_rows=%d  skipped=%d",
+        len(rows), skipped,
+    )
     return {
         "summary": _build_evaluation_summary(rows),
         "rows": rows,

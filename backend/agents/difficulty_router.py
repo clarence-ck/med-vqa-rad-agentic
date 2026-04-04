@@ -1,4 +1,5 @@
 import json
+import time
 from typing import Dict, Any
 from haystack import component
 from haystack.components.generators.chat import OpenAIChatGenerator
@@ -6,6 +7,9 @@ from haystack.dataclasses import ChatMessage
 from haystack.utils import Secret
 from config import OPENAI_API_KEY, OPENAI_MODEL
 from utils.json_utils import strip_json_fences
+from logger import get_logger
+
+_log = get_logger("agents.difficulty_router")
 
 
 @component
@@ -39,6 +43,12 @@ class DifficultyRouter:
         modality = ii.get("modality", "unknown")
         body_region = ii.get("body_region", "unknown")
         visual_summary = ii.get("visual_summary", "") or ""
+
+        _log.info(
+            "Routing difficulty  question_type=%s  reasoning=%s  med_knowledge=%s  modality=%s  region=%s",
+            question_type, reasoning_type, requires_medical_knowledge, modality, body_region,
+        )
+        started = time.perf_counter()
 
         prompt = f"""You are a medical VQA routing and planning agent.
 
@@ -84,9 +94,21 @@ Return ONLY the JSON object, no additional text."""
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
             result["status"] = "success"
+            elapsed_ms = int((time.perf_counter() - started) * 1000)
+            _log.info(
+                "Routing decision  difficulty=%s  needs_retrieval=%s  "
+                "verification=%s  fallback=%s  duration=%dms",
+                result.get("difficulty", "unknown"),
+                result.get("needs_retrieval", "?"),
+                result.get("verification_policy", "unknown"),
+                result.get("fallback_policy", "unknown"),
+                elapsed_ms,
+            )
+            _log.debug("Routing rationale: %s", result.get("routing_rationale", ""))
             return {"result": result}
 
         except json.JSONDecodeError:
+            _log.error("Failed to parse routing decision JSON; applying fallback (difficulty=medium)")
             return {"result": {
                 "status": "error",
                 "difficulty": "medium",
@@ -97,6 +119,7 @@ Return ONLY the JSON object, no additional text."""
                 "routing_rationale": "Fallback routing applied due to JSON parse failure.",
             }}
         except Exception as e:
+            _log.error("Unexpected error in difficulty routing: %s", e)
             return {"result": {
                 "status": "error",
                 "error": str(e),

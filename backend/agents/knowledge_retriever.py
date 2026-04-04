@@ -1,4 +1,5 @@
 import json
+import time
 from typing import Dict, Any, Optional
 from haystack import component
 from haystack.components.generators.chat import OpenAIChatGenerator
@@ -6,14 +7,18 @@ from haystack.dataclasses import ChatMessage
 from haystack.utils import Secret
 from config import OPENAI_API_KEY, OPENAI_MODEL
 from utils.json_utils import strip_json_fences
+from logger import get_logger
+
+_log = get_logger("agents.knowledge_retriever")
 
 # Import advanced RAG
 try:
     from agents.advanced_rag import get_rag_retriever, retrieve_knowledge_advanced
     _ADVANCED_RAG_AVAILABLE = True
+    _log.info("Advanced RAG module loaded successfully")
 except ImportError:
     _ADVANCED_RAG_AVAILABLE = False
-    print("[KnowledgeRetriever] Advanced RAG not available, falling back to standard mode")
+    _log.warning("Advanced RAG not available, falling back to standard (LLM-only) knowledge retrieval")
 
 
 @component
@@ -36,13 +41,14 @@ class KnowledgeRetriever:
         )
         self.use_advanced_rag = use_advanced_rag and _ADVANCED_RAG_AVAILABLE
         self._rag_retriever = None
-        
+
         # Lazy init RAG retriever on first use
         if self.use_advanced_rag:
             try:
                 self._rag_retriever = get_rag_retriever()
+                _log.info("Advanced RAG retriever initialized successfully")
             except Exception as e:
-                print(f"[KnowledgeRetriever] Advanced RAG init failed: {e}")
+                _log.error("Advanced RAG init failed: %s — falling back to LLM-only mode", e)
                 self.use_advanced_rag = False
 
     @component.output_types(result=Dict[str, Any])
@@ -71,11 +77,23 @@ class KnowledgeRetriever:
 
         cues_str = ", ".join(visual_cues) if visual_cues else "none"
         
+        _log.info(
+            "Knowledge retrieval starting  question=%r  modality=%s  body_region=%s  "
+            "question_type=%s  target_entity=%s  advanced_rag=%s",
+            original_question[:100] if original_question else "",
+            modality or "unknown",
+            body_region or "unknown",
+            question_type or "unknown",
+            target_entity or "unknown",
+            self.use_advanced_rag,
+        )
+        started = time.perf_counter()
+
         # Advanced RAG: Retrieve similar cases from train set
         rag_context = ""
         similar_cases = []
         rag_metadata = {}
-        
+
         if self.use_advanced_rag and original_question:
             try:
                 finding_category = None
@@ -92,19 +110,27 @@ class KnowledgeRetriever:
                     use_reranking=True,
                     use_self_reflection=True
                 )
-                
+
                 similar_cases = rag_result.get("similar_cases", [])
                 rag_metadata = {
                     "count": rag_result.get("count", 0),
                     "query_rewritten": rag_result.get("query_rewritten", False)
                 }
-                
+
                 if similar_cases:
                     rag_context = self._format_similar_cases(similar_cases)
-                    print(f"[KnowledgeRetriever] Retrieved {len(similar_cases)} similar cases via Advanced RAG")
-                    
+                    _log.info(
+                        "Advanced RAG retrieved %d similar cases  "
+                        "(query_rewritten=%s  finding_category=%s)",
+                        len(similar_cases),
+                        rag_metadata.get("query_rewritten", False),
+                        finding_category or "none",
+                    )
+                else:
+                    _log.info("Advanced RAG returned 0 similar cases for this question")
+
             except Exception as e:
-                print(f"[KnowledgeRetriever] RAG retrieval failed: {e}")
+                _log.error("Advanced RAG retrieval failed: %s — continuing without RAG context", e)
                 rag_context = ""
 
         # Build enhanced prompt with RAG context
@@ -129,17 +155,25 @@ class KnowledgeRetriever:
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
             result["status"] = "success"
-            
+
             # Add RAG metadata to result
             if similar_cases:
                 result["rag_retrieval"] = {
                     "similar_cases": similar_cases,
                     "metadata": rag_metadata
                 }
-            
+
+            elapsed_ms = int((time.perf_counter() - started) * 1000)
+            _log.info(
+                "Knowledge retrieval done  key_facts=%d  rag_cases=%d  duration=%dms",
+                len(result.get("key_facts", [])),
+                len(similar_cases),
+                elapsed_ms,
+            )
             return {"result": result}
 
         except json.JSONDecodeError:
+            _log.error("Failed to parse knowledge retrieval JSON response")
             return {"result": {
                 "status": "error",
                 "error": "Failed to parse knowledge retrieval response",
@@ -150,6 +184,7 @@ class KnowledgeRetriever:
                 "terminology": {}
             }}
         except Exception as e:
+            _log.error("Unexpected error in knowledge retrieval: %s", e)
             return {"result": {
                 "status": "error",
                 "error": str(e),

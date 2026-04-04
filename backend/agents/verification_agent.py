@@ -1,4 +1,5 @@
 import json
+import time
 from typing import Dict, Any
 from haystack import component
 from haystack.components.generators.chat import OpenAIChatGenerator
@@ -6,6 +7,9 @@ from haystack.dataclasses import ChatMessage
 from haystack.utils import Secret
 from config import OPENAI_API_KEY, OPENAI_MODEL
 from utils.json_utils import strip_json_fences
+from logger import get_logger
+
+_log = get_logger("agents.verification_agent")
 
 
 @component
@@ -34,6 +38,14 @@ class VerificationAgent:
         if not isinstance(ans, dict): ans = {}
         if not isinstance(vs, dict): vs = {}
         if not isinstance(qa, dict): qa = {}
+
+        _log.info(
+            "Verifying answer=%r  question=%r  question_type=%s",
+            str(ans.get("answer", ""))[:80],
+            original_question[:80] if original_question else "",
+            qa.get("question_type", "unknown"),
+        )
+        started = time.perf_counter()
 
         prompt = f"""You are a medical VQA verification agent. Your job is to critically evaluate whether the following answer is consistent, grounded, and appropriate.
 
@@ -90,9 +102,24 @@ Return ONLY the JSON object, no additional text."""
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
             result["status"] = "success"
+            elapsed_ms = int((time.perf_counter() - started) * 1000)
+            checks = result.get("checks", {}) or {}
+            passed = sum(1 for v in checks.values() if v)
+            _log.info(
+                "Verification done  status=%s  confidence=%s  checks=%d/%d  duration=%dms",
+                result.get("verification_status", "unknown"),
+                result.get("confidence_label", "unknown"),
+                passed,
+                len(checks),
+                elapsed_ms,
+            )
+            issues = result.get("issues_found", [])
+            if issues:
+                _log.warning("Verification issues: %s", issues)
             return {"result": result}
 
         except json.JSONDecodeError:
+            _log.error("Failed to parse verification response JSON")
             return {"result": {
                 "status": "error",
                 "error": "Failed to parse verification response",

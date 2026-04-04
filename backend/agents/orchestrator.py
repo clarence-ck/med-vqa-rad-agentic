@@ -12,6 +12,9 @@ from agents.knowledge_retriever import KnowledgeRetriever
 from agents.reasoning_agent import ReasoningAgent
 from agents.verification_agent import VerificationAgent
 from config import OPENAI_API_KEY, OPENAI_MODEL
+from logger import get_logger
+
+_log = get_logger("agents.orchestrator")
 
 
 # ---------------------------------------------------------------------------
@@ -20,28 +23,41 @@ from config import OPENAI_API_KEY, OPENAI_MODEL
 
 def _tool_interpret_image(image_bytes: bytes, mime_type: str = "image/png") -> dict:
     started = time.time()
+    _log.info("[tool] interpret_image called")
     result = ImageInterpreter().run(image_bytes=image_bytes, mime_type=mime_type)["result"]
-    return {"result": result, "duration_ms": int((time.time() - started) * 1000)}
+    duration_ms = int((time.time() - started) * 1000)
+    _log.info("[tool] interpret_image done  modality=%s  region=%s  duration=%dms",
+              result.get("modality", "?"), result.get("body_region", "?"), duration_ms)
+    return {"result": result, "duration_ms": duration_ms}
 
 
 def _tool_analyze_question(question: str, image_interpretation: dict = None) -> dict:
     started = time.time()
+    _log.info("[tool] analyze_question called  question=%r", question[:80])
     result = QuestionAnalyzer().run(question=question, image_interpretation=image_interpretation)["result"]
-    return {"result": result, "duration_ms": int((time.time() - started) * 1000)}
+    duration_ms = int((time.time() - started) * 1000)
+    _log.info("[tool] analyze_question done  type=%s  duration=%dms",
+              result.get("question_type", "?"), duration_ms)
+    return {"result": result, "duration_ms": duration_ms}
 
 
 def _tool_route_difficulty(question_analysis: dict = None, image_interpretation: dict = None) -> dict:
     started = time.time()
+    _log.info("[tool] route_difficulty called")
     result = DifficultyRouter().run(
         question_analysis=question_analysis,
         image_interpretation=image_interpretation,
     )["result"]
-    return {"result": result, "duration_ms": int((time.time() - started) * 1000)}
+    duration_ms = int((time.time() - started) * 1000)
+    _log.info("[tool] route_difficulty done  difficulty=%s  needs_retrieval=%s  duration=%dms",
+              result.get("difficulty", "?"), result.get("needs_retrieval", "?"), duration_ms)
+    return {"result": result, "duration_ms": duration_ms}
 
 
 def _tool_retrieve_knowledge(image_interpretation: dict = None, question_analysis: dict = None,
                              question: str = "", routing_decision: dict = None) -> dict:
     if routing_decision and not routing_decision.get("needs_retrieval", True):
+        _log.info("[tool] retrieve_knowledge SKIPPED (needs_retrieval=False)")
         return {"result": {
             "status": "skipped",
             "contextual_notes": "Retrieval skipped — routing decision: not needed.",
@@ -51,18 +67,25 @@ def _tool_retrieve_knowledge(image_interpretation: dict = None, question_analysi
             "terminology": {},
         }, "duration_ms": 0}
     started = time.time()
+    _log.info("[tool] retrieve_knowledge called")
     result = KnowledgeRetriever().run(
         image_interpretation=image_interpretation,
         question_analysis=question_analysis,
         original_question=question,
     )["result"]
-    return {"result": result, "duration_ms": int((time.time() - started) * 1000)}
+    duration_ms = int((time.time() - started) * 1000)
+    _log.info("[tool] retrieve_knowledge done  key_facts=%d  rag_cases=%d  duration=%dms",
+              len(result.get("key_facts", [])),
+              len(result.get("rag_retrieval", {}).get("similar_cases", [])),
+              duration_ms)
+    return {"result": result, "duration_ms": duration_ms}
 
 
 def _tool_reason_answer(image_interpretation: dict = None, question_analysis: dict = None,
                         knowledge: dict = None, question: str = "",
                         retry_context: dict = None) -> dict:
     started = time.time()
+    _log.info("[tool] reason_answer called  is_retry=%s", bool(retry_context))
     result = ReasoningAgent().run(
         image_interpretation=image_interpretation,
         question_analysis=question_analysis,
@@ -70,19 +93,26 @@ def _tool_reason_answer(image_interpretation: dict = None, question_analysis: di
         original_question=question,
         retry_context=retry_context,
     )["result"]
-    return {"result": result, "duration_ms": int((time.time() - started) * 1000)}
+    duration_ms = int((time.time() - started) * 1000)
+    _log.info("[tool] reason_answer done  answer=%r  confidence=%s  duration=%dms",
+              str(result.get("answer", ""))[:60], result.get("answer_confidence", "?"), duration_ms)
+    return {"result": result, "duration_ms": duration_ms}
 
 
 def _tool_verify_answer(answer_data: dict = None, image_interpretation: dict = None,
                         question_analysis: dict = None, question: str = "") -> dict:
     started = time.time()
+    _log.info("[tool] verify_answer called")
     result = VerificationAgent().run(
         answer_data=answer_data,
         image_interpretation=image_interpretation,
         question_analysis=question_analysis,
         original_question=question,
     )["result"]
-    return {"result": result, "duration_ms": int((time.time() - started) * 1000)}
+    duration_ms = int((time.time() - started) * 1000)
+    _log.info("[tool] verify_answer done  status=%s  confidence=%s  duration=%dms",
+              result.get("verification_status", "?"), result.get("confidence_label", "?"), duration_ms)
+    return {"result": result, "duration_ms": duration_ms}
 
 
 # ---------------------------------------------------------------------------
@@ -585,8 +615,13 @@ def _payload_score(payload: dict) -> tuple[int, int, int, int]:
 
 def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png") -> dict:
     pipeline_start = time.time()
+    _log.info(
+        "=== Agentic pipeline START  question=%r  mime_type=%s  size=%d bytes ===",
+        question[:100], mime_type, len(image_bytes),
+    )
 
     def _run_once(retry_context: dict | None = None) -> dict:
+        _log.info("Running agentic pipeline (is_retry=%s)", bool(retry_context))
         agent = _create_agent()
         response = agent.run(
             messages=[ChatMessage.from_user(question)],
@@ -624,18 +659,26 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
 
     first_results = _run_once()
     first_payload = _assemble_pipeline_payload(first_results, question, pipeline_start)
+    _log.info(
+        "Pipeline attempt 1 result  answer=%r  verification=%s  confidence=%s  flag_review=%s",
+        str(first_payload.get("answer", ""))[:60],
+        first_payload.get("verification_status", "unknown"),
+        first_payload.get("confidence", "unknown"),
+        first_payload.get("should_flag_for_review", False),
+    )
 
     retry_reason = ""
     retry_attempts = 0
     best_payload = first_payload
 
     if _should_retry_pipeline(first_payload):
-        retry_attempts = 1
         retry_reason = (
             f"verification_status={first_payload.get('verification_status', 'unknown')}; "
             f"fallback={first_payload.get('fallback_recommendation', 'none')}; "
             f"flag_for_review={first_payload.get('should_flag_for_review', False)}"
         )
+        _log.info("Pipeline RETRY triggered  reason: %s", retry_reason)
+        retry_attempts = 1
         retry_context = {
             "verification_status": first_payload.get("verification_status", "unknown"),
             "confidence": first_payload.get("confidence", "Low"),
@@ -646,11 +689,28 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
         second_payload = _assemble_pipeline_payload(
             second_results, question, pipeline_start, retry_attempts=1, retry_reason=retry_reason
         )
+        _log.info(
+            "Pipeline attempt 2 result  answer=%r  verification=%s  confidence=%s",
+            str(second_payload.get("answer", ""))[:60],
+            second_payload.get("verification_status", "unknown"),
+            second_payload.get("confidence", "unknown"),
+        )
         if _payload_score(second_payload) > _payload_score(first_payload):
             best_payload = second_payload
+            _log.info("Pipeline RETRY winner: attempt 2 (higher score)")
         else:
             best_payload = first_payload
+            _log.info("Pipeline RETRY winner: attempt 1 (kept original)")
+    else:
+        _log.info("Pipeline retry NOT needed")
 
     best_payload["retry_attempts"] = retry_attempts
     best_payload["retry_reason"] = retry_reason
+    total_ms = int((time.time() - pipeline_start) * 1000)
+    _log.info(
+        "=== Agentic pipeline DONE  answer=%r  retries=%d  total_duration=%dms ===",
+        str(best_payload.get("answer", ""))[:60],
+        retry_attempts,
+        total_ms,
+    )
     return best_payload

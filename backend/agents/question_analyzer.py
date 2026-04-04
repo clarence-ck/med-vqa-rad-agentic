@@ -1,4 +1,5 @@
 import json
+import time
 from typing import Dict, Any
 from haystack import component
 from haystack.components.generators.chat import OpenAIChatGenerator
@@ -6,6 +7,9 @@ from haystack.dataclasses import ChatMessage
 from haystack.utils import Secret
 from config import OPENAI_API_KEY, OPENAI_MODEL
 from utils.json_utils import strip_json_fences
+from logger import get_logger
+
+_log = get_logger("agents.question_analyzer")
 
 
 @component
@@ -25,6 +29,9 @@ class QuestionAnalyzer:
         visual_summary = ""
         if image_interpretation and isinstance(image_interpretation, dict):
             visual_summary = image_interpretation.get("visual_summary", "")
+
+        _log.info("Analyzing question: %r", question[:120])
+        started = time.perf_counter()
 
         prompt = f"""You are a medical VQA question understanding agent. Analyze the following question asked about a medical image.
 
@@ -56,9 +63,19 @@ Return ONLY the JSON object, no additional text."""
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
             result["status"] = "success"
+            elapsed_ms = int((time.perf_counter() - started) * 1000)
+            _log.info(
+                "Question analysis done  type=%s  reasoning=%s  med_knowledge=%s  clarity=%s  duration=%dms",
+                result.get("question_type", "unknown"),
+                result.get("reasoning_type", "unknown"),
+                result.get("requires_medical_knowledge", "?"),
+                result.get("question_clarity", "unknown"),
+                elapsed_ms,
+            )
             return {"result": result}
 
         except json.JSONDecodeError:
+            _log.error("Failed to parse question analysis JSON response")
             return {"result": {
                 "status": "error",
                 "error": "Failed to parse question analysis response",
