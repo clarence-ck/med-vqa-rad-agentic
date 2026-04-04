@@ -183,9 +183,6 @@ body {
   height: 40px;
   object-fit: contain;
   border-radius: var(--radius-md);
-  background: #ffffff;
-  padding: 4px;
-  box-shadow: var(--shadow-glow);
 }
 
 .app-logo-text {

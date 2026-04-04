@@ -95,7 +95,7 @@ function App() {
     <div className="app-container">
       <header className="app-header">
         <div className="app-logo">
-          <img src="/favicon.png" alt="MedVQA Logo" className="app-logo-img" />
+          <img src="/favicon_transparent.png" alt="MedVQA Logo" className="app-logo-img" />
           <div>
             <div className="app-logo-text">MedVisionQuery</div>
             <div className="app-logo-subtitle">Medical Image QA Assistant</div>

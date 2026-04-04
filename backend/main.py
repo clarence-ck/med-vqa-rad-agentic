@@ -55,7 +55,7 @@ async def _log_requests(request: Request, call_next):
 @app.get("/favicon.png", include_in_schema=False)
 async def favicon():
     """Serve the MEDVQA AGENTIC logo as the favicon."""
-    favicon_path = os.path.join(os.path.dirname(__file__), "static", "favicon.png")
+    favicon_path = os.path.join(os.path.dirname(__file__), "static", "favicon_transparent.png")
     if os.path.exists(favicon_path):
         return FileResponse(favicon_path, media_type="image/png")
     return Response(status_code=204)
