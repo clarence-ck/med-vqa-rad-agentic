@@ -23,7 +23,7 @@ if not OPENAI_API_KEY:
 
 if not OPENAI_MODEL:
     print("WARNING: OPENAI_MODEL not set. Defaulting to 'oss120b'.")
-    OPENAI_MODEL = "oss120b"
+    OPENAI_MODEL = "gpt-5.4-mini-2026-03-17"
 
 if not VISION_MODEL:
     print("WARNING: VISION_MODEL not set. Defaulting to 'gpt-5.4-mini-2026-03-17'.")
