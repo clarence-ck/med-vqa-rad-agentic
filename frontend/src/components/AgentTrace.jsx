@@ -3,6 +3,7 @@ import { useState } from 'react';
 const STEP_META = {
   'Image Interpretation': { stage: 'Perception', subtitle: 'visual grounding', className: 'perception' },
   'Question Understanding': { stage: 'Perception', subtitle: 'intent + format', className: 'perception' },
+  'Difficulty Routing': { stage: 'Planning', subtitle: 'complexity + pipeline depth', className: 'routing' },
   'Knowledge Support': { stage: 'Retrieval', subtitle: 'Advanced RAG context', className: 'retrieval' },
   'Reasoning & Answer': { stage: 'Reasoning', subtitle: 'final synthesis', className: 'reasoning' },
   'Verification': { stage: 'Safety', subtitle: 'support + confidence gate', className: 'verification' },
@@ -18,9 +19,10 @@ export default function AgentTrace({ agentTrace, loading }) {
   const defaultSteps = [
     { agent: 'Image Interpretation', agent_id: 1 },
     { agent: 'Question Understanding', agent_id: 2 },
-    { agent: 'Knowledge Support', agent_id: 3 },
-    { agent: 'Reasoning & Answer', agent_id: 4 },
-    { agent: 'Verification', agent_id: 5 },
+    { agent: 'Difficulty Routing', agent_id: 3 },
+    { agent: 'Knowledge Support', agent_id: 4 },
+    { agent: 'Reasoning & Answer', agent_id: 5 },
+    { agent: 'Verification', agent_id: 6 },
   ];
 
   const steps = agentTrace || (loading ? defaultSteps : []);
@@ -118,6 +120,22 @@ export default function AgentTrace({ agentTrace, loading }) {
                     {step.summary.length > 80 && !isExpanded
                       ? step.summary.slice(0, 80) + '...'
                       : step.summary}
+                  </div>
+                )}
+                {step.agent_id === 3 && step.output && !loading && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
+                    <span className={`tag ${step.output.difficulty === 'easy' ? 'tag-green' : step.output.difficulty === 'hard' ? 'tag-red' : 'tag-amber'}`}
+                          style={{ fontSize: '10px', padding: '0 5px' }}>
+                      {step.output.difficulty}
+                    </span>
+                    <span className={`tag ${step.output.needs_retrieval ? 'tag-green' : 'tag-gray'}`}
+                          style={{ fontSize: '10px', padding: '0 5px' }}>
+                      retrieval {step.output.needs_retrieval ? 'on' : 'off'}
+                    </span>
+                    <span className={`tag ${step.output.verification_policy === 'strict' ? 'tag-amber' : 'tag-gray'}`}
+                          style={{ fontSize: '10px', padding: '0 5px' }}>
+                      {step.output.verification_policy} verify
+                    </span>
                   </div>
                 )}
                 {isExpanded && step.output && (

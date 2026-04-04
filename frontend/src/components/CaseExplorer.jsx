@@ -86,6 +86,13 @@ function getVerificationTagClass(status) {
   return 'tag-gray';
 }
 
+function getDifficultyTagClass(difficulty) {
+  if (difficulty === 'easy') return 'tag-green';
+  if (difficulty === 'medium') return 'tag-amber';
+  if (difficulty === 'hard') return 'tag-red';
+  return 'tag-gray';
+}
+
 function MethodologyLabels() {
   return (
     <div className="methodology-compact" style={{ 
@@ -168,6 +175,11 @@ export default function CaseExplorer({
   const reviewRecommended = Boolean(analysisData?.agentic_result?.should_flag_for_review);
   const issueCount = analysisData?.agentic_result?.issues_found?.length || 0;
   const crossModalAgreement = analysisData?.agentic_result?.cross_modal_agreement?.level || 'unknown';
+  const routingDecision = analysisData?.agentic_result?.routing_decision || {};
+  const routingDifficulty = routingDecision.difficulty || 'unknown';
+  const routingVerificationPolicy = routingDecision.verification_policy || 'standard';
+  const routingFallbackPolicy = routingDecision.fallback_policy || 'none';
+  const routingRationale = routingDecision.routing_rationale || '';
 
   const groupedSamples = useMemo(() => {
     const groups = samples.reduce((acc, sample) => {
@@ -433,20 +445,32 @@ export default function CaseExplorer({
                       </section>
 
                       <section className="summary-section">
-                        <div className="summary-section-title">Retrieval</div>
+                        <div className="summary-section-title">Routing &amp; Retrieval</div>
                         <div className="summary-stat-list">
                           <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label" data-tooltip="Whether the Knowledge Retriever agent was invoked. It is only triggered for abnormality descriptions, explanation requests, or when medical knowledge is explicitly required.">Knowledge retriever</span>
+                            <span className="summary-stat-label" data-tooltip="Question difficulty assessed by the Difficulty Router agent: easy (simple visual recognition), medium (some clinical context needed), hard (requires background knowledge).">Difficulty</span>
+                            <span className={`tag ${getDifficultyTagClass(routingDifficulty)}`}>{routingDifficulty}</span>
+                          </div>
+                          <div className="summary-stat-row summary-stat-row-inline">
+                            <span className="summary-stat-label" data-tooltip="Whether the Knowledge Retriever agent was invoked. Determined by the Difficulty Router based on complexity and requires_medical_knowledge flag.">Knowledge retriever</span>
                             <span className={`tag ${hasRetrieverDetails ? 'tag-green' : 'tag-gray'}`}>
                               {hasRetrieverDetails ? 'triggered' : 'skipped'}
                             </span>
+                          </div>
+                          <div className="summary-stat-row summary-stat-row-inline">
+                            <span className="summary-stat-label" data-tooltip="Verification strictness set by the Difficulty Router. Strict mode applies tighter checks for complex or ambiguous questions.">Verification policy</span>
+                            <span className={`tag ${routingVerificationPolicy === 'strict' ? 'tag-amber' : 'tag-gray'}`}>{routingVerificationPolicy}</span>
+                          </div>
+                          <div className="summary-stat-row summary-stat-row-inline">
+                            <span className="summary-stat-label" data-tooltip="Fallback policy set by the Difficulty Router. Controls whether a disclaimer is added or the case is flagged for review on low confidence.">Fallback policy</span>
+                            <span className={`tag ${routingFallbackPolicy === 'flag_for_review' ? 'tag-red' : routingFallbackPolicy === 'add_disclaimer' ? 'tag-amber' : 'tag-gray'}`}>{routingFallbackPolicy.replace(/_/g, ' ')}</span>
                           </div>
                           <div className="summary-stat-row">
                             <span className="summary-stat-label" data-tooltip="Number of specific 'key facts' extracted by the Knowledge Support agent from external context to assist the reasoning phase.">Key facts</span>
                             <span className="summary-stat-value">{knowledgeSupport.keyFactsCount}</span>
                           </div>
                           <div className="summary-summary-text">
-                            {hasRetrieverDetails ? knowledgeSupport.summary : 'No retrieval context was added for this case.'}
+                            {routingRationale || (hasRetrieverDetails ? knowledgeSupport.summary : 'No retrieval context was added for this case.')}
                           </div>
                         </div>
                       </section>

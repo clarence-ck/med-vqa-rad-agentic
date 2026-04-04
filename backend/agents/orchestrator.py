@@ -1,5 +1,5 @@
 import time
-from typing import Any, Dict
+from typing import Any
 from haystack.components.agents import Agent
 from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage
@@ -7,6 +7,7 @@ from haystack.tools import Tool
 from haystack.utils import Secret
 from agents.image_interpreter import ImageInterpreter
 from agents.question_analyzer import QuestionAnalyzer
+from agents.difficulty_router import DifficultyRouter
 from agents.knowledge_retriever import KnowledgeRetriever
 from agents.reasoning_agent import ReasoningAgent
 from agents.verification_agent import VerificationAgent
@@ -29,8 +30,26 @@ def _tool_analyze_question(question: str, image_interpretation: dict = None) -> 
     return {"result": result, "duration_ms": int((time.time() - started) * 1000)}
 
 
+def _tool_route_difficulty(question_analysis: dict = None, image_interpretation: dict = None) -> dict:
+    started = time.time()
+    result = DifficultyRouter().run(
+        question_analysis=question_analysis,
+        image_interpretation=image_interpretation,
+    )["result"]
+    return {"result": result, "duration_ms": int((time.time() - started) * 1000)}
+
+
 def _tool_retrieve_knowledge(image_interpretation: dict = None, question_analysis: dict = None,
-                             question: str = "") -> dict:
+                             question: str = "", routing_decision: dict = None) -> dict:
+    if routing_decision and not routing_decision.get("needs_retrieval", True):
+        return {"result": {
+            "status": "skipped",
+            "contextual_notes": "Retrieval skipped — routing decision: not needed.",
+            "key_facts": [],
+            "expected_normal_findings": "",
+            "common_pathologies": [],
+            "terminology": {},
+        }, "duration_ms": 0}
     started = time.time()
     result = KnowledgeRetriever().run(
         image_interpretation=image_interpretation,
@@ -100,14 +119,32 @@ _ANALYZE_QUESTION_TOOL = Tool(
     },
 )
 
+_ROUTE_DIFFICULTY_TOOL = Tool(
+    name="route_difficulty",
+    description=(
+        "Evaluate the complexity of the question and determine the appropriate pipeline depth. "
+        "Call this after analyze_question and before retrieve_knowledge. "
+        "It returns needs_retrieval (whether to call retrieve_knowledge), "
+        "verification_policy (standard or strict), and fallback_policy."
+    ),
+    parameters={"type": "object", "properties": {}, "required": []},
+    function=_tool_route_difficulty,
+    inputs_from_state={
+        "question_analysis": "question_analysis",
+        "image_interpretation": "image_interpretation",
+    },
+    outputs_to_state={
+        "routing_decision": {"source": "result"},
+        "routing_duration_ms": {"source": "duration_ms"},
+    },
+)
+
 _RETRIEVE_KNOWLEDGE_TOOL = Tool(
     name="retrieve_knowledge",
     description=(
         "Retrieve supporting medical context and background knowledge relevant to the question. "
-        "Call this when requires_medical_knowledge is true or question_type is one of: "
-        "abnormality_description, explanation_request. "
-        "Skip for simple visual questions: anatomy_identification, modality_identification, "
-        "presence_absence, location, counting, yes_no."
+        "Call this ONLY when the routing_decision says needs_retrieval is true. "
+        "Skip if routing_decision says needs_retrieval is false."
     ),
     parameters={"type": "object", "properties": {}, "required": []},
     function=_tool_retrieve_knowledge,
@@ -115,6 +152,7 @@ _RETRIEVE_KNOWLEDGE_TOOL = Tool(
         "image_interpretation": "image_interpretation",
         "question_analysis": "question_analysis",
         "question": "question",
+        "routing_decision": "routing_decision",
     },
     outputs_to_state={
         "knowledge": {"source": "result"},
@@ -170,12 +208,12 @@ _AGENT_SYSTEM_PROMPT = (
     "PROCEDURE (follow in order):\n"
     "1. interpret_image — always required first.\n"
     "2. analyze_question — always required second.\n"
-    "3. retrieve_knowledge — call ONLY when requires_medical_knowledge is true "
-    "or question_type is abnormality_description or explanation_request. "
-    "Skip for anatomy_identification, modality_identification, presence_absence, "
-    "location, counting, and yes_no questions.\n"
-    "4. reason_answer — always required.\n"
-    "5. verify_answer — always required last; finalizes the session."
+    "3. route_difficulty — always required third. Evaluates question complexity and sets "
+    "needs_retrieval, verification_policy, and fallback_policy for downstream steps.\n"
+    "4. retrieve_knowledge — call ONLY if routing_decision.needs_retrieval is true. "
+    "Skip if routing_decision.needs_retrieval is false.\n"
+    "5. reason_answer — always required.\n"
+    "6. verify_answer — always required last; finalizes the session."
 )
 
 _STATE_SCHEMA = {
@@ -184,11 +222,13 @@ _STATE_SCHEMA = {
     "question": {"type": str},
     "image_interpretation": {"type": dict},
     "question_analysis": {"type": dict},
+    "routing_decision": {"type": dict},
     "knowledge": {"type": dict},
     "answer_data": {"type": dict},
     "verification_result": {"type": dict},
     "image_duration_ms": {"type": int},
     "question_duration_ms": {"type": int},
+    "routing_duration_ms": {"type": int},
     "knowledge_duration_ms": {"type": int},
     "answer_duration_ms": {"type": int},
     "verification_duration_ms": {"type": int},
@@ -206,6 +246,7 @@ def _create_agent() -> Agent:
         tools=[
             _INTERPRET_IMAGE_TOOL,
             _ANALYZE_QUESTION_TOOL,
+            _ROUTE_DIFFICULTY_TOOL,
             _RETRIEVE_KNOWLEDGE_TOOL,
             _REASON_ANSWER_TOOL,
             _VERIFY_ANSWER_TOOL,
@@ -296,37 +337,6 @@ def _categorize_failure_modes(knowledge_result: dict, answer_result: dict, verif
     return categories
 
 
-def _build_guardrail_payload(answer_result: dict, verification_result: dict, failure_categories: list) -> dict:
-    answer_text = answer_result.get("answer", "Unable to generate an answer.")
-    fallback_recommendation = verification_result.get("fallback_recommendation", "none")
-    suggested_disclaimer = verification_result.get("suggested_disclaimer", "")
-    verification_status = verification_result.get("verification_status", "low_confidence")
-    severe_codes = {category["code"] for category in failure_categories if category["severity"] == "high"}
-
-    guarded_answer = answer_text
-    should_flag_for_review = fallback_recommendation == "flag_for_review" or bool(
-        {"unsupported_claim", "visual_contradiction", "parser_failure"} & severe_codes
-    )
-
-    if verification_status in {"low_confidence", "unsupported"}:
-        guarded_answer = "The available evidence is insufficient to provide a reliable answer."
-        if answer_text:
-            guarded_answer = f"{guarded_answer} Most likely response: {answer_text}"
-
-    if not suggested_disclaimer and (verification_status in {"low_confidence", "unsupported"} or should_flag_for_review):
-        suggested_disclaimer = "This response is uncertain and should be reviewed by a qualified expert."
-
-    if fallback_recommendation == "none" and verification_status in {"low_confidence", "unsupported"}:
-        fallback_recommendation = "add_disclaimer" if verification_status == "low_confidence" else "flag_for_review"
-
-    return {
-        "guarded_answer": guarded_answer,
-        "fallback_recommendation": fallback_recommendation,
-        "suggested_disclaimer": suggested_disclaimer,
-        "should_flag_for_review": should_flag_for_review,
-    }
-
-
 def _build_self_consistency_signal(verification_result: dict) -> dict:
     checks = verification_result.get("checks", {}) or {}
     total_checks = len(checks)
@@ -370,11 +380,11 @@ def _build_cross_modal_agreement_signal(verification_result: dict) -> dict:
     }
 
 
-def _build_agent_trace(image_result: dict, question_result: dict, knowledge_result: dict,
-                       answer_result: dict, verification_result: dict,
+def _build_agent_trace(image_result: dict, question_result: dict, routing_result: dict,
+                       knowledge_result: dict, answer_result: dict, verification_result: dict,
                        image_duration_ms: int, question_duration_ms: int,
-                       knowledge_duration_ms: int, answer_duration_ms: int,
-                       verification_duration_ms: int) -> list:
+                       routing_duration_ms: int, knowledge_duration_ms: int,
+                       answer_duration_ms: int, verification_duration_ms: int) -> list:
     return [
         {
             "agent": "Image Interpretation",
@@ -401,10 +411,29 @@ def _build_agent_trace(image_result: dict, question_result: dict, knowledge_resu
             "duration_ms": question_duration_ms,
         },
         {
-            "agent": "Knowledge Support",
+            "agent": "Difficulty Routing",
             "agent_id": 3,
+            "status": "pass" if routing_result.get("status") == "success" else "warning",
+            "summary": (
+                f"Difficulty: {routing_result.get('difficulty', 'unknown')} | "
+                f"Retrieval: {'yes' if routing_result.get('needs_retrieval') else 'no'} | "
+                f"Verification: {routing_result.get('verification_policy', 'standard')}"
+            ),
+            "output": {
+                "difficulty": routing_result.get("difficulty", "unknown"),
+                "needs_retrieval": routing_result.get("needs_retrieval", False),
+                "retrieval_rationale": routing_result.get("retrieval_rationale", ""),
+                "verification_policy": routing_result.get("verification_policy", "standard"),
+                "fallback_policy": routing_result.get("fallback_policy", "none"),
+                "routing_rationale": routing_result.get("routing_rationale", ""),
+            },
+            "duration_ms": routing_duration_ms,
+        },
+        {
+            "agent": "Knowledge Support",
+            "agent_id": 4,
             "status": "skipped" if (knowledge_duration_ms == 0 and not knowledge_result.get("key_facts")) else ("pass" if knowledge_result.get("status") == "success" else "warning"),
-            "summary": "Skipped — not needed for this question type." if (knowledge_duration_ms == 0 and not knowledge_result.get("key_facts")) else knowledge_result.get("contextual_notes", "No context retrieved."),
+            "summary": "Skipped — routing decision: retrieval not needed." if (knowledge_duration_ms == 0 and not knowledge_result.get("key_facts")) else knowledge_result.get("contextual_notes", "No context retrieved."),
             "output": {
                 "key_facts": knowledge_result.get("key_facts", []),
             },
@@ -412,7 +441,7 @@ def _build_agent_trace(image_result: dict, question_result: dict, knowledge_resu
         },
         {
             "agent": "Reasoning & Answer",
-            "agent_id": 4,
+            "agent_id": 5,
             "status": "pass" if answer_result.get("status") == "success" else "warning",
             "summary": f"Answer: {answer_result.get('answer', 'N/A')}",
             "output": {
@@ -423,7 +452,7 @@ def _build_agent_trace(image_result: dict, question_result: dict, knowledge_resu
         },
         {
             "agent": "Verification",
-            "agent_id": 5,
+            "agent_id": 6,
             "status": "pass" if verification_result.get("verification_status") == "verified" else "warning" if verification_result.get("verification_status") == "partially_verified" else "fail",
             "summary": f"Status: {verification_result.get('verification_status', 'unknown')} | Confidence: {verification_result.get('confidence_label', 'unknown')}",
             "output": {
@@ -442,6 +471,8 @@ def _assemble_pipeline_payload(results: dict, question: str, started_at: float, 
     image_duration_ms = results.get("image_interpreter", {}).get("duration_ms", 0)
     question_result = results.get("question_analyzer", {}).get("result", {})
     question_duration_ms = results.get("question_analyzer", {}).get("duration_ms", 0)
+    routing_result = results.get("difficulty_router", {}).get("result", {})
+    routing_duration_ms = results.get("difficulty_router", {}).get("duration_ms", 0)
     knowledge_result = results.get("knowledge_retriever", {}).get("result", {})
     knowledge_duration_ms = results.get("knowledge_retriever", {}).get("duration_ms", 0)
     answer_result = results.get("reasoning_agent", {}).get("result", {})
@@ -463,11 +494,13 @@ def _assemble_pipeline_payload(results: dict, question: str, started_at: float, 
     agent_trace = _build_agent_trace(
         image_result=image_result,
         question_result=question_result,
+        routing_result=routing_result,
         knowledge_result=knowledge_result,
         answer_result=answer_result,
         verification_result=verification_result,
         image_duration_ms=image_duration_ms,
         question_duration_ms=question_duration_ms,
+        routing_duration_ms=routing_duration_ms,
         knowledge_duration_ms=knowledge_duration_ms,
         answer_duration_ms=answer_duration_ms,
         verification_duration_ms=verification_duration_ms,
@@ -505,6 +538,14 @@ def _assemble_pipeline_payload(results: dict, question: str, started_at: float, 
             "question_clarity": question_result.get("question_clarity", "unclear"),
             "reasoning_type": question_result.get("reasoning_type", "visual_recognition"),
             "rephrased_question": question_result.get("rephrased_question", question),
+        },
+        "routing_decision": {
+            "difficulty": routing_result.get("difficulty", "unknown"),
+            "needs_retrieval": routing_result.get("needs_retrieval", False),
+            "retrieval_rationale": routing_result.get("retrieval_rationale", ""),
+            "verification_policy": routing_result.get("verification_policy", "standard"),
+            "fallback_policy": routing_result.get("fallback_policy", "none"),
+            "routing_rationale": routing_result.get("routing_rationale", ""),
         },
         "agent_trace": agent_trace,
         "total_duration_ms": total_ms,
@@ -562,6 +603,10 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
             "question_analyzer": {
                 "result": response.get("question_analysis") or {},
                 "duration_ms": response.get("question_duration_ms") or 0,
+            },
+            "difficulty_router": {
+                "result": response.get("routing_decision") or {},
+                "duration_ms": response.get("routing_duration_ms") or 0,
             },
             "knowledge_retriever": {
                 "result": response.get("knowledge") or {},

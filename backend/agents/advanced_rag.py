@@ -40,7 +40,7 @@ class AdvancedRAGRetriever:
     Advanced RAG with:
     - Query rewriting/expansion
     - Hybrid retrieval (dense embeddings + BM25)
-    - Metadata pre-filtering (modality, body_region)
+    - Metadata pre-filtering (modality, body_region, finding_category)
     - Cross-encoder reranking
     - Self-reflection validation
     """
@@ -84,6 +84,7 @@ class AdvancedRAGRetriever:
         # Metadata indices for filtering
         self._modality_index: Dict[str, List[int]] = defaultdict(list)
         self._body_region_index: Dict[str, List[int]] = defaultdict(list)
+        self._finding_index: Dict[str, List[int]] = defaultdict(list)
         self._last_query_rewritten: bool = False
         self._device = self._resolve_device()
         print(f"[AdvancedRAG] Using device: {self._device}")
@@ -202,13 +203,14 @@ class AdvancedRAGRetriever:
         # Store with computed metadata
         self._train_examples = []
         for idx, item in enumerate(train_data):
-            # Infer modality and body_region from question if not present
             question = item.get('question', '')
             answer = item.get('answer', '')
             
-            # Simple keyword extraction for metadata
-            modality = self._infer_modality(question)
-            body_region = self._infer_body_region(question)
+            modality = self._infer_modality(question, answer)
+            body_region = self._infer_body_region(question, answer)
+            finding_category = self._infer_finding_category(question, answer)
+            answer_style = self._infer_answer_style(answer)
+            laterality = self._infer_laterality(question)
             
             example = {
                 'id': idx,
@@ -217,54 +219,133 @@ class AdvancedRAGRetriever:
                 'image_name': item.get('image_name', ''),
                 'modality': modality,
                 'body_region': body_region,
+                'finding_category': finding_category,
+                'answer_style': answer_style,
+                'laterality': laterality,
                 'combined_text': f"{question} {answer}"
             }
             
             self._train_examples.append(example)
             
             # Build metadata indices
-            if modality:
+            if modality and modality != 'unknown':
                 self._modality_index[modality.lower()].append(idx)
-            if body_region:
+            if body_region and body_region != 'unknown':
                 self._body_region_index[body_region.lower()].append(idx)
+            if finding_category and finding_category != 'other':
+                self._finding_index[finding_category.lower()].append(idx)
         
         return True
     
-    def _infer_modality(self, question: str) -> str:
-        """Infer imaging modality from question text"""
-        question_lower = question.lower()
+    def _infer_modality(self, question: str, answer: str = '') -> str:
+        """Infer imaging modality from question and answer text"""
+        combined = f"{question} {answer}".lower()
         modalities = {
-            'x-ray': 'x-ray', 'xray': 'x-ray', 'radiograph': 'x-ray',
-            'ct': 'ct', 'cat scan': 'ct', 'computed tomography': 'ct',
-            'mri': 'mri', 'magnetic resonance': 'mri',
-            'ultrasound': 'ultrasound', 'us': 'ultrasound', 'sonogram': 'ultrasound',
+            'x-ray': 'x-ray', 'xray': 'x-ray', 'radiograph': 'x-ray', 'plain film': 'x-ray',
+            'computed tomography': 'ct', 'cat scan': 'ct',
+            'magnetic resonance': 'mri',
+            'ultrasound': 'ultrasound', 'sonogram': 'ultrasound', 'sonography': 'ultrasound',
             'fundus': 'fundus', 'fundoscopy': 'fundus',
-            'dermoscopy': 'dermoscopy', 'skin': 'dermoscopy',
-            'mammogram': 'mammogram', 'mammography': 'mammogram'
+            'mammogram': 'mammogram', 'mammography': 'mammogram',
+            'dermoscopy': 'dermoscopy',
+            'fluoroscopy': 'fluoroscopy',
+            'nuclear': 'nuclear', 'scintigraphy': 'nuclear', 'pet scan': 'nuclear',
+            'angiography': 'angiography', 'angiogram': 'angiography',
         }
-        
+        # Multi-word before single-word to avoid partial false matches
         for keyword, modality in modalities.items():
-            if keyword in question_lower:
+            if keyword in combined:
+                return modality
+        # Single-char ambiguous tokens only after longer forms ruled out
+        for token, modality in [('mri', 'mri'), ('ct', 'ct'), ('us', 'ultrasound')]:
+            pattern = rf'\b{re.escape(token)}\b'
+            if re.search(pattern, combined):
                 return modality
         return 'unknown'
-    
-    def _infer_body_region(self, question: str) -> str:
-        """Infer body region from question text"""
-        question_lower = question.lower()
+
+    def _infer_body_region(self, question: str, answer: str = '') -> str:
+        """Infer body region from question and answer text"""
+        combined = f"{question} {answer}".lower()
         regions = {
-            'chest': 'chest', 'thorax': 'chest', 'lung': 'chest', 'pulmonary': 'chest',
-            'heart': 'chest', 'cardiac': 'chest',
-            'head': 'head', 'brain': 'head', 'cranial': 'head', 'skull': 'head',
-            'abdomen': 'abdomen', 'abdominal': 'abdomen', 'liver': 'abdomen',
-            'kidney': 'abdomen', 'renal': 'abdomen', 'spleen': 'abdomen',
-            'knee': 'knee', 'joint': 'knee', 'bone': 'knee',
-            'eye': 'eye', 'ocular': 'eye', 'retina': 'eye', 'fundus': 'eye',
-            'skin': 'skin', 'dermal': 'skin', 'lesion': 'skin'
+            'thorax': 'chest', 'pulmonary': 'chest', 'pleural': 'chest',
+            'cardiac': 'chest', 'pericardial': 'chest', 'mediastin': 'chest',
+            'cranial': 'head', 'cerebral': 'head', 'brainstem': 'head',
+            'cerebell': 'head', 'ventricle': 'head', 'hippocampus': 'head',
+            'abdominal': 'abdomen', 'hepatic': 'abdomen', 'splenic': 'abdomen',
+            'renal': 'abdomen', 'bowel': 'abdomen', 'intestin': 'abdomen',
+            'pancrea': 'abdomen', 'biliary': 'abdomen', 'gallbladder': 'abdomen',
+            'bladder': 'pelvis', 'uterus': 'pelvis', 'ovarian': 'pelvis',
+            'prostate': 'pelvis', 'pelvic': 'pelvis',
+            'femur': 'musculoskeletal', 'tibia': 'musculoskeletal', 'fibula': 'musculoskeletal',
+            'humerus': 'musculoskeletal', 'vertebra': 'musculoskeletal', 'spinal': 'musculoskeletal',
+            'shoulder': 'musculoskeletal', 'elbow': 'musculoskeletal', 'wrist': 'musculoskeletal',
+            'ankle': 'musculoskeletal', 'hip': 'musculoskeletal',
+            'ocular': 'eye', 'retina': 'eye', 'optic': 'eye', 'cornea': 'eye',
+            'dermal': 'skin', 'subcutaneous': 'skin',
+            'thyroid': 'neck', 'cervical': 'neck', 'laryngeal': 'neck',
         }
-        
         for keyword, region in regions.items():
-            if keyword in question_lower:
+            if keyword in combined:
                 return region
+        # Shorter/exact-match keywords checked with word boundaries
+        for token, region in [
+            ('chest', 'chest'), ('lung', 'chest'), ('heart', 'chest'),
+            ('head', 'head'), ('brain', 'head'), ('skull', 'head'),
+            ('abdomen', 'abdomen'), ('liver', 'abdomen'), ('kidney', 'abdomen'), ('spleen', 'abdomen'),
+            ('knee', 'musculoskeletal'), ('bone', 'musculoskeletal'), ('joint', 'musculoskeletal'),
+            ('eye', 'eye'), ('fundus', 'eye'),
+            ('skin', 'skin'), ('lesion', 'skin'),
+            ('neck', 'neck'), ('spine', 'musculoskeletal'),
+        ]:
+            if re.search(rf'\b{re.escape(token)}\b', combined):
+                return region
+        return 'unknown'
+
+    def _infer_finding_category(self, question: str, answer: str) -> str:
+        """Infer broad finding category from question and answer text"""
+        combined = f"{question} {answer}".lower()
+        categories = [
+            ('normal',       ['normal', 'no abnormality', 'unremarkable', 'within normal', 'no finding']),
+            ('fracture',     ['fracture', 'broken', 'break', 'cortical disruption']),
+            ('hemorrhage',   ['hemorrhage', 'hemorrhagic', 'bleed', 'bleeding', 'hematoma', 'haemorrhage']),
+            ('infarct',      ['infarct', 'infarction', 'ischemi', 'ischemia', 'stroke']),
+            ('mass',         ['mass', 'tumor', 'tumour', 'neoplasm', 'carcinoma', 'malignant', 'cancer', 'nodule']),
+            ('effusion',     ['effusion', 'pleural fluid', 'ascites', 'fluid collection']),
+            ('edema',        ['edema', 'oedema', 'swelling', 'pulmonary edema']),
+            ('pneumonia',    ['pneumonia', 'consolidation', 'opacity', 'infiltrate']),
+            ('atelectasis',  ['atelectasis', 'collapse', 'collapsed']),
+            ('pneumothorax', ['pneumothorax', 'air in pleural']),
+            ('lesion',       ['lesion', 'abnormality', 'abnormal', 'defect', 'density', 'lucency']),
+            ('device',       ['catheter', 'tube', 'pacemaker', 'stent', 'wire', 'implant', 'hardware', 'device']),
+        ]
+        for category, keywords in categories:
+            for kw in keywords:
+                if kw in combined:
+                    return category
+        return 'other'
+
+    def _infer_answer_style(self, answer: str) -> str:
+        """Classify answer as close_ended (yes/no, single value) or open_ended"""
+        ans = answer.strip().lower()
+        if ans in {'yes', 'no', 'y', 'n', 'true', 'false'}:
+            return 'close_ended'
+        if len(ans.split()) <= 3:
+            return 'close_ended'
+        return 'open_ended'
+
+    def _infer_laterality(self, question: str) -> str:
+        """Infer laterality from question text"""
+        q = question.lower()
+        if 'bilateral' in q or 'both sides' in q:
+            return 'bilateral'
+        has_left = bool(re.search(r'\bleft\b', q))
+        has_right = bool(re.search(r'\bright\b', q))
+        if has_left and has_right:
+            return 'bilateral'
+        if has_left:
+            return 'left'
+        if has_right:
+            return 'right'
         return 'unknown'
     
     def build_index(self) -> bool:
@@ -359,6 +440,7 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
         question: str,
         modality: str = None,
         body_region: str = None,
+        finding_category: str = None,
         use_query_rewrite: bool = True,
         use_reranking: bool = True,
         use_self_reflection: bool = True
@@ -374,6 +456,7 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
             "[AdvancedRAG] Retrieval pipeline started | "
             f"question={self._shorten_text(question, 140)} | "
             f"modality={modality or 'unknown'} | body_region={body_region or 'unknown'} | "
+            f"finding={finding_category or 'unknown'} | "
             f"rewrite={use_query_rewrite} rerank={use_reranking} reflection={use_self_reflection}"
         )
         
@@ -393,7 +476,7 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
             print("[AdvancedRAG] Query rewrite disabled; using original question")
         
         # 2. Metadata Filtering
-        candidate_indices = self._apply_metadata_filter(modality, body_region)
+        candidate_indices = self._apply_metadata_filter(modality, body_region, finding_category)
         if candidate_indices is None:
             print("[AdvancedRAG] Metadata filter: none applied (full corpus search)")
         else:
@@ -446,10 +529,11 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
     def _apply_metadata_filter(
         self,
         modality: str = None,
-        body_region: str = None
+        body_region: str = None,
+        finding_category: str = None,
     ) -> Optional[List[int]]:
         """Apply metadata pre-filtering to reduce search space"""
-        if not modality and not body_region:
+        if not modality and not body_region and not finding_category:
             print("[AdvancedRAG] Metadata filter inputs empty; skipping filter")
             return None  # No filtering
         
@@ -457,10 +541,8 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
         
         if modality and modality != 'unknown':
             modality_lower = modality.lower()
-            # Try exact match first, then partial
             matching = self._modality_index.get(modality_lower, [])
             if not matching:
-                # Partial match
                 for mod_key, indices in self._modality_index.items():
                     if modality_lower in mod_key or mod_key in modality_lower:
                         matching = indices
@@ -487,6 +569,23 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
                     candidates = set(matching)
             else:
                 print(f"[AdvancedRAG] Metadata filter body_region='{region_lower}': no exact matches")
+
+        if finding_category and finding_category not in ('unknown', 'other'):
+            finding_lower = finding_category.lower()
+            matching = self._finding_index.get(finding_lower, [])
+            if not matching:
+                for find_key, indices in self._finding_index.items():
+                    if finding_lower in find_key or find_key in finding_lower:
+                        matching = indices
+                        break
+            if matching:
+                print(f"[AdvancedRAG] Metadata filter finding='{finding_lower}': {len(matching)} matches")
+                if candidates is not None:
+                    candidates = candidates.intersection(set(matching))
+                else:
+                    candidates = set(matching)
+            else:
+                print(f"[AdvancedRAG] Metadata filter finding='{finding_lower}': no exact matches")
         
         if candidates:
             result = list(candidates)
@@ -747,6 +846,7 @@ def retrieve_knowledge_advanced(
     question: str,
     modality: str = None,
     body_region: str = None,
+    finding_category: str = None,
     **kwargs
 ) -> Dict[str, Any]:
     """
@@ -758,6 +858,7 @@ def retrieve_knowledge_advanced(
         question=question,
         modality=modality,
         body_region=body_region,
+        finding_category=finding_category,
         **kwargs
     )
     

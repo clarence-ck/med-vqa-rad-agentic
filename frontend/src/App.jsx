@@ -11,6 +11,7 @@ import ComparisonToggle from './components/ComparisonToggle';
 import CaseExplorer from './components/CaseExplorer';
 import EvaluationView from './components/EvaluationView';
 import FailureModeDrawer from './components/FailureModeDrawer';
+import RoutingCard from './components/RoutingCard';
 import { useAnalysis } from './hooks/useAnalysis';
 import { useDataset } from './hooks/useDataset';
 import { useEvaluation } from './hooks/useEvaluation';
@@ -191,6 +192,7 @@ function App() {
                   <AnswerCard result={result} />
                   <ExplanationCard result={result} />
                   <AgentTrace agentTrace={result.agent_trace} />
+                  <RoutingCard result={result} />
                   <VerificationPanel result={result} />
                   <FailureModeDrawer result={result} />
                 </>

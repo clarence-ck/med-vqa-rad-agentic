@@ -1116,6 +1116,10 @@ body {
   background: var(--color-accent);
 }
 
+.agent-step.stage-routing::before {
+  background: #a855f7;
+}
+
 .agent-step.stage-verification::before {
   background: var(--color-success);
 }
@@ -1206,6 +1210,10 @@ body {
   color: var(--color-accent);
 }
 
+.stage-routing {
+  color: #a855f7;
+}
+
 .stage-verification {
   color: var(--color-success);
 }
@@ -1224,6 +1232,10 @@ body {
 
 .agent-step-stage.stage-reasoning {
   background: rgba(59, 130, 246, 0.12);
+}
+
+.agent-step-stage.stage-routing {
+  background: rgba(168, 85, 247, 0.10);
 }
 
 .agent-step-stage.stage-verification {

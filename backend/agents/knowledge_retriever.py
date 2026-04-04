@@ -19,12 +19,12 @@ except ImportError:
 @component
 class KnowledgeRetriever:
     """
-    Agent 3: Knowledge Support Agent (Advanced RAG Version)
+    Agent 4: Knowledge Support Agent (Advanced RAG Version)
     
-    Retrieves supporting medical context using advanced RAG:
+    Retrieves supporting medical context using advanced RAG when the router requests retrieval:
     - Query rewriting and expansion
     - Hybrid retrieval (dense embeddings + BM25)
-    - Metadata filtering by modality and body region
+    - Metadata filtering by modality, body region, and finding category
     - Cross-encoder reranking
     - Self-reflection validation
     """
@@ -78,10 +78,16 @@ class KnowledgeRetriever:
         
         if self.use_advanced_rag and original_question:
             try:
+                finding_category = None
+                if self._rag_retriever is not None:
+                    finding_category = self._rag_retriever._infer_finding_category(
+                        original_question, ''
+                    )
                 rag_result = retrieve_knowledge_advanced(
                     question=original_question,
                     modality=modality,
                     body_region=body_region,
+                    finding_category=finding_category,
                     use_query_rewrite=True,
                     use_reranking=True,
                     use_self_reflection=True

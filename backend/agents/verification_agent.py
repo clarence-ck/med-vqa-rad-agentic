@@ -11,8 +11,8 @@ from utils.json_utils import strip_json_fences
 @component
 class VerificationAgent:
     """
-    Agent 5: Verification Agent
-    Checks consistency and believability of the generated answer.
+    Agent 6: Verification Agent
+    Checks consistency and believability of the generated answer after reasoning.
     """
     def __init__(self):
         self.generator = OpenAIChatGenerator(

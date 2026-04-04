@@ -1,3 +1,5 @@
+ import { useEffect, useRef, useState } from 'react';
+ 
 function formatPercent(value) {
   return `${Math.round((value || 0) * 100)}%`;
 }
@@ -20,6 +22,10 @@ function getLevelTagClass(level) {
   if (normalized === 'medium' || normalized === 'partially_verified') return 'tag-amber';
   if (normalized === 'low' || normalized === 'unsupported' || normalized === 'low_confidence') return 'tag-red';
   return 'tag-gray';
+}
+
+function formatLabel(value) {
+  return String(value || 'unknown').replace(/_/g, ' ');
 }
 
 function SystemPerformanceCard({ title, icon, accuracy, avgDuration, toneClass }) {
@@ -77,10 +83,47 @@ function AccuracyBar({ label, value, color }) {
 export default function EvaluationView({ loading, evaluationData, onRefresh }) {
   const summary = evaluationData?.summary;
   const rows = evaluationData?.rows || [];
+  const [selectedSampleIds, setSelectedSampleIds] = useState([]);
+  const [isSampleDropdownOpen, setIsSampleDropdownOpen] = useState(false);
+  const sampleDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleDocumentClick = (event) => {
+      if (sampleDropdownRef.current && !sampleDropdownRef.current.contains(event.target)) {
+        setIsSampleDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleDocumentClick);
+    return () => document.removeEventListener('mousedown', handleDocumentClick);
+  }, []);
 
   const avgBaselineF1 = rows.length ? rows.reduce((acc, r) => acc + (r.baseline_token_f1 || 0), 0) / rows.length : 0;
   const avgWorkflowF1 = rows.length ? rows.reduce((acc, r) => acc + (r.workflow_token_f1 || 0), 0) / rows.length : 0;
   const avgAgenticF1 = rows.length ? rows.reduce((acc, r) => acc + (r.agentic_token_f1 || 0), 0) / rows.length : 0;
+  const availableSampleIds = [...new Set(rows.map((row) => String(row.sample_id ?? '')).filter(Boolean))]
+    .sort((left, right) => Number(left) - Number(right));
+  const filteredRows = selectedSampleIds.length
+    ? rows.filter((row) => selectedSampleIds.includes(String(row.sample_id ?? '')))
+    : rows;
+
+  const toggleSampleId = (sampleId) => {
+    setSelectedSampleIds((current) => {
+      if (current.includes(sampleId)) {
+        return current.filter((id) => id !== sampleId);
+      }
+
+      if (current.length >= 5) {
+        return current;
+      }
+
+      return [...current, sampleId];
+    });
+  };
+
+  const clearSampleIdFilter = () => {
+    setSelectedSampleIds([]);
+  };
 
   return (
     <main className="evaluation-layout">
@@ -263,8 +306,111 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
             <div className="card">
               <div className="card-header">
                 <span className="card-title">Recent Evaluated Cases</span>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <span className="tag tag-gray">
+                    {filteredRows.length} of {rows.length} shown
+                  </span>
+                  <span className="tag tag-gray">
+                    {selectedSampleIds.length} selected
+                  </span>
+                </div>
               </div>
-              <div className="evaluation-table-wrap">
+              <div ref={sampleDropdownRef} style={{ padding: '0 24px 16px 24px', position: 'relative' }}>
+                <button
+                  type="button"
+                  className="form-select"
+                  onClick={() => setIsSampleDropdownOpen((open) => !open)}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
+                >
+                  <span>
+                    {selectedSampleIds.length === 0
+                      ? 'Filter by sample IDs'
+                      : `${selectedSampleIds.length} selected`}
+                  </span>
+                  <span aria-hidden="true">▾</span>
+                </button>
+
+                {isSampleDropdownOpen && (
+                  <div
+                    style={{
+                      marginTop: '8px',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: 'var(--radius-md)',
+                      background: 'var(--color-bg-secondary)',
+                      boxShadow: '0 16px 36px rgba(0, 0, 0, 0.28)',
+                      padding: '12px',
+                      maxHeight: '320px',
+                      overflowY: 'auto',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'center', marginBottom: '12px' }}>
+                      <div className="evaluation-list-subtitle">
+                        Select up to 5 sample IDs.
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={clearSampleIdFilter}
+                        disabled={!selectedSampleIds.length}
+                        style={{ padding: '6px 10px', fontSize: '12px' }}
+                      >
+                        Clear
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+                      {selectedSampleIds.length ? (
+                        selectedSampleIds.map((sampleId) => (
+                          <span key={sampleId} className="tag tag-green">
+                            Sample ID {sampleId}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="tag tag-gray">All sample IDs</span>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'grid', gap: '8px' }}>
+                      {availableSampleIds.map((sampleId) => {
+                        const checked = selectedSampleIds.includes(sampleId);
+                        const disabled = !checked && selectedSampleIds.length >= 5;
+
+                        return (
+                          <label
+                            key={sampleId}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '10px',
+                              padding: '8px 10px',
+                              borderRadius: 'var(--radius-sm)',
+                              border: '1px solid var(--color-border)',
+                              background: disabled && !checked ? 'var(--color-bg-input)' : 'var(--color-bg-card)',
+                              opacity: disabled && !checked ? 0.6 : 1,
+                              cursor: disabled && !checked ? 'not-allowed' : 'pointer',
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              disabled={disabled}
+                              onChange={() => toggleSampleId(sampleId)}
+                            />
+                            <span>Sample ID {sampleId}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+
+                    {selectedSampleIds.length >= 5 && (
+                      <div className="evaluation-list-subtitle" style={{ marginTop: '10px', color: 'var(--color-warning)' }}>
+                        Maximum of 5 sample IDs selected.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="evaluation-table-wrap" style={{ maxHeight: '720px', overflowY: 'auto' }}>
                 <table className="evaluation-table">
                   <thead>
                     <tr>
@@ -279,13 +425,23 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.slice(0, 12).map((row) => (
+                    {filteredRows.map((row) => (
                       <tr key={`${row.sample_id}-${row.cached_at || 'na'}`}>
                         <td>{row.sample_id}</td>
                         <td>
                           <div className="evaluation-question-cell" style={{ maxWidth: '280px' }}>
                             <div className="evaluation-list-title">{row.question || '—'}</div>
-                            <div className="evaluation-list-subtitle" style={{ marginBottom: '4px' }}>{row.question_type?.replace(/_/g, ' ') || 'unknown'}</div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', margin: '6px 0 4px 0' }}>
+                              <span className="tag tag-gray" style={{ fontSize: '10px' }}>
+                                Original Question Type: {formatLabel(row.original_question_type)}
+                              </span>
+                              <span className={`tag ${row.agentic_question_type ? 'tag-blue' : 'tag-gray'}`} style={{ fontSize: '10px' }}>
+                                Agentic Reclass Type: {formatLabel(row.agentic_question_type || row.original_question_type)}
+                              </span>
+                              <span className="tag tag-gray" style={{ fontSize: '10px' }}>
+                                Ground Truth Answer Style: {formatLabel(row.answer_style)}
+                              </span>
+                            </div>
                             <div className="evaluation-list-title" style={{ fontSize: '11px', color: 'var(--color-success)' }}>
                               GT: {row.ground_truth_answer}
                             </div>
@@ -345,6 +501,13 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                         </td>
                       </tr>
                     ))}
+                    {filteredRows.length === 0 && (
+                      <tr>
+                        <td colSpan="8" style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                          No evaluated cases match the selected sample IDs.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>

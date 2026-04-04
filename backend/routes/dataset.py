@@ -192,11 +192,10 @@ def _build_evaluation_row(payload: dict) -> dict:
     else:
         winner = "tie_all_wrong"
 
-    # Prefer the agentic pipeline's question_type (from LLM) over the heuristic (#17)
-    question_type = (
-        agentic_result.get("question_analysis", {}).get("question_type")
-        or sample.get("question_type", "unknown")
-    )
+    original_question_type = sample.get("question_type", "unknown")
+    agentic_question_type = agentic_result.get("question_analysis", {}).get("question_type")
+    question_type = agentic_question_type or original_question_type
+    question_type_source = "agentic" if agentic_question_type else "dataset"
     answer_style = "close_ended" if _is_close_ended_answer(ground_truth_normalized) else "open_ended"
     knowledge_details = _extract_knowledge_retriever_details(agentic_result)
 
@@ -204,6 +203,9 @@ def _build_evaluation_row(payload: dict) -> dict:
         "sample_id": sample.get("id"),
         "question": sample.get("question", ""),
         "question_type": question_type,
+        "original_question_type": original_question_type,
+        "agentic_question_type": agentic_question_type,
+        "question_type_source": question_type_source,
         "split": sample.get("split", "unknown"),
         "answer_style": answer_style,
         "ground_truth_answer": ground_truth,

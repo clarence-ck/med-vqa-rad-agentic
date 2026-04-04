@@ -119,7 +119,7 @@ def build_diagram(output_path="system_diagram.png"):
          "Agentic Process Map", AMBER_SOFT, AMBER, "#9A6700", fs=9)
     lbl(ax, 9, 11.18, "MedVisionQuery — Agentic Multimodal Medical VQA",
         fs=19, c=TEXT, weight="bold")
-    lbl(ax, 9, 10.80, "interpret + classify → optional retrieval → reason → verify",
+    lbl(ax, 9, 10.80, "interpret + classify → route → optional retrieval → reason → verify",
         fs=10.5, c=MUTED)
 
     # ── Section frames ──────────────────────────────────────────────────────
@@ -132,14 +132,14 @@ def build_diagram(output_path="system_diagram.png"):
     # Decision  x 14.20 – 17.70
     frame(ax, 14.20, 1.60, 3.50, 9.00, "Decision", AMBER,
           fill="#FFFCF4", lab_fc=AMBER_SOFT)
-    # Response States strip — simple border + plain text label
+    # Final Answer States strip — simple border + plain text label
     ax.add_patch(FancyBboxPatch(
         (6.80, 0.08), 10.90, 1.40,
         boxstyle="round,pad=0.02,rounding_size=0.18",
         linewidth=1.6, edgecolor=SLATE, facecolor="#FBFCFE",
         linestyle=(0, (4, 3)), zorder=0,
     ))
-    lbl(ax, 9.55, 1.35, "Response States",
+    lbl(ax, 9.55, 1.35, "Final Answer States",
         fs=9, c=SLATE, weight="bold")
 
     # ══════════════════════════════════════════════════════
@@ -164,7 +164,7 @@ def build_diagram(output_path="system_diagram.png"):
 
     # Controller  (y 8.90 – 10.00)
     box(ax, 5.00, 8.90, 6.80, 1.10, PURPLE, PURPLE,
-        "Haystack Agent Controller",
+        "Haystack Agentic Controller",
         "routing, state, tool orchestration, retries",
         tc="white", sc="#ECE7FF", fs1=15, fs2=9)
     pill(ax, 10.55, 9.62, 1.42, 0.28,
@@ -179,8 +179,8 @@ def build_diagram(output_path="system_diagram.png"):
     lbl(ax, 8.50, 8.65, "stage 1: sequential understanding",
         fs=8.5, c=PURPLE, weight="bold")
 
-    # Controller → stage-1 entry
-    orth_arrow(ax, [(6.50, 8.90), (6.10, 8.90), (6.10, 7.85)], color=SLATE)
+    # Controller → Image Interpreter (straight arrow)
+    arrow(ax, (6.10, 8.90), (6.10, 7.85), color=SLATE)
 
     # Stage-1 boxes  (y 6.75 – 7.85)
     box(ax, 4.30, 6.75, 3.60, 1.10, BLUE_SOFT, BLUE,
@@ -191,17 +191,23 @@ def build_diagram(output_path="system_diagram.png"):
     # Sequential flow: image interpretation feeds question analysis
     orth_arrow(ax, [(7.90, 7.30), (9.10, 7.30)], color=SLATE)
 
-    # Stage-2 label  (clear gap between stage-1 bottom 6.75 and diamond top 6.00)
-    lbl(ax, 8.50, 6.48, "stage 2: synthesis + validation",
+    # Stage-2 label
+    lbl(ax, 8.50, 6.48, "stage 2: routing + synthesis + validation",
         fs=8.5, c=PURPLE, weight="bold")
 
-    # Decision diamond  cy=5.35  top=6.00  bottom=4.70  (h=1.30)
-    diamond(ax, 10.90, 5.35, 2.80, 1.30, AMBER_SOFT, AMBER,
-            "Need external", "medical context?",
-            tc="#8A5A00", sc="#9A6D00")
+    # Difficulty Router  x 8.10-13.70, y 4.90-5.75
+    box(ax, 8.10, 4.90, 5.60, 0.85, PURPLE_SOFT, PURPLE,
+        "Difficulty Router", "sets difficulty · retrieval need · verification policy · fallback",
+        tc="#4D3DB5", sc="#6B65A8", fs1=13, fs2=8.3)
+    pill(ax, 12.38, 5.47, 1.22, 0.25,
+         "planning", PURPLE, PURPLE, "white", fs=7.2, z=6)
 
-    # Q-Analyzer bottom (6.75) → diamond top (6.00)
-    orth_arrow(ax, [(10.90, 6.75), (10.90, 6.00)], color=SLATE)
+    # Q-Analyzer bottom (6.75) → Difficulty Router top (5.75)
+    orth_arrow(ax, [(10.90, 6.75), (10.90, 5.75)], color=SLATE)
+
+    # Image Interpreter output also feeds Difficulty Router (mandatory image interpretation input)
+    orth_arrow(ax, [(8.45, 5.88), (9.20, 5.88), (9.20, 5.75)], color=SLATE, lw=1.4)
+    lbl(ax, 8.82, 5.98, "image interpretation", fs=6.5, c=MUTED, ha="center")
 
     # Stage-2 boxes  top = 4.40  →  safely below diamond bottom 4.70
     # Knowledge Retriever  x 4.30-7.70, y 3.40-4.40
@@ -224,16 +230,16 @@ def build_diagram(output_path="system_diagram.png"):
                 (8.45, 3.90), (9.20, 3.90)],
                color=SLATE)
 
-    # Diamond "yes" (left point 9.50, 5.35) → Knowledge Retriever top
+    # Router left (8.10, 5.32) → Knowledge Retriever top — "yes" path
     orth_arrow(ax,
-               [(9.50, 5.35), (6.00, 5.35), (6.00, 4.40)],
+               [(8.10, 5.32), (6.00, 5.32), (6.00, 4.40)],
                color=AMBER, lw=1.9, ls="--")
-    lbl(ax, 7.65, 5.57, "yes → retrieve",
+    lbl(ax, 7.00, 5.54, "yes → retrieve",
         fs=8.1, c="#9A6700", weight="bold")
 
-    # Diamond "no" (bottom 10.90, 4.70) → Reasoning Agent top (10.90, 4.40)
-    orth_arrow(ax, [(10.90, 4.70), (10.90, 4.40)], color=SLATE, lw=1.9)
-    lbl(ax, 11.55, 4.55, "no → skip",
+    # Router bottom (10.90, 4.90) → Reasoning Agent top (10.90, 4.40) — "no" path
+    orth_arrow(ax, [(10.90, 4.90), (10.90, 4.40)], color=SLATE, lw=1.9)
+    lbl(ax, 11.55, 4.65, "no → skip",
         fs=8.1, c=MUTED, weight="bold", ha="left")
 
     # Knowledge Retriever right → Reasoning Agent left  (dashed amber)
@@ -258,22 +264,22 @@ def build_diagram(output_path="system_diagram.png"):
                color=AMBER, lw=2.0)
 
     # ══════════════════════════════════════════════════════
-    # RESPONSE STATES (bottom strip, y 0.08 – 1.43)
+    # FINAL ANSWER STATES (bottom strip, y 0.08 – 1.43)
     # ══════════════════════════════════════════════════════
     box(ax, 7.25, 0.22, 2.60, 0.70, GREEN_SOFT, GREEN,
-        "Verified", "grounded response",
+        "Verified", "answer shown directly",
         tc="#14532D", sc="#2F6E43", fs1=11.2, fs2=7.7)
     box(ax, 10.65, 0.22, 2.60, 0.70, AMBER_SOFT, AMBER,
-        "Disclaimer", "guarded response",
+        "Disclaimer", "guarded answer + disclaimer",
         tc="#8A5A00", sc="#9A6D00", fs1=11.2, fs2=7.7)
     box(ax, 14.05, 0.22, 2.60, 0.70, RED_SOFT, RED,
-        "Review", "flagged for human check",
+        "Review", "review recommended",
         tc="#9B1C1C", sc="#B63A3A", fs1=11.2, fs2=7.5)
 
     # Guardrail → horizontal routing rail → three coloured drops
     GX  = 15.80   # guardrail centre-x
     GY  = 5.10    # guardrail bottom-y
-    RY  = 1.10    # routing rail y  (below Response States label, above boxes)
+    RY  = 1.10    # routing rail y  (below Final Answer States label, above boxes)
     VX  = 8.55    # Verified centre-x
     DX  = 11.95   # Disclaimer centre-x
     RVX = 15.35   # Review centre-x
@@ -286,7 +292,7 @@ def build_diagram(output_path="system_diagram.png"):
 
     # Footnote — in the left margin below the Input Lane boxes
     lbl(ax, 2.00, 1.20,
-        "retriever is conditional:\nonly enriches reasoning when\nthe question requires medical context",
+        "DifficultyRouter decides:\nretrieval need, verification policy\n& fallback before reasoning",
         fs=8.0, c=MUTED, style="italic", ha="center")
 
     plt.tight_layout(pad=0.25)

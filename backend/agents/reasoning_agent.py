@@ -11,8 +11,8 @@ from utils.json_utils import strip_json_fences
 @component
 class ReasoningAgent:
     """
-    Agent 4: Reasoning & Answer Agent
-    Synthesizes all prior agent outputs into a final answer with explanation.
+    Agent 5: Reasoning & Answer Agent
+    Synthesizes image analysis, question analysis, and optional retrieved knowledge into a final answer with explanation.
     """
     def __init__(self):
         self.generator = OpenAIChatGenerator(
