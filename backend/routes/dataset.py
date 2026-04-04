@@ -277,9 +277,12 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
     rows_with_baseline_ms = [row for row in rows if row.get("baseline_duration_ms") is not None]
     rows_with_workflow_ms = [row for row in rows if row.get("workflow_duration_ms") is not None]
     rows_with_agentic_ms = [row for row in rows if row.get("agentic_duration_ms") is not None]
-    avg_baseline_duration_ms = int(sum(r["baseline_duration_ms"] for r in rows_with_baseline_ms) / len(rows_with_baseline_ms)) if rows_with_baseline_ms else None
-    avg_workflow_duration_ms = int(sum(r["workflow_duration_ms"] for r in rows_with_workflow_ms) / len(rows_with_workflow_ms)) if rows_with_workflow_ms else None
-    avg_agentic_duration_ms = int(sum(r["agentic_duration_ms"] for r in rows_with_agentic_ms) / len(rows_with_agentic_ms)) if rows_with_agentic_ms else None
+    total_baseline_duration_ms = sum(r["baseline_duration_ms"] for r in rows_with_baseline_ms) if rows_with_baseline_ms else None
+    total_workflow_duration_ms = sum(r["workflow_duration_ms"] for r in rows_with_workflow_ms) if rows_with_workflow_ms else None
+    total_agentic_duration_ms = sum(r["agentic_duration_ms"] for r in rows_with_agentic_ms) if rows_with_agentic_ms else None
+    avg_baseline_duration_ms = int(total_baseline_duration_ms / len(rows_with_baseline_ms)) if total_baseline_duration_ms is not None else None
+    avg_workflow_duration_ms = int(total_workflow_duration_ms / len(rows_with_workflow_ms)) if total_workflow_duration_ms is not None else None
+    avg_agentic_duration_ms = int(total_agentic_duration_ms / len(rows_with_agentic_ms)) if total_agentic_duration_ms is not None else None
     close_ended_rows = [row for row in rows if row.get("answer_style") == "close_ended"]
     open_ended_rows = [row for row in rows if row.get("answer_style") == "open_ended"]
 
@@ -322,6 +325,9 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
         "avg_baseline_duration_ms": avg_baseline_duration_ms,
         "avg_workflow_duration_ms": avg_workflow_duration_ms,
         "avg_agentic_duration_ms": avg_agentic_duration_ms,
+        "total_baseline_duration_ms": total_baseline_duration_ms,
+        "total_workflow_duration_ms": total_workflow_duration_ms,
+        "total_agentic_duration_ms": total_agentic_duration_ms,
         "by_question_type": [
             {
                 "question_type": bucket["question_type"],

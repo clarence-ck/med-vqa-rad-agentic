@@ -6,6 +6,7 @@ function formatPercent(value) {
 
 function fmtMs(ms) {
   if (ms == null) return '—';
+  if (ms >= 60000) return `${(ms / 60000).toFixed(1)}m`;
   return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`;
 }
 
@@ -28,7 +29,7 @@ function formatLabel(value) {
   return String(value || 'unknown').replace(/_/g, ' ');
 }
 
-function SystemPerformanceCard({ title, icon, accuracy, avgDuration, toneClass }) {
+function SystemPerformanceCard({ title, icon, accuracy, avgDuration, totalDuration, toneClass }) {
   return (
     <div className="card evaluation-system-card">
       <div className="card-header">
@@ -36,12 +37,16 @@ function SystemPerformanceCard({ title, icon, accuracy, avgDuration, toneClass }
       </div>
       <div className="evaluation-system-stats">
         <div>
-          <div className="evaluation-list-subtitle">Exact-match</div>
+          <div className="evaluation-list-subtitle">Exact-match against Ground Truth</div>
           <div className="evaluation-metric-value">{formatPercent(accuracy)}</div>
         </div>
         <div>
           <div className="evaluation-list-subtitle">Avg runtime</div>
           <div className="evaluation-system-runtime">{fmtMs(avgDuration)}</div>
+        </div>
+        <div>
+          <div className="evaluation-list-subtitle">Total runtime</div>
+          <div className="evaluation-system-runtime" style={{ color: 'var(--color-text-muted)' }}>{fmtMs(totalDuration)}</div>
         </div>
       </div>
     </div>
@@ -162,6 +167,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
               icon="⚡"
               accuracy={summary.baseline_accuracy}
               avgDuration={summary.avg_baseline_duration_ms}
+              totalDuration={summary.total_baseline_duration_ms}
               toneClass="tag-amber"
             />
             <SystemPerformanceCard
@@ -169,6 +175,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
               icon="🧭"
               accuracy={summary.workflow_accuracy}
               avgDuration={summary.avg_workflow_duration_ms}
+              totalDuration={summary.total_workflow_duration_ms}
               toneClass="tag-blue"
             />
             <SystemPerformanceCard
@@ -176,6 +183,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
               icon="🔗"
               accuracy={summary.agentic_accuracy}
               avgDuration={summary.avg_agentic_duration_ms}
+              totalDuration={summary.total_agentic_duration_ms}
               toneClass="tag-green"
             />
           </section>
