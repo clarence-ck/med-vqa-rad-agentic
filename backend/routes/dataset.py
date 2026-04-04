@@ -10,7 +10,7 @@ from agents.baseline import baseline_answer
 from agents.orchestrator import run_pipeline
 from agents.workflow_baseline import workflow_answer
 from utils.data_loader import get_sample_cases, get_sample_by_id, get_image_bytes
-from logger import get_logger
+from logger import get_logger, sample_id_var
 
 router = APIRouter(prefix="/api/dataset")
 CACHE_DIR = os.path.join(os.path.dirname(__file__), "..", ".case_explorer_cache")
@@ -338,76 +338,81 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
 
 @router.get("/sample/{sample_id}/analysis")
 async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=False)):
-    sample, image_bytes = _get_sample_with_image(sample_id)
-    if sample is None:
-        _log.warning("Sample %d not found", sample_id)
-        return JSONResponse(status_code=404, content={"error": "Sample not found"})
+    token = sample_id_var.set(str(sample_id))
+    try:
+        sample, image_bytes = _get_sample_with_image(sample_id)
 
-    if not image_bytes:
-        _log.warning("Image bytes missing for sample %d", sample_id)
-        return JSONResponse(status_code=404, content={"error": "Sample image not found"})
+        if sample is None:
+            _log.warning("Sample %d not found", sample_id)
+            return JSONResponse(status_code=404, content={"error": "Sample not found"})
 
-    question = sample.get("question", "")
-    mime_type = sample.get("image_mime", "image/png")
-    cache_path = _get_cache_path(sample_id, question)
+        if not image_bytes:
+            _log.warning("Image bytes missing for sample %d", sample_id)
+            return JSONResponse(status_code=404, content={"error": "Sample image not found"})
 
-    if not refresh and os.path.exists(cache_path):
-        _log.info("Cache HIT for sample %d (question=%r)", sample_id, question[:80])
-        with open(cache_path, "r", encoding="utf-8") as f:
-            cached_payload = json.load(f)
-            cached_payload["cached"] = True
-            return cached_payload
+        question = sample.get("question", "")
+        mime_type = sample.get("image_mime", "image/png")
+        cache_path = _get_cache_path(sample_id, question)
 
-    _log.info(
-        "Cache MISS for sample %d  question=%r  refresh=%s  running all 3 pipelines in parallel",
-        sample_id, question[:80], refresh,
-    )
-    started_at = time.time()
+        if not refresh and os.path.exists(cache_path):
+            _log.info("Cache HIT for sample %d (question=%r)", sample_id, question[:80])
+            with open(cache_path, "r", encoding="utf-8") as f:
+                cached_payload = json.load(f)
+                cached_payload["cached"] = True
+                return cached_payload
 
-    async def timed(fn, *args):
-        t0 = time.time()
-        result = await asyncio.to_thread(fn, *args)
-        return result, int((time.time() - t0) * 1000)
+        _log.info(
+            "Cache MISS for sample %d  question=%r  refresh=%s  running all 3 pipelines in parallel",
+            sample_id, question[:80], refresh,
+        )
+        started_at = time.time()
 
-    (baseline_result, baseline_ms), (workflow_result, workflow_ms), (agentic_result, agentic_ms) = \
-        await asyncio.gather(
-            timed(baseline_answer, image_bytes, question, mime_type),
-            timed(workflow_answer, image_bytes, question, mime_type),
-            timed(run_pipeline, image_bytes, question, mime_type),
+        async def timed(fn, *args):
+            t0 = time.time()
+            result = await asyncio.to_thread(fn, *args)
+            return result, int((time.time() - t0) * 1000)
+
+        (baseline_result, baseline_ms), (workflow_result, workflow_ms), (agentic_result, agentic_ms) = \
+            await asyncio.gather(
+                timed(baseline_answer, image_bytes, question, mime_type),
+                timed(workflow_answer, image_bytes, question, mime_type),
+                timed(run_pipeline, image_bytes, question, mime_type),
+            )
+
+        total_ms = int((time.time() - started_at) * 1000)
+        _log.info(
+            "Sample %d analysis complete  baseline=%dms  workflow=%dms  agentic=%dms  total=%dms",
+            sample_id, baseline_ms, workflow_ms, agentic_ms, total_ms,
+        )
+        _log.info(
+            "Sample %d answers  baseline=%r  workflow=%r  agentic=%r  ground_truth=%r",
+            sample_id,
+            str(baseline_result.get("answer", ""))[:60],
+            str(workflow_result.get("answer", ""))[:60],
+            str(agentic_result.get("answer", ""))[:60],
+            str(sample.get("answer", ""))[:60],
         )
 
-    total_ms = int((time.time() - started_at) * 1000)
-    _log.info(
-        "Sample %d analysis complete  baseline=%dms  workflow=%dms  agentic=%dms  total=%dms",
-        sample_id, baseline_ms, workflow_ms, agentic_ms, total_ms,
-    )
-    _log.info(
-        "Sample %d answers  baseline=%r  workflow=%r  agentic=%r  ground_truth=%r",
-        sample_id,
-        str(baseline_result.get("answer", ""))[:60],
-        str(workflow_result.get("answer", ""))[:60],
-        str(agentic_result.get("answer", ""))[:60],
-        str(sample.get("answer", ""))[:60],
-    )
+        payload = {
+            "sample": sample,
+            "baseline_result": baseline_result,
+            "workflow_result": workflow_result,
+            "agentic_result": agentic_result,
+            "ground_truth_answer": sample.get("answer", ""),
+            "cached": False,
+            "cached_at": int(time.time()),
+            "duration_ms": int((time.time() - started_at) * 1000),
+            "baseline_duration_ms": baseline_ms,
+            "workflow_duration_ms": workflow_ms,
+            "agentic_duration_ms": agentic_ms,
+        }
 
-    payload = {
-        "sample": sample,
-        "baseline_result": baseline_result,
-        "workflow_result": workflow_result,
-        "agentic_result": agentic_result,
-        "ground_truth_answer": sample.get("answer", ""),
-        "cached": False,
-        "cached_at": int(time.time()),
-        "duration_ms": int((time.time() - started_at) * 1000),
-        "baseline_duration_ms": baseline_ms,
-        "workflow_duration_ms": workflow_ms,
-        "agentic_duration_ms": agentic_ms,
-    }
+        with open(cache_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f)
 
-    with open(cache_path, "w", encoding="utf-8") as f:
-        json.dump(payload, f)
-
-    return payload
+        return payload
+    finally:
+        sample_id_var.reset(token)
 
 
 @router.get("/evaluation")
