@@ -72,8 +72,8 @@ class PerSampleFileHandler(logging.Handler):
                 return  # If no sample ID in context, do nothing
 
             msg = self.format(record)
-            # Create a dedicated log file per sample ID
-            file_path = os.path.join(self.log_dir, f"sample_{sid}.log")
+            # Create a dedicated log file per sample ID, prefixing with session timestamp
+            file_path = os.path.join(self.log_dir, f"medvqa_{_SESSION_TIMESTAMP}_{sid}.log")
             with open(file_path, "a", encoding="utf-8") as f:
                 f.write(msg + "\n")
         except Exception:
