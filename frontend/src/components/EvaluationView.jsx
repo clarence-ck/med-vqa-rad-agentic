@@ -258,7 +258,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
               <div className="card-header">
                 <span className="card-title">Accuracy by Question Type</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <span className="tag tag-gray">F1 matching</span>
+                  <span className="tag tag-gray">BioBERT</span>
                   <span className="tag tag-gray" data-tooltip="Breakdown of accuracy by question type. Close-ended questions use yes/no synonym matching only. Open-ended questions use BioBERT semantic similarity ≥ 0.65 to capture meaning equivalence." data-tooltip-align="left">info</span>
                 </div>
               </div>
