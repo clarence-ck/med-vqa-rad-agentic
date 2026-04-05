@@ -32,7 +32,8 @@ def _get_embedding_model():
     global _EMBED_MODEL
     if _EMBED_MODEL is None:
         # BioBERT for medical domain-specific embeddings
-        _EMBED_MODEL = SentenceTransformer('pritamdeka/BioBERT-mnli-snli-scinli')
+        # Using dmis-lab/biobert-base-cased-v1.2 (official BioBERT)
+        _EMBED_MODEL = SentenceTransformer('dmis-lab/biobert-base-cased-v1.2')
     return _EMBED_MODEL
 
 
@@ -182,6 +183,19 @@ def _subset_accuracy(subset_rows: list[dict], key: str) -> float:
     return sum(1 for row in subset_rows if row.get(key)) / total
 
 
+def _has_semantic_disagreement(baseline: str, workflow: str, agentic: str) -> bool:
+    """Check if any two systems disagree using BioBERT semantic similarity.
+    
+    Disagreement exists if not all pairs are semantically equivalent (similarity >= 0.75).
+    """
+    baseline_workflow_same = _semantic_similarity(baseline, workflow) >= _SEMANTIC_THRESHOLD
+    baseline_agentic_same = _semantic_similarity(baseline, agentic) >= _SEMANTIC_THRESHOLD
+    workflow_agentic_same = _semantic_similarity(workflow, agentic) >= _SEMANTIC_THRESHOLD
+    
+    # Disagreement if any pair doesn't match semantically
+    return not (baseline_workflow_same and baseline_agentic_same and workflow_agentic_same)
+
+
 def _extract_knowledge_retriever_details(agentic_result: dict) -> dict:
     trace = agentic_result.get("agent_trace", []) or []
     knowledge_step = next(
@@ -264,7 +278,7 @@ def _build_evaluation_row(payload: dict) -> dict:
         "workflow_semantic": round(_semantic_similarity(workflow_normalized, ground_truth_normalized), 4),
         "agentic_semantic": round(_semantic_similarity(agentic_normalized, ground_truth_normalized), 4),
         "winner": winner,
-        "disagreement": len({baseline_normalized, workflow_normalized, agentic_normalized}) > 1,
+        "disagreement": _has_semantic_disagreement(baseline_normalized, workflow_normalized, agentic_normalized),
         "verification_status": agentic_result.get("verification_status", "unknown"),
         "confidence": agentic_result.get("confidence", "Low"),
         "issues_found": agentic_result.get("issues_found", []),

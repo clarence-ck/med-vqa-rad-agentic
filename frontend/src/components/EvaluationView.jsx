@@ -196,7 +196,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
             <div className="card">
               <div className="card-header">
                 <span className="card-title">3-System Disagreement</span>
-                <span className="tag tag-gray" data-tooltip="Percentage of cases where at least one of the three systems yielded a different result than the others." data-tooltip-align="left">info</span>
+                <span className="tag tag-gray" data-tooltip="Percentage of cases where systems produce semantically different answers (BioBERT similarity < 0.75). For example, 'brain' and 'nervous system' are semantically similar (no disagreement), but 'brain' and 'leg' would be a disagreement." data-tooltip-align="left">info</span>
               </div>
               <div className="evaluation-metric-value">{formatPercent(summary.disagreement_rate)}</div>
             </div>
@@ -242,7 +242,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 <span className="card-title">BioBERT Accuracy (Open-ended)</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.open_ended_cases} cases</span>
-                  <span className="tag tag-gray" data-tooltip="BioBERT Semantic Accuracy: Percentage of open-ended answers with embedding similarity ≥ 0.75. Uses BioBERT (medical-domain model) to capture meaning equivalence (e.g., 'brain' ≈ 'nervous system'). NOT based on token F1." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="BioBERT Accuracy: Percentage of open-ended answers with embedding similarity ≥ 0.75. Uses dmis-lab/biobert-base-cased-v1.2 (official BioBERT trained on PubMed/PMC) to capture medical meaning equivalence (e.g., 'brain' ≈ 'nervous system'). NOT based on token F1." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <AccuracyMetricStack
@@ -259,7 +259,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 <span className="card-title">Accuracy by Question Type</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">F1 matching</span>
-                  <span className="tag tag-gray" data-tooltip="Breakdown of accuracy by question type. Close-ended questions use yes/no synonym matching only. Open-ended questions use semantic similarity ≥ 0.75 (embedding-based) to capture meaning equivalence." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="Breakdown of accuracy by question type. Close-ended questions use yes/no synonym matching only. Open-ended questions use BioBERT semantic similarity ≥ 0.75 to capture meaning equivalence." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <div className="evaluation-table-wrap" style={{ margin: '0 -24px -24px -24px' }}>
