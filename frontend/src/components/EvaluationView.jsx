@@ -135,7 +135,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
       <section className="evaluation-header-strip">
         <div>
           <h1 className="evaluation-title">Evaluation Dashboard</h1>
-          <p className="evaluation-subtitle">Aggregate exact-match metrics from cached Case Explorer runs.</p>
+          <p className="evaluation-subtitle">Aggregate accuracy metrics from cached Case Explorer runs. Close-ended: synonym matching. Open-ended: BioBERT semantic similarity ≥ 0.65.</p>
         </div>
         <div className="evaluation-actions">
           <button className="btn btn-secondary" onClick={onRefresh} disabled={loading}>

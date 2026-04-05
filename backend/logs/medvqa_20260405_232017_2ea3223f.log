@@ -1,0 +1,285 @@
+2026-04-05T23:20:17  INFO      medvqa  Session started  file=medvqa_20260405_232017_2ea3223f.log  session_id=2ea3223f
+2026-04-05T23:20:28  INFO      medvqa.agents.knowledge_retriever  Advanced RAG module loaded successfully
+2026-04-05T23:20:28  INFO      medvqa.server  ============================================================
+2026-04-05T23:20:28  INFO      medvqa.server  MedVisionQuery API  v1.0.0  starting up
+2026-04-05T23:20:28  INFO      medvqa.server  CORS origins: ['http://localhost:5173']
+2026-04-05T23:20:28  INFO      medvqa.server  ============================================================
+2026-04-05T23:20:29  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-05T23:20:29  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-05T23:20:29  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=57ms
+2026-04-05T23:20:29  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-05T23:20:29  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-05T23:20:29  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=34ms
+2026-04-05T23:20:31  INFO      medvqa.server  → GET /api/dataset/sample/2027/analysis
+2026-04-05T23:20:32  INFO      medvqa.routes.dataset  Cache MISS for sample 2027  question='what organ is affected by pathology in this image?'  refresh=False  running all 3 pipelines in parallel
+2026-04-05T23:20:32  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=257399 bytes  question='what organ is affected by pathology in this image?'
+2026-04-05T23:20:32  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what organ is affected by pathology in this image?'  mime_type=image/png  size=257399 bytes ===
+2026-04-05T23:20:32  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-05T23:20:32  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=257399 bytes)
+2026-04-05T23:20:33  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-05T23:20:33  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=257399 bytes)
+2026-04-05T23:20:34  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Brain",
+  "explanation": "This is an axial FLAIR MRI of the head showing abnormal signal within the brain parenchyma, specifically in the deep cerebral region. The pathology therefore affects the brain.",
+  "confidence": "high"
+}
+2026-04-05T23:20:34  INFO      medvqa.agents.baseline  Baseline done  answer='Brain'  confidence=high  duration=2124ms
+2026-04-05T23:20:34  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2791ms
+2026-04-05T23:20:34  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial FLAIR MRI image of the brain at the level of the basal ganglia and lateral ventricles. Brain parenchyma and ventricular spaces are visible, with a focal area of increased FLAIR signal in the deep left cerebral region.
+2026-04-05T23:20:34  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Focal hyperintense signal in the left deep brain/basal ganglia region', 'No obvious midline shift on this slice', 'Mild motion/low-resolution artifact possible']
+2026-04-05T23:20:34  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what organ is affected by pathology in this image?'
+2026-04-05T23:20:34  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-05T23:20:36  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1098ms
+2026-04-05T23:20:36  DEBUG     medvqa.agents.question_analyzer  Target entity: organ affected by pathology  Expected format: single_word  Rephrased: What organ is affected by the pathology in this image?
+2026-04-05T23:20:36  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what organ is affected by pathology in this image?'  modality=MRI  body_region=brain  question_type=anatomy_identification
+2026-04-05T23:20:36  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-05T23:20:36  DEBUG     medvqa.agents.workflow_baseline  Branch taken: anatomy_identification
+2026-04-05T23:20:36  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='brain'  confidence=high  question_type=anatomy_identification  duration=4030ms
+2026-04-05T23:20:36  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2595ms
+2026-04-05T23:20:36  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial FLAIR MRI image of the brain at the level of the basal ganglia and lateral ventricles. The scan shows brain parenchyma, ventricular system, and surrounding soft tissues in cross-section.
+2026-04-05T23:20:36  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Focal asymmetric hyperintense area in the left basal ganglia/periventricular region on FLAIR', 'No obvious midline shift on this single image', 'Mild prominence of the cortical sulci and ventricles may be present']
+2026-04-05T23:20:36  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain  duration=2645ms
+2026-04-05T23:20:36  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what organ is affected by pathology in this image?'
+2026-04-05T23:20:36  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what organ is affected by pathology in this image?'
+2026-04-05T23:20:36  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-05T23:20:38  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1111ms
+2026-04-05T23:20:38  DEBUG     medvqa.agents.question_analyzer  Target entity: organ affected by pathology  Expected format: single_word  Rephrased: What organ is affected by pathology in this image?
+2026-04-05T23:20:38  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=anatomy_identification  duration=1189ms
+2026-04-05T23:20:38  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-05T23:20:38  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  modality=MRI  region=brain
+2026-04-05T23:20:40  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1326ms
+2026-04-05T23:20:40  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clear single-structure visual recognition task on an unambiguous MRI, so it fits an easy routing path with no retrieval needed.
+2026-04-05T23:20:40  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1381ms
+2026-04-05T23:20:41  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-05T23:20:41  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what organ is affected by pathology in this image?'  is_retry=False  question_type=anatomy_identification  yes_no=False
+2026-04-05T23:20:41  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-05T23:20:43  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='brain'  confidence=high  duration=2065ms
+2026-04-05T23:20:43  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the imaging modality and body region as brain MRI.', 'Located the noted pathology in the left basal ganglia/periventricular brain tissue.', 'Mapped the affected structures to the organ they belong to.', 'Concluded the organ affected is the brain.']
+2026-04-05T23:20:43  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Modality: MRI', 'Body region: brain', 'Visible structures: cerebral hemispheres, lateral ventricles, basal ganglia, thalami, internal capsules', 'Focal asymmetric hyperintense area in the left basal ganglia/periventricular region on FLAIR']
+2026-04-05T23:20:43  DEBUG     medvqa.agents.reasoning_agent  Limitations: The answer is based on a single image and the provided analysis; subtle additional pathology cannot be assessed.
+2026-04-05T23:20:43  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='brain'  confidence=high  duration=2101ms
+2026-04-05T23:20:44  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-05T23:20:44  INFO      medvqa.agents.verification_agent  Verifying answer='brain'  question='what organ is affected by pathology in this image?'  question_type=anatomy_identification
+2026-04-05T23:20:45  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1665ms
+2026-04-05T23:20:45  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-05T23:20:45  DEBUG     medvqa.agents.verification_agent  Verification notes: The question asks which organ is affected, and the answer 'brain' is consistent with the MRI being an axial FLAIR scan of the brain. The explanation correctly references visible brain structures and does not overstate beyond the image evidence.
+2026-04-05T23:20:45  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1707ms
+2026-04-05T23:20:45  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed']
+2026-04-05T23:20:45  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-05T23:20:45  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-05T23:20:45  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-05T23:20:45  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='brain'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=13740ms
+2026-04-05T23:20:45  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='brain'  verification=verified  confidence=High  flag_review=False
+2026-04-05T23:20:45  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-05T23:20:45  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-05T23:20:45  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='brain'  retries=0  total_duration=13742ms ===
+2026-04-05T23:20:45  INFO      medvqa.routes.dataset  Sample 2027 analysis complete  baseline=2129ms  workflow=4043ms  agentic=13757ms  total=13762ms
+2026-04-05T23:20:45  INFO      medvqa.routes.dataset  Sample 2027 answers  baseline='Brain'  workflow='brain'  agentic='brain'  ground_truth='brain'
+2026-04-05T23:20:45  INFO      medvqa.server  ← GET /api/dataset/sample/2027/analysis  status=200  duration=13785ms
+2026-04-05T23:20:56  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-05T23:20:56  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=1
+2026-04-05T23:21:01  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=1  skipped=0
+2026-04-05T23:21:01  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=5344ms
+2026-04-05T23:21:15  INFO      medvqa.server  → GET /api/dataset/sample/1925/analysis
+2026-04-05T23:21:15  INFO      medvqa.routes.dataset  Cache MISS for sample 1925  question='what organ system is being imaged?'  refresh=False  running all 3 pipelines in parallel
+2026-04-05T23:21:15  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=99775 bytes  question='what organ system is being imaged?'
+2026-04-05T23:21:15  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what organ system is being imaged?'  mime_type=image/png  size=99775 bytes ===
+2026-04-05T23:21:15  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-05T23:21:15  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=99775 bytes)
+2026-04-05T23:21:16  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-05T23:21:16  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=99775 bytes)
+2026-04-05T23:21:17  DEBUG     medvqa.agents.baseline  Raw baseline response: {"is_radiology_image":true,"answer":"Brain (central nervous system)","explanation":"This is an axial radiology image of the head showing brain structures within the skull, consistent with neuroimaging. The organ system being imaged is the nervous system.","confidence":"high"}
+2026-04-05T23:21:17  INFO      medvqa.agents.baseline  Baseline done  answer='Brain (central nervous system)'  confidence=high  duration=1336ms
+2026-04-05T23:21:17  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=head  quality=fair  findings=3  duration=2124ms
+2026-04-05T23:21:17  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the head at the level of the cerebral hemispheres is shown. The skull and intracranial structures are visible, with a large symmetric low-density/soft tissue region occupying much of the intracranial space on both sides.
+2026-04-05T23:21:17  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large bilateral symmetric intracranial low-density/soft tissue-appearing areas', 'Central midline separation is visible', 'No obvious acute skull fracture on this slice']
+2026-04-05T23:21:18  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what organ system is being imaged?'
+2026-04-05T23:21:18  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-05T23:21:18  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=head  quality=fair  findings=3  duration=2104ms
+2026-04-05T23:21:18  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the head at a superior level. The brain and surrounding calvarium are visible, with marked bilateral, symmetric hyperdense extra-axial-appearing regions occupying much of the intracranial space on this slice.
+2026-04-05T23:21:18  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Bilateral symmetric large hyperdense intracranial collections/structures on this axial slice', 'Compression of visible brain tissue by the hyperdense regions', 'Limited field with a single slice only']
+2026-04-05T23:21:18  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=head  duration=2180ms
+2026-04-05T23:21:19  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1420ms
+2026-04-05T23:21:19  DEBUG     medvqa.agents.question_analyzer  Target entity: organ system  Expected format: short_phrase  Rephrased: What organ system is being imaged?
+2026-04-05T23:21:19  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what organ system is being imaged?'  modality=CT  body_region=head  question_type=anatomy_identification
+2026-04-05T23:21:19  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-05T23:21:19  DEBUG     medvqa.agents.workflow_baseline  Branch taken: anatomy_identification
+2026-04-05T23:21:19  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='head'  confidence=high  question_type=anatomy_identification  duration=3632ms
+2026-04-05T23:21:19  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what organ system is being imaged?'
+2026-04-05T23:21:19  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what organ system is being imaged?'
+2026-04-05T23:21:19  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-05T23:21:20  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1055ms
+2026-04-05T23:21:20  DEBUG     medvqa.agents.question_analyzer  Target entity: organ system  Expected format: short_phrase  Rephrased: What organ system is being imaged?
+2026-04-05T23:21:20  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=anatomy_identification  duration=1115ms
+2026-04-05T23:21:21  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-05T23:21:21  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=head
+2026-04-05T23:21:23  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1370ms
+2026-04-05T23:21:23  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clear anatomy-identification question on a focused but abnormal head CT, making it a medium-complexity visual recognition task that benefits from retrieval support.
+2026-04-05T23:21:23  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1424ms
+2026-04-05T23:21:23  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-05T23:21:24  INFO      medvqa.agents.advanced_rag  Using device: cpu
+2026-04-05T23:21:24  INFO      medvqa.agents.advanced_rag  Loading dataset from C:\Users\chin_\Documents\GitHub\Medical-VQA-Explanation-Agent\data\vqa-rad\vqa_rad.json
+2026-04-05T23:21:24  INFO      medvqa.agents.advanced_rag  Loaded 1793 training examples from dataset
+2026-04-05T23:21:24  INFO      medvqa.agents.advanced_rag  Building indices for 1793 examples...
+2026-04-05T23:21:24  INFO      medvqa.agents.advanced_rag  Computing dense embeddings (model=sentence-transformers/all-MiniLM-L6-v2)...
+2026-04-05T23:21:24  INFO      medvqa.agents.advanced_rag  Loading embedding model: sentence-transformers/all-MiniLM-L6-v2 on cpu
+2026-04-05T23:21:32  INFO      medvqa.agents.advanced_rag  Building FAISS index (dim=384)...
+2026-04-05T23:21:32  INFO      medvqa.agents.advanced_rag  FAISS index built with 1793 vectors
+2026-04-05T23:21:32  INFO      medvqa.agents.advanced_rag  Building BM25 sparse index...
+2026-04-05T23:21:32  INFO      medvqa.agents.advanced_rag  Indexing complete — FAISS + BM25 ready
+2026-04-05T23:21:32  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-05T23:21:32  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='what organ system is being imaged?'  modality=CT  body_region=head  question_type=anatomy_identification  target_entity=organ system  advanced_rag=True
+2026-04-05T23:21:32  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=what organ system is being imaged? | modality=CT | body_region=head | finding=other | rewrite=True rerank=True reflection=True
+2026-04-05T23:21:34  INFO      medvqa.agents.advanced_rag  Query rewrite | original='what organ system is being imaged?'
+2026-04-05T23:21:34  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='What organ system is being imaged on computed tomography (CT) of the head, including the brain, intracranial structures, skull, and cranial contents? Which anatomical system or region is evaluated on a head CT scan?'  changed=True
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='head': 158 matches
+2026-04-05T23:21:34  INFO      medvqa.agents.advanced_rag  Metadata filter result: 3 candidates after intersection
+2026-04-05T23:21:34  INFO      medvqa.agents.advanced_rag  Metadata filter: 3 candidates retained
+2026-04-05T23:21:34  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 3 candidates
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/3
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag    1. id=656 score=0.5154 | Q: what test or procedure might reveal the diagnosis? | A: head/neck ct
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag    2. id=555 score=0.5112 | Q: is a noncontrast ct the first imaging test for a suspected brain bleed? | A: yes
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag    3. id=1362 score=0.4512 | Q: is there acute blood present on this head ct? | A: no
+2026-04-05T23:21:34  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 3 candidates
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/3
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag    1. id=1362 score=1.5361 | Q: is there acute blood present on this head ct? | A: no
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag    2. id=555 score=1.5357 | Q: is a noncontrast ct the first imaging test for a suspected brain bleed? | A: yes
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag    3. id=656 score=1.4753 | Q: what test or procedure might reveal the diagnosis? | A: head/neck ct
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=3 sparse=3
+2026-04-05T23:21:34  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 3 unique candidates
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/3
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag    1. id=656 score=0.0323 method=hybrid_rrf | Q: what test or procedure might reveal the diagnosis? | A: head/neck ct
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag    2. id=1362 score=0.0323 method=hybrid_rrf | Q: is there acute blood present on this head ct? | A: no
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag    3. id=555 score=0.0323 method=hybrid_rrf | Q: is a noncontrast ct the first imaging test for a suspected brain bleed? | A: yes
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag  Reranking skipped; using first 3 merged candidates
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag    1. id=656 score=0.0323 method=hybrid_rrf | Q: what test or procedure might reveal the diagnosis? | A: head/neck ct
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag    2. id=1362 score=0.0323 method=hybrid_rrf | Q: is there acute blood present on this head ct? | A: no
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag    3. id=555 score=0.0323 method=hybrid_rrf | Q: is a noncontrast ct the first imaging test for a suspected brain bleed? | A: yes
+2026-04-05T23:21:34  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 3 retrieved candidates
+2026-04-05T23:21:34  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 3 retrieved candidates via LLM
+2026-04-05T23:21:34  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=True  confidence=high  recommendation=use
+2026-04-05T23:21:34  INFO      medvqa.agents.advanced_rag  Self-reflection accepted retrieved candidates
+2026-04-05T23:21:34  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag    1. id=656 score=0.0323 method=hybrid_rrf | Q: what test or procedure might reveal the diagnosis? | A: head/neck ct
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag    2. id=1362 score=0.0323 method=hybrid_rrf | Q: is there acute blood present on this head ct? | A: no
+2026-04-05T23:21:34  DEBUG     medvqa.agents.advanced_rag    3. id=555 score=0.0323 method=hybrid_rrf | Q: is a noncontrast ct the first imaging test for a suspected brain bleed? | A: yes
+2026-04-05T23:21:34  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases  (query_rewritten=True  finding_category=other)
+2026-04-05T23:21:37  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=3  duration=4829ms
+2026-04-05T23:21:37  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Head CT visualizes the brain, skull/calvarium, scalp, and intracranial spaces.', 'The primary organ system assessed is the nervous system, especially the central nervous system.', 'Midline structures such as the falx, ventricles, and basal cisterns can be evaluated on CT.', 'Noncontrast head CT is commonly used to rapidly assess acute intracranial abnormalities such as bleeding.']
+2026-04-05T23:21:37  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: A CT of the head primarily images the central nervous system structures within the skull, especially the brain parenchyma, ventricles, and intracranial midline structures, along with the calvarium and
+2026-04-05T23:21:37  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=3  duration=13870ms
+2026-04-05T23:21:38  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-05T23:21:38  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what organ system is being imaged?'  is_retry=False  question_type=anatomy_identification  yes_no=False
+2026-04-05T23:21:38  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=3
+2026-04-05T23:21:40  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Central nervous system'  confidence=high  duration=1940ms
+2026-04-05T23:21:40  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the modality and body region as CT of the head.', 'Note that the visible structures include brain parenchyma and intracranial anatomy.', 'Map head CT anatomy to the organ system primarily assessed.', 'Select the central nervous system as the best answer.']
+2026-04-05T23:21:40  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Modality: CT', 'Body region: head', 'Visible brain parenchyma', 'Visible skull/calvarium and intracranial structures', 'Head CT primarily evaluates the brain and other central nervous system structures']
+2026-04-05T23:21:40  DEBUG     medvqa.agents.reasoning_agent  Limitations: This is based on a single axial head CT slice, so fine anatomic detail is limited, but the organ system is still clear.
+2026-04-05T23:21:40  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Central nervous system'  confidence=high  duration=2022ms
+2026-04-05T23:21:41  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-05T23:21:41  INFO      medvqa.agents.verification_agent  Verifying answer='Central nervous system'  question='what organ system is being imaged?'  question_type=anatomy_identification
+2026-04-05T23:21:43  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1413ms
+2026-04-05T23:21:43  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-05T23:21:43  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer correctly identifies the organ system as the central nervous system based on a head CT showing brain parenchyma and intracranial structures. The explanation is consistent with the visual analysis and the short-phrase format is appropriate.
+2026-04-05T23:21:43  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1477ms
+2026-04-05T23:21:43  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-05T23:21:43  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-05T23:21:43  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-05T23:21:43  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Central nervous system'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=27217ms
+2026-04-05T23:21:43  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Central nervous system'  verification=verified  confidence=High  flag_review=False
+2026-04-05T23:21:43  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-05T23:21:43  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-05T23:21:43  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Central nervous system'  retries=0  total_duration=27227ms ===
+2026-04-05T23:21:43  INFO      medvqa.routes.dataset  Sample 1925 analysis complete  baseline=1344ms  workflow=3632ms  agentic=27231ms  total=27231ms
+2026-04-05T23:21:43  INFO      medvqa.routes.dataset  Sample 1925 answers  baseline='Brain (central nervous system)'  workflow='head'  agentic='Central nervous system'  ground_truth='brain'
+2026-04-05T23:21:43  INFO      medvqa.server  ← GET /api/dataset/sample/1925/analysis  status=200  duration=27248ms
+2026-04-05T23:21:44  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-05T23:21:44  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=2
+2026-04-05T23:21:45  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=2  skipped=0
+2026-04-05T23:21:45  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=402ms
+2026-04-05T23:21:59  INFO      medvqa.server  → GET /api/dataset/sample/2032/analysis
+2026-04-05T23:21:59  INFO      medvqa.routes.dataset  Cache MISS for sample 2032  question='what organ system is shown?'  refresh=False  running all 3 pipelines in parallel
+2026-04-05T23:21:59  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=259127 bytes  question='what organ system is shown?'
+2026-04-05T23:21:59  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what organ system is shown?'  mime_type=image/png  size=259127 bytes ===
+2026-04-05T23:21:59  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-05T23:21:59  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=259127 bytes)
+2026-04-05T23:22:00  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-05T23:22:00  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=259127 bytes)
+2026-04-05T23:22:00  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Nervous system (brain)",
+  "explanation": "This is an axial MRI scan of the head showing the brain, including the cerebral hemispheres and ventricles. Therefore, the organ system shown is the nervous system.",
+  "confidence": "high"
+}
+2026-04-05T23:22:00  INFO      medvqa.agents.baseline  Baseline done  answer='Nervous system (brain)'  confidence=high  duration=1558ms
+2026-04-05T23:22:01  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2383ms
+2026-04-05T23:22:01  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial MRI image of the brain at the level of the lateral ventricles. The cerebral hemispheres and ventricular spaces are clearly seen, with surrounding cortical sulci and deep brain structures visible.
+2026-04-05T23:22:01  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Axial T2-weighted appearance with bright cerebrospinal fluid', 'No obvious large mass effect or midline shift on this single image', 'Symmetric ventricular appearance on this slice']
+2026-04-05T23:22:01  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what organ system is shown?'
+2026-04-05T23:22:01  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-05T23:22:02  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1065ms
+2026-04-05T23:22:02  DEBUG     medvqa.agents.question_analyzer  Target entity: organ system  Expected format: short_phrase  Rephrased: What organ system is shown?
+2026-04-05T23:22:02  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what organ system is shown?'  modality=MRI  body_region=brain  question_type=anatomy_identification
+2026-04-05T23:22:02  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-05T23:22:02  DEBUG     medvqa.agents.workflow_baseline  Branch taken: anatomy_identification
+2026-04-05T23:22:02  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='brain'  confidence=high  question_type=anatomy_identification  duration=3553ms
+2026-04-05T23:22:02  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2768ms
+2026-04-05T23:22:02  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial MRI image of the brain showing a slice through the cerebral hemispheres and lateral ventricles. The image appears to be a T2-weighted sequence with bright cerebrospinal fluid and preserved overall brain anatomy on this single view.
+2026-04-05T23:22:02  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Symmetric appearance of the lateral ventricles', 'No obvious large mass effect or midline shift on this image', 'Cortical sulci are visible and appear symmetric']
+2026-04-05T23:22:02  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain  duration=2829ms
+2026-04-05T23:22:03  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what organ system is shown?'
+2026-04-05T23:22:03  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what organ system is shown?'
+2026-04-05T23:22:03  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-05T23:22:04  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1020ms
+2026-04-05T23:22:04  DEBUG     medvqa.agents.question_analyzer  Target entity: organ system  Expected format: short_phrase  Rephrased: What organ system is shown?
+2026-04-05T23:22:04  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=anatomy_identification  duration=1097ms
+2026-04-05T23:22:05  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-05T23:22:06  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  modality=MRI  region=brain
+2026-04-05T23:22:07  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1725ms
+2026-04-05T23:22:07  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a simple, clear visual recognition task on an unambiguous MRI slice, so it fits the easy category and does not require external retrieval or special fallback handling.
+2026-04-05T23:22:07  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1791ms
+2026-04-05T23:22:08  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-05T23:22:08  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what organ system is shown?'  is_retry=False  question_type=anatomy_identification  yes_no=False
+2026-04-05T23:22:08  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-05T23:22:10  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Nervous system'  confidence=high  duration=2055ms
+2026-04-05T23:22:10  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the modality as brain MRI.', 'Recognize visible brain structures such as the cerebral hemispheres and lateral ventricles.', 'Map these structures to the central nervous system.', 'Conclude the organ system is the nervous system.']
+2026-04-05T23:22:10  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['MRI of the brain', 'Cerebral hemispheres visible', 'Lateral ventricles visible', 'Deep gray matter and cortical sulci visible', 'Skull and scalp surrounding the brain']
+2026-04-05T23:22:10  DEBUG     medvqa.agents.reasoning_agent  Limitations: This is based on a single axial image, but the visible anatomy clearly identifies the brain and thus the nervous system.
+2026-04-05T23:22:10  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Nervous system'  confidence=high  duration=2130ms
+2026-04-05T23:22:11  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-05T23:22:11  INFO      medvqa.agents.verification_agent  Verifying answer='Nervous system'  question='what organ system is shown?'  question_type=anatomy_identification
+2026-04-05T23:22:13  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1769ms
+2026-04-05T23:22:13  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-05T23:22:13  DEBUG     medvqa.agents.verification_agent  Verification notes: The image analysis identifies an axial MRI of the brain with clear central nervous system structures visible. 'Nervous system' is an appropriate organ system answer and matches the short-phrase expected format.
+2026-04-05T23:22:13  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1819ms
+2026-04-05T23:22:13  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed']
+2026-04-05T23:22:13  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-05T23:22:13  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-05T23:22:13  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-05T23:22:13  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Nervous system'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=14310ms
+2026-04-05T23:22:13  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Nervous system'  verification=verified  confidence=High  flag_review=False
+2026-04-05T23:22:13  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-05T23:22:13  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-05T23:22:13  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Nervous system'  retries=0  total_duration=14321ms ===
+2026-04-05T23:22:13  INFO      medvqa.routes.dataset  Sample 2032 analysis complete  baseline=1559ms  workflow=3558ms  agentic=14321ms  total=14323ms
+2026-04-05T23:22:13  INFO      medvqa.routes.dataset  Sample 2032 answers  baseline='Nervous system (brain)'  workflow='brain'  agentic='Nervous system'  ground_truth='brain'
+2026-04-05T23:22:13  INFO      medvqa.server  ← GET /api/dataset/sample/2032/analysis  status=200  duration=14359ms
+2026-04-05T23:22:16  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-05T23:22:16  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=3
+2026-04-05T23:22:17  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=3  skipped=0
+2026-04-05T23:22:17  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=731ms
+2026-04-05T23:22:32  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-05T23:22:32  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=3
+2026-04-05T23:22:33  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=3  skipped=0
+2026-04-05T23:22:33  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=804ms
+2026-04-05T23:23:14  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-05T23:23:14  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=3
+2026-04-05T23:23:15  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=3  skipped=0
+2026-04-05T23:23:15  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=729ms
+2026-04-05T23:29:26  INFO      medvqa.server  MedVisionQuery API shutting down

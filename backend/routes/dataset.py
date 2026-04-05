@@ -4,9 +4,7 @@ import json
 import os
 import time
 from hashlib import md5
-from functools import lru_cache
 
-import numpy as np
 from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 from sklearn.metrics.pairwise import cosine_similarity
@@ -122,7 +120,8 @@ def _get_cache_path(sample_id: int, question: str) -> str:
 
 
 _YES_TOKENS = {"yes", "true", "present", "positive", "abnormal", "found", "visible", "seen"}
-_NO_TOKENS = {"no", "false", "absent", "negative", "normal", "not found", "not visible", "not seen"}
+_NO_TOKENS = {"no", "false", "absent", "negative", "normal"}
+_NO_PHRASES = {"not found", "not visible", "not seen"}  # multi-word; must be checked before token split
 
 
 def _normalize_answer(text: str) -> str:
@@ -134,12 +133,16 @@ def _normalize_answer(text: str) -> str:
 
 def _normalize_yes_no(text: str) -> str:
     """Collapse common yes/no synonyms to a canonical 'yes' or 'no' token."""
-    tokens = set(_normalize_answer(text).split())
+    normalized = _normalize_answer(text)
+    # Multi-word NO phrases must be checked before splitting ("not found" contains "found" which is a YES token)
+    if any(phrase in normalized for phrase in _NO_PHRASES):
+        return "no"
+    tokens = set(normalized.split())
     if tokens & _YES_TOKENS:
         return "yes"
     if tokens & _NO_TOKENS:
         return "no"
-    return _normalize_answer(text)
+    return normalized
 
 
 def _token_f1(prediction: str, ground_truth: str) -> float:
