@@ -333,18 +333,19 @@ The Guardrail combines `verification_status` + `failure_categories` to produce 5
 
 ### Metrics computed per cached case
 - **Normalized answer match** — evaluation method depends on ground truth answer style:
-  - **Close-ended** (binary ground truth like yes/no): synonym matching only
-  - **Open-ended** (non-binary ground truth): Token F1 ≥ 0.7 only
-- **Yes/no normalization** — `yes/true/present/positive/abnormal/found/visible/seen` → `yes`; `no/false/absent/negative/normal/not found/not visible/not seen` → `no`
-- **Token F1** — unigram overlap between predicted and ground-truth answer
+  - **Close-ended** (binary ground truth like yes/no): synonym matching using normalized yes/no tokens
+  - **Open-ended** (non-binary ground truth): BioBERT semantic similarity ≥ 0.65
+- **Yes/no normalization** — `yes/true/present/positive/abnormal/found/visible/seen` → `yes`; `no/false/absent/negative/normal` → `no`; multi-word phrases `not found/not visible/not seen` → `no`
+- **BioBERT semantic similarity** — cosine similarity between answer embeddings using `pritamdeka/BioBERT-mnli-snli-scinli-scitail-mednli-stsb` (fine-tuned for NLI+STS+MedNLI)
+- **Lexical Overlap (Token F1)** — unigram overlap between predicted and ground-truth answer; diagnostic metric only, NOT used for accuracy
 - **Winner** — `baseline` / `workflow` / `agentic` / `tie: ...` / `tie_all_wrong`
-- **Disagreement** — whether any two systems produced different answers
+- **Disagreement** — whether any two systems produced semantically different answers (BioBERT similarity < 0.65)
 
 ### Aggregate evaluation summary
-- Overall normalized answer-match accuracy per system (baseline / workflow / agentic)
+- Overall accuracy per system (baseline / workflow / agentic) — combines close-ended (synonym) and open-ended (BioBERT) correctness
 - Close-ended and open-ended accuracy per system
-- Win counts, disagreement rate, and average duration (ms)
-- Per-question-type accuracy breakdown
+- 3-System Disagreement rate — percentage of cases where systems produce semantically different answers
+- Win counts, average duration (ms), and per-question-type accuracy breakdown
 - Recent-case rows including verification status, self-consistency, and cross-modal agreement
 
 ### Cache and evaluation workflow
@@ -583,7 +584,7 @@ The current download script flattens the Hugging Face dataset into one local PNG
 
 - ~8–10 serial LLM calls per pass (one controller dispatch + one tool call per stage) — up to ~20 with automatic retry; significantly slower and more expensive than single-shot inference
 - Retrieval is grounded to VQA-RAD train examples, but coverage is still limited to dataset distribution (not a comprehensive medical knowledge base)
-- Token F1 thresholding is still brittle for open-ended answers; near-correct responses can fall below the cutoff
+- Token F1 thresholding has been replaced with BioBERT semantic similarity for open-ended questions; the Token F1 score is retained as a diagnostic "Lexical Overlap" metric
 - Self-consistency signal is lightweight (single verifier pass) rather than multi-sample voting
 - Research and demonstration use only — not suitable for clinical deployment
 

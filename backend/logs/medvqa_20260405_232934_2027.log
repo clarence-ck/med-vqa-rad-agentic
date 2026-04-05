@@ -1,0 +1,125 @@
+2026-04-05T23:31:02  INFO      medvqa.routes.dataset  Cache HIT for sample 2027 (question='what organ is affected by pathology in this image?')
+2026-04-05T23:31:14  INFO      medvqa.routes.dataset  Cache HIT for sample 2027 (question='what organ is affected by pathology in this image?')
+2026-04-05T23:31:15  INFO      medvqa.routes.dataset  Cache MISS for sample 2027  question='what organ is affected by pathology in this image?'  refresh=True  running all 3 pipelines in parallel
+2026-04-05T23:31:15  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=257399 bytes  question='what organ is affected by pathology in this image?'
+2026-04-05T23:31:15  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what organ is affected by pathology in this image?'  mime_type=image/png  size=257399 bytes ===
+2026-04-05T23:31:15  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-05T23:31:15  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=257399 bytes)
+2026-04-05T23:31:16  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-05T23:31:16  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=257399 bytes)
+2026-04-05T23:31:17  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Brain",
+  "explanation": "This is an axial FLAIR MRI of the head showing abnormal signal within the brain parenchyma, consistent with pathology affecting the brain.",
+  "confidence": "high"
+}
+2026-04-05T23:31:17  INFO      medvqa.agents.baseline  Baseline done  answer='Brain'  confidence=high  duration=1907ms
+2026-04-05T23:31:17  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2695ms
+2026-04-05T23:31:17  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial brain MRI FLAIR image. The image shows the brain parenchyma and ventricular system with good overall anatomic detail, including bilateral deep gray and white matter structures.
+2026-04-05T23:31:17  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Focal hyperintense area in the left deep white matter/basal ganglia region', 'No obvious midline shift on this slice', 'Ventricular size appears preserved on this image']
+2026-04-05T23:31:17  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what organ is affected by pathology in this image?'
+2026-04-05T23:31:17  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-05T23:31:18  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1007ms
+2026-04-05T23:31:18  DEBUG     medvqa.agents.question_analyzer  Target entity: affected organ  Expected format: short_phrase  Rephrased: What organ is affected by pathology in this image?
+2026-04-05T23:31:18  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what organ is affected by pathology in this image?'  modality=MRI  body_region=brain  question_type=anatomy_identification
+2026-04-05T23:31:18  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-05T23:31:18  DEBUG     medvqa.agents.workflow_baseline  Branch taken: anatomy_identification
+2026-04-05T23:31:18  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='brain'  confidence=high  question_type=anatomy_identification  duration=3814ms
+2026-04-05T23:31:19  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2586ms
+2026-04-05T23:31:19  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial brain MRI image on FLAIR sequence showing the supratentorial brain at the level of the basal ganglia and lateral ventricles. There is a focal area of increased signal intensity in the deep gray/white matter region on one side of the brain, with otherwise preserved overall brain anatomy on this slice.
+2026-04-05T23:31:19  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Focal asymmetric hyperintense lesion in the left deep brain region on FLAIR', 'No obvious midline shift on this slice', 'No gross hydrocephalus visible on the provided image']
+2026-04-05T23:31:19  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain  duration=2629ms
+2026-04-05T23:31:20  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what organ is affected by pathology in this image?'
+2026-04-05T23:31:20  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what organ is affected by pathology in this image?'
+2026-04-05T23:31:20  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-05T23:31:21  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1171ms
+2026-04-05T23:31:21  DEBUG     medvqa.agents.question_analyzer  Target entity: organ affected by pathology  Expected format: single_word  Rephrased: What organ is affected by the pathology in this image?
+2026-04-05T23:31:21  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=anatomy_identification  duration=1260ms
+2026-04-05T23:31:22  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-05T23:31:22  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  modality=MRI  region=brain
+2026-04-05T23:31:23  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1621ms
+2026-04-05T23:31:23  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a focused anatomy-identification task on a clear MRI slice, but it still requires careful visual recognition of neuroanatomy, making it medium complexity and suitable for retrieval-assisted standard verification.
+2026-04-05T23:31:23  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1657ms
+2026-04-05T23:31:24  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-05T23:31:24  INFO      medvqa.agents.advanced_rag  Using device: cpu
+2026-04-05T23:31:24  INFO      medvqa.agents.advanced_rag  Loading dataset from C:\Users\chin_\Documents\GitHub\Medical-VQA-Explanation-Agent\data\vqa-rad\vqa_rad.json
+2026-04-05T23:31:24  INFO      medvqa.agents.advanced_rag  Loaded 1793 training examples from dataset
+2026-04-05T23:31:24  INFO      medvqa.agents.advanced_rag  Building indices for 1793 examples...
+2026-04-05T23:31:24  INFO      medvqa.agents.advanced_rag  Computing dense embeddings (model=sentence-transformers/all-MiniLM-L6-v2)...
+2026-04-05T23:31:24  INFO      medvqa.agents.advanced_rag  Loading embedding model: sentence-transformers/all-MiniLM-L6-v2 on cpu
+2026-04-05T23:31:33  INFO      medvqa.agents.advanced_rag  Building FAISS index (dim=384)...
+2026-04-05T23:31:33  INFO      medvqa.agents.advanced_rag  FAISS index built with 1793 vectors
+2026-04-05T23:31:33  INFO      medvqa.agents.advanced_rag  Building BM25 sparse index...
+2026-04-05T23:31:33  INFO      medvqa.agents.advanced_rag  Indexing complete — FAISS + BM25 ready
+2026-04-05T23:31:33  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-05T23:31:33  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='what organ is affected by pathology in this image?'  modality=MRI  body_region=brain  question_type=anatomy_identification  target_entity=organ affected by pathology  advanced_rag=True
+2026-04-05T23:31:33  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=what organ is affected by pathology in this image? | modality=MRI | body_region=brain | finding=other | rewrite=True rerank=True reflection=True
+2026-04-05T23:31:34  INFO      medvqa.agents.advanced_rag  Query rewrite | original='what organ is affected by pathology in this image?'
+2026-04-05T23:31:34  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='What organ or anatomical structure is affected by the pathology shown on this MRI of the brain? Identify the involved intracranial structure, cerebral tissue, or central nervous system region demonstrated on magnetic resonance imaging.'  changed=True
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='mri': 44 matches
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='brain': no exact matches
+2026-04-05T23:31:34  INFO      medvqa.agents.advanced_rag  Metadata filter result: 44 candidates after intersection
+2026-04-05T23:31:34  INFO      medvqa.agents.advanced_rag  Metadata filter: 44 candidates retained
+2026-04-05T23:31:34  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 44 candidates
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/20
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag    1. id=1261 score=0.4511 | Q: is there evidence of midlight shift of structures on this mri? | A: yes
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag    2. id=1376 score=0.4497 | Q: in what plane is this mri taken? | A: axial
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag    3. id=1399 score=0.4229 | Q: do we see diffuse cerebral edema in this mri? | A: no
+2026-04-05T23:31:34  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 44 candidates
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/20
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag    1. id=1261 score=7.8366 | Q: is there evidence of midlight shift of structures on this mri? | A: yes
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag    2. id=1554 score=7.3647 | Q: what type of mri is shown in the above image? | A: t2 weighted
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag    3. id=60 score=7.1549 | Q: the imaging modality is...? | A: mri/flair
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=20 sparse=20
+2026-04-05T23:31:34  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 20 unique candidates
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/20
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag    1. id=1261 score=0.0328 method=hybrid_rrf | Q: is there evidence of midlight shift of structures on this mri? | A: yes
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag    2. id=60 score=0.0315 method=hybrid_rrf | Q: the imaging modality is...? | A: mri/flair
+2026-04-05T23:31:34  DEBUG     medvqa.agents.advanced_rag    3. id=1407 score=0.0303 method=hybrid_rrf | Q: which lobe of the brain demonstrates a hyper-intense signal in this t2 weighted mri image? | A: the left occipital lobe
+2026-04-05T23:31:34  INFO      medvqa.agents.advanced_rag  Reranking 20 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-05T23:31:34  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 20 candidates...
+2026-04-05T23:31:34  INFO      medvqa.agents.advanced_rag  Loading cross-encoder: cross-encoder/ms-marco-MiniLM-L-6-v2 on cpu
+2026-04-05T23:31:38  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-05T23:31:38  DEBUG     medvqa.agents.advanced_rag    1. id=1261 score=-2.4513 method=reranked softmax=0.4355 | Q: is there evidence of midlight shift of structures on this mri? | A: yes
+2026-04-05T23:31:38  DEBUG     medvqa.agents.advanced_rag    2. id=1399 score=-3.5113 method=reranked softmax=0.1509 | Q: do we see diffuse cerebral edema in this mri? | A: no
+2026-04-05T23:31:38  DEBUG     medvqa.agents.advanced_rag    3. id=1407 score=-3.7169 method=reranked softmax=0.1228 | Q: which lobe of the brain demonstrates a hyper-intense signal in this t2 weighted mri image? | A: the left occipital lobe
+2026-04-05T23:31:38  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 3 retrieved candidates
+2026-04-05T23:31:38  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 3 retrieved candidates via LLM
+2026-04-05T23:31:39  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=True  confidence=high  recommendation=use
+2026-04-05T23:31:39  INFO      medvqa.agents.advanced_rag  Self-reflection accepted retrieved candidates
+2026-04-05T23:31:39  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-05T23:31:39  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-05T23:31:39  DEBUG     medvqa.agents.advanced_rag    1. id=1261 score=-2.4513 method=reranked softmax=0.4355 | Q: is there evidence of midlight shift of structures on this mri? | A: yes
+2026-04-05T23:31:39  DEBUG     medvqa.agents.advanced_rag    2. id=1399 score=-3.5113 method=reranked softmax=0.1509 | Q: do we see diffuse cerebral edema in this mri? | A: no
+2026-04-05T23:31:39  DEBUG     medvqa.agents.advanced_rag    3. id=1407 score=-3.7169 method=reranked softmax=0.1228 | Q: which lobe of the brain demonstrates a hyper-intense signal in this t2 weighted mri image? | A: the left occipital lobe
+2026-04-05T23:31:39  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases  (query_rewritten=True  finding_category=other)
+2026-04-05T23:31:42  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=3  duration=9239ms
+2026-04-05T23:31:42  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The brain includes the cerebral hemispheres, basal ganglia, temporal lobes, insular regions, and ventricular system.', 'MRI is sensitive for detecting structural and signal abnormalities in brain parenchyma and CSF spaces.', 'Pathology in this region may affect gray matter, white matter, ventricles, or cause mass effect on adjacent structures.', 'Midline shift and ventricular compression are important signs of intracranial mass effect or edema.']
+2026-04-05T23:31:42  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: This MRI appears to depict the brain, including the cerebral hemispheres, ventricles, deep gray nuclei, and surrounding white matter. For anatomy-identification questions like this, the organ affected
+2026-04-05T23:31:42  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=3  duration=17972ms
+2026-04-05T23:31:43  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-05T23:31:43  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what organ is affected by pathology in this image?'  is_retry=False  question_type=anatomy_identification  yes_no=False
+2026-04-05T23:31:43  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=3
+2026-04-05T23:31:45  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='brain'  confidence=high  duration=2373ms
+2026-04-05T23:31:45  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the modality and anatomy shown: axial MRI of the head/brain.', 'Recognize visible intracranial structures such as cerebral hemispheres, ventricles, and basal ganglia.', 'Locate the abnormal focal hyperintense lesion within the left deep brain region.', 'Conclude that the affected organ is the brain.']
+2026-04-05T23:31:45  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['MRI modality of the brain', 'Visible cerebral hemispheres, basal ganglia, lateral ventricles, and deep white matter', 'Focal asymmetric hyperintense lesion in the left deep brain region on FLAIR', 'No indication that the pathology is limited to a non-brain organ']
+2026-04-05T23:31:45  DEBUG     medvqa.agents.reasoning_agent  Limitations: The exact substructure involved is not fully specified from this single slice, but the organ-level answer is clear.
+2026-04-05T23:31:45  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='brain'  confidence=high  duration=2429ms
+2026-04-05T23:31:47  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-05T23:31:47  INFO      medvqa.agents.verification_agent  Verifying answer='brain'  question='what organ is affected by pathology in this image?'  question_type=anatomy_identification
+2026-04-05T23:31:48  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1435ms
+2026-04-05T23:31:48  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-05T23:31:48  DEBUG     medvqa.agents.verification_agent  Verification notes: The image is a brain MRI and the described pathology is within the brain. The answer is a single word, matches the anatomy-identification question, and is consistent with the visual analysis and explanation.
+2026-04-05T23:31:48  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1493ms
+2026-04-05T23:31:48  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-05T23:31:48  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-05T23:31:48  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-05T23:31:48  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='brain'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=33521ms
+2026-04-05T23:31:48  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='brain'  verification=verified  confidence=High  flag_review=False
+2026-04-05T23:31:48  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-05T23:31:48  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-05T23:31:48  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='brain'  retries=0  total_duration=33531ms ===
+2026-04-05T23:31:48  INFO      medvqa.routes.dataset  Sample 2027 analysis complete  baseline=1915ms  workflow=3813ms  agentic=33543ms  total=33547ms
+2026-04-05T23:31:48  INFO      medvqa.routes.dataset  Sample 2027 answers  baseline='Brain'  workflow='brain'  agentic='brain'  ground_truth='brain'
