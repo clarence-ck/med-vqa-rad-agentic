@@ -533,3 +533,10 @@
 2026-04-05T23:51:22  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
 2026-04-05T23:51:23  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
 2026-04-05T23:51:23  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=1250ms
+2026-04-05T23:52:47  INFO      medvqa.server  → GET /api/dataset/sample/1860/analysis
+2026-04-05T23:52:47  INFO      medvqa.routes.dataset  Cache HIT for sample 1860 (question='what organ system is the pathology?')
+2026-04-05T23:52:47  INFO      medvqa.server  ← GET /api/dataset/sample/1860/analysis  status=200  duration=23ms
+2026-04-05T23:53:23  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-05T23:53:23  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-05T23:53:24  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-05T23:53:24  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=1158ms

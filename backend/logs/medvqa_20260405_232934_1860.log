@@ -111,3 +111,4 @@
 2026-04-05T23:34:00  INFO      medvqa.routes.dataset  Sample 1860 analysis complete  baseline=2055ms  workflow=5605ms  agentic=24632ms  total=24633ms
 2026-04-05T23:34:00  INFO      medvqa.routes.dataset  Sample 1860 answers  baseline='Respiratory system (lungs/chest)'  workflow='Single frontal chest radiograph showing the lungs, heart, an'  agentic='Respiratory system'  ground_truth='pulmonary/lymphatic'
 2026-04-05T23:42:32  INFO      medvqa.routes.dataset  Cache HIT for sample 1860 (question='what organ system is the pathology?')
+2026-04-05T23:52:47  INFO      medvqa.routes.dataset  Cache HIT for sample 1860 (question='what organ system is the pathology?')
