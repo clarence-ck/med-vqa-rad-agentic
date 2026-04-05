@@ -74,7 +74,7 @@ export default function CaseInput({
             </>
           ) : (
             <>
-              <span className="upload-zone-icon">🩻</span>
+              <span className="upload-zone-icon">🏥</span>
               <span className="upload-zone-text">
                 Drop a medical image here<br />or click to browse
               </span>

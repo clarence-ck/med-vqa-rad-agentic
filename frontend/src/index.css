@@ -7,46 +7,46 @@
 
 /* ---- CSS Custom Properties ---- */
 :root {
-  /* Primary Palette — Clinical Blue/Slate */
-  --color-bg-primary: #0a0e1a;
-  --color-bg-secondary: #111827;
-  --color-bg-card: #1a2235;
-  --color-bg-card-hover: #1e2842;
-  --color-bg-input: #0f1629;
-  --color-bg-overlay: rgba(10, 14, 26, 0.85);
+  /* Primary Palette — Light Clinical Theme */
+  --color-bg-primary: #94a3b8;
+  --color-bg-secondary: #cbd5e1;
+  --color-bg-card: #e2e8f0;
+  --color-bg-card-hover: #f1f5f9;
+  --color-bg-input: #cbd5e1;
+  --color-bg-overlay: rgba(148, 163, 184, 0.9);
 
-  /* Accent */
+  /* Accent — Vibrant Blue */
   --color-accent: #3b82f6;
   --color-accent-hover: #60a5fa;
-  --color-accent-subtle: rgba(59, 130, 246, 0.12);
-  --color-accent-glow: rgba(59, 130, 246, 0.25);
+  --color-accent-subtle: rgba(59, 130, 246, 0.2);
+  --color-accent-glow: rgba(59, 130, 246, 0.5);
 
-  /* Text */
-  --color-text-primary: #f1f5f9;
-  --color-text-secondary: #94a3b8;
+  /* Text — Dark for contrast on light bg */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #334155;
   --color-text-muted: #64748b;
-  --color-text-accent: #93c5fd;
+  --color-text-accent: #1d4ed8;
 
-  /* Borders */
-  --color-border: rgba(148, 163, 184, 0.1);
-  --color-border-hover: rgba(148, 163, 184, 0.2);
-  --color-border-accent: rgba(59, 130, 246, 0.3);
+  /* Borders — Darker for contrast */
+  --color-border: rgba(100, 116, 139, 0.5);
+  --color-border-hover: rgba(100, 116, 139, 0.7);
+  --color-border-accent: rgba(29, 78, 216, 0.6);
 
-  /* Status Colors */
-  --color-success: #22c55e;
-  --color-success-bg: rgba(34, 197, 94, 0.1);
-  --color-warning: #f59e0b;
-  --color-warning-bg: rgba(245, 158, 11, 0.1);
-  --color-error: #ef4444;
-  --color-error-bg: rgba(239, 68, 68, 0.1);
-  --color-info: #3b82f6;
-  --color-info-bg: rgba(59, 130, 246, 0.1);
+  /* Status Colors — Brighter */
+  --color-success: #4ade80;
+  --color-success-bg: rgba(74, 222, 128, 0.15);
+  --color-warning: #fbbf24;
+  --color-warning-bg: rgba(251, 191, 36, 0.15);
+  --color-error: #f87171;
+  --color-error-bg: rgba(248, 113, 113, 0.15);
+  --color-info: #60a5fa;
+  --color-info-bg: rgba(96, 165, 250, 0.15);
 
-  /* Confidence */
-  --color-confidence-high: #22c55e;
-  --color-confidence-medium: #f59e0b;
-  --color-confidence-low: #ef4444;
-  --color-confidence-unverified: #6b7280;
+  /* Confidence — Brighter */
+  --color-confidence-high: #4ade80;
+  --color-confidence-medium: #fbbf24;
+  --color-confidence-low: #f87171;
+  --color-confidence-unverified: #9ca3af;
 
   /* Spacing (4px grid) */
   --space-1: 4px;
@@ -76,11 +76,11 @@
   --radius-xl: 20px;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 20px var(--color-accent-glow);
+  /* Shadows — Lighter */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.25);
+  --shadow-glow: 0 0 30px var(--color-accent-glow);
 
   /* Transitions */
   --transition-fast: 0.15s ease;
@@ -579,7 +579,7 @@ body {
 .summary-hero {
   padding: var(--space-5);
   border-radius: var(--radius-lg);
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.10), rgba(15, 22, 41, 0.95));
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.2), rgba(226, 232, 240, 0.95));
   border: 1px solid var(--color-border-accent);
   box-shadow: var(--shadow-sm);
 }
@@ -699,6 +699,47 @@ body {
   flex-shrink: 0;
 }
 
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.tag-blue {
+  background: rgba(59, 130, 246, 0.2);
+  color: #1e40af;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.tag-green {
+  background: rgba(34, 197, 94, 0.2);
+  color: #166534;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.tag-amber {
+  background: rgba(245, 158, 11, 0.2);
+  color: #92400e;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.tag-red {
+  background: rgba(239, 68, 68, 0.2);
+  color: #991b1b;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.tag-gray {
+  background: rgba(100, 116, 139, 0.2);
+  color: #475569;
+  border: 1px solid rgba(100, 116, 139, 0.4);
+}
+
 /* ---- Tooltip (data-tooltip) ---- */
 [data-tooltip] {
   position: relative;
@@ -711,7 +752,7 @@ body {
   bottom: calc(100% + 4px);
   left: 50%;
   transform: translateX(-50%);
-  background: #1e293b;
+  background: var(--color-bg-secondary);
   color: var(--color-text-primary);
   font-size: 8.5px;
   font-weight: 400;
@@ -901,7 +942,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #000;
+  background: var(--color-bg-primary);
   position: relative;
   min-height: 400px;
   border-radius: var(--radius-lg);
@@ -966,46 +1007,6 @@ body {
 }
 
 /* ---- Tags / Pills ---- */
-.tag {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: 2px var(--space-3);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-xs);
-  font-weight: 500;
-  letter-spacing: 0.3px;
-}
-
-.tag-blue {
-  background: var(--color-info-bg);
-  color: #93c5fd;
-  border: 1px solid rgba(59, 130, 246, 0.2);
-}
-
-.tag-green {
-  background: var(--color-success-bg);
-  color: #86efac;
-  border: 1px solid rgba(34, 197, 94, 0.2);
-}
-
-.tag-amber {
-  background: var(--color-warning-bg);
-  color: #fcd34d;
-  border: 1px solid rgba(245, 158, 11, 0.2);
-}
-
-.tag-red {
-  background: var(--color-error-bg);
-  color: #fca5a5;
-  border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.tag-gray {
-  background: rgba(107, 114, 128, 0.1);
-  color: #9ca3af;
-  border: 1px solid rgba(107, 114, 128, 0.2);
-}
 
 /* ---- Confidence Badge ---- */
 .confidence-badge {

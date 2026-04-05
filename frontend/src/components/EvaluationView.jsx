@@ -345,7 +345,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                       border: '1px solid var(--color-border)',
                       borderRadius: 'var(--radius-md)',
                       background: 'var(--color-bg-secondary)',
-                      boxShadow: '0 16px 36px rgba(0, 0, 0, 0.28)',
+                      boxShadow: 'var(--shadow-lg)',
                       padding: '12px',
                       maxHeight: '320px',
                       overflowY: 'auto',

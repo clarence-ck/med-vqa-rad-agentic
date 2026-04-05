@@ -33,11 +33,11 @@ export default function CaseHeader({ result, baselineResult, workflowResult }) {
     return { name, duration, raw: step.duration_ms };
   }).filter(item => item.raw !== undefined) || [];
 
-  // System timings
+  // System timings - using CSS variable colors for theme consistency
   const systems = [
-    { name: 'Agentic', duration: formatDuration(result.total_duration_ms), color: '#3b82f6' },
-    { name: 'Workflow', duration: formatDuration(workflowResult?.duration_ms), color: '#a855f7' },
-    { name: 'Baseline', duration: formatDuration(baselineResult?.duration_ms), color: '#6b7280' },
+    { name: 'Agentic', duration: formatDuration(result.total_duration_ms), colorVar: '--color-accent' },
+    { name: 'Workflow', duration: formatDuration(workflowResult?.duration_ms), colorVar: '--color-warning' },
+    { name: 'Baseline', duration: formatDuration(baselineResult?.duration_ms), colorVar: '--color-text-muted' },
   ].filter(s => s.duration);
 
   return (
@@ -69,7 +69,7 @@ export default function CaseHeader({ result, baselineResult, workflowResult }) {
               <span
                 key={i}
                 className="timing-badge"
-                style={{ '--timing-color': sys.color }}
+                style={{ color: `var(${sys.colorVar})`, borderColor: `var(${sys.colorVar})`, background: `var(${sys.colorVar})15` }}
               >
                 {sys.name}: <strong>{sys.duration}</strong>
               </span>
