@@ -99,7 +99,7 @@ Return ONLY the JSON object, no additional text."""
             "status": "error",
             "answer": "Baseline failed to produce an answer.",
             "explanation": "",
-            "confidence": "low"
+            "confidence": "unverified"
         }
     except Exception as e:
         _log.error("Unexpected error in baseline: %s", e)
@@ -107,5 +107,5 @@ Return ONLY the JSON object, no additional text."""
             "status": "error",
             "answer": "Baseline error.",
             "explanation": str(e),
-            "confidence": "low"
+            "confidence": "unverified"
         }

@@ -91,7 +91,7 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
             "status": "error",
             "answer": "Workflow failed: image interpretation error.",
             "explanation": str(e),
-            "confidence": "low",
+            "confidence": "unverified",
             "workflow_trace": {},
         }
     try:
@@ -102,7 +102,7 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
             "status": "error",
             "answer": "Workflow failed: question analysis error.",
             "explanation": str(e),
-            "confidence": "low",
+            "confidence": "unverified",
             "workflow_trace": {},
         }
 

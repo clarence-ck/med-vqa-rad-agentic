@@ -273,6 +273,12 @@ function App() {
                           </div>
                         )}
                       </div>
+                      <div className="baseline-note">
+                        <div className="baseline-note-text">
+                          ℹ️ This is a workflow baseline result with a fixed sequence of analysis steps without agentic self-correction.
+                          Switch to <strong>Agentic Pipeline</strong> to see the full analysis with step-by-step reasoning.
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     !loading && hasAnyResult && (
