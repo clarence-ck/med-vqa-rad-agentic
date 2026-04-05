@@ -68,6 +68,8 @@ Return ONLY the JSON object, no additional text."""
                 len(result.get("notable_findings", [])),
                 elapsed_ms,
             )
+            _log.debug("Visual summary: %s", result.get("visual_summary", ""))
+            _log.debug("Notable findings: %s", result.get("notable_findings", []))
             return {"result": result}
 
         except json.JSONDecodeError as e:

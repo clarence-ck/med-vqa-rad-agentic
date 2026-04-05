@@ -31,6 +31,7 @@ class QuestionAnalyzer:
             visual_summary = image_interpretation.get("visual_summary", "")
 
         _log.info("Analyzing question: %r", question[:120])
+        _log.debug("Visual context provided: %s", bool(visual_summary))
         started = time.perf_counter()
 
         prompt = f"""You are a medical VQA question understanding agent. Analyze the following question asked about a medical image.
@@ -72,6 +73,12 @@ Return ONLY the JSON object, no additional text."""
                 result.get("question_clarity", "unknown"),
                 elapsed_ms,
             )
+            _log.debug(
+                "Target entity: %s  Expected format: %s  Rephrased: %s",
+                result.get("target_entity", "unknown"),
+                result.get("expected_answer_format", "unknown"),
+                result.get("rephrased_question", "")[:120],
+            )
             return {"result": result}
 
         except json.JSONDecodeError:
@@ -88,6 +95,7 @@ Return ONLY the JSON object, no additional text."""
                 "rephrased_question": question
             }}
         except Exception as e:
+            _log.error("Unexpected error in question analysis: %s", e)
             return {"result": {
                 "status": "error",
                 "error": str(e),

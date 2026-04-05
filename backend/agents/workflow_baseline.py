@@ -82,8 +82,28 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
             Pass this to avoid a second LLM call when the caller already has one
             (e.g. from the agentic pipeline run).
     """
-    image_result = precomputed_image_result if precomputed_image_result is not None else interpret_image(image_bytes, mime_type)
-    question_result = analyze_question(question, image_result.get("visual_summary", ""))
+    try:
+        image_result = precomputed_image_result if precomputed_image_result is not None else interpret_image(image_bytes, mime_type)
+    except Exception as e:
+        _log.error("Image interpretation failed in workflow: %s", e)
+        return {
+            "status": "error",
+            "answer": "Workflow failed: image interpretation error.",
+            "explanation": str(e),
+            "confidence": "low",
+            "workflow_trace": {},
+        }
+    try:
+        question_result = analyze_question(question, image_result.get("visual_summary", ""))
+    except Exception as e:
+        _log.error("Question analysis failed in workflow: %s", e)
+        return {
+            "status": "error",
+            "answer": "Workflow failed: question analysis error.",
+            "explanation": str(e),
+            "confidence": "low",
+            "workflow_trace": {},
+        }
 
     _log.info(
         "Workflow baseline  question=%r  modality=%s  body_region=%s  question_type=%s",
@@ -117,17 +137,21 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
     )
     matched_findings = _find_matching_items(target_entity, notable_findings)
     matched_structures = _find_matching_items(target_entity, visible_structures)
+    _log.debug("Matched findings: %s  Matched structures: %s", matched_findings, matched_structures)
 
     answer = "Unable to determine from the current workflow."
     confidence = "low"
 
     if question_type == "modality_identification":
+        _log.debug("Branch taken: modality_identification")
         answer = modality
         confidence = "high" if modality != "unknown" else "low"
     elif question_type == "anatomy_identification":
+        _log.debug("Branch taken: anatomy_identification")
         answer = body_region
         confidence = "high" if body_region != "unknown" else "low"
     elif question_type in {"yes_no", "presence_absence"}:
+        _log.debug("Branch taken: yes_no/presence_absence")
         answer, confidence = _derive_presence_answer(
             question=rephrased_question,
             target_entity=target_entity,
@@ -137,6 +161,7 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
             image_status=image_status,
         )
     elif question_type == "location":
+        _log.debug("Branch taken: location")
         if matched_findings:
             answer = body_region if body_region != "unknown" else matched_findings[0]
             confidence = "medium"
@@ -147,6 +172,7 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
             answer = body_region
             confidence = "low" if body_region == "unknown" else "medium"
     elif question_type == "counting":
+        _log.debug("Branch taken: counting")
         if matched_findings:
             answer = str(len(matched_findings))
             confidence = "high" if len(matched_findings) == 1 else "medium"
@@ -157,6 +183,7 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
             answer = str(len(visible_structures))
             confidence = "low"
     elif question_type == "abnormality_description":
+        _log.debug("Branch taken: abnormality_description")
         if matched_findings:
             answer = "; ".join(matched_findings[:2])
             confidence = "high"
@@ -167,6 +194,7 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
             answer = visual_summary
             confidence = "low"
     else:
+        _log.debug("Branch taken: fallback/other")
         if target_entity in {"modality", "imaging modality"}:
             answer = modality
             confidence = "medium" if modality != "unknown" else "low"

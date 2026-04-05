@@ -60,6 +60,9 @@ class ReasoningAgent:
                 rc.get("fallback_recommendation", "none"),
             )
         started = time.perf_counter()
+        _log.debug("Knowledge input  key_facts=%d  rag_cases=%d",
+                   len(kn.get("key_facts", [])),
+                   len(kn.get("rag_retrieval", {}).get("similar_cases", [])))
 
         failure_categories = rc.get('failure_categories', []) if rc else []
         if isinstance(failure_categories, list):
@@ -93,6 +96,7 @@ RETRY CONTEXT:
 
         yes_no_constraint = ""
         if is_yes_no:
+            _log.info("Yes/no constraint applied for question_type=%s", question_type)
             yes_no_constraint = """
 ANSWER CONSTRAINT — YES/NO QUESTION:
 The question requires a yes or no answer.
@@ -162,6 +166,9 @@ Return ONLY the JSON object, no additional text."""
                 result.get("answer_confidence", "unknown"),
                 elapsed_ms,
             )
+            _log.debug("Reasoning trace: %s", result.get("reasoning_trace", ""))
+            _log.debug("Evidence used: %s", result.get("evidence_used", []))
+            _log.debug("Limitations: %s", result.get("limitations", ""))
             return {"result": result}
 
         except json.JSONDecodeError:
@@ -177,6 +184,7 @@ Return ONLY the JSON object, no additional text."""
                 "limitations": "Reasoning failed"
             }}
         except Exception as e:
+            _log.error("Unexpected error in reasoning: %s", e)
             return {"result": {
                 "status": "error",
                 "error": str(e),

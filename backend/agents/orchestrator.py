@@ -364,6 +364,8 @@ def _categorize_failure_modes(knowledge_result: dict, answer_result: dict, verif
             "high",
         )
 
+    if categories:
+        _log.debug("Failure categories detected: %s", [c['code'] for c in categories])
     return categories
 
 
@@ -397,6 +399,12 @@ def _build_guardrail_payload(answer_result: dict, verification_result: dict, fai
     else:
         guarded_answer = answer
 
+    _log.info(
+        "Guardrail decision  flag_for_review=%s  fallback=%s  disclaimer=%s",
+        should_flag_for_review,
+        fallback_recommendation,
+        bool(suggested_disclaimer),
+    )
     return {
         "guarded_answer": guarded_answer,
         "fallback_recommendation": fallback_recommendation,
@@ -421,6 +429,7 @@ def _build_self_consistency_signal(verification_result: dict) -> dict:
     else:
         level = "low"
 
+    _log.debug("Self-consistency signal: level=%s  passed=%d/%d", level, passed_checks, total_checks)
     return {
         "level": level,
         "passed_checks": passed_checks,
@@ -440,6 +449,7 @@ def _build_cross_modal_agreement_signal(verification_result: dict) -> dict:
     else:
         level = "medium"
 
+    _log.debug("Cross-modal agreement: level=%s  grounded=%s  no_contradictions=%s", level, grounded, contradiction_free)
     return {
         "level": level,
         "grounded_in_evidence": grounded,
@@ -573,6 +583,15 @@ def _assemble_pipeline_payload(results: dict, question: str, started_at: float, 
         verification_duration_ms=verification_duration_ms,
     )
     total_ms = int((time.time() - started_at) * 1000)
+    _log.info(
+        "Pipeline payload assembled  answer=%r  verification=%s  guardrail_flag=%s  consistency=%s  cross_modal=%s  duration=%dms",
+        str(answer_result.get("answer", ""))[:60],
+        verification_result.get("verification_status", "unknown"),
+        guardrail_payload.get("should_flag_for_review", False),
+        self_consistency_signal.get("level", "unknown"),
+        cross_modal_agreement.get("level", "unknown"),
+        total_ms,
+    )
     return {
         "answer": answer_result.get("answer", "Unable to generate an answer."),
         "guarded_answer": guardrail_payload.get("guarded_answer", answer_result.get("answer", "Unable to generate an answer.")),
@@ -623,12 +642,19 @@ def _assemble_pipeline_payload(results: dict, question: str, started_at: float, 
 
 def _should_retry_pipeline(payload: dict) -> bool:
     verification_status = payload.get("verification_status", "low_confidence")
-    if verification_status in {"low_confidence", "unsupported"}:
-        return True
-    if payload.get("should_flag_for_review"):
-        return True
+    flag_review = payload.get("should_flag_for_review", False)
     failure_categories = payload.get("failure_categories", []) or []
-    return any(category.get("severity") == "high" for category in failure_categories)
+    high_severity = any(category.get("severity") == "high" for category in failure_categories)
+    should_retry = (
+        verification_status in {"low_confidence", "unsupported"}
+        or flag_review
+        or high_severity
+    )
+    _log.debug(
+        "Retry evaluation  verification=%s  flag_review=%s  high_severity=%s  -> retry=%s",
+        verification_status, flag_review, high_severity, should_retry,
+    )
+    return should_retry
 
 
 def _payload_score(payload: dict) -> tuple[int, int, int, int]:
@@ -647,6 +673,10 @@ def _payload_score(payload: dict) -> tuple[int, int, int, int]:
     failure_categories = payload.get("failure_categories", []) or []
     high_severity_count = sum(1 for category in failure_categories if category.get("severity") == "high")
     review_flag = 1 if payload.get("should_flag_for_review") else 0
+    _log.debug(
+        "Payload score  verification_rank=%d  confidence_rank=%d  high_failures=%d  review=%d",
+        verification_rank, confidence_rank, high_severity_count, review_flag,
+    )
     return verification_rank, confidence_rank, -high_severity_count, -review_flag
 
 

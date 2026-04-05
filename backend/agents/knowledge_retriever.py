@@ -170,6 +170,8 @@ class KnowledgeRetriever:
                 len(similar_cases),
                 elapsed_ms,
             )
+            _log.debug("Key facts: %s", result.get("key_facts", []))
+            _log.debug("Contextual notes: %s", str(result.get("contextual_notes", ""))[:200])
             return {"result": result}
 
         except json.JSONDecodeError:

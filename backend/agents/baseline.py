@@ -69,6 +69,7 @@ Return ONLY the JSON object, no additional text."""
         )
 
         raw = strip_json_fences(response.choices[0].message.content or "")
+        _log.debug("Raw baseline response: %s", raw[:500])
         result = json.loads(raw)
         result["status"] = "success"
         elapsed_ms = int((time.perf_counter() - started) * 1000)

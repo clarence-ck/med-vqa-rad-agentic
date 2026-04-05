@@ -116,6 +116,8 @@ Return ONLY the JSON object, no additional text."""
             issues = result.get("issues_found", [])
             if issues:
                 _log.warning("Verification issues: %s", issues)
+            _log.info("Fallback recommendation: %s", result.get("fallback_recommendation", "none"))
+            _log.debug("Verification notes: %s", result.get("verification_notes", ""))
             return {"result": result}
 
         except json.JSONDecodeError:
@@ -132,6 +134,7 @@ Return ONLY the JSON object, no additional text."""
                 "suggested_disclaimer": "This answer has not been verified."
             }}
         except Exception as e:
+            _log.error("Unexpected error in verification: %s", e)
             return {"result": {
                 "status": "error",
                 "error": str(e),
