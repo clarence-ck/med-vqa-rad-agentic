@@ -10,7 +10,6 @@ venv/
 # Node
 node_modules/
 frontend/dist/
-*.log
 
 # Environment
 .env
