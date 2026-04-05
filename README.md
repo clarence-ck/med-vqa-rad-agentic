@@ -63,20 +63,33 @@ flowchart LR
 
     ORCH -->|tool call| T1[Tool: interpret_image\nImageInterpreter]
     ORCH -->|tool call| T2[Tool: analyze_question\nQuestionAnalyzer]
-    ORCH -->|tool call| T3[Tool: retrieve_knowledge\nKnowledgeRetriever]
-    ORCH -->|tool call| T4[Tool: reason_answer\nReasoningAgent]
-    ORCH -->|tool call| T5[Tool: verify_answer\nVerificationAgent]
+    ORCH -->|tool call| T3[Tool: route_difficulty\nDifficultyRouter]
+    ORCH -->|tool call| T4[Tool: retrieve_knowledge\nKnowledgeRetriever]
+    ORCH -->|tool call| T5[Tool: reason_answer\nReasoningAgent]
+    ORCH -->|tool call| T6[Tool: verify_answer\nVerificationAgent]
+
+    T1 -->|auto-block| ERR[Error\nnon-radiology image]
+    T3 -->|policy| T6
 
     T1 -->|outputs_to_state| STATE[(Shared Agent State\n14 typed fields)]
     T2 -->|outputs_to_state| STATE
     T3 -->|outputs_to_state| STATE
     T4 -->|outputs_to_state| STATE
     T5 -->|outputs_to_state| STATE
+    T6 -->|outputs_to_state| STATE
 
     STATE -->|inputs_from_state| T2
     STATE -->|inputs_from_state| T3
     STATE -->|inputs_from_state| T4
     STATE -->|inputs_from_state| T5
+    STATE -->|inputs_from_state| T6
+
+    T6 --> GUARD[Guardrail\nverification + failures]
+    GUARD --> VER[Verified]
+    GUARD --> PART[Partially Verified]
+    GUARD --> LOW[Low Confidence]
+    GUARD --> REV[Review]
+    GUARD --> ERR
 
     API --> B1[Baseline 1\nSingle-shot Multimodal Prompt]
     API --> B2[Baseline 2\nHand-designed Workflow]
@@ -104,12 +117,13 @@ flowchart LR
 
 | Component | File | Role | Model |
 |---|---|---|---|
-| `ImageInterpreter` | `image_interpreter.py` | Perception — multimodal image interpretation (OpenAI) | OpenAI |
-| `QuestionAnalyzer` | `question_analyzer.py` | Task understanding — question classification and intent analysis (OpenAI) | OpenAI |
+| `ImageInterpreter` | `image_interpreter.py` | Perception — multimodal image interpretation with auto-block for non-radiology images | OpenAI |
+| `QuestionAnalyzer` | `question_analyzer.py` | Task understanding — question classification and intent analysis | OpenAI |
+| `DifficultyRouter` | `difficulty_router.py` | Planning — sets difficulty, retrieval need, verification policy, fallback policy | OpenAI |
 | `KnowledgeRetriever` | `knowledge_retriever.py` | Context — optional Advanced RAG retrieval over VQA-RAD train split + LLM synthesis | OpenAI + local retrieval stack |
 | `ReasoningAgent` | `reasoning_agent.py` | Synthesis — generates answer and explanation from all prior context | OpenAI |
-| `VerificationAgent` | `verification_agent.py` | Evaluator — runs 5 structured checks on the answer | OpenAI |
-| Agent Controller | `orchestrator.py` | Haystack `Agent` — routes tool calls via LLM, manages shared state | OpenAI |
+| `VerificationAgent` | `verification_agent.py` | Evaluator — policy-guided verification with 5 structured checks | OpenAI |
+| Agent Controller | `orchestrator.py` | Haystack `Agent` — routes tool calls, manages shared state, guardrails, retry | OpenAI |
 | Workflow Baseline | `workflow_baseline.py` | Deterministic answer derivation over image/question analysis outputs | Rules + OpenAI intermediates |
 | Single-shot Baseline | `baseline.py` | Direct image+question prompt with no decomposition | OpenAI |
 
@@ -117,9 +131,18 @@ flowchart LR
 
 The orchestrator uses Haystack's `Agent` + `Tool` architecture:
 
-- Each agent is wrapped as a `Tool` with `inputs_from_state` / `outputs_to_state` bindings
+- **6 agents** wrapped as `Tool` with `inputs_from_state` / `outputs_to_state` bindings:
+  1. `interpret_image` — ImageInterpreter (multimodal)
+  2. `analyze_question` — QuestionAnalyzer
+  3. `route_difficulty` — DifficultyRouter (sets verification/fallback policy)
+  4. `retrieve_knowledge` — KnowledgeRetriever (conditional)
+  5. `reason_answer` — ReasoningAgent
+  6. `verify_answer` — VerificationAgent (uses policy from Router)
 - The controller LLM decides which tools to invoke and in what order based on prior outputs in state
-- 14 state fields: `image_bytes`, `mime_type`, `question`, `image_interpretation`, `question_analysis`, `knowledge`, `answer_data`, `verification_result`, 5 duration fields, `retry_context`
+- **Policy flow**: DifficultyRouter → sets `verification_policy` + `fallback_policy` → guides VerificationAgent
+- **Auto-block**: ImageInterpreter validates radiology images; non-radiology images abort pipeline early → Error state
+- **Guardrail**: Combines `verification_status` + `failure_categories` → 5 final states: Verified, Partially Verified, Low Confidence, Review, Error
+- 14 state fields: `image_bytes`, `mime_type`, `question`, `image_interpretation`, `question_analysis`, `routing_decision`, `knowledge`, `answer_data`, `verification_result`, 5 duration fields, `retry_context`
 - Exit condition: `verify_answer` finalizes the session
 - A fresh `Agent` is created per request to prevent shared mutable state under concurrency
 
@@ -265,17 +288,25 @@ The image is consumed only once (stage 1); all downstream stages operate on the 
 ## Control and Failure Handling
 
 ### Verification status levels
-| Status | Meaning |
-|---|---|
-| `verified` | All 5 checks passed |
-| `partially_verified` | Most checks passed with minor uncertainty |
-| `low_confidence` | Insufficient evidence for a confident answer |
-| `unsupported` | Answer is not grounded in visible evidence |
+| Status | Meaning | Final State |
+|---|---|---|
+| `verified` | All 5 checks passed | **Verified** — answer shown directly |
+| `partially_verified` | Most checks passed with minor uncertainty | **Partially Verified** — some uncertainty noted |
+| `low_confidence` | Insufficient evidence for a confident answer | **Low Confidence** — guarded answer + disclaimer |
+| `unsupported` | Answer is not grounded in visible evidence | **Low Confidence** — guarded answer + disclaimer |
+| `rejected` (image abort) | Non-radiology image detected | **Error** — invalid image type |
 
 ### Guardrail logic
-- `low_confidence` or `unsupported` → answer replaced with a guarded response + disclaimer
-- `flag_for_review` or any high-severity failure category → `should_flag_for_review = true`
-- Disclaimer auto-inserted when the verifier does not provide one
+The Guardrail combines `verification_status` + `failure_categories` to produce 5 final answer states:
+
+1. **Verified** (`verification_status == "verified"`) — answer shown directly
+2. **Partially Verified** (`verification_status == "partially_verified"`) — answer with minor uncertainty
+3. **Low Confidence** (`verification_status in {"low_confidence", "unsupported"}`) — guarded answer + disclaimer
+4. **Review** (`should_flag_for_review == true` or high-severity failures) — review recommended
+5. **Error** (ImageInterpreter auto-block) — non-radiology image rejected
+
+- Disclaimer auto-inserted when verifier does not provide one
+- `flag_for_review` triggered by high-severity failure categories
 
 ### Failure categories (automatically detected)
 | Code | Severity |
