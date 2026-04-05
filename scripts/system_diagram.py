@@ -250,9 +250,8 @@ def build_diagram(output_path="system_diagram.png"):
     # Reasoning Agent → Verification Agent
     orth_arrow(ax, [(10.90, 3.40), (10.90, 3.05)], color=SLATE)
 
-    # Router → Verification Agent (policy guidance) - dotted purple line
-    orth_arrow(ax, [(11.50, 4.90), (11.50, 3.75), (12.20, 3.75), (12.20, 3.05)], color=PURPLE, lw=1.5, ls=":")
-    lbl(ax, 12.60, 3.88, "policy", fs=7, c=PURPLE, style="italic", ha="left")
+    # Router → Verification Agent (policy guidance) - dashed purple line, routed around Reasoning Agent
+    orth_arrow(ax, [(12.98, 5.47), (13.20, 5.47), (13.20, 2.85), (12.60, 2.85)], color=PURPLE, lw=1.5, ls="--")
 
     # ══════════════════════════════════════════════════════
     # DECISION
