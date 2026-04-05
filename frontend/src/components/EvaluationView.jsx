@@ -6,7 +6,12 @@ function formatPercent(value) {
 
 function fmtMs(ms) {
   if (ms == null) return '—';
-  if (ms >= 60000) return `${(ms / 60000).toFixed(1)}m`;
+  if (ms >= 60000) {
+    const totalSeconds = Math.round(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}m ${seconds}s`;
+  }
   return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`;
 }
 
