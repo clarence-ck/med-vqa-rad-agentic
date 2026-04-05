@@ -11,7 +11,7 @@ import ComparisonToggle from './components/ComparisonToggle';
 import CaseExplorer from './components/CaseExplorer';
 import EvaluationView from './components/EvaluationView';
 import FailureModeDrawer from './components/FailureModeDrawer';
-import ConfidenceBadge from './components/ConfidenceBadge';
+import RoutingCard from './components/RoutingCard';
 import { useAnalysis } from './hooks/useAnalysis';
 import { useDataset } from './hooks/useDataset';
 import { useEvaluation } from './hooks/useEvaluation';
@@ -33,6 +33,21 @@ function App() {
   const [caseAnalysisLoading, setCaseAnalysisLoading] = useState(false);
   const [caseAnalysisData, setCaseAnalysisData] = useState(null);
   const hasAnyResult = Boolean(result || workflowResult || baselineResult);
+
+  const formatConfidenceMeta = (confidence) => {
+    if (!confidence) {
+      return { label: 'Not Verified', className: 'tag-gray' };
+    }
+
+    const normalized = confidence.toLowerCase();
+    if (normalized === 'unknown' || normalized === 'unverified') {
+      return { label: 'Not Verified', className: 'tag-gray' };
+    }
+
+    if (normalized === 'high') return { label: 'High Confidence', className: 'tag-green' };
+    if (normalized === 'medium') return { label: 'Medium Confidence', className: 'tag-amber' };
+    return { label: 'Low Confidence', className: 'tag-red' };
+  };
 
   const handleImageSelect = useCallback((file) => {
     setImageFile(file);
@@ -220,7 +235,9 @@ function App() {
                         )}
                         {baselineResult.confidence && (
                           <div style={{ marginTop: 'var(--space-3)' }}>
-                            <ConfidenceBadge level={baselineResult.confidence} />
+                            <span className={`tag ${formatConfidenceMeta(baselineResult.confidence).className}`}>
+                              {formatConfidenceMeta(baselineResult.confidence).label}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -259,7 +276,9 @@ function App() {
                         )}
                         {workflowResult.confidence && (
                           <div style={{ marginTop: 'var(--space-3)' }}>
-                            <ConfidenceBadge level={workflowResult.confidence} />
+                            <span className={`tag ${formatConfidenceMeta(workflowResult.confidence).className}`}>
+                              {formatConfidenceMeta(workflowResult.confidence).label}
+                            </span>
                           </div>
                         )}
                       </div>
