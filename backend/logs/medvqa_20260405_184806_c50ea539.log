@@ -477,3 +477,13 @@
 2026-04-05T19:09:17  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Plain X-ray of the left hand showing mild degenerative osteo'  retries=0  total_duration=35679ms ===
 2026-04-05T19:09:17  INFO      medvqa.routes.analyze  [agentic-pipeline] done  answer='Plain X-ray of the left hand showing mild degenerative osteoarthritic change, without acute fracture or dislocation.'  verification=verified  confidence=High  duration=35684ms
 2026-04-05T19:09:17  INFO      medvqa.server  ← POST /api/analyze  status=200  duration=35688ms
+2026-04-05T19:13:22  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-05T19:13:22  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-05T19:13:22  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=55ms
+2026-04-05T19:13:22  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-05T19:13:22  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-05T19:13:22  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=20ms
+2026-04-05T19:13:28  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-05T19:13:28  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=0
+2026-04-05T19:13:28  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=0  skipped=0
+2026-04-05T19:13:28  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2ms
