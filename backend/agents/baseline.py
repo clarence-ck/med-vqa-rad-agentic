@@ -37,9 +37,11 @@ def baseline_answer(image_bytes: bytes, question: str,
     prompt = f"""You are a medical visual question answering system. Look at this medical image and answer the following question.
 
 Question: "{question}"
+IMPORTANT INSTRUCTION: You MUST evaluate if the image is a radiology image (e.g. X-ray, CT, MRI, Ultrasound, Fluoroscopy). If it is a generic photo (like a cat, a logo, or a car), or a non-radiology medical image (like Dermoscopy or Fundoscopy), you MUST set "is_radiology_image" to false.
 
 Return a JSON object with:
 {{
+  "is_radiology_image": true,
   "answer": "Direct answer to the question",
   "explanation": "Brief explanation (1-2 sentences)",
   "confidence": "high / medium / low"
@@ -71,6 +73,15 @@ Return ONLY the JSON object, no additional text."""
         raw = strip_json_fences(response.choices[0].message.content or "")
         _log.debug("Raw baseline response: %s", raw[:500])
         result = json.loads(raw)
+        
+        val = result.get("is_radiology_image", result.get("is_medical_image", True))
+        if isinstance(val, str):
+            val = val.lower().strip() not in ("false", "no", "0")
+            
+        if not val:
+            _log.warning("Non-radiology image detected in baseline. Aborting.")
+            raise ValueError("The uploaded image does not appear to be a radiology image. Please upload a valid X-ray, CT, MRI, or Ultrasound.")
+
         result["status"] = "success"
         elapsed_ms = int((time.perf_counter() - started) * 1000)
         _log.info(

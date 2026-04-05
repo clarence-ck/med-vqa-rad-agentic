@@ -21,10 +21,21 @@ _log = get_logger("agents.orchestrator")
 # Tool implementation functions — thin wrappers around each agent
 # ---------------------------------------------------------------------------
 
+class ImageBlockerAbort(BaseException):
+    """A special exception that inherits from BaseException so Haystack's Agent 
+    (which catches `Exception`) does not trap it. This allows us to instantly 
+    abort the pipeline without Haystack stringifying binary images into tokens."""
+    pass
+
 def _tool_interpret_image(image_bytes: bytes, mime_type: str = "image/png") -> dict:
     started = time.time()
     _log.info("[tool] interpret_image called")
-    result = ImageInterpreter().run(image_bytes=image_bytes, mime_type=mime_type)["result"]
+    try:
+        result = ImageInterpreter().run(image_bytes=image_bytes, mime_type=mime_type)["result"]
+    except ValueError as e:
+        # Trap the intentional blocker exception and escalate it as a BaseException
+        raise ImageBlockerAbort(str(e))
+        
     duration_ms = int((time.time() - started) * 1000)
     _log.info("[tool] interpret_image done  modality=%s  region=%s  duration=%dms",
               result.get("modality", "?"), result.get("body_region", "?"), duration_ms)
@@ -690,13 +701,21 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
     def _run_once(retry_context: dict | None = None) -> dict:
         _log.info("Running agentic pipeline (is_retry=%s)", bool(retry_context))
         agent = _create_agent()
-        response = agent.run(
-            messages=[ChatMessage.from_user(question)],
-            image_bytes=image_bytes,
-            mime_type=mime_type,
-            question=question,
-            retry_context=retry_context or {},
-        )
+        try:
+            response = agent.run(
+                messages=[ChatMessage.from_user(question)],
+                image_bytes=image_bytes,
+                mime_type=mime_type,
+                question=question,
+                retry_context=retry_context or {},
+            )
+        except ImageBlockerAbort as e:
+            _log.warning("Agentic pipeline halted by ImageBlockerAbort: %s", e)
+            return {
+                "image_interpreter": {"result": {"status": "error", "error": str(e)}},
+                "abort": str(e)
+            }
+            
         return {
             "image_interpreter": {
                 "result": response.get("image_interpretation") or {},
@@ -725,6 +744,20 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
         }
 
     first_results = _run_once()
+    
+    if first_results.get("abort"):
+        return {
+            "answer": first_results["abort"],
+            "verification_status": "rejected",
+            "confidence": "high",
+            "should_flag_for_review": False,
+            "fallback_recommendation": "none",
+            "duration_ms": int((time.time() - pipeline_start) * 1000),
+            "reasoning_trace": [],
+            "evidence_used": ["Image interpretation failed validation"],
+            "limitations": "Invalid image provided."
+        }
+
     first_payload = _assemble_pipeline_payload(first_results, question, pipeline_start)
     _log.info(
         "Pipeline attempt 1 result  answer=%r  verification=%s  confidence=%s  flag_review=%s",

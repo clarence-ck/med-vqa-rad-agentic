@@ -28,10 +28,13 @@ class ImageInterpreter:
 
     @component.output_types(result=Dict[str, Any])
     def run(self, image_bytes: bytes, mime_type: str = "image/png"):
-        prompt = """You are a medical image interpretation agent. Analyze this medical image and return a JSON object with the following fields:
+        prompt = """You are a medical image interpretation agent. Analyze this medical image and return a JSON object with the following fields.
+
+IMPORTANT INSTRUCTION: You MUST evaluate if the image is a radiology image (e.g. X-ray, CT, MRI, Ultrasound, Fluoroscopy). If it is a generic photo (like a cat, a logo, or a car), or a non-radiology medical image (like Dermoscopy or Fundoscopy), you MUST set "is_radiology_image" to false.
 
 {
-  "modality": "The imaging modality (e.g., X-ray, CT, MRI, Ultrasound, Fundoscopy, Dermoscopy, etc.)",
+  "is_radiology_image": true,
+  "modality": "The imaging modality (e.g., X-ray, CT, MRI, Ultrasound, Fluoroscopy, etc.)",
   "body_region": "The anatomical region shown (e.g., chest, head, abdomen, knee, etc.)",
   "visible_structures": ["List of visible anatomical structures"],
   "visual_summary": "A 2-3 sentence summary of what is visible in the image",
@@ -57,6 +60,15 @@ Return ONLY the JSON object, no additional text."""
             response = self.generator.run(messages=messages, generation_kwargs={"max_completion_tokens": 3000})
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
+            
+            val = result.get("is_radiology_image", result.get("is_medical_image", True))
+            if isinstance(val, str):
+                val = val.lower().strip() not in ("false", "no", "0")
+                
+            if not val:
+                _log.warning("Non-radiology image detected. Aborting pipeline.")
+                raise ValueError("The uploaded image does not appear to be a radiology image. Please upload a valid X-ray, CT, MRI, or Ultrasound.")
+
             result["status"] = "success"
             elapsed_ms = int((time.perf_counter() - started) * 1000)
             _log.info(
@@ -86,6 +98,9 @@ Return ONLY the JSON object, no additional text."""
                 "image_quality": "unknown",
                 "notable_findings": []
             }}
+        except ValueError:
+            # Let our intentional non-radiology blocker blow up the pipeline
+            raise
         except Exception as e:
             _log.error("Unexpected error: %s: %s", type(e).__name__, e)
             return {"result": {

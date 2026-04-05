@@ -18,8 +18,8 @@ export default function ImageViewer({ imageSrc, result }) {
           <img src={imageSrc} alt="Medical image" draggable={false} />
         ) : (
           <div className="image-viewer-placeholder">
-            <span className="icon">🩻</span>
-            <span>Upload an image or select a sample case</span>
+            <span className="icon">🖼️</span>
+            <span>Please Upload An Image</span>
           </div>
         )}
 
