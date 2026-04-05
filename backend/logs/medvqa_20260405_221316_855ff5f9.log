@@ -1,0 +1,15 @@
+2026-04-05T22:13:16  INFO      medvqa  Session started  file=medvqa_20260405_221316_855ff5f9.log  session_id=855ff5f9
+2026-04-05T22:13:25  INFO      medvqa.agents.knowledge_retriever  Advanced RAG module loaded successfully
+2026-04-05T22:13:26  INFO      medvqa.server  ============================================================
+2026-04-05T22:13:26  INFO      medvqa.server  MedVisionQuery API  v1.0.0  starting up
+2026-04-05T22:13:26  INFO      medvqa.server  CORS origins: ['http://localhost:5173']
+2026-04-05T22:13:26  INFO      medvqa.server  ============================================================
+2026-04-05T22:21:36  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-05T22:21:36  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=2
+2026-04-05T22:21:37  WARNING   medvqa.routes.dataset  Skipping cache file sample_1925_816620eb68.json: pritamdeka/BioBERT-mnli-snli-scinli is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-04-05T22:21:37  WARNING   medvqa.routes.dataset  Skipping cache file sample_2027_345bc44234.json: pritamdeka/BioBERT-mnli-snli-scinli is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-04-05T22:21:37  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=0  skipped=2
+2026-04-05T22:21:37  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=1076ms
+2026-04-05T22:22:15  INFO      medvqa.server  MedVisionQuery API shutting down

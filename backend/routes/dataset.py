@@ -4,8 +4,14 @@ import json
 import os
 import time
 from hashlib import md5
+from functools import lru_cache
+
+import numpy as np
 from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
+from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import SentenceTransformer
+
 from agents.baseline import baseline_answer
 from agents.orchestrator import run_pipeline
 from agents.workflow_baseline import workflow_answer
@@ -15,6 +21,33 @@ from logger import get_logger, sample_id_var
 router = APIRouter(prefix="/api/dataset")
 CACHE_DIR = os.path.join(os.path.dirname(__file__), "..", ".case_explorer_cache")
 _log = get_logger("routes.dataset")
+
+
+_EMBED_MODEL = None
+_SEMANTIC_THRESHOLD = 0.75  # Threshold for semantic similarity match
+
+
+def _get_embedding_model():
+    """Lazy-load BioBERT embedding model for medical semantic similarity."""
+    global _EMBED_MODEL
+    if _EMBED_MODEL is None:
+        # BioBERT for medical domain-specific embeddings
+        _EMBED_MODEL = SentenceTransformer('pritamdeka/BioBERT-mnli-snli-scinli')
+    return _EMBED_MODEL
+
+
+def _semantic_similarity(prediction: str, ground_truth: str) -> float:
+    """Compute semantic similarity using embeddings (cosine similarity).
+    
+    Returns float between 0 and 1, where 1 = identical meaning.
+    """
+    if not prediction or not ground_truth:
+        return 1.0 if prediction == ground_truth else 0.0
+    
+    model = _get_embedding_model()
+    embeddings = model.encode([prediction, ground_truth])
+    similarity = cosine_similarity(embeddings[0:1], embeddings[1:2])[0][0]
+    return float(similarity)
 
 
 @router.get("/samples")
@@ -127,14 +160,14 @@ def _answers_match(predicted: str, ground_truth: str, is_close_ended: bool = Fal
     """Return True if the predicted answer is correct based on question type.
     
     For close-ended (yes/no) questions: uses synonym matching only.
-    For open-ended questions: uses Token F1 >= 0.7 threshold only.
+    For open-ended questions: uses semantic similarity >= 0.75 threshold only.
     """
     if is_close_ended:
         # Close-ended: strict yes/no synonym matching
         return _normalize_yes_no(predicted) == _normalize_yes_no(ground_truth)
     else:
-        # Open-ended: Token F1 >= 0.7
-        return _token_f1(predicted, ground_truth) >= 0.7
+        # Open-ended: Semantic similarity >= threshold
+        return _semantic_similarity(predicted, ground_truth) >= _SEMANTIC_THRESHOLD
 
 
 def _is_close_ended_answer(text: str) -> bool:
@@ -227,6 +260,9 @@ def _build_evaluation_row(payload: dict) -> dict:
         "baseline_token_f1": round(_token_f1(baseline_normalized, ground_truth_normalized), 4),
         "workflow_token_f1": round(_token_f1(workflow_normalized, ground_truth_normalized), 4),
         "agentic_token_f1": round(_token_f1(agentic_normalized, ground_truth_normalized), 4),
+        "baseline_semantic": round(_semantic_similarity(baseline_normalized, ground_truth_normalized), 4),
+        "workflow_semantic": round(_semantic_similarity(workflow_normalized, ground_truth_normalized), 4),
+        "agentic_semantic": round(_semantic_similarity(agentic_normalized, ground_truth_normalized), 4),
         "winner": winner,
         "disagreement": len({baseline_normalized, workflow_normalized, agentic_normalized}) > 1,
         "verification_status": agentic_result.get("verification_status", "unknown"),

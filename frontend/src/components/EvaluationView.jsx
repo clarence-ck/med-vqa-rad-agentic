@@ -202,8 +202,8 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
             </div>
             <div className="card">
               <div className="card-header">
-                <span className="card-title">Avg Token F1 Score</span>
-                <span className="tag tag-gray" data-tooltip="Avg Token F1: Measures word overlap quality (0-1). High = answers share many words with ground truth. This is the raw score before applying the 0.7 threshold. Different from Accuracy — a system can have decent F1 (e.g., 0.65) but low Accuracy if it rarely crosses the 0.7 threshold." data-tooltip-align="left">info</span>
+                <span className="card-title">Lexical Overlap</span>
+                <span className="tag tag-gray" data-tooltip="Lexical Overlap: Average word/token overlap score (0-1) across all cases. Diagnostic metric showing surface-level lexical similarity — NOT used for accuracy. Compare with BioBERT Accuracy which uses medical-domain embeddings (≥ 0.75 threshold)." data-tooltip-align="left">info</span>
               </div>
               <AccuracyMetricStack
                 baseline={avgBaselineF1}
@@ -228,7 +228,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 <span className="card-title">Close-ended Accuracy</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.close_ended_cases} cases</span>
-                  <span className="tag tag-gray" data-tooltip="Accuracy on yes/no questions. Uses synonym mapping: words like 'positive', 'present', 'abnormal' count as 'yes'; 'negative', 'absent', 'normal' count as 'no'. Also allows F1 matching if synonym mapping fails." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="Accuracy on yes/no questions. Uses strict synonym matching only: words like 'positive', 'present', 'abnormal', 'found', 'visible', 'seen' count as 'yes'; 'negative', 'absent', 'normal', 'not found', 'not visible', 'not seen' count as 'no'. No F1 fallback." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <AccuracyMetricStack
@@ -239,10 +239,10 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
             </div>
             <div className="card">
               <div className="card-header">
-                <span className="card-title">Open-ended Accuracy</span>
+                <span className="card-title">BioBERT Accuracy (Open-ended)</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.open_ended_cases} cases</span>
-                  <span className="tag tag-gray" data-tooltip="Open-ended Accuracy: Percentage of answers that pass the F1 ≥ 0.7 threshold. A binary pass/fail — either enough word overlap (pass) or not (fail). Compare with Avg Token F1: a system could have 0.65 avg F1 but only 40% accuracy if many answers are close but below 0.7." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="BioBERT Semantic Accuracy: Percentage of open-ended answers with embedding similarity ≥ 0.75. Uses BioBERT (medical-domain model) to capture meaning equivalence (e.g., 'brain' ≈ 'nervous system'). NOT based on token F1." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <AccuracyMetricStack
@@ -259,7 +259,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 <span className="card-title">Accuracy by Question Type</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">F1 matching</span>
-                  <span className="tag tag-gray" data-tooltip="Breakdown of accuracy by question type. Close-ended questions use yes/no synonym matching only. Open-ended questions use Token F1 ≥ 0.7 threshold only. No exact match required." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="Breakdown of accuracy by question type. Close-ended questions use yes/no synonym matching only. Open-ended questions use semantic similarity ≥ 0.75 (embedding-based) to capture meaning equivalence." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <div className="evaluation-table-wrap" style={{ margin: '0 -24px -24px -24px' }}>
