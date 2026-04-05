@@ -160,7 +160,7 @@ def _answers_match(predicted: str, ground_truth: str, is_close_ended: bool = Fal
     """Return True if the predicted answer is correct based on question type.
     
     For close-ended (yes/no) questions: uses synonym matching only.
-    For open-ended questions: uses semantic similarity >= 0.75 threshold only.
+    For open-ended questions: uses semantic similarity >= 0.65 threshold only.
     """
     if is_close_ended:
         # Close-ended: strict yes/no synonym matching

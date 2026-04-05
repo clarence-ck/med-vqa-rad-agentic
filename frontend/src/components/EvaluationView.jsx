@@ -37,7 +37,7 @@ function SystemPerformanceCard({ title, icon, accuracy, avgDuration, totalDurati
       </div>
       <div className="evaluation-system-stats">
         <div>
-          <div className="evaluation-list-subtitle">Exact-match against Ground Truth</div>
+          <div className="evaluation-list-subtitle">Overall Accuracy (Synonym + BioBERT)</div>
           <div className="evaluation-metric-value">{formatPercent(accuracy)}</div>
         </div>
         <div>
