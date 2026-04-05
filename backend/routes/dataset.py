@@ -18,9 +18,9 @@ _log = get_logger("routes.dataset")
 
 
 @router.get("/samples")
-async def list_samples(limit: int = 20):
-    samples = get_sample_cases(limit)
-    _log.info("Listing samples  limit=%d  returned=%d", limit, len(samples))
+async def list_samples():
+    samples = get_sample_cases()
+    _log.info("Listing samples  returned=%d", len(samples))
     return {"samples": samples, "count": len(samples)}
 
 

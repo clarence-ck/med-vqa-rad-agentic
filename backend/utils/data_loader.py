@@ -39,7 +39,7 @@ def _resolve_split(item: dict, image_name: str) -> str:
     return (item.get("split") or infer_split(image_name) or "unknown").lower()
 
 
-def get_sample_cases(limit: int = 20) -> list:
+def get_sample_cases(limit: int = 30) -> list:
     """Return a curated set of sample cases for the UI dropdown."""
     data = load_dataset()
     if not data:

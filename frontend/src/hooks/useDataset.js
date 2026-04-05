@@ -12,7 +12,7 @@ export function useDataset() {
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE}/api/dataset/samples?limit=30`);
+      const response = await fetch(`${API_BASE}/api/dataset/samples`);
       if (!response.ok) throw new Error('Failed to fetch samples');
 
       const data = await response.json();
