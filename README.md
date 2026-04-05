@@ -430,7 +430,7 @@ Edit `.env`:
 ```env
 OPENAI_API_KEY=sk-...
 VISION_MODEL=gpt-5.4-mini-2026-03-17
-OPENAI_MODEL=oss120b
+OPENAI_MODEL=gpt-5.4-mini-2026-03-17
 HF_TOKEN=hf_...
 
 # Frontend origin allowed by CORS
