@@ -31,9 +31,8 @@ def _get_embedding_model():
     """Lazy-load BioBERT embedding model for medical semantic similarity."""
     global _EMBED_MODEL
     if _EMBED_MODEL is None:
-        # BioBERT for medical domain-specific embeddings
-        # Using dmis-lab/biobert-base-cased-v1.2 (official BioBERT)
-        _EMBED_MODEL = SentenceTransformer('dmis-lab/biobert-base-cased-v1.2')
+        # BioBERT fine-tuned for semantic similarity (NLI + STS + Medical NLI)
+        _EMBED_MODEL = SentenceTransformer('pritamdeka/BioBERT-mnli-snli-scinli-scitail-mednli-stsb')
     return _EMBED_MODEL
 
 

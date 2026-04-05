@@ -242,7 +242,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 <span className="card-title">BioBERT Accuracy (Open-ended)</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.open_ended_cases} cases</span>
-                  <span className="tag tag-gray" data-tooltip="BioBERT Accuracy: Percentage of open-ended answers with embedding similarity ≥ 0.75. Uses dmis-lab/biobert-base-cased-v1.2 (official BioBERT trained on PubMed/PMC) to capture medical meaning equivalence (e.g., 'brain' ≈ 'nervous system'). NOT based on token F1." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="BioBERT Accuracy: Percentage of open-ended answers with embedding similarity ≥ 0.75. Uses BioBERT fine-tuned on NLI+STS+MedNLI (natural language inference & semantic textual similarity) to capture medical meaning equivalence (e.g., 'brain' ≈ 'nervous system'). NOT based on token F1." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <AccuracyMetricStack
