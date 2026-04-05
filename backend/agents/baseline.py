@@ -84,6 +84,7 @@ Return ONLY the JSON object, no additional text."""
 
         result["status"] = "success"
         elapsed_ms = int((time.perf_counter() - started) * 1000)
+        result["duration_ms"] = elapsed_ms
         _log.info(
             "Baseline done  answer=%r  confidence=%s  duration=%dms",
             str(result.get("answer", ""))[:80],

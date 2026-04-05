@@ -1,6 +1,20 @@
 import ConfidenceBadge from './ConfidenceBadge';
 
-export default function CaseHeader({ result }) {
+const AGENT_NAMES = {
+  'Image Interpretation': 'Image',
+  'Question Understanding': 'Question',
+  'Difficulty Routing': 'Router',
+  'Knowledge Support': 'Knowledge',
+  'Reasoning & Answer': 'Reasoning',
+  'Verification': 'Verify',
+};
+
+function formatDuration(ms) {
+  if (ms === undefined || ms === null) return null;
+  return (ms / 1000).toFixed(1) + 's';
+}
+
+export default function CaseHeader({ result, baselineResult, workflowResult }) {
   if (!result) return null;
 
   const modality = result.image_analysis?.modality || '—';
@@ -11,6 +25,20 @@ export default function CaseHeader({ result }) {
     verificationStatus === 'verified' ? 'tag-green' :
     verificationStatus === 'partially_verified' ? 'tag-amber' :
     'tag-red';
+
+  // Agent pipeline timings
+  const agentTimings = result.agent_trace?.map(step => {
+    const name = AGENT_NAMES[step.agent] || step.agent;
+    const duration = formatDuration(step.duration_ms);
+    return { name, duration, raw: step.duration_ms };
+  }).filter(item => item.raw !== undefined) || [];
+
+  // System timings
+  const systems = [
+    { name: 'Agentic', duration: formatDuration(result.total_duration_ms), color: '#3b82f6' },
+    { name: 'Workflow', duration: formatDuration(workflowResult?.duration_ms), color: '#a855f7' },
+    { name: 'Baseline', duration: formatDuration(baselineResult?.duration_ms), color: '#6b7280' },
+  ].filter(s => s.duration);
 
   return (
     <div className="case-header animate-fade-in">
@@ -31,10 +59,36 @@ export default function CaseHeader({ result }) {
       <div className="case-header-item" style={{ marginLeft: 'auto' }}>
         <ConfidenceBadge level={result.confidence} />
       </div>
-      {result.total_duration_ms && (
-        <div className="case-header-item">
-          <span className="case-header-label">Time</span>
-          <span className="case-header-value">{(result.total_duration_ms / 1000).toFixed(1)}s</span>
+
+      {/* System Timing Comparison */}
+      {systems.length > 0 && (
+        <div className="case-header-item timing-section">
+          <span className="case-header-label">System Times</span>
+          <div className="timing-badges">
+            {systems.map((sys, i) => (
+              <span
+                key={i}
+                className="timing-badge"
+                style={{ '--timing-color': sys.color }}
+              >
+                {sys.name}: <strong>{sys.duration}</strong>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Agent Pipeline Breakdown */}
+      {agentTimings.length > 0 && (
+        <div className="case-header-item timing-section">
+          <span className="case-header-label">Pipeline Steps</span>
+          <div className="timing-badges">
+            {agentTimings.map((item, i) => (
+              <span key={i} className="timing-badge timing-agent">
+                {item.name}: <strong>{item.duration}</strong>
+              </span>
+            ))}
+          </div>
         </div>
       )}
     </div>

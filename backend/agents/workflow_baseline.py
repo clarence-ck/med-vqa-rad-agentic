@@ -82,6 +82,7 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
             Pass this to avoid a second LLM call when the caller already has one
             (e.g. from the agentic pipeline run).
     """
+    started = time.perf_counter()
     try:
         image_result = precomputed_image_result if precomputed_image_result is not None else interpret_image(image_bytes, mime_type)
     except Exception as e:
@@ -112,7 +113,6 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
         image_result.get("body_region", "unknown"),
         question_result.get("question_type", "unknown"),
     )
-    started = time.perf_counter()
 
     modality = _clean_value(image_result.get("modality"))
     body_region = _clean_value(image_result.get("body_region"))
@@ -239,6 +239,7 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
         "answer": answer,
         "explanation": ". ".join(explanation_parts) + ".",
         "confidence": confidence,
+        "duration_ms": elapsed_ms,
         "workflow_trace": {
             "image_result": image_result,
             "question_result": question_result,

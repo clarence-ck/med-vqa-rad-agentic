@@ -126,7 +126,13 @@ function App() {
         </nav>
       </header>
 
-      {activeTab === 'dashboard' && result && <CaseHeader result={result} />}
+      {activeTab === 'dashboard' && result && (
+        <CaseHeader 
+          result={result} 
+          baselineResult={baselineResult} 
+          workflowResult={workflowResult} 
+        />
+      )}
 
       {/* Error Display */}
       {error && (
