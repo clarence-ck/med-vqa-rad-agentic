@@ -11,7 +11,7 @@ import ComparisonToggle from './components/ComparisonToggle';
 import CaseExplorer from './components/CaseExplorer';
 import EvaluationView from './components/EvaluationView';
 import FailureModeDrawer from './components/FailureModeDrawer';
-import RoutingCard from './components/RoutingCard';
+import ConfidenceBadge from './components/ConfidenceBadge';
 import { useAnalysis } from './hooks/useAnalysis';
 import { useDataset } from './hooks/useDataset';
 import { useEvaluation } from './hooks/useEvaluation';
@@ -220,12 +220,7 @@ function App() {
                         )}
                         {baselineResult.confidence && (
                           <div style={{ marginTop: 'var(--space-3)' }}>
-                            <span className={`tag ${
-                              baselineResult.confidence === 'high' ? 'tag-green' :
-                              baselineResult.confidence === 'medium' ? 'tag-amber' : 'tag-red'
-                            }`}>
-                              {baselineResult.confidence} confidence
-                            </span>
+                            <ConfidenceBadge level={baselineResult.confidence} />
                           </div>
                         )}
                       </div>
@@ -264,12 +259,7 @@ function App() {
                         )}
                         {workflowResult.confidence && (
                           <div style={{ marginTop: 'var(--space-3)' }}>
-                            <span className={`tag ${
-                              workflowResult.confidence === 'high' ? 'tag-green' :
-                              workflowResult.confidence === 'medium' ? 'tag-amber' : 'tag-red'
-                            }`}>
-                              {workflowResult.confidence} confidence
-                            </span>
+                            <ConfidenceBadge level={workflowResult.confidence} />
                           </div>
                         )}
                       </div>
