@@ -96,7 +96,7 @@ flowchart LR
     T4 --> RAG[Advanced RAG Engine\nquery rewrite + FAISS/BM25 + rerank + reflection]
     RAG --> TRAIN[(VQA-RAD train split\nretrieval corpus)]
 
-    EXP --> DATA[Dataset Analysis\n/api/dataset/sample/{id}/analysis]
+    EXP --> DATA[Dataset Analysis\n/api/dataset/sample/sample_id/analysis]
     DATA --> CACHE[Case Analysis Cache\n.case_explorer_cache/]
     CACHE --> EVAL
 
