@@ -221,9 +221,8 @@ def build_diagram(output_path="system_diagram.png"):
         fs1=12.5, fs2=8.1)
     # Verification Agent  x 9.20-12.60, y 2.15-3.05
     box(ax, 9.20, 2.15, 3.40, 0.90, BLUE_SOFT, BLUE,
-        "Verification Agent", "policy-guided verification",
+        "Verification Agent", "grounded consistency / safety checks",
         fs1=11.3, fs2=7.8)
-    pill(ax, 12.00, 2.65, 0.60, 0.22, "policy", PURPLE, PURPLE, "white", fs=6.5, z=6)
 
     # Image Interpreter → Reasoning Agent
     # Corridor at x=8.45 (gap between retriever right 7.70 & reasoning left 9.20)
@@ -249,9 +248,6 @@ def build_diagram(output_path="system_diagram.png"):
 
     # Reasoning Agent → Verification Agent
     orth_arrow(ax, [(10.90, 3.40), (10.90, 3.05)], color=SLATE)
-
-    # Router → Verification Agent (policy guidance) - dashed purple line, routed around Reasoning Agent
-    orth_arrow(ax, [(12.98, 5.47), (13.20, 5.47), (13.20, 2.85), (12.60, 2.85)], color=PURPLE, lw=1.5, ls="--")
 
     # ══════════════════════════════════════════════════════
     # DECISION
@@ -313,11 +309,11 @@ def build_diagram(output_path="system_diagram.png"):
     orth_arrow(ax, [(6.10, 6.75), (6.10, 5.60), (4.20, 5.60), (4.20, 1.10), (EX, 1.10), (EX, 0.92)], color=RED, lw=1.5, ls="--")
 
     # Footnote — in the left margin below the Input Lane boxes
-    lbl(ax, 2.00, 1.20,
-        "Router sets policy → Verification uses policy\n"
+    lbl(ax, 2.20, 1.34,
+        "Router sets routing policy: retrieval need, verification strictness, fallback\n"
         "Guardrail = verification_status + failure_categories\n"
         "→ Verified / Partially Verified / Low Confidence / Review / Error",
-        fs=7.5, c=MUTED, style="italic", ha="center")
+        fs=7.0, c=MUTED, style="italic", ha="center")
 
     plt.tight_layout(pad=0.25)
     plt.savefig(output_path, bbox_inches="tight", facecolor=fig.get_facecolor())

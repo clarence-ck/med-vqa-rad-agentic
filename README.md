@@ -1,6 +1,6 @@
 # MedVisionQuery — Agentic Multimodal Medical VQA System
 
-MedVisionQuery is an **agentic multimodal system** for medical visual question answering (VQA) over radiology images. It decomposes the task into 5 specialized agent stages — image interpretation, question understanding, knowledge support, reasoning, and verification — orchestrated by a **Haystack Agent** with LLM-driven tool selection. The knowledge stage now uses an **Advanced RAG pipeline** (query rewriting, hybrid retrieval, reranking, and self-reflection). Results are exposed through a demo UI with **Dashboard**, **Case Explorer**, and **Evaluation** views.
+MedVisionQuery is an **agentic multimodal system** for medical visual question answering (VQA) over radiology images. It decomposes the task into 6 specialized agent stages — image interpretation, question understanding, difficulty routing, knowledge support, reasoning, and verification — orchestrated by a **Haystack Agent** with LLM-driven tool selection. The knowledge stage now uses an **Advanced RAG pipeline** (query rewriting, hybrid retrieval, reranking, and self-reflection). Results are exposed through a demo UI with **Dashboard**, **Case Explorer**, and **Evaluation** views.
 
 > ⚠️ **For educational and research purposes only. Not for clinical use.**
 
@@ -10,12 +10,12 @@ MedVisionQuery is an **agentic multimodal system** for medical visual question a
 
 | Property | Implementation |
 |---|---|
-| Problem decomposition | 5 distinct agent stages with explicit roles |
+| Problem decomposition | 6 distinct agent stages with explicit roles |
 | Agent architecture | Named agents wrapped as Haystack Tools; the controller decides tool use over shared state |
 | Multimodal grounding | The image is interpreted once, then downstream stages consume structured visual state; the current runtime uses OpenAI-backed generators throughout |
 | Dynamic tool selection | `retrieve_knowledge` is optional and skipped for simple visual question types by the controller |
 | Control & failure handling | Verification, guardrails, disclaimers, review flags, failure categories, and automatic retry |
-| Evaluation | Against two baselines with exact match, token F1, close/open-ended accuracy, and disagreement analysis |
+| Evaluation | Against two baselines with normalized answer-match accuracy, token F1, close/open-ended accuracy, and disagreement analysis |
 
 ---
 
@@ -69,9 +69,8 @@ flowchart LR
     ORCH -->|tool call| T6[Tool: verify_answer\nVerificationAgent]
 
     T1 -->|auto-block| ERR[Error\nnon-radiology image]
-    T3 -->|policy| T6
 
-    T1 -->|outputs_to_state| STATE[(Shared Agent State\n14 typed fields)]
+    T1 -->|outputs_to_state| STATE[(Shared Agent State\n16 typed fields)]
     T2 -->|outputs_to_state| STATE
     T3 -->|outputs_to_state| STATE
     T4 -->|outputs_to_state| STATE
@@ -94,12 +93,11 @@ flowchart LR
     API --> B1[Baseline 1\nSingle-shot Multimodal Prompt]
     API --> B2[Baseline 2\nHand-designed Workflow]
 
-    T3 --> RAG[Advanced RAG Engine\nquery rewrite + FAISS/BM25 + rerank + reflection]
+    T4 --> RAG[Advanced RAG Engine\nquery rewrite + FAISS/BM25 + rerank + reflection]
     RAG --> TRAIN[(VQA-RAD train split\nretrieval corpus)]
 
-    T5 --> CACHE[Case Analysis Cache\n.case_explorer_cache/]
-    B1 --> CACHE
-    B2 --> CACHE
+    EXP --> DATA[Dataset Analysis\n/api/dataset/sample/{id}/analysis]
+    DATA --> CACHE[Case Analysis Cache\n.case_explorer_cache/]
     CACHE --> EVAL
 
     T1 --> LLM[OpenAI API\nOPENAI_MODEL]
@@ -119,10 +117,10 @@ flowchart LR
 |---|---|---|---|
 | `ImageInterpreter` | `image_interpreter.py` | Perception — multimodal image interpretation with auto-block for non-radiology images | OpenAI |
 | `QuestionAnalyzer` | `question_analyzer.py` | Task understanding — question classification and intent analysis | OpenAI |
-| `DifficultyRouter` | `difficulty_router.py` | Planning — sets difficulty, retrieval need, verification policy, fallback policy | OpenAI |
+| `DifficultyRouter` | `difficulty_router.py` | Agent 3: Planning — sets routing metadata in shared state | OpenAI |
 | `KnowledgeRetriever` | `knowledge_retriever.py` | Context — optional Advanced RAG retrieval over VQA-RAD train split + LLM synthesis | OpenAI + local retrieval stack |
 | `ReasoningAgent` | `reasoning_agent.py` | Synthesis — generates answer and explanation from all prior context | OpenAI |
-| `VerificationAgent` | `verification_agent.py` | Evaluator — policy-guided verification with 5 structured checks | OpenAI |
+| `VerificationAgent` | `verification_agent.py` | Evaluator — grounded consistency / safety checks with 5 structured checks | OpenAI |
 | Agent Controller | `orchestrator.py` | Haystack `Agent` — routes tool calls, manages shared state, guardrails, retry | OpenAI |
 | Workflow Baseline | `workflow_baseline.py` | Deterministic answer derivation over image/question analysis outputs | Rules + OpenAI intermediates |
 | Single-shot Baseline | `baseline.py` | Direct image+question prompt with no decomposition | OpenAI |
@@ -134,27 +132,26 @@ The orchestrator uses Haystack's `Agent` + `Tool` architecture:
 - **6 agents** wrapped as `Tool` with `inputs_from_state` / `outputs_to_state` bindings:
   1. `interpret_image` — ImageInterpreter (multimodal)
   2. `analyze_question` — QuestionAnalyzer
-  3. `route_difficulty` — DifficultyRouter (sets verification/fallback policy)
-  4. `retrieve_knowledge` — KnowledgeRetriever (conditional)
+  3. `route_difficulty` — DifficultyRouter (sets routing metadata in shared state)
+  4. `retrieve_knowledge` — KnowledgeRetriever (conditional, based on `routing_decision.needs_retrieval`)
   5. `reason_answer` — ReasoningAgent
-  6. `verify_answer` — VerificationAgent (uses policy from Router)
+  6. `verify_answer` — VerificationAgent
 - The controller LLM decides which tools to invoke and in what order based on prior outputs in state
-- **Policy flow**: DifficultyRouter → sets `verification_policy` + `fallback_policy` → guides VerificationAgent
+- **Routing metadata**: DifficultyRouter stores `verification_policy` + `fallback_policy` in `routing_decision`; downstream payloads and UI surfaces read these fields from shared state
 - **Auto-block**: ImageInterpreter validates radiology images; non-radiology images abort pipeline early → Error state
-- **Guardrail**: Combines `verification_status` + `failure_categories` → 5 final states: Verified, Partially Verified, Low Confidence, Review, Error
-- 14 state fields: `image_bytes`, `mime_type`, `question`, `image_interpretation`, `question_analysis`, `routing_decision`, `knowledge`, `answer_data`, `verification_result`, 5 duration fields, `retry_context`
+- 16 state fields: `image_bytes`, `mime_type`, `question`, `image_interpretation`, `question_analysis`, `routing_decision`, `knowledge`, `answer_data`, `verification_result`, 5 duration fields, `retry_context`
 - Exit condition: `verify_answer` finalizes the session
 - A fresh `Agent` is created per request to prevent shared mutable state under concurrency
 
 ### Dynamic Tool Selection
 
-The controller uses `question_type` from `QuestionAnalyzer` to decide whether to invoke `KnowledgeRetriever`:
+The controller follows `routing_decision.needs_retrieval` to decide whether to invoke `KnowledgeRetriever`:
 
 | Question type | `retrieve_knowledge` called? |
 |---|---|
-| `modality_identification`, `anatomy_identification`, `presence_absence`, `location`, `counting`, `yes_no` | No — skipped |
-| `abnormality_description`, `explanation_request` | Yes |
-| When `requires_medical_knowledge` is true | Yes |
+| `modality_identification`, `anatomy_identification`, `presence_absence`, `location`, `counting`, `yes_no` | Usually skipped |
+| `abnormality_description`, `explanation_request` | Usually retrieved |
+| When `requires_medical_knowledge` is true | Usually retrieved |
 
 ### Knowledge Retrieval (Advanced RAG)
 
@@ -172,7 +169,7 @@ Retrieval corpus is built from the **train split** of `data/vqa-rad/vqa_rad.json
 
 ### Current runtime model configuration
 
-The current runtime uses a single OpenAI configuration across the full agentic pipeline and the single-shot baseline.
+The current runtime uses OpenAI for all LLM-driven stages; the Advanced RAG retrieval stack additionally uses local SentenceTransformers, CrossEncoder, FAISS, and BM25 models.
 
 | Env vars | Used by |
 |---|---|
@@ -180,7 +177,7 @@ The current runtime uses a single OpenAI configuration across the full agentic p
 | `VISION_MODEL` | `ImageInterpreter`, `baseline.py` |
 | `OPENAI_MODEL` | `QuestionAnalyzer`, `KnowledgeRetriever`, `ReasoningAgent`, `VerificationAgent`, Haystack controller |
 
-All agentic steps strictly utilize OpenAI. Hugging Face is only used to download the raw dataset via scripts.
+Hugging Face is used to download the raw dataset via scripts. The retrieval stack itself is local, while the agentic generation steps use OpenAI.
 
 ### Other Technology Choices
 
@@ -191,7 +188,7 @@ All agentic steps strictly utilize OpenAI. Hugging Face is only used to download
 - **SentenceTransformers + CrossEncoder** — dense embeddings and cross-encoder reranking
 - **BM25 (`rank-bm25`)** — sparse lexical retrieval for hybrid search
 - **Hugging Face `datasets`** — used only by `scripts/download_dataset.py` to materialize the local VQA-RAD data folder
-- **Matplotlib** — `scripts/system_diagram.py` regenerates `scripts/docs/system_diagram.png`
+- **Matplotlib** — `scripts/system_diagram.py` regenerates `system_diagram.png`
 
 ---
 
@@ -335,14 +332,14 @@ The Guardrail combines `verification_status` + `failure_categories` to produce 5
 ## Evaluation Design
 
 ### Metrics computed per cached case
-- **Exact match** — normalized answer string comparison
+- **Normalized answer match** — yes/no normalization first, otherwise Token F1 ≥ 0.7
 - **Yes/no normalization** — `yes/true/present/positive` → `yes`; `no/false/absent/negative/normal` → `no`
 - **Token F1** — unigram overlap between predicted and ground-truth answer
-- **Winner** — `baseline` / `workflow` / `agentic` / `tie_multi_correct` / `tie_all_wrong`
+- **Winner** — `baseline` / `workflow` / `agentic` / `tie: ...` / `tie_all_wrong`
 - **Disagreement** — whether any two systems produced different answers
 
 ### Aggregate evaluation summary
-- Overall exact-match accuracy per system (baseline / workflow / agentic)
+- Overall normalized answer-match accuracy per system (baseline / workflow / agentic)
 - Close-ended and open-ended accuracy per system
 - Win counts, disagreement rate, and average duration (ms)
 - Per-question-type accuracy breakdown
@@ -358,7 +355,7 @@ The Guardrail combines `verification_status` + `failure_categories` to produce 5
 |---|---|---|
 | Single-shot baseline | `baseline.py` | One multimodal prompt, no decomposition — answer + explanation + confidence |
 | Workflow baseline | `workflow_baseline.py` | Deterministic answer derivation over image/question analysis outputs |
-| Agentic pipeline | `orchestrator.py` | 5-tool Haystack Agent with LLM controller, verification, guardrails, retry |
+| Agentic pipeline | `orchestrator.py` | 6-tool Haystack Agent with LLM controller, verification, guardrails, retry |
 
 ---
 
@@ -404,7 +401,7 @@ Purpose: **systematic browsing and analysis of the VQA-RAD dataset**.
 Purpose: **aggregate performance comparison across all cached analyses**.
 
 - Reads all cached Case Explorer results automatically
-- Displays exact-match accuracy, close/open-ended accuracy, win counts, disagreement rate, and average duration per system
+- Displays normalized answer-match accuracy, close/open-ended accuracy, win counts, disagreement rate, and average duration per system
 - Shows a per-question-type breakdown and recent evaluated-case table with verification signals
 - Hit **Refresh** to re-aggregate after running new cases in Case Explorer
 
@@ -509,9 +506,9 @@ Medical-VQA-Explanation-Agent/
 │   │   ├── image_interpreter.py     # Agent 1: multimodal image interpretation (OpenAI)
 │   │   ├── question_analyzer.py     # Agent 2: question classification and intent analysis (OpenAI)
 │   │   ├── advanced_rag.py          # Advanced RAG engine: query rewrite, FAISS+BM25 retrieval, reranking, reflection
-│   │   ├── knowledge_retriever.py   # Agent 3: optional medical context retrieval with Advanced RAG grounding
-│   │   ├── reasoning_agent.py       # Agent 4: answer synthesis with retry context support (OpenAI)
-│   │   ├── verification_agent.py    # Agent 5: structured verification and fallback recommendations (OpenAI)
+│   │   ├── knowledge_retriever.py   # Agent 4: optional medical context retrieval with Advanced RAG grounding
+│   │   ├── reasoning_agent.py       # Agent 5: answer synthesis with retry context support (OpenAI)
+│   │   ├── verification_agent.py    # Agent 6: structured verification and fallback recommendations (OpenAI)
 │   │   ├── baseline.py              # Single-shot multimodal baseline (OpenAI)
 │   │   └── workflow_baseline.py     # Deterministic answer derivation over image/question analysis outputs
 │   ├── routes/
@@ -546,8 +543,7 @@ Medical-VQA-Explanation-Agent/
 ├── scripts/
 │   ├── download_dataset.py          # downloads VQA-RAD from Hugging Face, writes JSON + images
 │   ├── system_diagram.py            # regenerates the architecture figure
-│   └── docs/
-│       └── system_diagram.png       # rendered system diagram asset
+├── system_diagram.png               # rendered system diagram asset
 └── data/
     └── vqa-rad/                     # gitignored — created by download_dataset.py
         ├── vqa_rad.json             # flattened QA manifest with split labels and image filenames
@@ -585,7 +581,7 @@ The current download script flattens the Hugging Face dataset into one local PNG
 
 - ~8–10 serial LLM calls per pass (one controller dispatch + one tool call per stage) — up to ~20 with automatic retry; significantly slower and more expensive than single-shot inference
 - Retrieval is grounded to VQA-RAD train examples, but coverage is still limited to dataset distribution (not a comprehensive medical knowledge base)
-- Token F1 is brittle for open-ended answers; exact match misses near-correct responses
+- Token F1 thresholding is still brittle for open-ended answers; near-correct responses can fall below the cutoff
 - Self-consistency signal is lightweight (single verifier pass) rather than multi-sample voting
 - Research and demonstration use only — not suitable for clinical deployment
 
