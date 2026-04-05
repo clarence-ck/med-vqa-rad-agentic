@@ -24,7 +24,7 @@ _log = get_logger("routes.dataset")
 
 
 _EMBED_MODEL = None
-_SEMANTIC_THRESHOLD = 0.75  # Threshold for semantic similarity match
+_SEMANTIC_THRESHOLD = 0.65  # Threshold for semantic similarity match (lowered for medical synonyms)
 
 
 def _get_embedding_model():
