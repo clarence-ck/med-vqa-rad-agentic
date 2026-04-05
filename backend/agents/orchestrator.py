@@ -384,7 +384,6 @@ def _build_guardrail_payload(answer_result: dict, verification_result: dict, fai
     """Build guardrail output: guarded answer, disclaimer, flag-for-review signal."""
     answer = answer_result.get("answer", "Unable to generate an answer.")
     verification_status = verification_result.get("verification_status", "low_confidence")
-    confidence_label = verification_result.get("confidence_label", "Low")
     fallback_recommendation = verification_result.get("fallback_recommendation", "none")
     suggested_disclaimer = verification_result.get("suggested_disclaimer", "")
     high_severity = any(c.get("severity") == "high" for c in (failure_categories or []))

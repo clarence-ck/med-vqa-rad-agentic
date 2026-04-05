@@ -185,6 +185,7 @@ def build_diagram(output_path="system_diagram.png"):
     # Stage-1 boxes  (y 6.75 – 7.85)
     box(ax, 4.30, 6.75, 3.60, 1.10, BLUE_SOFT, BLUE,
         "Image Interpreter", "visual evidence / findings", fs1=13, fs2=8.8)
+    pill(ax, 7.28, 7.42, 0.62, 0.24, "auto-block", RED, RED, "white", fs=6.5, z=6)
     box(ax, 9.10, 6.75, 3.60, 1.10, PURPLE_SOFT, BLUE,
         "Question Analyzer", "intent / type / answer format", fs1=13, fs2=8.7)
 
@@ -220,8 +221,9 @@ def build_diagram(output_path="system_diagram.png"):
         fs1=12.5, fs2=8.1)
     # Verification Agent  x 9.20-12.60, y 2.15-3.05
     box(ax, 9.20, 2.15, 3.40, 0.90, BLUE_SOFT, BLUE,
-        "Verification Agent", "grounding + confidence",
+        "Verification Agent", "policy-guided verification",
         fs1=11.3, fs2=7.8)
+    pill(ax, 12.00, 2.65, 0.60, 0.22, "policy", PURPLE, PURPLE, "white", fs=6.5, z=6)
 
     # Image Interpreter → Reasoning Agent
     # Corridor at x=8.45 (gap between retriever right 7.70 & reasoning left 9.20)
@@ -248,15 +250,19 @@ def build_diagram(output_path="system_diagram.png"):
     # Reasoning Agent → Verification Agent
     orth_arrow(ax, [(10.90, 3.40), (10.90, 3.05)], color=SLATE)
 
+    # Router → Verification Agent (policy guidance) - dotted purple line
+    orth_arrow(ax, [(11.50, 4.90), (11.50, 3.75), (12.20, 3.75), (12.20, 3.05)], color=PURPLE, lw=1.5, ls=":")
+    lbl(ax, 12.60, 3.88, "policy", fs=7, c=PURPLE, style="italic", ha="left")
+
     # ══════════════════════════════════════════════════════
     # DECISION
     # ══════════════════════════════════════════════════════
     # Guardrail  x 14.40-17.20, y 5.10-6.20
     box(ax, 14.40, 5.10, 2.80, 1.10, AMBER_SOFT, AMBER,
-        "Guardrail", "policy + confidence gate",
-        tc="#8A5A00", sc="#9A6D00", fs1=13, fs2=8.5)
-    lbl(ax, 15.80, 4.82, "verified / disclaimer / review",
-        fs=8.0, c=MUTED)
+        "Guardrail", "verification + failures\n→ flag / guarded / disclaimer",
+        tc="#8A5A00", sc="#9A6D00", fs1=13, fs2=8.0)
+    lbl(ax, 15.80, 4.82, "verified / partially / low / unsupported + severity",
+        fs=7.5, c=MUTED)
 
     # Verification Agent right (12.60, 2.60) → Guardrail left (14.40, 5.65)
     orth_arrow(ax,
@@ -266,34 +272,53 @@ def build_diagram(output_path="system_diagram.png"):
     # ══════════════════════════════════════════════════════
     # FINAL ANSWER STATES (bottom strip, y 0.08 – 1.43)
     # ══════════════════════════════════════════════════════
-    box(ax, 7.25, 0.22, 2.60, 0.70, GREEN_SOFT, GREEN,
+    # Error (auto-block for non-radiology images)
+    box(ax, 4.30, 0.22, 2.30, 0.70, RED_SOFT, RED,
+        "Error", "invalid image",
+        tc="#9B1C1C", sc="#B63A3A", fs1=11.2, fs2=7.5)
+    # Verified
+    box(ax, 6.90, 0.22, 2.30, 0.70, GREEN_SOFT, GREEN,
         "Verified", "answer shown directly",
         tc="#14532D", sc="#2F6E43", fs1=11.2, fs2=7.7)
-    box(ax, 10.65, 0.22, 2.60, 0.70, AMBER_SOFT, AMBER,
-        "Disclaimer", "guarded answer + disclaimer",
+    # Partially Verified
+    box(ax, 9.50, 0.22, 2.30, 0.70, AMBER_SOFT, AMBER,
+        "Partially Verified", "some uncertainty",
         tc="#8A5A00", sc="#9A6D00", fs1=11.2, fs2=7.7)
-    box(ax, 14.05, 0.22, 2.60, 0.70, RED_SOFT, RED,
+    # Low Confidence
+    box(ax, 12.10, 0.22, 2.30, 0.70, RED_SOFT, RED,
+        "Low Confidence", "guarded + disclaimer",
+        tc="#9B1C1C", sc="#B63A3A", fs1=11.2, fs2=7.5)
+    # Review
+    box(ax, 14.70, 0.22, 2.30, 0.70, RED_SOFT, RED,
         "Review", "review recommended",
         tc="#9B1C1C", sc="#B63A3A", fs1=11.2, fs2=7.5)
 
-    # Guardrail → horizontal routing rail → three coloured drops
+    # Guardrail → horizontal routing rail → five coloured drops
     GX  = 15.80   # guardrail centre-x
     GY  = 5.10    # guardrail bottom-y
     RY  = 1.10    # routing rail y  (below Final Answer States label, above boxes)
-    VX  = 8.55    # Verified centre-x
-    DX  = 11.95   # Disclaimer centre-x
-    RVX = 15.35   # Review centre-x
+    EX  = 5.45    # Error centre-x
+    VX  = 8.05    # Verified centre-x
+    PX  = 10.65   # Partially Verified centre-x
+    DX  = 13.25   # Low Confidence centre-x
+    RVX = 15.85   # Review centre-x
 
     ax.plot([GX,  GX],  [GY, RY], color=AMBER, linewidth=2.0, zorder=5)
-    ax.plot([VX,  GX],  [RY, RY], color=SLATE, linewidth=1.8, zorder=5)
+    ax.plot([EX,  GX],  [RY, RY], color=SLATE, linewidth=1.8, zorder=5)
+    orth_arrow(ax, [(EX,  RY), (EX,  0.92)],  color=RED,   lw=1.9)
     orth_arrow(ax, [(VX,  RY), (VX,  0.92)],  color=GREEN, lw=1.9)
-    orth_arrow(ax, [(DX,  RY), (DX,  0.92)],  color=AMBER, lw=1.9)
+    orth_arrow(ax, [(PX,  RY), (PX,  0.92)],  color=AMBER, lw=1.9)
+    orth_arrow(ax, [(DX,  RY), (DX,  0.92)],  color=RED,   lw=1.9)
     orth_arrow(ax, [(RVX, RY), (RVX, 0.92)],  color=RED,   lw=1.9)
+    # Image Interpreter auto-block → Error state (route above Knowledge Retriever)
+    orth_arrow(ax, [(6.10, 6.75), (6.10, 5.60), (4.20, 5.60), (4.20, 1.10), (EX, 1.10), (EX, 0.92)], color=RED, lw=1.5, ls="--")
 
     # Footnote — in the left margin below the Input Lane boxes
     lbl(ax, 2.00, 1.20,
-        "DifficultyRouter decides:\nretrieval need, verification policy\n& fallback before reasoning",
-        fs=8.0, c=MUTED, style="italic", ha="center")
+        "Router sets policy → Verification uses policy\n"
+        "Guardrail = verification_status + failure_categories\n"
+        "→ Verified / Partially Verified / Low Confidence / Review / Error",
+        fs=7.5, c=MUTED, style="italic", ha="center")
 
     plt.tight_layout(pad=0.25)
     plt.savefig(output_path, bbox_inches="tight", facecolor=fig.get_facecolor())
