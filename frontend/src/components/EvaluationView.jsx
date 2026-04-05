@@ -203,7 +203,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
             <div className="card">
               <div className="card-header">
                 <span className="card-title">Avg Token F1 Score</span>
-                <span className="tag tag-gray" data-tooltip="A partial-credit score. Measures precision and recall of exact word overlap between the generated answer and the Ground Truth." data-tooltip-align="left">info</span>
+                <span className="tag tag-gray" data-tooltip="Avg Token F1: Measures word overlap quality (0-1). High = answers share many words with ground truth. This is the raw score before applying the 0.7 threshold. Different from Accuracy — a system can have decent F1 (e.g., 0.65) but low Accuracy if it rarely crosses the 0.7 threshold." data-tooltip-align="left">info</span>
               </div>
               <AccuracyMetricStack
                 baseline={avgBaselineF1}
@@ -228,7 +228,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 <span className="card-title">Close-ended Accuracy</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.close_ended_cases} cases</span>
-                  <span className="tag tag-gray" data-tooltip="Accuracy on questions with strict, fixed answers, such as yes/no or multiple choice." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="Accuracy on yes/no questions. Uses synonym mapping: words like 'positive', 'present', 'abnormal' count as 'yes'; 'negative', 'absent', 'normal' count as 'no'. Also allows F1 matching if synonym mapping fails." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <AccuracyMetricStack
@@ -242,7 +242,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 <span className="card-title">Open-ended Accuracy</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.open_ended_cases} cases</span>
-                  <span className="tag tag-gray" data-tooltip="A strict binary pass/fail grade. Evaluates if the core clinical concept was successfully identified, regardless of filler phrasing." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="Open-ended Accuracy: Percentage of answers that pass the F1 ≥ 0.7 threshold. A binary pass/fail — either enough word overlap (pass) or not (fail). Compare with Avg Token F1: a system could have 0.65 avg F1 but only 40% accuracy if many answers are close but below 0.7." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <AccuracyMetricStack
@@ -258,8 +258,8 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
               <div className="card-header">
                 <span className="card-title">Accuracy by Question Type</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <span className="tag tag-gray">exact match</span>
-                  <span className="tag tag-gray" data-tooltip="A breakdown of how often each pipeline's answer perfectly matched the Ground Truth across different clinical question categories." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray">F1 matching</span>
+                  <span className="tag tag-gray" data-tooltip="Breakdown of accuracy by question type. Close-ended uses yes/no synonym matching. Open-ended uses Token F1 ≥ 0.7 threshold. No exact match required." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <div className="evaluation-table-wrap" style={{ margin: '0 -24px -24px -24px' }}>
@@ -489,13 +489,13 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                         </td>
                         <td>
                           <div className="evaluation-signal-stack">
-                            <span className={`tag ${getLevelTagClass(row.confidence)}`}>
+                            <span className={`tag ${getLevelTagClass(row.confidence)}`} data-tooltip="Overall confidence level. High = passed all 5 verification checks: (1) answer matches question type, (2) explanation is grounded in image evidence, (3) confidence level is appropriate, (4) no contradictions with image, (5) format is correct. Medium/Low = some checks failed.">
                               confidence {(row.confidence || 'low').toLowerCase()}
                             </span>
-                            <span className={`tag ${getLevelTagClass(row.self_consistency_level)}`}>
+                            <span className={`tag ${getLevelTagClass(row.self_consistency_level)}`} data-tooltip="Internal consistency of the answer. The system runs 5 self-checks. High = all 5 passed. Medium = 4 passed (1 minor issue). Low = 3 or fewer passed (significant issues). Measures whether the answer logic holds together.">
                               consistency {row.self_consistency_level}
                             </span>
-                            <span className={`tag ${getLevelTagClass(row.cross_modal_agreement_level)}`}>
+                            <span className={`tag ${getLevelTagClass(row.cross_modal_agreement_level)}`} data-tooltip="Agreement between answer and image evidence. Two checks: (1) explanation grounded in actual image evidence, (2) no contradictions between answer and what the image shows. High = both checks passed. Medium = unclear/insufficient evidence. Low = contradicts image or makes unsupported claims.">
                               cross-modal {row.cross_modal_agreement_level}
                             </span>
                           </div>

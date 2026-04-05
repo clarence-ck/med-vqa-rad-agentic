@@ -124,12 +124,10 @@ def _token_f1(prediction: str, ground_truth: str) -> float:
 
 
 def _answers_match(predicted: str, ground_truth: str) -> bool:
-    """Return True if the predicted answer is correct by exact match, yes/no normalization, or Token F1 >= 0.5."""
-    if predicted == ground_truth:
-        return True
+    """Return True if the predicted answer is correct by yes/no normalization or Token F1 >= 0.7."""
     if _normalize_yes_no(predicted) == _normalize_yes_no(ground_truth):
         return True
-    return _token_f1(predicted, ground_truth) >= 0.5
+    return _token_f1(predicted, ground_truth) >= 0.7
 
 
 def _is_close_ended_answer(text: str) -> bool:

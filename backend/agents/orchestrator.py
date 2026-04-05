@@ -748,7 +748,7 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
         return {
             "answer": first_results["abort"],
             "verification_status": "rejected",
-            "confidence": "high",
+            "confidence": "unknown",
             "should_flag_for_review": False,
             "fallback_recommendation": "none",
             "duration_ms": int((time.time() - pipeline_start) * 1000),
