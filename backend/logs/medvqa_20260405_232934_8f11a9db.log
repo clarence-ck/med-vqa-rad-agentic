@@ -517,3 +517,19 @@
 2026-04-05T23:46:02  INFO      medvqa.server  → GET /api/dataset/sample/1947/analysis
 2026-04-05T23:46:02  INFO      medvqa.routes.dataset  Cache HIT for sample 1947 (question='what organ system is visualized in the above image?')
 2026-04-05T23:46:02  INFO      medvqa.server  ← GET /api/dataset/sample/1947/analysis  status=200  duration=17ms
+2026-04-05T23:47:28  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-05T23:47:28  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-05T23:47:29  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-05T23:47:29  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=1064ms
+2026-04-05T23:48:30  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-05T23:48:30  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-05T23:48:31  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-05T23:48:31  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=1058ms
+2026-04-05T23:50:45  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-05T23:50:45  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-05T23:50:47  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-05T23:50:47  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=1327ms
+2026-04-05T23:51:22  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-05T23:51:22  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-05T23:51:23  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-05T23:51:23  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=1250ms
