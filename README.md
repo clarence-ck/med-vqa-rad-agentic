@@ -12,8 +12,8 @@ MedVisionQuery is an **agentic multimodal system** for medical visual question a
 |---|---|
 | Problem decomposition | 6 distinct agent stages with explicit roles |
 | Agent architecture | Named agents wrapped as Haystack Tools; the controller decides tool use over shared state |
-| Multimodal grounding | The image is interpreted once, then downstream stages consume structured visual state; the current runtime uses OpenAI-backed generators throughout |
-| Dynamic tool selection | `retrieve_knowledge` is optional and skipped for simple visual question types by the controller |
+| Multimodal grounding | The image is interpreted once, then downstream stages consume structured visual state; OpenAI-backed generators drive the agentic stages while Advanced RAG uses local retrieval models |
+| Dynamic tool selection | `retrieve_knowledge` is optional and skipped when the Difficulty Router sets `needs_retrieval=false` |
 | Control & failure handling | Verification, guardrails, disclaimers, review flags, failure categories, and automatic retry |
 | Evaluation | Against two baselines with normalized answer-match accuracy, token F1, close/open-ended accuracy, and disagreement analysis |
 
@@ -115,12 +115,12 @@ flowchart LR
 
 | Component | File | Role | Model |
 |---|---|---|---|
-| `ImageInterpreter` | `image_interpreter.py` | Perception — multimodal image interpretation with auto-block for non-radiology images | OpenAI |
-| `QuestionAnalyzer` | `question_analyzer.py` | Task understanding — question classification and intent analysis | OpenAI |
+| `ImageInterpreter` | `image_interpreter.py` | Agent 1: Perception — multimodal image interpretation with auto-block for non-radiology images | OpenAI |
+| `QuestionAnalyzer` | `question_analyzer.py` | Agent 2: Task understanding — question classification and intent analysis | OpenAI |
 | `DifficultyRouter` | `difficulty_router.py` | Agent 3: Planning — sets routing metadata in shared state | OpenAI |
-| `KnowledgeRetriever` | `knowledge_retriever.py` | Context — optional Advanced RAG retrieval over VQA-RAD train split + LLM synthesis | OpenAI + local retrieval stack |
-| `ReasoningAgent` | `reasoning_agent.py` | Synthesis — generates answer and explanation from all prior context | OpenAI |
-| `VerificationAgent` | `verification_agent.py` | Evaluator — grounded consistency / safety checks with 5 structured checks | OpenAI |
+| `KnowledgeRetriever` | `knowledge_retriever.py` | Agent 4: Context — optional Advanced RAG retrieval over VQA-RAD train split + LLM synthesis | OpenAI + local retrieval stack |
+| `ReasoningAgent` | `reasoning_agent.py` | Agent 5: Synthesis — generates answer and explanation from all prior context | OpenAI |
+| `VerificationAgent` | `verification_agent.py` | Agent 6: Evaluator — grounded consistency / safety checks with 5 structured checks | OpenAI |
 | Agent Controller | `orchestrator.py` | Haystack `Agent` — routes tool calls, manages shared state, guardrails, retry | OpenAI |
 | Workflow Baseline | `workflow_baseline.py` | Deterministic answer derivation over image/question analysis outputs | Rules + OpenAI intermediates |
 | Single-shot Baseline | `baseline.py` | Direct image+question prompt with no decomposition | OpenAI |
@@ -386,7 +386,7 @@ Purpose: **ad-hoc analysis of any uploaded image**.
 - Upload a medical image and type a question
 - All 3 systems run in parallel; results appear as each completes
 - Toggle between Agentic Pipeline / Workflow Baseline / Single-shot Baseline views
-- Components: `CaseInput`, `ImageViewer`, `AnswerCard`, `ExplanationCard`, `AgentTrace`, `VerificationPanel`, `FailureModeDrawer`, `ConfidenceBadge`
+- Components: `CaseHeader`, `CaseInput`, `ImageViewer`, `ComparisonToggle`, `AnswerCard`, `ExplanationCard`, `AgentTrace`, `RoutingCard`, `VerificationPanel`, `FailureModeDrawer`, `ConfidenceBadge`
 
 ### Case Explorer
 Purpose: **systematic browsing and analysis of the VQA-RAD dataset**.
