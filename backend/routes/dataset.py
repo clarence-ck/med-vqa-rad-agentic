@@ -123,11 +123,18 @@ def _token_f1(prediction: str, ground_truth: str) -> float:
     return 2 * precision * recall / (precision + recall)
 
 
-def _answers_match(predicted: str, ground_truth: str) -> bool:
-    """Return True if the predicted answer is correct by yes/no normalization or Token F1 >= 0.7."""
-    if _normalize_yes_no(predicted) == _normalize_yes_no(ground_truth):
-        return True
-    return _token_f1(predicted, ground_truth) >= 0.7
+def _answers_match(predicted: str, ground_truth: str, is_close_ended: bool = False) -> bool:
+    """Return True if the predicted answer is correct based on question type.
+    
+    For close-ended (yes/no) questions: uses synonym matching only.
+    For open-ended questions: uses Token F1 >= 0.7 threshold only.
+    """
+    if is_close_ended:
+        # Close-ended: strict yes/no synonym matching
+        return _normalize_yes_no(predicted) == _normalize_yes_no(ground_truth)
+    else:
+        # Open-ended: Token F1 >= 0.7
+        return _token_f1(predicted, ground_truth) >= 0.7
 
 
 def _is_close_ended_answer(text: str) -> bool:
@@ -177,9 +184,11 @@ def _build_evaluation_row(payload: dict) -> dict:
     workflow_normalized = _normalize_answer(workflow_answer_text)
     agentic_normalized = _normalize_answer(agentic_answer_text)
     ground_truth_normalized = _normalize_answer(ground_truth)
-    baseline_correct = _answers_match(baseline_normalized, ground_truth_normalized)
-    workflow_correct = _answers_match(workflow_normalized, ground_truth_normalized)
-    agentic_correct = _answers_match(agentic_normalized, ground_truth_normalized)
+    is_close_ended = _is_close_ended_answer(ground_truth_normalized)
+    baseline_correct = _answers_match(baseline_normalized, ground_truth_normalized, is_close_ended)
+    workflow_correct = _answers_match(workflow_normalized, ground_truth_normalized, is_close_ended)
+    agentic_correct = _answers_match(agentic_normalized, ground_truth_normalized, is_close_ended)
+    answer_style = "close_ended" if is_close_ended else "open_ended"
     candidates = {
         "baseline": baseline_correct,
         "workflow": workflow_correct,
@@ -197,7 +206,6 @@ def _build_evaluation_row(payload: dict) -> dict:
     agentic_question_type = agentic_result.get("question_analysis", {}).get("question_type")
     question_type = agentic_question_type or original_question_type
     question_type_source = "agentic" if agentic_question_type else "dataset"
-    answer_style = "close_ended" if _is_close_ended_answer(ground_truth_normalized) else "open_ended"
     knowledge_details = _extract_knowledge_retriever_details(agentic_result)
 
     return {

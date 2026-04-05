@@ -332,8 +332,10 @@ The Guardrail combines `verification_status` + `failure_categories` to produce 5
 ## Evaluation Design
 
 ### Metrics computed per cached case
-- **Normalized answer match** — yes/no normalization first, otherwise Token F1 ≥ 0.7
-- **Yes/no normalization** — `yes/true/present/positive` → `yes`; `no/false/absent/negative/normal` → `no`
+- **Normalized answer match** — evaluation method depends on ground truth answer style:
+  - **Close-ended** (binary ground truth like yes/no): synonym matching only
+  - **Open-ended** (non-binary ground truth): Token F1 ≥ 0.7 only
+- **Yes/no normalization** — `yes/true/present/positive/abnormal/found/visible/seen` → `yes`; `no/false/absent/negative/normal/not found/not visible/not seen` → `no`
 - **Token F1** — unigram overlap between predicted and ground-truth answer
 - **Winner** — `baseline` / `workflow` / `agentic` / `tie: ...` / `tie_all_wrong`
 - **Disagreement** — whether any two systems produced different answers

@@ -259,7 +259,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 <span className="card-title">Accuracy by Question Type</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">F1 matching</span>
-                  <span className="tag tag-gray" data-tooltip="Breakdown of accuracy by question type. Close-ended uses yes/no synonym matching. Open-ended uses Token F1 ≥ 0.7 threshold. No exact match required." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="Breakdown of accuracy by question type. Close-ended questions use yes/no synonym matching only. Open-ended questions use Token F1 ≥ 0.7 threshold only. No exact match required." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <div className="evaluation-table-wrap" style={{ margin: '0 -24px -24px -24px' }}>
