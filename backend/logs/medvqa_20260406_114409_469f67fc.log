@@ -41,3 +41,165 @@
 2026-04-06T12:03:08  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
 2026-04-06T12:03:11  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
 2026-04-06T12:03:11  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2274ms
+2026-04-06T12:07:57  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:07:57  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:08:00  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:08:00  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=3035ms
+2026-04-06T12:11:22  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:11:22  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:11:25  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:11:25  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2304ms
+2026-04-06T12:20:44  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:20:44  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:20:44  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=13ms
+2026-04-06T12:20:44  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:20:44  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:20:44  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=18ms
+2026-04-06T12:20:45  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:20:45  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:20:47  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:20:47  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2259ms
+2026-04-06T12:22:10  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:22:10  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:22:10  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=14ms
+2026-04-06T12:22:10  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:22:10  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:22:10  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=13ms
+2026-04-06T12:22:11  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:22:11  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:22:13  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:22:13  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2357ms
+2026-04-06T12:24:37  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:24:37  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:24:37  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=11ms
+2026-04-06T12:24:37  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:24:37  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:24:37  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=14ms
+2026-04-06T12:24:39  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:24:39  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:24:41  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:24:41  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2316ms
+2026-04-06T12:26:01  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:26:01  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:26:01  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=13ms
+2026-04-06T12:26:01  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:26:01  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:26:01  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=11ms
+2026-04-06T12:26:02  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:26:02  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:26:04  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:26:04  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2263ms
+2026-04-06T12:26:12  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:26:12  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:26:12  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=23ms
+2026-04-06T12:26:12  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:26:12  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:26:12  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=23ms
+2026-04-06T12:26:14  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:26:14  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:26:16  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:26:16  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2345ms
+2026-04-06T12:26:42  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:26:42  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:26:42  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=12ms
+2026-04-06T12:26:42  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:26:42  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:26:42  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=14ms
+2026-04-06T12:26:48  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:26:48  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:26:48  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=24ms
+2026-04-06T12:26:48  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:26:48  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:26:48  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=24ms
+2026-04-06T12:26:49  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:26:49  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:26:52  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:26:52  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2271ms
+2026-04-06T12:27:55  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:27:55  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:27:55  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=12ms
+2026-04-06T12:27:55  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:27:55  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:27:55  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=11ms
+2026-04-06T12:27:56  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:27:56  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:27:58  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:27:58  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2377ms
+2026-04-06T12:28:58  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:28:58  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:28:58  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=12ms
+2026-04-06T12:28:58  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:28:58  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:28:58  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=11ms
+2026-04-06T12:28:59  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:28:59  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:29:01  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:29:01  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2325ms
+2026-04-06T12:31:46  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:31:46  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:31:48  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:31:48  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2233ms
+2026-04-06T12:33:33  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:33:33  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:33:33  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=13ms
+2026-04-06T12:33:33  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:33:33  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:33:33  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=12ms
+2026-04-06T12:33:33  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:33:33  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:33:35  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:33:35  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2237ms
+2026-04-06T12:33:56  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:33:56  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:33:56  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=28ms
+2026-04-06T12:33:56  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:33:56  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:33:56  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=20ms
+2026-04-06T12:33:57  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:33:57  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:33:59  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:33:59  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2223ms
+2026-04-06T12:42:32  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:42:32  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:42:32  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=18ms
+2026-04-06T12:42:32  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:42:32  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:42:32  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=12ms
+2026-04-06T12:42:33  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:42:33  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:42:36  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:42:36  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2334ms
+2026-04-06T12:44:40  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:44:40  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:44:43  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:44:43  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2601ms
+2026-04-06T12:46:19  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:46:19  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:46:19  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=19ms
+2026-04-06T12:46:19  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:46:19  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:46:19  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=11ms
+2026-04-06T12:46:20  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:46:20  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:46:22  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:46:22  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2353ms
+2026-04-06T12:48:26  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:48:26  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:48:26  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=12ms
+2026-04-06T12:48:26  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:48:26  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:48:26  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=16ms
+2026-04-06T12:48:27  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:48:27  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:48:29  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:48:29  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2654ms
+2026-04-06T12:50:51  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:50:51  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:50:51  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=13ms
+2026-04-06T12:50:51  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T12:50:51  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T12:50:51  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=19ms
+2026-04-06T12:50:52  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:50:52  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:50:55  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:50:55  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2687ms

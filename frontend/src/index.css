@@ -368,8 +368,12 @@ body {
 
 .evaluation-two-col {
   display: grid;
-  grid-template-columns: 1fr 1.1fr;
-  gap: var(--space-4);
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+  gap: var(--space-2);
+}
+
+.evaluation-two-col > .card {
+  min-width: 0;
 }
 
 .evaluation-list {
@@ -410,11 +414,13 @@ body {
 }
 
 .evaluation-table-wrap {
+  min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
 }
 
 .evaluation-question-cell {
-  min-width: 240px;
+  min-width: 220px;
 }
 
 .evaluation-question-cell .evaluation-list-title {
@@ -445,9 +451,25 @@ body {
 .evaluation-table th,
 .evaluation-table td {
   text-align: left;
-  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-3);
+  padding: 10px 8px;
   border-bottom: 1px solid var(--color-border);
   vertical-align: top;
+}
+
+.evaluation-two-col > .card:first-child .evaluation-table th,
+.evaluation-two-col > .card:first-child .evaluation-table td {
+  vertical-align: middle;
+  padding: 12px 10px;
+}
+
+.evaluation-two-col > .card:first-child .evaluation-table th:first-child,
+.evaluation-two-col > .card:first-child .evaluation-table td:first-child {
+  width: 38%;
+}
+
+.evaluation-two-col > .card:first-child .evaluation-table td:not(:first-child),
+.evaluation-two-col > .card:first-child .evaluation-table th:not(:first-child) {
+  text-align: center;
 }
 
 .evaluation-table td:nth-child(5),
@@ -766,7 +788,7 @@ body {
   transform: translateX(-50%);
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
-  font-size: 8.5px;
+  font-size: 9.5px;
   font-weight: 400;
   line-height: 1.5;
   text-transform: none;
@@ -790,6 +812,11 @@ body {
 }
 
 [data-tooltip][data-tooltip-position="below"]::after {
+  bottom: auto;
+  top: calc(100% + 4px);
+}
+
+.evaluation-table [data-tooltip]::after {
   bottom: auto;
   top: calc(100% + 4px);
 }

@@ -66,7 +66,7 @@ function getRoutingProcedureTooltip(difficulty) {
 
 function getBreakdownTooltip(mode) {
   if (mode === 'difficulty_type') {
-    return 'Breakdown by Difficulty Router output. Difficulty groups are collapsible and each group can be expanded to see question-type accuracy. easy skips retrieval, medium retrieves knowledge and uses standard verification, hard retrieves knowledge and uses strict verification.';
+    return 'Breakdown by Difficulty Router output. Parent rows show overall difficulty accuracy, and expanding a difficulty row reveals question-type accuracy within that bucket. easy skips retrieval and uses standard verification; medium retrieves knowledge, uses standard verification, and can add a disclaimer; hard retrieves knowledge, uses strict verification, and can flag the case for review.';
   }
 
   return 'Breakdown by question type. Close-ended questions use yes/no synonym matching only. Open-ended questions use BioBERT semantic similarity ≥ 0.65 to capture meaning equivalence.';
@@ -368,14 +368,14 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
             <div className="card">
               <div className="card-header">
                 <span className="card-title">3-System Disagreement</span>
-                <span className="tag tag-gray" data-tooltip="Percentage of cases where systems produce semantically different answers (BioBERT similarity < 0.65). For example, 'brain' and 'nervous system' are semantically similar (no disagreement), but 'brain' and 'leg' would be a disagreement." data-tooltip-align="left">info</span>
+                <span className="tag tag-gray" data-tooltip="Percentage of cases where at least one pair of system outputs falls below the BioBERT semantic-match threshold (0.65), so the three answers are not all semantically aligned." data-tooltip-align="left">info</span>
               </div>
               <div className="evaluation-metric-value">{formatPercent(summary.disagreement_rate)}</div>
             </div>
             <div className="card">
               <div className="card-header">
                 <span className="card-title">Lexical Overlap</span>
-                <span className="tag tag-gray" data-tooltip="Lexical Overlap: Average word/token overlap score (0-1) across all cases. Diagnostic metric showing surface-level lexical similarity — NOT used for accuracy. Compare with BioBERT Accuracy which uses medical-domain embeddings (≥ 0.65 threshold)." data-tooltip-align="left">info</span>
+                <span className="tag tag-gray" data-tooltip="Average token F1 overlap score (0-1) across all cases. This is a surface-level diagnostic similarity metric only and is not used for correctness. Compare with BioBERT Accuracy, which uses embedding similarity with a 0.65 threshold." data-tooltip-align="left">info</span>
               </div>
               <AccuracyMetricStack
                 baseline={avgBaselineF1}
@@ -386,7 +386,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
             <div className="card">
               <div className="card-header">
                 <span className="card-title">Wins</span>
-                <span className="tag tag-gray" data-tooltip="A 'Win' happens when one system uniquely finds the correct answer. 'Ties' occur when multiple systems are correct, or when all systems fail." data-tooltip-align="left">info</span>
+                <span className="tag tag-gray" data-tooltip="A 'Win' means exactly one of the three systems is correct. Ties happen when two or more systems are correct, or when all three are wrong." data-tooltip-align="left">info</span>
               </div>
               <div className="evaluation-metric-stack">
                 <span className="tag tag-amber">Baseline {summary.baseline_wins}</span>
@@ -400,7 +400,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 <span className="card-title">Close-ended Accuracy</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.close_ended_cases} cases</span>
-                  <span className="tag tag-gray" data-tooltip="Accuracy on yes/no questions. Uses strict synonym matching only: words like 'positive', 'present', 'abnormal', 'found', 'visible', 'seen' count as 'yes'; 'negative', 'absent', 'normal', 'not found', 'not visible', 'not seen' count as 'no'. No F1 fallback." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="Accuracy on cases whose ground-truth answer normalizes to yes/no. Uses strict synonym matching only: words like 'positive', 'present', 'abnormal', 'found', 'visible', 'seen' count as 'yes'; 'negative', 'absent', 'normal', 'not found', 'not visible', 'not seen' count as 'no'. No F1 fallback." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <AccuracyMetricStack
@@ -414,7 +414,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 <span className="card-title">BioBERT Accuracy (Open-ended)</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.open_ended_cases} cases</span>
-                  <span className="tag tag-gray" data-tooltip="BioBERT Accuracy: Percentage of open-ended answers with embedding similarity ≥ 0.65. Uses BioBERT fine-tuned on NLI+STS+MedNLI (natural language inference & semantic textual similarity) to capture medical meaning equivalence (e.g., 'brain' ≈ 'nervous system'). NOT based on token F1." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="BioBERT Accuracy: Percentage of open-ended answers whose embedding similarity to the ground truth is ≥ 0.65. Uses a medical-domain sentence-transformer fine-tuned for semantic similarity on NLI/STS-style data. Not based on token F1." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <AccuracyMetricStack
