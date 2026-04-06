@@ -38,6 +38,40 @@ The task is decomposed rather than single-prompted because the system must separ
 4. **Synthesis** — what is the best-grounded answer?
 5. **Verification** — is the answer actually supported?
 
+## Three Methods Compared
+
+All three methods use the same medical image and question as input, but they differ in how much structure they impose before producing an answer.
+
+### 1) Single-shot baseline
+
+- Sends the image and question directly to a multimodal model in one prompt
+- Produces the answer, explanation, and confidence in a single pass
+- Does **not** explicitly separate perception, question analysis, retrieval, or verification
+- Best viewed as the simplest lower-bound baseline: fast and easy to run, but least interpretable
+
+### 2) Workflow baseline
+
+- Uses a hand-designed, non-agentic sequence of steps
+- First interprets the image, then analyzes the question, then applies fixed branching rules
+- Chooses an answer path based on question type, such as:
+  - modality identification
+  - anatomy identification
+  - yes/no or presence-absence questions
+  - location questions
+  - counting questions
+  - abnormality description
+  - a fallback path for other question types
+- Builds the explanation from structured image and question outputs
+- Serves as the required hand-designed workflow baseline: more transparent than the single-shot baseline, but still fixed and non-adaptive
+
+### 3) Agentic pipeline
+
+- Uses a Haystack Agent to coordinate six specialized tools
+- Runs image interpretation, question analysis, difficulty routing, optional retrieval, reasoning, and verification as distinct stages
+- Lets the Difficulty Router decide whether retrieval is needed and how strict verification should be
+- Can add disclaimers, flag cases for review, and retry when the first pass is not strong enough
+- Is the most expressive and best aligned with the project’s agentic design, but it is also the slowest and most expensive method
+
 ---
 
 ## Agent Architecture
@@ -354,9 +388,9 @@ The Guardrail combines `verification_status` + `failure_categories` to produce 5
 ### Systems compared
 | System | File | Approach |
 |---|---|---|
-| Single-shot baseline | `baseline.py` | One multimodal prompt, no decomposition — answer + explanation + confidence |
-| Workflow baseline | `workflow_baseline.py` | Deterministic answer derivation over image/question analysis outputs |
-| Agentic pipeline | `orchestrator.py` | 6-tool Haystack Agent with LLM controller, verification, guardrails, retry |
+| Single-shot baseline | `baseline.py` | Direct multimodal prompting with no explicit decomposition; returns answer, explanation, and confidence in one pass |
+| Workflow baseline | `workflow_baseline.py` | Hand-designed non-agentic workflow that interprets the image, analyzes the question, and applies fixed branching rules to derive the answer |
+| Agentic pipeline | `orchestrator.py` | 6-tool Haystack Agent with routing, optional retrieval, verification, guardrails, and retry |
 
 ---
 
