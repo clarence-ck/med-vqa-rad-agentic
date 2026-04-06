@@ -604,6 +604,7 @@ Medical-VQA-Explanation-Agent/
 ├── backend/
 │   ├── main.py                      # FastAPI app, CORS middleware, router registration
 │   ├── config.py                    # loads .env: OPENAI_API_KEY, OPENAI_MODEL, VISION_MODEL, HF_TOKEN, DATA_DIR, CORS
+│   ├── logger.py                    # structured logging: get_logger(), per-sample file handler, log rotation
 │   ├── requirements.txt             # pip dependencies
 │   ├── agents/
 │   │   ├── orchestrator.py          # Haystack Agent controller, tool routing, retry logic, guardrails
@@ -625,6 +626,7 @@ Medical-VQA-Explanation-Agent/
 ├── frontend/
 │   ├── package.json                 # React 19 + Vite app
 │   └── src/
+│       ├── main.jsx                 # React entry point
 │       ├── App.jsx                  # root component, tab routing (Dashboard / Case Explorer / Evaluation)
 │       ├── config.js                # API base URL (`VITE_API_BASE` override)
 │       ├── index.css                # custom CSS (no framework)
@@ -640,6 +642,7 @@ Medical-VQA-Explanation-Agent/
 │       │   ├── ExplanationCard.jsx  # explanation text, evidence used, reasoning trace
 │       │   ├── FailureModeDrawer.jsx# collapsible failure category list and failure hints
 │       │   ├── ImageViewer.jsx      # image display with zoom and predicted tags
+│       │   ├── RoutingCard.jsx      # difficulty badge, retrieval trigger, verification policy, fallback policy
 │       │   └── VerificationPanel.jsx# verification checks, notes, fallback, review flag
 │       └── hooks/
 │           ├── useAnalysis.js       # analyze / analyzeBaseline / analyzeWorkflow API calls
