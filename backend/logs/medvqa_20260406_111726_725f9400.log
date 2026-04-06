@@ -1,0 +1,81 @@
+2026-04-06T11:17:26  INFO      medvqa  Session started  file=medvqa_20260406_111726_725f9400.log  session_id=725f9400
+2026-04-06T11:17:38  INFO      medvqa.agents.knowledge_retriever  Advanced RAG module loaded successfully
+2026-04-06T11:17:38  INFO      medvqa.server  ============================================================
+2026-04-06T11:17:38  INFO      medvqa.server  MedVisionQuery API  v1.0.0  starting up
+2026-04-06T11:17:38  INFO      medvqa.server  CORS origins: ['http://localhost:5173']
+2026-04-06T11:17:38  INFO      medvqa.server  ============================================================
+2026-04-06T11:17:47  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:17:47  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:17:47  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=23ms
+2026-04-06T11:17:47  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:17:47  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:17:47  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=13ms
+2026-04-06T11:17:50  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T11:17:50  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T11:18:35  WARNING   medvqa.routes.dataset  Skipping cache file sample_1860_07b29e7a6b.json: CUDA error: no kernel image is available for execution on the device
+Search for `cudaErrorNoKernelImageForDevice' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+2026-04-06T11:18:35  WARNING   medvqa.routes.dataset  Skipping cache file sample_1925_816620eb68.json: CUDA error: no kernel image is available for execution on the device
+Search for `cudaErrorNoKernelImageForDevice' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+2026-04-06T11:18:35  WARNING   medvqa.routes.dataset  Skipping cache file sample_1947_9cd8ef8fd4.json: CUDA error: no kernel image is available for execution on the device
+Search for `cudaErrorNoKernelImageForDevice' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+2026-04-06T11:18:35  WARNING   medvqa.routes.dataset  Skipping cache file sample_2027_345bc44234.json: CUDA error: no kernel image is available for execution on the device
+Search for `cudaErrorNoKernelImageForDevice' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+2026-04-06T11:18:35  WARNING   medvqa.routes.dataset  Skipping cache file sample_2032_76790aa59f.json: CUDA error: no kernel image is available for execution on the device
+Search for `cudaErrorNoKernelImageForDevice' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+2026-04-06T11:18:36  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=0  skipped=5
+2026-04-06T11:18:36  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=45546ms
+2026-04-06T11:19:00  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T11:19:00  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T11:19:00  WARNING   medvqa.routes.dataset  Skipping cache file sample_1860_07b29e7a6b.json: CUDA error: no kernel image is available for execution on the device
+Search for `cudaErrorNoKernelImageForDevice' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+2026-04-06T11:19:00  WARNING   medvqa.routes.dataset  Skipping cache file sample_1925_816620eb68.json: CUDA error: no kernel image is available for execution on the device
+Search for `cudaErrorNoKernelImageForDevice' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+2026-04-06T11:19:00  WARNING   medvqa.routes.dataset  Skipping cache file sample_1947_9cd8ef8fd4.json: CUDA error: no kernel image is available for execution on the device
+Search for `cudaErrorNoKernelImageForDevice' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+2026-04-06T11:19:00  WARNING   medvqa.routes.dataset  Skipping cache file sample_2027_345bc44234.json: CUDA error: no kernel image is available for execution on the device
+Search for `cudaErrorNoKernelImageForDevice' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+2026-04-06T11:19:00  WARNING   medvqa.routes.dataset  Skipping cache file sample_2032_76790aa59f.json: CUDA error: no kernel image is available for execution on the device
+Search for `cudaErrorNoKernelImageForDevice' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+2026-04-06T11:19:00  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=0  skipped=5
+2026-04-06T11:19:00  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=26ms
+2026-04-06T11:20:01  INFO      medvqa.server  MedVisionQuery API shutting down

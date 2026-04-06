@@ -1,4 +1,4 @@
- import { useEffect, useRef, useState } from 'react';
+ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
  
 function formatPercent(value) {
   return `${Math.round((value || 0) * 100)}%`;
@@ -28,6 +28,155 @@ function getLevelTagClass(level) {
   if (normalized === 'medium' || normalized === 'partially_verified') return 'tag-amber';
   if (normalized === 'low' || normalized === 'unsupported' || normalized === 'low_confidence') return 'tag-red';
   return 'tag-gray';
+}
+
+function getDifficultyTagClass(difficulty) {
+  const normalized = String(difficulty || 'unknown').toLowerCase();
+  if (normalized === 'easy') return 'tag-green';
+  if (normalized === 'medium') return 'tag-amber';
+  if (normalized === 'hard') return 'tag-red';
+  return 'tag-gray';
+}
+
+function getVerificationPolicyTagClass(policy) {
+  return String(policy || 'standard').toLowerCase() === 'strict' ? 'tag-amber' : 'tag-gray';
+}
+
+function getRetrievalTagClass(needsRetrieval) {
+  return needsRetrieval ? 'tag-green' : 'tag-gray';
+}
+
+function getRoutingProcedureTooltip(difficulty) {
+  const normalized = String(difficulty || 'unknown').toLowerCase();
+
+  if (normalized === 'easy') {
+    return 'Procedure: interpret image → analyze question → skip retrieval → use standard verification → finalize.';
+  }
+
+  if (normalized === 'medium') {
+    return 'Procedure: interpret image → analyze question → retrieve knowledge → use standard verification → add disclaimer if needed.';
+  }
+
+  if (normalized === 'hard') {
+    return 'Procedure: interpret image → analyze question → retrieve knowledge → use strict verification → flag for review if needed.';
+  }
+
+  return 'Procedure: interpret image → analyze question → route difficulty → retrieve knowledge only when needed → verify the final answer.';
+}
+
+function getBreakdownTooltip(mode) {
+  if (mode === 'difficulty_type') {
+    return 'Breakdown by Difficulty Router output. Difficulty groups are collapsible and each group can be expanded to see question-type accuracy. easy skips retrieval, medium retrieves knowledge and uses standard verification, hard retrieves knowledge and uses strict verification.';
+  }
+
+  return 'Breakdown by question type. Close-ended questions use yes/no synonym matching only. Open-ended questions use BioBERT semantic similarity ≥ 0.65 to capture meaning equivalence.';
+}
+
+const QUESTION_TYPE_ORDER = [
+  'anatomy_identification',
+  'modality_identification',
+  'yes_no',
+  'counting',
+  'location',
+  'abnormality_description',
+  'other',
+];
+
+const DIFFICULTY_ORDER = ['easy', 'medium', 'hard', 'unknown'];
+
+function normalizeBreakdownLabel(value) {
+  return String(value || 'unknown').trim().toLowerCase() || 'unknown';
+}
+
+function createBreakdownBucket(label) {
+  return {
+    label,
+    count: 0,
+    baseline_correct: 0,
+    workflow_correct: 0,
+    agentic_correct: 0,
+    disagreement_count: 0,
+  };
+}
+
+function accumulateBreakdownBucket(bucket, row) {
+  bucket.count += 1;
+  bucket.baseline_correct += row.baseline_correct ? 1 : 0;
+  bucket.workflow_correct += row.workflow_correct ? 1 : 0;
+  bucket.agentic_correct += row.agentic_correct ? 1 : 0;
+  bucket.disagreement_count += row.disagreement ? 1 : 0;
+}
+
+function finalizeBreakdownBucket(bucket) {
+  return {
+    label: bucket.label,
+    count: bucket.count,
+    baseline_accuracy: bucket.count ? bucket.baseline_correct / bucket.count : 0,
+    workflow_accuracy: bucket.count ? bucket.workflow_correct / bucket.count : 0,
+    agentic_accuracy: bucket.count ? bucket.agentic_correct / bucket.count : 0,
+    disagreement_rate: bucket.count ? bucket.disagreement_count / bucket.count : 0,
+  };
+}
+
+function compareLabels(left, right, preferredOrder = []) {
+  const leftIndex = preferredOrder.indexOf(left);
+  const rightIndex = preferredOrder.indexOf(right);
+
+  if (leftIndex !== -1 || rightIndex !== -1) {
+    if (leftIndex === -1) return 1;
+    if (rightIndex === -1) return -1;
+    if (leftIndex !== rightIndex) return leftIndex - rightIndex;
+  }
+
+  return left.localeCompare(right);
+}
+
+function buildDifficultyBreakdown(rows) {
+  const difficultyBuckets = new Map();
+  const questionTypeBucketsByDifficulty = new Map();
+
+  rows.forEach((row) => {
+    const difficulty = normalizeBreakdownLabel(row.routing_difficulty);
+    const questionType = normalizeBreakdownLabel(row.question_type || row.original_question_type);
+
+    if (!difficultyBuckets.has(difficulty)) {
+      difficultyBuckets.set(difficulty, createBreakdownBucket(difficulty));
+      questionTypeBucketsByDifficulty.set(difficulty, new Map());
+    }
+
+    accumulateBreakdownBucket(difficultyBuckets.get(difficulty), row);
+
+    const questionTypeBuckets = questionTypeBucketsByDifficulty.get(difficulty);
+    if (!questionTypeBuckets.has(questionType)) {
+      questionTypeBuckets.set(questionType, createBreakdownBucket(questionType));
+    }
+
+    accumulateBreakdownBucket(questionTypeBuckets.get(questionType), row);
+  });
+
+  return Array.from(difficultyBuckets.values())
+    .sort((left, right) => compareLabels(left.label, right.label, DIFFICULTY_ORDER))
+    .map((bucket) => {
+      const questionTypeBuckets = Array.from(questionTypeBucketsByDifficulty.get(bucket.label)?.values() || [])
+        .sort((left, right) => compareLabels(left.label, right.label, QUESTION_TYPE_ORDER))
+        .map(finalizeBreakdownBucket);
+
+      return {
+        ...finalizeBreakdownBucket(bucket),
+        question_type_breakdown: questionTypeBuckets,
+      };
+    });
+}
+
+function BreakdownAccuracyCell({ value, color }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ width: '40px', backgroundColor: 'var(--color-border)', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>
+        <div style={{ width: `${value * 100}%`, height: '100%', backgroundColor: color, borderRadius: '3px' }}></div>
+      </div>
+      <span style={{ fontSize: '11px', fontWeight: 600 }}>{formatPercent(value)}</span>
+    </div>
+  );
 }
 
 function formatLabel(value) {
@@ -95,6 +244,8 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
   const rows = evaluationData?.rows || [];
   const [selectedSampleIds, setSelectedSampleIds] = useState([]);
   const [isSampleDropdownOpen, setIsSampleDropdownOpen] = useState(false);
+  const [breakdownMode, setBreakdownMode] = useState('question_type');
+  const [collapsedDifficultyGroups, setCollapsedDifficultyGroups] = useState([]);
   const sampleDropdownRef = useRef(null);
 
   useEffect(() => {
@@ -113,6 +264,14 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
   const avgAgenticF1 = rows.length ? rows.reduce((acc, r) => acc + (r.agentic_token_f1 || 0), 0) / rows.length : 0;
   const availableSampleIds = [...new Set(rows.map((row) => String(row.sample_id ?? '')).filter(Boolean))]
     .sort((left, right) => Number(left) - Number(right));
+  const isDifficultyMode = breakdownMode === 'difficulty_type';
+  const questionBreakdownRows = summary?.by_question_type || [];
+  const difficultyBreakdownRows = useMemo(() => buildDifficultyBreakdown(rows), [rows]);
+  const breakdownRows = isDifficultyMode ? difficultyBreakdownRows : questionBreakdownRows;
+  const breakdownTitle = isDifficultyMode ? 'Accuracy by Difficulty Type' : 'Accuracy by Question Type';
+  const breakdownPrimaryLabel = isDifficultyMode ? 'Difficulty / Question Type' : 'Question Type';
+  const breakdownContextTag = isDifficultyMode ? 'Routing' : 'BioBERT';
+  const breakdownTooltip = getBreakdownTooltip(breakdownMode);
   const filteredRows = selectedSampleIds.length
     ? rows.filter((row) => selectedSampleIds.includes(String(row.sample_id ?? '')))
     : rows;
@@ -133,6 +292,14 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
 
   const clearSampleIdFilter = () => {
     setSelectedSampleIds([]);
+  };
+
+  const toggleDifficultyGroup = (groupLabel) => {
+    setCollapsedDifficultyGroups((current) => (
+      current.includes(groupLabel)
+        ? current.filter((label) => label !== groupLabel)
+        : [...current, groupLabel]
+    ));
   };
 
   return (
@@ -261,17 +428,27 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
           <section className="evaluation-two-col animate-fade-in">
             <div className="card">
               <div className="card-header">
-                <span className="card-title">Accuracy by Question Type</span>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <span className="tag tag-gray">BioBERT</span>
-                  <span className="tag tag-gray" data-tooltip="Breakdown of accuracy by question type. Close-ended questions use yes/no synonym matching only. Open-ended questions use BioBERT semantic similarity ≥ 0.65 to capture meaning equivalence." data-tooltip-align="left">info</span>
+                <span className="card-title">{breakdownTitle}</span>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                  <select
+                    className="form-select"
+                    value={breakdownMode}
+                    onChange={(event) => setBreakdownMode(event.target.value)}
+                    aria-label="Select evaluation breakdown mode"
+                    style={{ minWidth: '190px', cursor: 'pointer' }}
+                  >
+                    <option value="question_type">Question Type</option>
+                    <option value="difficulty_type">Difficulty Type</option>
+                  </select>
+                  <span className={`tag ${isDifficultyMode ? 'tag-green' : 'tag-gray'}`}>{breakdownContextTag}</span>
+                  <span className="tag tag-gray" data-tooltip={breakdownTooltip} data-tooltip-align="left">info</span>
                 </div>
               </div>
               <div className="evaluation-table-wrap" style={{ margin: '0 -24px -24px -24px' }}>
                 <table className="evaluation-table" style={{ margin: 0, borderTop: '1px solid var(--color-border)' }}>
                   <thead>
                     <tr>
-                      <th>Question Type</th>
+                      <th>{breakdownPrimaryLabel}</th>
                       <th>Total Cases</th>
                       <th>Baseline</th>
                       <th>Workflow</th>
@@ -279,38 +456,80 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {summary.by_question_type.map((item) => (
-                      <tr key={item.question_type}>
-                        <td style={{ textTransform: 'capitalize', fontWeight: 500, color: 'var(--color-text-primary)' }}>
-                          {item.question_type.replace(/_/g, ' ')}
+                    {!isDifficultyMode && breakdownRows.map((item) => (
+                      <tr key={item.question_type || item.label}>
+                        <td style={{ fontWeight: 500, color: 'var(--color-text-primary)' }}>
+                          {formatLabel(item.question_type || item.label)}
                         </td>
                         <td><span className="tag tag-gray">{item.count}</span></td>
-                        <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '40px', backgroundColor: 'var(--color-border)', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>
-                              <div style={{ width: `${item.baseline_accuracy * 100}%`, height: '100%', backgroundColor: 'var(--color-warning)', borderRadius: '3px' }}></div>
-                            </div>
-                            <span style={{ fontSize: '11px', fontWeight: 600 }}>{formatPercent(item.baseline_accuracy)}</span>
-                          </div>
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '40px', backgroundColor: 'var(--color-border)', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>
-                              <div style={{ width: `${item.workflow_accuracy * 100}%`, height: '100%', backgroundColor: 'var(--color-accent)', borderRadius: '3px' }}></div>
-                            </div>
-                            <span style={{ fontSize: '11px', fontWeight: 600 }}>{formatPercent(item.workflow_accuracy)}</span>
-                          </div>
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '40px', backgroundColor: 'var(--color-border)', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>
-                              <div style={{ width: `${item.agentic_accuracy * 100}%`, height: '100%', backgroundColor: 'var(--color-success)', borderRadius: '3px' }}></div>
-                            </div>
-                            <span style={{ fontSize: '11px', fontWeight: 600 }}>{formatPercent(item.agentic_accuracy)}</span>
-                          </div>
-                        </td>
+                        <td><BreakdownAccuracyCell value={item.baseline_accuracy} color="var(--color-warning)" /></td>
+                        <td><BreakdownAccuracyCell value={item.workflow_accuracy} color="var(--color-accent)" /></td>
+                        <td><BreakdownAccuracyCell value={item.agentic_accuracy} color="var(--color-success)" /></td>
                       </tr>
                     ))}
+                    {isDifficultyMode && breakdownRows.map((difficultyGroup) => {
+                      const isCollapsed = collapsedDifficultyGroups.includes(difficultyGroup.label);
+                      const typeCount = difficultyGroup.question_type_breakdown.length;
+                      const typeCountLabel = typeCount === 1 ? '1 question type' : `${typeCount} question types`;
+
+                      return (
+                        <Fragment key={difficultyGroup.label}>
+                          <tr style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                            <td style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                              <button
+                                type="button"
+                                onClick={() => toggleDifficultyGroup(difficultyGroup.label)}
+                                aria-expanded={!isCollapsed}
+                                title={isCollapsed ? 'Expand difficulty group' : 'Collapse difficulty group'}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  width: '100%',
+                                  background: 'transparent',
+                                  border: 'none',
+                                  padding: 0,
+                                  color: 'inherit',
+                                  font: 'inherit',
+                                  cursor: 'pointer',
+                                  textAlign: 'left',
+                                }}
+                              >
+                                <span aria-hidden="true" style={{ width: '16px', display: 'inline-flex', justifyContent: 'center' }}>
+                                  {isCollapsed ? '▸' : '▾'}
+                                </span>
+                                <span className={`tag ${getDifficultyTagClass(difficultyGroup.label)}`}>
+                                  {formatLabel(difficultyGroup.label)}
+                                </span>
+                                <span className="tag tag-gray">{typeCountLabel}</span>
+                              </button>
+                            </td>
+                            <td><span className="tag tag-gray">{difficultyGroup.count}</span></td>
+                            <td><BreakdownAccuracyCell value={difficultyGroup.baseline_accuracy} color="var(--color-warning)" /></td>
+                            <td><BreakdownAccuracyCell value={difficultyGroup.workflow_accuracy} color="var(--color-accent)" /></td>
+                            <td><BreakdownAccuracyCell value={difficultyGroup.agentic_accuracy} color="var(--color-success)" /></td>
+                          </tr>
+                          {!isCollapsed && difficultyGroup.question_type_breakdown.map((item) => (
+                            <tr key={`${difficultyGroup.label}-${item.label}`}>
+                              <td style={{ paddingLeft: '24px', color: 'var(--color-text-secondary)' }}>
+                                ↳ {formatLabel(item.label)}
+                              </td>
+                              <td><span className="tag tag-gray">{item.count}</span></td>
+                              <td><BreakdownAccuracyCell value={item.baseline_accuracy} color="var(--color-warning)" /></td>
+                              <td><BreakdownAccuracyCell value={item.workflow_accuracy} color="var(--color-accent)" /></td>
+                              <td><BreakdownAccuracyCell value={item.agentic_accuracy} color="var(--color-success)" /></td>
+                            </tr>
+                          ))}
+                        </Fragment>
+                      );
+                    })}
+                    {breakdownRows.length === 0 && (
+                      <tr>
+                        <td colSpan="5" style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                          No breakdown data available.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -431,6 +650,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                       <th>Question & Truth</th>
                       <th>Answers</th>
                       <th>Winner</th>
+                      <th>Routing</th>
                       <th>Agentic Retriever</th>
                       <th>Agentic Verify</th>
                       <th>Agentic Signals</th>
@@ -479,6 +699,33 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                         <td><span className={`tag ${getWinnerTagClass(row.winner)}`}>{row.winner.replace(/_/g, ' ')}</span></td>
                         <td>
                           <div className="evaluation-signal-stack">
+                            <span
+                              className={`tag ${getDifficultyTagClass(row.routing_difficulty)}`}
+                              data-tooltip={getRoutingProcedureTooltip(row.routing_difficulty)}
+                              data-tooltip-align="left"
+                            >
+                              {formatLabel(row.routing_difficulty)}
+                            </span>
+                            <span className={`tag ${getRetrievalTagClass(row.routing_needs_retrieval)}`}>
+                              retrieval {row.routing_needs_retrieval ? 'yes' : 'no'}
+                            </span>
+                            <span className={`tag ${getVerificationPolicyTagClass(row.routing_verification_policy)}`}>
+                              {formatLabel(row.routing_verification_policy)} verify
+                            </span>
+                            <span
+                              className="tag tag-gray"
+                              data-tooltip={[
+                                row.routing_fallback_policy ? `Fallback: ${formatLabel(row.routing_fallback_policy)}` : null,
+                                row.routing_rationale ? `Routing: ${row.routing_rationale}` : null,
+                                row.routing_retrieval_rationale ? `Retrieval: ${row.routing_retrieval_rationale}` : null,
+                              ].filter(Boolean).join(' | ') || 'Routing details unavailable'}
+                            >
+                              details
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="evaluation-signal-stack">
                             <span className={`tag ${row.knowledge_retriever_triggered ? 'tag-green' : 'tag-gray'}`}>
                               {row.knowledge_retriever_triggered
                                 ? (row.knowledge_retriever_status || 'triggered')
@@ -516,7 +763,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                     ))}
                     {filteredRows.length === 0 && (
                       <tr>
-                        <td colSpan="8" style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                        <td colSpan="9" style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>
                           No evaluated cases match the selected sample IDs.
                         </td>
                       </tr>

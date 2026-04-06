@@ -5,6 +5,7 @@ import os
 import time
 from hashlib import md5
 
+import torch
 from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 from sklearn.metrics.pairwise import cosine_similarity
@@ -25,12 +26,53 @@ _EMBED_MODEL = None
 _SEMANTIC_THRESHOLD = 0.65  # Threshold for semantic similarity match (lowered for medical synonyms)
 
 
+def _resolve_device() -> str:
+    """Pick a safe runtime device for sentence-transformers models."""
+    requested = os.getenv("EVALUATION_DEVICE", "auto").strip().lower()
+
+    if requested == "cpu":
+        return "cpu"
+
+    if requested.startswith("cuda"):
+        if torch.cuda.is_available():
+            return requested
+        _log.warning("EVALUATION_DEVICE requests CUDA but CUDA is unavailable, falling back to CPU")
+        return "cpu"
+
+    if requested != "auto":
+        _log.warning("Unrecognized EVALUATION_DEVICE='%s', defaulting to auto", requested)
+
+    if not torch.cuda.is_available():
+        return "cpu"
+
+    try:
+        major, minor = torch.cuda.get_device_capability(0)
+        if major < 7:
+            _log.warning(
+                "GPU compute capability %d.%d is below recommended threshold; using CPU for BioBERT",
+                major,
+                minor,
+            )
+            return "cpu"
+
+        _ = torch.zeros(1, device="cuda")
+        return "cuda"
+    except Exception as exc:
+        _log.warning("CUDA probe failed (%s); using CPU for BioBERT", exc)
+        return "cpu"
+
+
 def _get_embedding_model():
     """Lazy-load BioBERT embedding model for medical semantic similarity."""
     global _EMBED_MODEL
     if _EMBED_MODEL is None:
+        device = _resolve_device()
+        _log.info("Loading BioBERT embedding model on device: %s", device)
         # BioBERT fine-tuned for semantic similarity (NLI + STS + Medical NLI)
-        _EMBED_MODEL = SentenceTransformer('pritamdeka/BioBERT-mnli-snli-scinli-scitail-mednli-stsb')
+        _EMBED_MODEL = SentenceTransformer(
+            'pritamdeka/BioBERT-mnli-snli-scinli-scitail-mednli-stsb',
+            device=device
+        )
     return _EMBED_MODEL
 
 
@@ -220,6 +262,45 @@ def _extract_knowledge_retriever_details(agentic_result: dict) -> dict:
     }
 
 
+def _build_accuracy_breakdown(rows: list[dict], group_key: str, preferred_order: list[str] | None = None) -> list[dict]:
+    grouped_rows = {}
+    for row in rows:
+        group_value = str(row.get(group_key, "unknown") or "unknown").strip().lower() or "unknown"
+        bucket = grouped_rows.setdefault(group_value, {
+            "label": group_value,
+            "count": 0,
+            "baseline_correct": 0,
+            "workflow_correct": 0,
+            "agentic_correct": 0,
+            "disagreement_count": 0,
+        })
+        bucket["count"] += 1
+        bucket["baseline_correct"] += 1 if row["baseline_correct"] else 0
+        bucket["workflow_correct"] += 1 if row["workflow_correct"] else 0
+        bucket["agentic_correct"] += 1 if row["agentic_correct"] else 0
+        bucket["disagreement_count"] += 1 if row["disagreement"] else 0
+
+    order_map = {value: index for index, value in enumerate(preferred_order or [])}
+
+    def sort_key(bucket: dict) -> tuple[int, int | str]:
+        label = bucket["label"]
+        if label in order_map:
+            return (0, order_map[label])
+        return (1, label)
+
+    return [
+        {
+            "label": bucket["label"],
+            "count": bucket["count"],
+            "baseline_accuracy": bucket["baseline_correct"] / bucket["count"] if bucket["count"] else 0.0,
+            "workflow_accuracy": bucket["workflow_correct"] / bucket["count"] if bucket["count"] else 0.0,
+            "agentic_accuracy": bucket["agentic_correct"] / bucket["count"] if bucket["count"] else 0.0,
+            "disagreement_rate": bucket["disagreement_count"] / bucket["count"] if bucket["count"] else 0.0,
+        }
+        for bucket in sorted(grouped_rows.values(), key=sort_key)
+    ]
+
+
 def _build_evaluation_row(payload: dict) -> dict:
     sample = payload.get("sample", {})
     baseline_result = payload.get("baseline_result", {})
@@ -256,6 +337,13 @@ def _build_evaluation_row(payload: dict) -> dict:
     question_type = agentic_question_type or original_question_type
     question_type_source = "agentic" if agentic_question_type else "dataset"
     knowledge_details = _extract_knowledge_retriever_details(agentic_result)
+    routing_decision = agentic_result.get("routing_decision", {}) or {}
+    routing_difficulty = routing_decision.get("difficulty", "unknown")
+    routing_needs_retrieval = bool(routing_decision.get("needs_retrieval", False))
+    routing_verification_policy = routing_decision.get("verification_policy", "standard")
+    routing_fallback_policy = routing_decision.get("fallback_policy", "none")
+    routing_rationale = routing_decision.get("routing_rationale", "")
+    routing_retrieval_rationale = routing_decision.get("retrieval_rationale", "")
 
     return {
         "sample_id": sample.get("id"),
@@ -286,6 +374,12 @@ def _build_evaluation_row(payload: dict) -> dict:
         "issues_found": agentic_result.get("issues_found", []),
         "self_consistency_level": agentic_result.get("self_consistency_signal", {}).get("level", "low"),
         "cross_modal_agreement_level": agentic_result.get("cross_modal_agreement", {}).get("level", "medium"),
+        "routing_difficulty": routing_difficulty,
+        "routing_needs_retrieval": routing_needs_retrieval,
+        "routing_verification_policy": routing_verification_policy,
+        "routing_fallback_policy": routing_fallback_policy,
+        "routing_rationale": routing_rationale,
+        "routing_retrieval_rationale": routing_retrieval_rationale,
         "knowledge_retriever_triggered": knowledge_details["knowledge_retriever_triggered"],
         "knowledge_retriever_status": knowledge_details["knowledge_retriever_status"],
         "knowledge_key_facts_count": knowledge_details["knowledge_key_facts_count"],
@@ -321,6 +415,7 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
             "ties": 0,
             "avg_duration_ms": 0,
             "by_question_type": [],
+            "by_difficulty_type": [],
         }
 
     baseline_correct = sum(1 for row in rows if row["baseline_correct"])
@@ -343,23 +438,6 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
     avg_agentic_duration_ms = int(total_agentic_duration_ms / len(rows_with_agentic_ms)) if total_agentic_duration_ms is not None else None
     close_ended_rows = [row for row in rows if row.get("answer_style") == "close_ended"]
     open_ended_rows = [row for row in rows if row.get("answer_style") == "open_ended"]
-
-    by_question_type = {}
-    for row in rows:
-        question_type = row.get("question_type", "unknown")
-        bucket = by_question_type.setdefault(question_type, {
-            "question_type": question_type,
-            "count": 0,
-            "baseline_correct": 0,
-            "workflow_correct": 0,
-            "agentic_correct": 0,
-            "disagreement_count": 0,
-        })
-        bucket["count"] += 1
-        bucket["baseline_correct"] += 1 if row["baseline_correct"] else 0
-        bucket["workflow_correct"] += 1 if row["workflow_correct"] else 0
-        bucket["agentic_correct"] += 1 if row["agentic_correct"] else 0
-        bucket["disagreement_count"] += 1 if row["disagreement"] else 0
 
     return {
         "total_cases": total,
@@ -386,17 +464,8 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
         "total_baseline_duration_ms": total_baseline_duration_ms,
         "total_workflow_duration_ms": total_workflow_duration_ms,
         "total_agentic_duration_ms": total_agentic_duration_ms,
-        "by_question_type": [
-            {
-                "question_type": bucket["question_type"],
-                "count": bucket["count"],
-                "baseline_accuracy": bucket["baseline_correct"] / bucket["count"] if bucket["count"] else 0.0,
-                "workflow_accuracy": bucket["workflow_correct"] / bucket["count"] if bucket["count"] else 0.0,
-                "agentic_accuracy": bucket["agentic_correct"] / bucket["count"] if bucket["count"] else 0.0,
-                "disagreement_rate": bucket["disagreement_count"] / bucket["count"] if bucket["count"] else 0.0,
-            }
-            for bucket in sorted(by_question_type.values(), key=lambda item: item["question_type"])
-        ],
+        "by_question_type": _build_accuracy_breakdown(rows, "question_type"),
+        "by_difficulty_type": _build_accuracy_breakdown(rows, "routing_difficulty", ["easy", "medium", "hard", "unknown"]),
     }
 
 

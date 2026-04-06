@@ -1,0 +1,43 @@
+2026-04-06T11:44:09  INFO      medvqa  Session started  file=medvqa_20260406_114409_469f67fc.log  session_id=469f67fc
+2026-04-06T11:44:19  INFO      medvqa.agents.knowledge_retriever  Advanced RAG module loaded successfully
+2026-04-06T11:44:19  INFO      medvqa.server  ============================================================
+2026-04-06T11:44:19  INFO      medvqa.server  MedVisionQuery API  v1.0.0  starting up
+2026-04-06T11:44:19  INFO      medvqa.server  CORS origins: ['http://localhost:5173']
+2026-04-06T11:44:19  INFO      medvqa.server  ============================================================
+2026-04-06T11:44:34  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:44:34  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:44:34  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=24ms
+2026-04-06T11:44:34  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:44:35  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:44:35  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=32ms
+2026-04-06T11:44:35  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T11:44:35  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T11:44:35  WARNING   medvqa.routes.dataset  GPU compute capability 6.1 is below recommended threshold; using CPU for BioBERT
+2026-04-06T11:44:35  INFO      medvqa.routes.dataset  Loading BioBERT embedding model on device: cpu
+2026-04-06T11:44:44  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T11:44:44  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=8704ms
+2026-04-06T11:44:57  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:44:57  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:44:57  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=24ms
+2026-04-06T11:44:57  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:44:57  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:44:57  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=24ms
+2026-04-06T11:45:01  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T11:45:01  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T11:45:04  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T11:45:04  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=3029ms
+2026-04-06T11:49:29  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T11:49:29  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T11:49:32  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T11:49:32  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2754ms
+2026-04-06T12:03:00  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:03:00  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:03:03  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:03:03  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2633ms
+2026-04-06T12:03:03  INFO      medvqa.server  → GET /api/dataset/sample/1947/analysis
+2026-04-06T12:03:03  INFO      medvqa.routes.dataset  Cache HIT for sample 1947 (question='what organ system is visualized in the above image?')
+2026-04-06T12:03:03  INFO      medvqa.server  ← GET /api/dataset/sample/1947/analysis  status=200  duration=23ms
+2026-04-06T12:03:08  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T12:03:08  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T12:03:11  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T12:03:11  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2274ms

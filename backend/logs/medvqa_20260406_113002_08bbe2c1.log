@@ -1,0 +1,76 @@
+2026-04-06T11:30:02  INFO      medvqa  Session started  file=medvqa_20260406_113002_08bbe2c1.log  session_id=08bbe2c1
+2026-04-06T11:30:14  INFO      medvqa.agents.knowledge_retriever  Advanced RAG module loaded successfully
+2026-04-06T11:30:14  INFO      medvqa.server  ============================================================
+2026-04-06T11:30:14  INFO      medvqa.server  MedVisionQuery API  v1.0.0  starting up
+2026-04-06T11:30:14  INFO      medvqa.server  CORS origins: ['http://localhost:5173']
+2026-04-06T11:30:14  INFO      medvqa.server  ============================================================
+2026-04-06T11:30:14  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T11:30:14  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:30:14  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T11:30:14  WARNING   medvqa.routes.dataset  GPU compute capability 6.1 is below recommended threshold; using CPU for BioBERT
+2026-04-06T11:30:14  INFO      medvqa.routes.dataset  Loading BioBERT embedding model on device: cpu
+2026-04-06T11:30:22  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T11:30:22  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:30:22  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=7717ms
+2026-04-06T11:30:22  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=7718ms
+2026-04-06T11:30:22  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:30:22  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:30:22  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=27ms
+2026-04-06T11:31:13  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:31:13  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:31:13  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=36ms
+2026-04-06T11:31:13  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:31:13  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:31:13  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=21ms
+2026-04-06T11:31:14  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T11:31:14  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T11:31:18  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T11:31:18  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=3077ms
+2026-04-06T11:32:15  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:32:15  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:32:15  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=13ms
+2026-04-06T11:32:15  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:32:15  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:32:15  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=12ms
+2026-04-06T11:32:16  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T11:32:16  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T11:32:19  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T11:32:19  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2278ms
+2026-04-06T11:34:36  INFO      medvqa.server  → GET /api/dataset/sample/1947/analysis
+2026-04-06T11:34:37  INFO      medvqa.routes.dataset  Cache HIT for sample 1947 (question='what organ system is visualized in the above image?')
+2026-04-06T11:34:37  INFO      medvqa.server  ← GET /api/dataset/sample/1947/analysis  status=200  duration=337ms
+2026-04-06T11:34:48  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T11:34:48  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T11:34:50  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T11:34:50  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2391ms
+2026-04-06T11:36:03  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:36:03  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:36:03  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=15ms
+2026-04-06T11:36:03  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:36:03  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:36:03  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=19ms
+2026-04-06T11:36:03  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T11:36:03  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T11:36:06  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T11:36:06  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2499ms
+2026-04-06T11:36:39  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:36:39  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:36:39  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=42ms
+2026-04-06T11:36:39  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:36:39  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:36:39  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=23ms
+2026-04-06T11:36:39  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T11:36:39  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T11:36:42  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T11:36:42  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=3031ms
+2026-04-06T11:40:54  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:40:54  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:40:54  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=25ms
+2026-04-06T11:40:54  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-06T11:40:54  INFO      medvqa.routes.dataset  Listing samples  returned=30
+2026-04-06T11:40:54  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=22ms
+2026-04-06T11:40:56  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-06T11:40:56  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-06T11:40:59  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-06T11:40:59  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=3057ms
+2026-04-06T11:43:58  INFO      medvqa.server  MedVisionQuery API shutting down
