@@ -6,19 +6,6 @@ MedVisionQuery is an **agentic multimodal system** for medical visual question a
 
 ---
 
-## Agentic System Design
-
-| Property | Implementation |
-|---|---|
-| Problem decomposition | 6 distinct agent stages with explicit roles |
-| Agent architecture | Named agents wrapped as Haystack Tools; the controller decides tool use over shared state |
-| Multimodal grounding | The image is interpreted once, then downstream stages consume structured visual state; OpenAI-backed generators drive the agentic stages while Advanced RAG uses local retrieval models |
-| Dynamic tool selection | `retrieve_knowledge` is optional and skipped when the Difficulty Router sets `needs_retrieval=false` |
-| Control & failure handling | Verification, guardrails, disclaimers, review flags, failure categories, and automatic retry |
-| Evaluation | Against two baselines with normalized answer-match accuracy, token F1, close/open-ended accuracy, and disagreement analysis |
-
----
-
 ## Problem Definition
 
 **Task:** medical visual question answering with explanation
@@ -37,6 +24,8 @@ The task is decomposed rather than single-prompted because the system must separ
 3. **Medical context** — what background knowledge applies?
 4. **Synthesis** — what is the best-grounded answer?
 5. **Verification** — is the answer actually supported?
+
+---
 
 ## Three Methods Compared
 
@@ -71,6 +60,19 @@ All three methods use the same medical image and question as input, but they dif
 - Lets the Difficulty Router decide whether retrieval is needed and how strict verification should be
 - Can add disclaimers, flag cases for review, and retry when the first pass is not strong enough
 - Is the most expressive and best aligned with the project’s agentic design, but it is also the slowest and most expensive method
+
+---
+
+## Agentic System Design
+
+| Property | Implementation |
+|---|---|
+| Problem decomposition | 6 distinct agent stages with explicit roles |
+| Agent architecture | Named agents wrapped as Haystack Tools; the controller decides tool use over shared state |
+| Multimodal grounding | The image is interpreted once, then downstream stages consume structured visual state; OpenAI-backed generators drive the agentic stages while Advanced RAG uses local retrieval models |
+| Dynamic tool selection | `retrieve_knowledge` is optional and skipped when the Difficulty Router sets `needs_retrieval=false` |
+| Control & failure handling | Verification, guardrails, disclaimers, review flags, failure categories, and automatic retry |
+| Evaluation | Against two baselines with normalized answer-match accuracy, token F1, close/open-ended accuracy, and disagreement analysis |
 
 ---
 
@@ -177,13 +179,21 @@ The orchestrator uses Haystack's `Agent` + `Tool` architecture:
 
 ### Dynamic Tool Selection
 
-The controller follows `routing_decision.needs_retrieval` to decide whether to invoke `KnowledgeRetriever`:
+The `DifficultyRouter` determines the pipeline configuration from question and image context. Policies are strictly mapped by difficulty level:
 
-| Question type | `retrieve_knowledge` called? |
+| Difficulty | `needs_retrieval` | `verification_policy` | `fallback_policy` |
+|---|---|---|---|
+| `easy` | false | standard | none |
+| `medium` | true | standard | add_disclaimer |
+| `hard` | true | strict | flag_for_review |
+
+Typical difficulty assignments by question type:
+
+| Question type | Typical difficulty |
 |---|---|
-| `modality_identification`, `anatomy_identification`, `presence_absence`, `location`, `counting`, `yes_no` | Usually skipped |
-| `abnormality_description`, `explanation_request` | Usually retrieved |
-| When `requires_medical_knowledge` is true | Usually retrieved |
+| `modality_identification`, `anatomy_identification`, `yes_no`, `counting`, `location` | easy |
+| `presence_absence`, `abnormality_description` | medium |
+| `explanation_request` (complex clinical reasoning) | hard |
 
 ### Knowledge Retrieval (Advanced RAG)
 
@@ -199,7 +209,7 @@ The controller follows `routing_decision.needs_retrieval` to decide whether to i
 
 Retrieval corpus is built from the **train split** of `data/vqa-rad/vqa_rad.json`.
 
-### Current runtime model configuration
+### Model Configuration
 
 The current runtime uses OpenAI for all LLM-driven stages; the Advanced RAG retrieval stack additionally uses local SentenceTransformers, CrossEncoder, FAISS, and BM25 models.
 
@@ -226,7 +236,7 @@ Hugging Face is used to download the raw dataset via scripts. The retrieval stac
 
 ## Multimodal Grounding
 
-- **Image** — converted to base64 PNG, passed as `image_url` content block to the vision model
+- **Image** — converted to base64 PNG and passed as an `ImageContent` block (base64 image + MIME type) to the Haystack vision generator
 - **Text** — user's natural language question
 
 ### How modalities interact across stages
@@ -267,6 +277,18 @@ The image is consumed only once (stage 1); all downstream stages operate on the 
   "requires_medical_knowledge": true,
   "question_clarity": "clear | ambiguous | unclear",
   "rephrased_question": "..."
+}
+```
+
+### DifficultyRouter
+```json
+{
+  "difficulty": "easy | medium | hard",
+  "needs_retrieval": true,
+  "retrieval_rationale": "...",
+  "verification_policy": "standard | strict",
+  "fallback_policy": "none | add_disclaimer | flag_for_review",
+  "routing_rationale": "..."
 }
 ```
 
@@ -471,6 +493,24 @@ Hit **Refresh Metrics** to re-aggregate after running new cases in Case Explorer
 
 ---
 
+## Dataset
+
+**VQA-RAD** — a publicly available radiology VQA benchmark from [flaviagiammarino/vqa-rad](https://huggingface.co/datasets/flaviagiammarino/vqa-rad) on Hugging Face.
+
+| Field | Value |
+|---|---|
+| QA pairs in local manifest | 2,244 total |
+| Split breakdown | 1,793 train / 451 test |
+| Generated image files | 2,244 PNGs under `data/vqa-rad/images/` |
+| Image types | Radiology images |
+| Question styles | Yes/no (close-ended) and open-ended |
+
+The train split (1,793 cases) is used as the **retrieval corpus** for the Advanced RAG pipeline. The test split (451 cases) is used exclusively for Case Explorer browsing and evaluation — no test cases appear in the retrieval index.
+
+The download script flattens the Hugging Face dataset into one local PNG per QA item and writes a flat `vqa_rad.json` with split labels. Local image filenames are saved as `{split}_{index:04d}.png`.
+
+---
+
 ## Quick Start
 
 ### Prerequisites
@@ -563,12 +603,13 @@ Medical-VQA-Explanation-Agent/
 ├── environment.yml                  # conda environment (Python 3.12 + pip dependencies)
 ├── backend/
 │   ├── main.py                      # FastAPI app, CORS middleware, router registration
-│   ├── config.py                    # loads .env: OPENAI_*, legacy TEXT_MODEL*, DATA_DIR, CORS
+│   ├── config.py                    # loads .env: OPENAI_API_KEY, OPENAI_MODEL, VISION_MODEL, HF_TOKEN, DATA_DIR, CORS
 │   ├── requirements.txt             # pip dependencies
 │   ├── agents/
 │   │   ├── orchestrator.py          # Haystack Agent controller, tool routing, retry logic, guardrails
 │   │   ├── image_interpreter.py     # Agent 1: multimodal image interpretation (OpenAI)
 │   │   ├── question_analyzer.py     # Agent 2: question classification and intent analysis (OpenAI)
+│   │   ├── difficulty_router.py     # Agent 3: planning — sets difficulty, retrieval flag, verification policy, fallback policy
 │   │   ├── advanced_rag.py          # Advanced RAG engine: query rewrite, FAISS+BM25 retrieval, reranking, reflection
 │   │   ├── knowledge_retriever.py   # Agent 4: optional medical context retrieval with Advanced RAG grounding
 │   │   ├── reasoning_agent.py       # Agent 5: answer synthesis with retry context support (OpenAI)
@@ -613,22 +654,6 @@ Medical-VQA-Explanation-Agent/
         ├── vqa_rad.json             # flattened QA manifest with split labels and image filenames
         └── images/                  # PNG images named {split}_{index:04d}.png
 ```
-
----
-
-## Dataset
-
-**VQA-RAD** — a publicly available radiology VQA benchmark from [flaviagiammarino/vqa-rad](https://huggingface.co/datasets/flaviagiammarino/vqa-rad) on Hugging Face.
-
-| Field | Value |
-|---|---|
-| QA pairs in local manifest | 2,244 total |
-| Split breakdown | 1,793 train / 451 test |
-| Generated image files | 2,244 PNGs under `data/vqa-rad/images/` |
-| Image types | Radiology images |
-| Question styles | Yes/no (close-ended) and open-ended |
-
-The current download script flattens the Hugging Face dataset into one local PNG per QA item and writes a flat `vqa_rad.json` with split labels. Local image filenames are saved as `{split}_{index:04d}.png`, so the number of generated image files matches the number of manifest rows.
 
 ---
 
