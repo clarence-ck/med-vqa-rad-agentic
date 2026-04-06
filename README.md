@@ -78,7 +78,7 @@ All three methods use the same medical image and question as input, but they dif
 
 ### System Diagram
 
-This figure focuses on the **agentic pipeline**. Baseline methods are documented in the evaluation section below.
+This picture is only for the **agentic pipeline**.
 
 ```mermaid
 flowchart LR
