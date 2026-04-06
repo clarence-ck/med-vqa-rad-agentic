@@ -12,7 +12,7 @@ _log = get_logger("server")
 
 app = FastAPI(
     title="MedVisionQuery API",
-    description="Medical VQA Explanation Agent — 5-agent pipeline for medical image question answering",
+    description="Medical VQA Explanation Agent — 6-agent pipeline for medical image question answering",
     version="1.0.0",
 )
 
