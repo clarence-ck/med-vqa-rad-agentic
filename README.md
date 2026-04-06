@@ -652,6 +652,7 @@ Medical-VQA-Explanation-Agent/
 │   ├── download_dataset.py          # downloads VQA-RAD from Hugging Face, writes JSON + images
 │   ├── system_diagram.py            # regenerates the architecture figure
 ├── system_diagram.png               # rendered system diagram asset
+├── eval-dashboard-screenshots/      # UI screenshots of the evaluation dashboard
 └── data/
     └── vqa-rad/                     # gitignored — created by download_dataset.py
         ├── vqa_rad.json             # flattened QA manifest with split labels and image filenames
