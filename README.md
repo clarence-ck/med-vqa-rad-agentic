@@ -44,6 +44,8 @@ The task is decomposed rather than single-prompted because the system must separ
 
 ### System Diagram
 
+This figure focuses on the **agentic pipeline**. Baseline methods are documented in the evaluation section below.
+
 ```mermaid
 flowchart LR
     UI[MedVisionQuery React UI]
@@ -90,9 +92,6 @@ flowchart LR
     GUARD --> REV[Review]
     GUARD --> ERR
 
-    API --> B1[Baseline 1\nSingle-shot Multimodal Prompt]
-    API --> B2[Baseline 2\nHand-designed Workflow]
-
     T4 --> RAG[Advanced RAG Engine\nquery rewrite + FAISS/BM25 + rerank + reflection]
     RAG --> TRAIN[(VQA-RAD train split\nretrieval corpus)]
 
@@ -106,7 +105,6 @@ flowchart LR
     T4 --> LLM
     T5 --> LLM
     ORCH --> LLM
-    B1 --> LLM
 ```
 
 ![System Diagram](system_diagram.png)
@@ -372,7 +370,7 @@ All endpoints served at `http://localhost:8000`.
 | `POST` | `/api/analyze` | Run full agentic pipeline |
 | `POST` | `/api/analyze/baseline` | Run single-shot baseline |
 | `POST` | `/api/analyze/workflow` | Run workflow baseline |
-| `GET` | `/api/dataset/samples?limit=N` | List **test-split only** dataset samples (balanced across question-type categories) |
+| `GET` | `/api/dataset/samples` | List **test-split only** dataset samples (balanced across question-type categories) |
 | `GET` | `/api/dataset/sample/{id}` | Get sample with base64-encoded image |
 | `GET` | `/api/dataset/sample/{id}/analysis?refresh=false` | Run all 3 systems on a sample, cache result |
 | `GET` | `/api/dataset/evaluation` | Aggregate evaluation metrics from all cached analyses |
@@ -597,17 +595,6 @@ Medical-VQA-Explanation-Agent/
 | Question styles | Yes/no (close-ended) and open-ended |
 
 The current download script flattens the Hugging Face dataset into one local PNG per QA item and writes a flat `vqa_rad.json` with split labels. Local image filenames are saved as `{split}_{index:04d}.png`, so the number of generated image files matches the number of manifest rows.
-
----
-
-## Reflection
-
-### When agentic decomposition helps
-
-- The task requires both low-level perception and high-level reasoning that are better separated
-- Failures can be localized to a specific stage (image extraction vs. question understanding vs. verification)
-- Uncertainty needs to be handled explicitly — the medical domain requires disclaimers and review flags
-- Intermediate outputs have independent value (visual summary, question classification, knowledge notes)
 
 ---
 
