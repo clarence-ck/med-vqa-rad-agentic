@@ -1,0 +1,146 @@
+2026-04-06T13:22:41  INFO      medvqa.routes.dataset  Cache MISS for sample 1915  question='what is the location of the lesion?'  refresh=False  running all 3 pipelines in parallel
+2026-04-06T13:22:41  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=690456 bytes  question='what is the location of the lesion?'
+2026-04-06T13:22:41  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what is the location of the lesion?'  mime_type=image/png  size=690456 bytes ===
+2026-04-06T13:22:41  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-06T13:22:41  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=690456 bytes)
+2026-04-06T13:22:42  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-06T13:22:42  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=690456 bytes)
+2026-04-06T13:22:44  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Right mid-lung zone, lateral aspect of the right lower lobe.",
+  "explanation": "This is a chest radiograph showing a focal opacity over the lateral mid-to-lower portion of the right lung. The lesion is located in the right lower lung field.",
+  "confidence": "high"
+}
+2026-04-06T13:22:44  INFO      medvqa.agents.baseline  Baseline done  answer='Right mid-lung zone, lateral aspect of the right lower lobe.'  confidence=high  duration=2869ms
+2026-04-06T13:22:45  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=3  duration=3844ms
+2026-04-06T13:22:45  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing both lungs, the cardiomediastinal silhouette, and the bony thorax. The lungs are well expanded with no obvious large pleural effusion or pneumothorax on this view.
+2026-04-06T13:22:45  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Mild focal increased opacity in the right mid/lower lung field', 'Cardiomediastinal silhouette is not enlarged', 'No visible pleural effusion or pneumothorax']
+2026-04-06T13:22:45  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what is the location of the lesion?'
+2026-04-06T13:22:45  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-06T13:22:46  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=4  duration=3766ms
+2026-04-06T13:22:46  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is a frontal chest radiograph showing the thoracic cavity, including both lungs, cardiac silhouette, and mediastinal contours. The lungs are largely clear and the heart size appears within normal limits on this view.
+2026-04-06T13:22:46  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Mild focal opacity in the right mid-lung region', 'No pleural effusion visible', 'No pneumothorax visible', 'Cardiomediastinal silhouette not enlarged']
+2026-04-06T13:22:46  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=chest  duration=3797ms
+2026-04-06T13:22:46  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=True  clarity=clear  duration=1104ms
+2026-04-06T13:22:46  DEBUG     medvqa.agents.question_analyzer  Target entity: lesion  Expected format: short_phrase  Rephrased: What is the location of the lesion?
+2026-04-06T13:22:46  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what is the location of the lesion?'  modality=X-ray  body_region=chest  question_type=location
+2026-04-06T13:22:46  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-06T13:22:46  DEBUG     medvqa.agents.workflow_baseline  Branch taken: location
+2026-04-06T13:22:46  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='chest'  confidence=medium  question_type=location  duration=5018ms
+2026-04-06T13:22:47  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what is the location of the lesion?'
+2026-04-06T13:22:47  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what is the location of the lesion?'
+2026-04-06T13:22:47  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-06T13:22:48  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=clear  duration=1075ms
+2026-04-06T13:22:48  DEBUG     medvqa.agents.question_analyzer  Target entity: lesion  Expected format: short_phrase  Rephrased: What is the location of the lesion?
+2026-04-06T13:22:48  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=1105ms
+2026-04-06T13:22:49  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-06T13:22:49  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=False  modality=X-ray  region=chest
+2026-04-06T13:22:50  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1284ms
+2026-04-06T13:22:50  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a straightforward, clear-image location question requiring only basic visual inspection and no advanced clinical reasoning.
+2026-04-06T13:22:50  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1309ms
+2026-04-06T13:22:51  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-06T13:22:51  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what is the location of the lesion?'  is_retry=False  question_type=location  yes_no=False
+2026-04-06T13:22:51  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-06T13:22:53  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='right mid-lung region'  confidence=high  duration=2025ms
+2026-04-06T13:22:53  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Review the chest radiograph findings.', 'Identify the abnormal opacity described in the image analysis.', 'Map the opacity to its anatomic location in the right mid-lung.']
+2026-04-06T13:22:53  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Mild focal opacity in the right mid-lung region', 'Frontal chest radiograph showing both lungs', 'No other focal abnormalities described']
+2026-04-06T13:22:53  DEBUG     medvqa.agents.reasoning_agent  Limitations: The answer is based on the provided image analysis rather than direct image inspection, and the lesion is described only as a mild focal opacity.
+2026-04-06T13:22:53  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='right mid-lung region'  confidence=high  duration=2058ms
+2026-04-06T13:22:54  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-06T13:22:54  INFO      medvqa.agents.verification_agent  Verifying answer='right mid-lung region'  question='what is the location of the lesion?'  question_type=location
+2026-04-06T13:22:56  INFO      medvqa.agents.verification_agent  Verification done  status=unsupported  confidence=Low  checks=3/5  duration=2036ms
+2026-04-06T13:22:56  WARNING   medvqa.agents.verification_agent  Verification issues: ['The visual analysis states the lungs are largely clear and does not identify a focal opacity or lesion in the right mid-lung region.', 'The answer and explanation assert a specific lesion location that is not supported by the provided image analysis.', 'The stated confidence is too high given the lack of corroborating evidence.']
+2026-04-06T13:22:56  INFO      medvqa.agents.verification_agent  Fallback recommendation: flag_for_review
+2026-04-06T13:22:56  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct short location format, but the specific lesion location is not grounded in the available visual summary. Since no lesion is described in the image analysis, the answer is unsupported and potentially overconfident.
+2026-04-06T13:22:56  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=unsupported  confidence=Low  duration=2071ms
+2026-04-06T13:22:56  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'unsupported_claim']
+2026-04-06T13:22:56  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=True  fallback=flag_for_review  disclaimer=True
+2026-04-06T13:22:56  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-06T13:22:56  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-06T13:22:56  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='right mid-lung region'  verification=unsupported  guardrail_flag=True  consistency=low  cross_modal=low  duration=14944ms
+2026-04-06T13:22:56  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='right mid-lung region'  verification=unsupported  confidence=Low  flag_review=True
+2026-04-06T13:22:56  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=unsupported  flag_review=True  high_severity=True  -> retry=True
+2026-04-06T13:22:56  INFO      medvqa.agents.orchestrator  Pipeline RETRY triggered  reason: verification_status=unsupported; fallback=flag_for_review; flag_for_review=True
+2026-04-06T13:22:56  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=True)
+2026-04-06T13:22:57  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-06T13:22:57  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=690456 bytes)
+2026-04-06T13:23:01  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=3  duration=3805ms
+2026-04-06T13:23:01  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing both lungs and the cardiomediastinal silhouette. The lungs are well expanded, and there is a focal rounded opacity in the right mid-lung/perihilar region with otherwise no obvious diffuse abnormality.
+2026-04-06T13:23:01  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Rounded focal opacity in the right mid-lung/perihilar region', 'No pleural effusion or pneumothorax visible', 'Cardiomediastinal silhouette is not enlarged']
+2026-04-06T13:23:01  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=chest  duration=3835ms
+2026-04-06T13:23:01  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what is the location of the lesion?'
+2026-04-06T13:23:01  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what is the location of the lesion?'
+2026-04-06T13:23:01  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-06T13:23:03  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=clear  duration=1180ms
+2026-04-06T13:23:03  DEBUG     medvqa.agents.question_analyzer  Target entity: lesion  Expected format: short_phrase  Rephrased: What is the location of the lesion?
+2026-04-06T13:23:03  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=1205ms
+2026-04-06T13:23:03  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-06T13:23:04  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=False  modality=X-ray  region=chest
+2026-04-06T13:23:05  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1659ms
+2026-04-06T13:23:05  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clear spatial location question on a mostly straightforward chest radiograph, but it still requires careful inspection of a focal pulmonary opacity, making the overall task medium complexity.
+2026-04-06T13:23:05  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1686ms
+2026-04-06T13:23:06  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-06T13:23:06  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-06T13:23:06  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='what is the location of the lesion?'  modality=X-ray  body_region=chest  question_type=location  target_entity=lesion  advanced_rag=True
+2026-04-06T13:23:06  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=what is the location of the lesion? | modality=X-ray | body_region=chest | finding=lesion | rewrite=True rerank=True reflection=True
+2026-04-06T13:23:07  INFO      medvqa.agents.advanced_rag  Query rewrite | original='what is the location of the lesion?'
+2026-04-06T13:23:07  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='What is the location of the lesion, mass, abnormal opacity, or focal pulmonary/chest finding on chest X-ray (CXR) radiograph? Specify the anatomic site in the thorax, including lung, pleura, mediastinum, hilar region, chest wall, or other intrathoracic location.'  changed=True
+2026-04-06T13:23:07  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='x-ray': 41 matches
+2026-04-06T13:23:07  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='chest': 255 matches
+2026-04-06T13:23:07  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='lesion': 166 matches
+2026-04-06T13:23:07  INFO      medvqa.agents.advanced_rag  Metadata filter result: 1 candidates after intersection
+2026-04-06T13:23:07  INFO      medvqa.agents.advanced_rag  Metadata filter: 1 candidates retained
+2026-04-06T13:23:07  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-06T13:23:07  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 1 candidates
+2026-04-06T13:23:07  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 1/1
+2026-04-06T13:23:07  DEBUG     medvqa.agents.advanced_rag    1. id=1341 score=0.5538 | Q: do you see a cavitary lesion in this chest xray? | A: yes
+2026-04-06T13:23:07  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-06T13:23:07  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 1 candidates
+2026-04-06T13:23:07  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 1/1
+2026-04-06T13:23:07  DEBUG     medvqa.agents.advanced_rag    1. id=1341 score=-1.3733 | Q: do you see a cavitary lesion in this chest xray? | A: yes
+2026-04-06T13:23:07  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=1 sparse=1
+2026-04-06T13:23:07  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 1 unique candidates
+2026-04-06T13:23:07  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 1/1
+2026-04-06T13:23:07  DEBUG     medvqa.agents.advanced_rag    1. id=1341 score=0.0328 method=hybrid_rrf | Q: do you see a cavitary lesion in this chest xray? | A: yes
+2026-04-06T13:23:07  DEBUG     medvqa.agents.advanced_rag  Reranking skipped; using first 1 merged candidates
+2026-04-06T13:23:07  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 1/1
+2026-04-06T13:23:07  DEBUG     medvqa.agents.advanced_rag    1. id=1341 score=0.0328 method=hybrid_rrf | Q: do you see a cavitary lesion in this chest xray? | A: yes
+2026-04-06T13:23:07  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 1 retrieved candidates
+2026-04-06T13:23:07  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 1 retrieved candidates via LLM
+2026-04-06T13:23:09  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=True  confidence=medium  recommendation=augment
+2026-04-06T13:23:09  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ['Retrieved case is about a chest X-ray lesion, which matches the modality and general topic, but it asks about presence of a cavitary lesion rather than the location of a lesion.', "The answer 'yes' confirms lesion presence but does not provide location information needed for the original question."]
+2026-04-06T13:23:09  INFO      medvqa.agents.advanced_rag  Self-reflection accepted retrieved candidates
+2026-04-06T13:23:09  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 1 final candidates
+2026-04-06T13:23:09  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 1/1
+2026-04-06T13:23:09  DEBUG     medvqa.agents.advanced_rag    1. id=1341 score=0.0328 method=hybrid_rrf | Q: do you see a cavitary lesion in this chest xray? | A: yes
+2026-04-06T13:23:09  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 1 similar cases  (query_rewritten=True  finding_category=lesion)
+2026-04-06T13:23:13  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=1  duration=6929ms
+2026-04-06T13:23:13  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Chest X-rays localize lesions by comparing their position to the lungs, hila, mediastinum, pleura, and diaphragms.', 'A lesion may be intrapulmonary (within a lobe or lung zone) or extrapulmonary (pleural, mediastinal, chest wall, or diaphragmatic).', 'Cavitary lesions are identified by a lucent center within an area of consolidation or mass, often best localized by its surrounding lung anatomy.', 'The heart silhouette and diaphragms can help determine whether a lesion is in the lower lobes, lingula, or adjacent mediastinum.', 'Rib and clavicle overlap can obscure lesions, so the frontal chest radiograph requires systematic review of all thoracic compartments.']
+2026-04-06T13:23:13  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On a chest X-ray, lesion location is usually described by lung zone or lobe, and by whether it is central, peripheral, hilar, mediastinal, pleural, or subdiaphragmatic. In similar chest X-ray cases, l
+2026-04-06T13:23:13  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=1  duration=6964ms
+2026-04-06T13:23:14  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=True
+2026-04-06T13:23:14  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what is the location of the lesion?'  is_retry=True  question_type=location  yes_no=False
+2026-04-06T13:23:14  INFO      medvqa.agents.reasoning_agent  Retry context  prev_status=unsupported  prev_confidence=Low  fallback=flag_for_review
+2026-04-06T13:23:14  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=1
+2026-04-06T13:23:16  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Right mid-lung/perihilar region'  confidence=high  duration=2104ms
+2026-04-06T13:23:16  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the abnormality as a rounded focal opacity.', 'Note its described position on the frontal chest X-ray.', 'Use adjacent anatomy to localize it as right mid-lung/perihilar (central intrapulmonary) rather than pleural or mediastinal.']
+2026-04-06T13:23:16  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Rounded focal opacity in the right mid-lung/perihilar region', 'Frontal chest radiograph showing both lungs and cardiomediastinal silhouette', 'No pleural effusion or pneumothorax visible', 'Cardiomediastinal silhouette is not enlarged']
+2026-04-06T13:23:16  DEBUG     medvqa.agents.reasoning_agent  Limitations: Localization is based on the provided image analysis rather than direct image inspection; exact lobe assignment is not specified.
+2026-04-06T13:23:16  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Right mid-lung/perihilar region'  confidence=high  duration=2134ms
+2026-04-06T13:23:17  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-06T13:23:17  INFO      medvqa.agents.verification_agent  Verifying answer='Right mid-lung/perihilar region'  question='what is the location of the lesion?'  question_type=location
+2026-04-06T13:23:18  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1419ms
+2026-04-06T13:23:18  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-06T13:23:18  DEBUG     medvqa.agents.verification_agent  Verification notes: The response gives a concise lesion location that matches the question type. The explanation is consistent with the provided image analysis, which specifically notes a focal rounded opacity in the right mid-lung/perihilar region. The answer is appropriately cautious and does not overstate beyond the visible evidence.
+2026-04-06T13:23:18  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1449ms
+2026-04-06T13:23:18  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-06T13:23:18  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-06T13:23:18  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-06T13:23:18  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Right mid-lung/perihilar region'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=36940ms
+2026-04-06T13:23:18  INFO      medvqa.agents.orchestrator  Pipeline attempt 2 result  answer='Right mid-lung/perihilar region'  verification=verified  confidence=High
+2026-04-06T13:23:18  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=4  confidence_rank=3  high_failures=0  review=0
+2026-04-06T13:23:18  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=1  confidence_rank=1  high_failures=1  review=1
+2026-04-06T13:23:18  INFO      medvqa.agents.orchestrator  Pipeline RETRY winner: attempt 2 (higher score)
+2026-04-06T13:23:18  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Right mid-lung/perihilar region'  retries=1  total_duration=36947ms ===
+2026-04-06T13:23:18  INFO      medvqa.routes.dataset  Sample 1915 analysis complete  baseline=2874ms  workflow=5019ms  agentic=36951ms  total=36952ms
+2026-04-06T13:23:18  INFO      medvqa.routes.dataset  Sample 1915 answers  baseline='Right mid-lung zone, lateral aspect of the right lower lobe.'  workflow='chest'  agentic='Right mid-lung/perihilar region'  ground_truth='right lower lateral lung field'

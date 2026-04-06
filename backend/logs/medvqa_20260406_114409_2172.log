@@ -1,0 +1,207 @@
+2026-04-06T13:27:48  INFO      medvqa.routes.dataset  Cache MISS for sample 2172  question='how would you describe the spleen abnormality'  refresh=False  running all 3 pipelines in parallel
+2026-04-06T13:27:48  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=305148 bytes  question='how would you describe the spleen abnormality'
+2026-04-06T13:27:48  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='how would you describe the spleen abnormality'  mime_type=image/png  size=305148 bytes ===
+2026-04-06T13:27:48  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-06T13:27:48  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=305148 bytes)
+2026-04-06T13:27:50  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-06T13:27:50  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=305148 bytes)
+2026-04-06T13:27:50  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "The spleen contains a low-attenuation focal lesion, most consistent with a splenic cystic or hypodense mass.",
+  "explanation": "This is an axial contrast-enhanced CT of the abdomen. In the spleen there is a well-defined round hypodense lesion, which appears cystic rather than solid.",
+  "confidence": "medium"
+}
+2026-04-06T13:27:50  INFO      medvqa.agents.baseline  Baseline done  answer='The spleen contains a low-attenuation focal lesion, most consistent with a splen'  confidence=medium  duration=2014ms
+2026-04-06T13:27:52  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=upper abdomen  quality=good  findings=3  duration=3461ms
+2026-04-06T13:27:52  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver and spleen are visible with surrounding upper abdominal organs and major vessels; there is also a left upper quadrant soft tissue lesion with low-attenuation center visible near the spleen.
+2026-04-06T13:27:52  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Left upper quadrant round low-attenuation lesion adjacent to the spleen', 'Multiple enhancing vascular structures in the liver', 'Postsurgical/foreign material or high-density object near the stomach region']
+2026-04-06T13:27:52  INFO      medvqa.agents.question_analyzer  Analyzing question: 'how would you describe the spleen abnormality'
+2026-04-06T13:27:52  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-06T13:27:53  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=upper abdomen  quality=good  findings=3  duration=2909ms
+2026-04-06T13:27:53  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver and spleen are seen in cross-section along with major upper abdominal vessels and the upper lumbar spine.
+2026-04-06T13:27:53  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Contrast enhancement is present in abdominal vessels and solid organs', 'A focal low-attenuation area is visible in the spleen', 'Postsurgical/medical hardware or dense material is seen near the gastroesophageal region']
+2026-04-06T13:27:53  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=upper abdomen  duration=2947ms
+2026-04-06T13:27:53  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=descriptive  med_knowledge=True  clarity=clear  duration=999ms
+2026-04-06T13:27:53  DEBUG     medvqa.agents.question_analyzer  Target entity: spleen abnormality  Expected format: short_phrase  Rephrased: How would you describe the spleen abnormality?
+2026-04-06T13:27:53  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='how would you describe the spleen abnormality'  modality=CT  body_region=upper abdomen  question_type=abnormality_description
+2026-04-06T13:27:53  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['spleen']
+2026-04-06T13:27:53  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-06T13:27:53  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Left upper quadrant round low-attenuation lesion adjacent to the spleen; Multipl'  confidence=medium  question_type=abnormality_description  duration=4524ms
+2026-04-06T13:27:53  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='how would you describe the spleen abnormality'
+2026-04-06T13:27:53  INFO      medvqa.agents.question_analyzer  Analyzing question: 'how would you describe the spleen abnormality'
+2026-04-06T13:27:53  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-06T13:27:55  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=descriptive  med_knowledge=True  clarity=clear  duration=1318ms
+2026-04-06T13:27:55  DEBUG     medvqa.agents.question_analyzer  Target entity: spleen abnormality  Expected format: short_phrase  Rephrased: How would you describe the abnormality of the spleen?
+2026-04-06T13:27:55  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1353ms
+2026-04-06T13:27:56  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-06T13:27:56  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  reasoning=descriptive  med_knowledge=True  modality=CT  region=upper abdomen
+2026-04-06T13:27:57  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1603ms
+2026-04-06T13:27:57  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clear CT-based abnormality description task with moderate clinical interpretation demands, so it is best routed as medium with retrieval and standard verification.
+2026-04-06T13:27:57  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1628ms
+2026-04-06T13:27:58  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-06T13:27:58  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-06T13:27:58  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='how would you describe the spleen abnormality'  modality=CT  body_region=upper abdomen  question_type=abnormality_description  target_entity=spleen abnormality  advanced_rag=True
+2026-04-06T13:27:58  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=how would you describe the spleen abnormality | modality=CT | body_region=upper abdomen | finding=normal | rewrite=True rerank=True reflection=True
+2026-04-06T13:27:59  INFO      medvqa.agents.advanced_rag  Query rewrite | original='how would you describe the spleen abnormality'
+2026-04-06T13:27:59  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='How would you describe the splenic abnormality on CT of the upper abdomen, including any spleen lesion, splenic mass, splenomegaly, focal splenic lesion, splenic infarct, splenic cyst, calcification, laceration, or other abnormal splenic finding? Please characterize the spleen appearance, size, contour, attenuation, enhancement, and any associated upper abdominal abnormalities.'  changed=True
+2026-04-06T13:27:59  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-06T13:27:59  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='upper abdomen': 209 matches
+2026-04-06T13:27:59  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 170 matches
+2026-04-06T13:27:59  WARNING   medvqa.agents.advanced_rag  Metadata filter found no intersection; falling back to full corpus
+2026-04-06T13:27:59  DEBUG     medvqa.agents.advanced_rag  Metadata filter: none applied (full corpus search)
+2026-04-06T13:27:59  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag  Dense retrieval searching full FAISS index with 1793 vectors
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/20
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag    1. id=564 score=0.6285 | Q: are there any abnormalities seen in the spleen? | A: no
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag    2. id=565 score=0.6222 | Q: what is the pathology seen in the spleen? | A: nothing
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag    3. id=148 score=0.5496 | Q: which organ is abnormally large? | A: spleen
+2026-04-06T13:28:00  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval searching full corpus of 1793 documents
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/20
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag    1. id=1301 score=28.7466 | Q: how would you characterize the lesion? | A: ring enhancing lesion
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag    2. id=564 score=26.8431 | Q: are there any abnormalities seen in the spleen? | A: no
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag    3. id=558 score=26.0208 | Q: how would you describe the lesion? | A: ring-enhancing lesion
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=20 sparse=20
+2026-04-06T13:28:00  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 20 unique candidates
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/20
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag    1. id=564 score=0.0325 method=hybrid_rrf | Q: are there any abnormalities seen in the spleen? | A: no
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag    2. id=1028 score=0.0269 method=hybrid_rrf | Q: is the size of the spleen normal? | A: yes
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag    3. id=1301 score=0.0164 method=hybrid_rrf | Q: how would you characterize the lesion? | A: ring enhancing lesion
+2026-04-06T13:28:00  INFO      medvqa.agents.advanced_rag  Reranking 20 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-06T13:28:00  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 20 candidates...
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag    1. id=624 score=1.1073 method=reranked softmax=0.3365 | Q: how would you describe the abnormality? | A: diffuse
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag    2. id=558 score=0.4028 method=reranked softmax=0.1664 | Q: how would you describe the lesion? | A: ring-enhancing lesion
+2026-04-06T13:28:00  DEBUG     medvqa.agents.advanced_rag    3. id=1758 score=0.2851 method=reranked softmax=0.1479 | Q: how would you describe the lesion? | A: ring-enhancing
+2026-04-06T13:28:00  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 3 retrieved candidates
+2026-04-06T13:28:00  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 3 retrieved candidates via LLM
+2026-04-06T13:28:01  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=True  confidence=medium  recommendation=augment
+2026-04-06T13:28:01  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ['The retrieved cases are only loosely related: they ask about a generic abnormality or lesion, not specifically the spleen.', 'Modality is not explicitly stated in the retrieved cases, so CT match cannot be confirmed.', "Answers like 'diffuse' and 'ring-enhancing lesion' are plausible descriptors but may not correspond to a spleen abnormality, so direct usefulness is limited."]
+2026-04-06T13:28:01  INFO      medvqa.agents.advanced_rag  Self-reflection accepted retrieved candidates
+2026-04-06T13:28:01  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-06T13:28:01  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-06T13:28:01  DEBUG     medvqa.agents.advanced_rag    1. id=624 score=1.1073 method=reranked softmax=0.3365 | Q: how would you describe the abnormality? | A: diffuse
+2026-04-06T13:28:01  DEBUG     medvqa.agents.advanced_rag    2. id=558 score=0.4028 method=reranked softmax=0.1664 | Q: how would you describe the lesion? | A: ring-enhancing lesion
+2026-04-06T13:28:01  DEBUG     medvqa.agents.advanced_rag    3. id=1758 score=0.2851 method=reranked softmax=0.1479 | Q: how would you describe the lesion? | A: ring-enhancing
+2026-04-06T13:28:01  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases  (query_rewritten=True  finding_category=normal)
+2026-04-06T13:28:05  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=3  duration=6886ms
+2026-04-06T13:28:05  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Normal spleen is usually homogeneous in attenuation on CT.', 'Splenic abnormalities may be focal (mass, cyst, infarct) or diffuse (splenomegaly, heterogeneous enhancement).', 'Contour irregularity, capsular distortion, or perisplenic fluid can suggest trauma or rupture.', 'Contrast-enhanced CT can help identify perfusion defects, active bleeding, or enhancing lesions.', 'The spleen lies in the left upper quadrant, near the stomach, pancreatic tail, and left hemidiaphragm.']
+2026-04-06T13:28:05  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On upper abdominal CT, the spleen is normally a homogeneous soft-tissue organ in the left upper quadrant, adjacent to the stomach, pancreas, and left kidney. For an abnormality-description question li
+2026-04-06T13:28:05  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=3  duration=6914ms
+2026-04-06T13:28:06  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-06T13:28:06  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='how would you describe the spleen abnormality'  is_retry=False  question_type=abnormality_description  yes_no=False
+2026-04-06T13:28:06  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=3
+2026-04-06T13:28:09  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='focal low-attenuation splenic lesion'  confidence=high  duration=2366ms
+2026-04-06T13:28:09  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the spleen on the upper abdominal CT.', 'Assess its attenuation and enhancement pattern.', 'Note the presence of a discrete low-attenuation focus within the spleen.', 'Conclude this represents a focal splenic abnormality.']
+2026-04-06T13:28:09  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial contrast-enhanced CT of the upper abdomen', 'Focal low-attenuation area visible in the spleen', 'Spleen otherwise visible as a solid organ in the left upper quadrant', 'Contrast enhancement present in abdominal solid organs and vessels']
+2026-04-06T13:28:09  DEBUG     medvqa.agents.reasoning_agent  Limitations: Only a single CT image summary is provided, so the exact cause of the splenic lesion cannot be determined from the available information.
+2026-04-06T13:28:09  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='focal low-attenuation splenic lesion'  confidence=high  duration=2396ms
+2026-04-06T13:28:09  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-06T13:28:10  INFO      medvqa.agents.verification_agent  Verifying answer='focal low-attenuation splenic lesion'  question='how would you describe the spleen abnormality'  question_type=abnormality_description
+2026-04-06T13:28:11  INFO      medvqa.agents.verification_agent  Verification done  status=unsupported  confidence=Low  checks=3/5  duration=1936ms
+2026-04-06T13:28:11  WARNING   medvqa.agents.verification_agent  Verification issues: ['The image analysis provided does not explicitly confirm a focal low-attenuation splenic lesion.', 'The explanation asserts a specific CT finding without direct evidence from the supplied visual summary.', 'The answer is more specific than warranted by the available information.']
+2026-04-06T13:28:11  INFO      medvqa.agents.verification_agent  Fallback recommendation: flag_for_review
+2026-04-06T13:28:11  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct short-phrase format for describing a splenic abnormality, but the claimed finding is not substantiated by the provided image analysis. Because the visual summary does not mention an identifiable splenic lesion, the answer should be treated as unsupported and overly strong.
+2026-04-06T13:28:11  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=unsupported  confidence=Low  duration=1967ms
+2026-04-06T13:28:11  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['unsupported_claim', 'question_answer_mismatch']
+2026-04-06T13:28:11  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=True  fallback=flag_for_review  disclaimer=True
+2026-04-06T13:28:11  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-06T13:28:11  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-06T13:28:11  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='focal low-attenuation splenic lesion'  verification=unsupported  guardrail_flag=True  consistency=low  cross_modal=low  duration=23267ms
+2026-04-06T13:28:11  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='focal low-attenuation splenic lesion'  verification=unsupported  confidence=Low  flag_review=True
+2026-04-06T13:28:11  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=unsupported  flag_review=True  high_severity=True  -> retry=True
+2026-04-06T13:28:11  INFO      medvqa.agents.orchestrator  Pipeline RETRY triggered  reason: verification_status=unsupported; fallback=flag_for_review; flag_for_review=True
+2026-04-06T13:28:11  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=True)
+2026-04-06T13:28:12  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-06T13:28:12  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=305148 bytes)
+2026-04-06T13:28:15  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=upper abdomen  quality=good  findings=3  duration=3052ms
+2026-04-06T13:28:15  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver and spleen are clearly visible, along with adjacent stomach and major upper abdominal vessels, with a focal low-attenuation lesion seen in the spleen.
+2026-04-06T13:28:15  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Focal round hypodense lesion in the spleen', 'Contrast enhancement of the liver and abdominal vessels is present', 'No obvious free air or large volume ascites visible on this slice']
+2026-04-06T13:28:15  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=upper abdomen  duration=3083ms
+2026-04-06T13:28:16  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='how would you describe the spleen abnormality'
+2026-04-06T13:28:16  INFO      medvqa.agents.question_analyzer  Analyzing question: 'how would you describe the spleen abnormality'
+2026-04-06T13:28:16  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-06T13:28:17  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=descriptive  med_knowledge=True  clarity=clear  duration=1179ms
+2026-04-06T13:28:17  DEBUG     medvqa.agents.question_analyzer  Target entity: spleen abnormality  Expected format: short_phrase  Rephrased: How would you describe the abnormality in the spleen?
+2026-04-06T13:28:17  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1215ms
+2026-04-06T13:28:18  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-06T13:28:18  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  reasoning=descriptive  med_knowledge=True  modality=CT  region=upper abdomen
+2026-04-06T13:28:20  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1435ms
+2026-04-06T13:28:20  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a focused abnormality-description task on a clear image, but it requires clinical interpretation of a lesion rather than simple visual recognition, so it is best routed as medium complexity.
+2026-04-06T13:28:20  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1474ms
+2026-04-06T13:28:21  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-06T13:28:21  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-06T13:28:21  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='how would you describe the spleen abnormality'  modality=CT  body_region=upper abdomen  question_type=abnormality_description  target_entity=spleen abnormality  advanced_rag=True
+2026-04-06T13:28:21  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=how would you describe the spleen abnormality | modality=CT | body_region=upper abdomen | finding=normal | rewrite=True rerank=True reflection=True
+2026-04-06T13:28:23  INFO      medvqa.agents.advanced_rag  Query rewrite | original='how would you describe the spleen abnormality'
+2026-04-06T13:28:23  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='How would you describe the splenic abnormality on CT of the upper abdomen, including any spleen lesion, splenic mass, focal splenic lesion, splenomegaly, splenic infarct, splenic laceration, splenic cyst, calcification, or other abnormal splenic finding? Describe the appearance, size, location, attenuation, enhancement, and any associated upper abdominal findings involving the spleen.'  changed=True
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='upper abdomen': 209 matches
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 170 matches
+2026-04-06T13:28:23  WARNING   medvqa.agents.advanced_rag  Metadata filter found no intersection; falling back to full corpus
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag  Metadata filter: none applied (full corpus search)
+2026-04-06T13:28:23  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag  Dense retrieval searching full FAISS index with 1793 vectors
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/20
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag    1. id=564 score=0.6098 | Q: are there any abnormalities seen in the spleen? | A: no
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag    2. id=565 score=0.6057 | Q: what is the pathology seen in the spleen? | A: nothing
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag    3. id=146 score=0.5423 | Q: what organ is enlarged? | A: spleen
+2026-04-06T13:28:23  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval searching full corpus of 1793 documents
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/20
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag    1. id=1783 score=35.8827 | Q: how would you describe the location of the lesion? | A: retrocardiac
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag    2. id=558 score=31.6793 | Q: how would you describe the lesion? | A: ring-enhancing lesion
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag    3. id=624 score=31.2805 | Q: how would you describe the abnormality? | A: diffuse
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=20 sparse=20
+2026-04-06T13:28:23  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 20 unique candidates
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/20
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag    1. id=1775 score=0.0282 method=hybrid_rrf | Q: what is the location of the lesion? | A: abdomen and pelvis
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag    2. id=1028 score=0.0268 method=hybrid_rrf | Q: is the size of the spleen normal? | A: yes
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag    3. id=564 score=0.0164 method=hybrid_rrf | Q: are there any abnormalities seen in the spleen? | A: no
+2026-04-06T13:28:23  INFO      medvqa.agents.advanced_rag  Reranking 20 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-06T13:28:23  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 20 candidates...
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag    1. id=624 score=1.1592 method=reranked softmax=0.3177 | Q: how would you describe the abnormality? | A: diffuse
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag    2. id=558 score=0.3702 method=reranked softmax=0.1444 | Q: how would you describe the lesion? | A: ring-enhancing lesion
+2026-04-06T13:28:23  DEBUG     medvqa.agents.advanced_rag    3. id=1758 score=0.3162 method=reranked softmax=0.1368 | Q: how would you describe the lesion? | A: ring-enhancing
+2026-04-06T13:28:23  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 3 retrieved candidates
+2026-04-06T13:28:23  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 3 retrieved candidates via LLM
+2026-04-06T13:28:25  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=True  confidence=medium  recommendation=augment
+2026-04-06T13:28:25  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ['The retrieved cases are only loosely related: they ask about a generic abnormality/lesion rather than specifically the spleen.', 'Modality match is not explicit in the retrieved cases, so CT alignment cannot be confirmed.', 'The answers are very generic and may not help identify a spleen-specific abnormality.']
+2026-04-06T13:28:25  INFO      medvqa.agents.advanced_rag  Self-reflection accepted retrieved candidates
+2026-04-06T13:28:25  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-06T13:28:25  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-06T13:28:25  DEBUG     medvqa.agents.advanced_rag    1. id=624 score=1.1592 method=reranked softmax=0.3177 | Q: how would you describe the abnormality? | A: diffuse
+2026-04-06T13:28:25  DEBUG     medvqa.agents.advanced_rag    2. id=558 score=0.3702 method=reranked softmax=0.1444 | Q: how would you describe the lesion? | A: ring-enhancing lesion
+2026-04-06T13:28:25  DEBUG     medvqa.agents.advanced_rag    3. id=1758 score=0.3162 method=reranked softmax=0.1368 | Q: how would you describe the lesion? | A: ring-enhancing
+2026-04-06T13:28:25  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases  (query_rewritten=True  finding_category=normal)
+2026-04-06T13:28:28  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=3  duration=6417ms
+2026-04-06T13:28:28  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The spleen normally appears as a uniformly enhancing, wedge-shaped organ on contrast CT.', 'Diffuse abnormalities affect most or all of the spleen, while focal abnormalities are localized lesions.', 'Important features to describe include splenic size, contour, density/attenuation, and enhancement pattern.', 'The spleen lies in the left upper abdomen and is closely related to the stomach, pancreas tail, left kidney, and diaphragm.']
+2026-04-06T13:28:28  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On CT, the spleen is normally a homogeneous soft-tissue organ in the left upper quadrant, just beneath the diaphragm and adjacent to the stomach, left kidney, and splenic flexure. When describing a sp
+2026-04-06T13:28:28  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=3  duration=6443ms
+2026-04-06T13:28:29  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=True
+2026-04-06T13:28:29  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='how would you describe the spleen abnormality'  is_retry=True  question_type=abnormality_description  yes_no=False
+2026-04-06T13:28:29  INFO      medvqa.agents.reasoning_agent  Retry context  prev_status=unsupported  prev_confidence=Low  fallback=flag_for_review
+2026-04-06T13:28:29  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=3
+2026-04-06T13:28:31  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='focal hypodense splenic lesion'  confidence=high  duration=2098ms
+2026-04-06T13:28:31  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the spleen on the axial contrast-enhanced upper abdominal CT.', 'Look for abnormal attenuation or contour changes in the spleen.', 'Find a focal round low-attenuation area, which corresponds to a focal hypodense lesion.', 'Use only the observed finding without adding a specific diagnosis.']
+2026-04-06T13:28:31  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial contrast-enhanced CT of the upper abdomen', 'Focal round hypodense lesion in the spleen', 'Normal enhancement of surrounding liver and vessels', 'No other described splenic abnormality such as diffuse enlargement or laceration']
+2026-04-06T13:28:31  DEBUG     medvqa.agents.reasoning_agent  Limitations: Only one CT slice is described, so full splenic extent and exact lesion characterization cannot be confirmed.
+2026-04-06T13:28:31  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='focal hypodense splenic lesion'  confidence=high  duration=2146ms
+2026-04-06T13:28:32  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-06T13:28:32  INFO      medvqa.agents.verification_agent  Verifying answer='focal hypodense splenic lesion'  question='how would you describe the spleen abnormality'  question_type=abnormality_description
+2026-04-06T13:28:33  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1181ms
+2026-04-06T13:28:33  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-06T13:28:33  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer is a short descriptive phrase that matches the abnormality-description question. The explanation is consistent with the provided CT visual summary noting a focal low-attenuation splenic lesion, and there is no contradiction or overstatement.
+2026-04-06T13:28:33  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1210ms
+2026-04-06T13:28:33  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-06T13:28:33  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-06T13:28:33  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-06T13:28:33  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='focal hypodense splenic lesion'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=44534ms
+2026-04-06T13:28:33  INFO      medvqa.agents.orchestrator  Pipeline attempt 2 result  answer='focal hypodense splenic lesion'  verification=verified  confidence=High
+2026-04-06T13:28:33  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=4  confidence_rank=3  high_failures=0  review=0
+2026-04-06T13:28:33  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=1  confidence_rank=1  high_failures=1  review=1
+2026-04-06T13:28:33  INFO      medvqa.agents.orchestrator  Pipeline RETRY winner: attempt 2 (higher score)
+2026-04-06T13:28:33  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='focal hypodense splenic lesion'  retries=1  total_duration=44542ms ===
+2026-04-06T13:28:33  INFO      medvqa.routes.dataset  Sample 2172 analysis complete  baseline=2018ms  workflow=4526ms  agentic=44545ms  total=44546ms
+2026-04-06T13:28:33  INFO      medvqa.routes.dataset  Sample 2172 answers  baseline='The spleen contains a low-attenuation focal lesion, most con'  workflow='Left upper quadrant round low-attenuation lesion adjacent to'  agentic='focal hypodense splenic lesion'  ground_truth='hypodense lesion'

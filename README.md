@@ -386,27 +386,56 @@ All endpoints served at `http://localhost:8000`.
 ### Dashboard
 Purpose: **ad-hoc analysis of any uploaded image**.
 
-- Upload a medical image and type a question
-- All 3 systems run in parallel; results appear as each completes
-- Toggle between Agentic Pipeline / Workflow Baseline / Single-shot Baseline views
-- Components: `CaseHeader`, `CaseInput`, `ImageViewer`, `ComparisonToggle`, `AnswerCard`, `ExplanationCard`, `AgentTrace`, `RoutingCard`, `VerificationPanel`, `FailureModeDrawer`, `ConfidenceBadge`
+Three-panel layout:
+
+- **Case Input (left)** — Image upload via drag-drop or click, question text area, Clear and Analyze buttons, educational disclaimer
+- **Image Workspace (center)** — Image display with predicted modality/body-region tags; comparison toggle appears here when results exist
+- **AI Analysis (right)** — Results panel showing one of three comparison views:
+  - **Agentic Pipeline** — `AnswerCard`, `ExplanationCard`, `AgentTrace` (stage timeline), `RoutingCard` (difficulty/retrieval), `VerificationPanel` (5-check verification), `FailureModeDrawer`
+  - **Single-shot Baseline** — Simplified result card with answer, explanation, confidence tag, and educational note
+  - **Workflow Baseline** — Simplified result card with answer, explanation, confidence tag, and workflow note
+
+All 3 systems run in parallel; results populate as each completes. Toggle between views using the comparison toggle in the Image Workspace header.
 
 ### Case Explorer
 Purpose: **systematic browsing and analysis of the VQA-RAD dataset**.
 
-- Browse a curated set of **test-split only** samples (default 30)
-- Sample selector is grouped by question-type categories with deterministic ordering
-- Select a sample to load its image, question, and ground-truth answer
-- Run full 3-system analysis with cache awareness (Refresh to force re-run)
-- Inspect ground truth, all 3 answers, agent trace, verification, and failure modes side-by-side
+Three-panel layout:
+
+- **Sample Cases (left)** — Dropdown grouped by question-type category (anatomy identification, modality identification, yes/no, counting, location, abnormality description, other); selected case card shows ID, question, ground truth answer, and question type; Refresh and Clear buttons
+- **Case Preview (center)** — Methodology labels (3-column summary of Agentic/Workflow/Baseline approaches); image display; **Case Summary** card with:
+  - **Overview** — selected sample ID, current view, duration per system
+  - **Agentic Quality** (agentic view only) — confidence, verification status, self-consistency, cross-modal agreement, review flag, issue count
+  - **Routing & Retrieval** (agentic view only) — difficulty (easy/medium/hard), knowledge retriever trigger status, verification policy, fallback policy, key facts count, routing rationale
+- **Case Analysis (right)** — Same component set as Dashboard (`AnswerCard`, `ExplanationCard`, `AgentTrace`, `VerificationPanel`, `FailureModeDrawer`) with agentic details, or simplified cards for baseline/workflow views
+
+Features:
+- Browse **test-split only** samples (default 30) grouped by question type with deterministic ordering
+- Comparison toggle with per-system timing badges (agentic/workflow/baseline durations)
+- Sample IDs visible in dropdown options for easy reference
+- Cache-aware analysis with Refresh button to force re-run
 
 ### Evaluation
 Purpose: **aggregate performance comparison across all cached analyses**.
 
-- Reads all cached Case Explorer results automatically
-- Displays normalized answer-match accuracy, close/open-ended accuracy, win counts, disagreement rate, and average duration per system
-- Shows a per-question-type breakdown and recent evaluated-case table with verification signals
-- Hit **Refresh** to re-aggregate after running new cases in Case Explorer
+Reads all cached Case Explorer results automatically and displays:
+
+- **System Performance Cards** — Overall accuracy (synonym + BioBERT), average runtime, and total runtime for Baseline, Workflow, and Agentic
+- **Metrics Grid** — Total cases, 3-system disagreement rate, lexical overlap (Token F1), win counts per system, close-ended accuracy (synonym matching), BioBERT accuracy (open-ended, threshold ≥ 0.65)
+- **Breakdown Table** — Dropdown selector for two modes:
+  - **Question Type** — Flat list with accuracy bars per question category
+  - **Difficulty Type** — Expandable parent rows (easy/medium/hard) with nested question-type breakdowns; reflects Difficulty Router policy (retrieval trigger, verification strictness, fallback)
+- **Recent Evaluated Cases** — Filterable table with columns:
+  - Sample ID, question, ground truth, and question type tags (original vs agentic-reclassified)
+  - All three system answers
+  - Winner tag (baseline/workflow/agentic/tie)
+  - **Routing** — Difficulty badge, knowledge retriever trigger, verification policy
+  - Agentic retriever status, verification status
+  - Agentic signals (self-consistency level, cross-modal agreement)
+  - Runtime per system
+  - Sample ID multi-select filter (up to 5 IDs)
+
+Hit **Refresh Metrics** to re-aggregate after running new cases in Case Explorer.
 
 ---
 
@@ -579,14 +608,6 @@ The current download script flattens the Hugging Face dataset into one local PNG
 - Failures can be localized to a specific stage (image extraction vs. question understanding vs. verification)
 - Uncertainty needs to be handled explicitly — the medical domain requires disclaimers and review flags
 - Intermediate outputs have independent value (visual summary, question classification, knowledge notes)
-
-### Limitations
-
-- ~8–10 serial LLM calls per pass (one controller dispatch + one tool call per stage) — up to ~20 with automatic retry; significantly slower and more expensive than single-shot inference
-- Retrieval is grounded to VQA-RAD train examples, but coverage is still limited to dataset distribution (not a comprehensive medical knowledge base)
-- Token F1 thresholding has been replaced with BioBERT semantic similarity for open-ended questions; the Token F1 score is retained as a diagnostic "Lexical Overlap" metric
-- Self-consistency signal is lightweight (single verifier pass) rather than multi-sample voting
-- Research and demonstration use only — not suitable for clinical deployment
 
 ---
 
