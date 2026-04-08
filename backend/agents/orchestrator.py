@@ -297,12 +297,14 @@ def _create_agent() -> Agent:
     )
 
 
-def _categorize_failure_modes(knowledge_result: dict, answer_result: dict, verification_result: dict) -> list:
+def _categorize_failure_modes(knowledge_result: dict, answer_result: dict, verification_result: dict,
+                              routing_result: dict = None) -> list:
     categories = []
     issues = [str(issue) for issue in verification_result.get("issues_found", [])]
     verification_status = verification_result.get("verification_status", "unknown")
     knowledge_status = knowledge_result.get("status", "unknown")
     reasoning_status = answer_result.get("status", "unknown")
+    needs_retrieval = bool((routing_result or {}).get("needs_retrieval", False))
 
     def add_category(code: str, label: str, description: str, severity: str):
         if any(category["code"] == code for category in categories):
@@ -314,11 +316,18 @@ def _categorize_failure_modes(knowledge_result: dict, answer_result: dict, verif
             "severity": severity,
         })
 
-    if knowledge_status != "success":
+    if knowledge_status not in {"success", "skipped"}:
         add_category(
             "knowledge_retrieval_failed",
             "Knowledge retrieval failed",
             "The support agent did not return reliable contextual notes or key facts.",
+            "medium",
+        )
+    elif knowledge_status == "skipped" and needs_retrieval:
+        add_category(
+            "knowledge_retrieval_failed",
+            "Knowledge retrieval failed",
+            "Retrieval was expected by routing but did not run successfully.",
             "medium",
         )
 
@@ -570,6 +579,7 @@ def _assemble_pipeline_payload(results: dict, question: str, started_at: float, 
         knowledge_result=knowledge_result,
         answer_result=answer_result,
         verification_result=verification_result,
+        routing_result=routing_result,
     )
     guardrail_payload = _build_guardrail_payload(
         answer_result=answer_result,
