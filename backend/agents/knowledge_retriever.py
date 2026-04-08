@@ -127,7 +127,7 @@ class KnowledgeRetriever:
                         finding_category or "none",
                     )
                 else:
-                    _log.info("Advanced RAG returned 0 similar cases for this question")
+                    _log.info("Advanced RAG returned 0 similar cases for this question; proceeding without RAG context")
 
             except Exception as e:
                 _log.error("Advanced RAG retrieval failed: %s — continuing without RAG context", e)
@@ -198,21 +198,21 @@ class KnowledgeRetriever:
             }}
 
     def _format_similar_cases(self, cases: list) -> str:
-        """Format similar cases for prompt injection"""
+        """Format similar cases as compact answer-focused evidence blocks for prompt injection."""
         formatted = []
         for i, case in enumerate(cases, 1):
-            q = case.get("question", "")
             a = case.get("answer", "")
             score = case.get("score", 0.0)
             meta = case.get("metadata", {})
             
             case_str = f"Case {i}:\n"
-            case_str += f"  Question: {q}\n"
             case_str += f"  Answer: {a}\n"
             if meta.get("modality"):
                 case_str += f"  Modality: {meta['modality']}\n"
             if meta.get("body_region"):
                 case_str += f"  Region: {meta['body_region']}\n"
+            if meta.get("question_type"):
+                case_str += f"  Question Type: {meta['question_type']}\n"
             case_str += f"  Relevance Score: {score:.3f}"
             
             formatted.append(case_str)
@@ -234,10 +234,14 @@ class KnowledgeRetriever:
         rag_section = ""
         if rag_context:
             rag_section = f"""
-RETRIEVED SIMILAR CASES (from training data):
+RETRIEVED ANSWER-FOCUSED EVIDENCE (from training data):
 {rag_context}
 
-Use these similar cases as reference for the expected answer format and relevant medical concepts, but adapt to the current specific question.
+Use this evidence only as a short hint for the expected answer and relevant medical concepts. If the retrieved cases are only loosely related, ignore them. Do not copy or paraphrase any retrieved question wording.
+"""
+        else:
+            rag_section = """
+No usable retrieved evidence was found. Rely on the current question context and general medical knowledge only.
 """
         
         return f"""You are a medical knowledge support agent. Provide concise, relevant medical context to help answer a question about a medical image.
@@ -259,7 +263,7 @@ Return a JSON object with:
   "terminology": {{"term": "definition"}} for 2-3 relevant medical terms
 }}
 
-Keep responses focused and educational. Do NOT attempt to diagnose. Base your response on established medical knowledge and the patterns observed in similar cases.
+Keep responses focused and educational. Do NOT attempt to diagnose. Base your response on established medical knowledge and only the retrieved evidence that directly matches the current anatomy/pathology; ignore weak or loosely related cases.
 Return ONLY the JSON object, no additional text."""
 
 # Wrapper function for compatibility

@@ -407,8 +407,8 @@ class AdvancedRAGRetriever:
         body_region: str = None
     ) -> str:
         """
-        Query rewriting/expansion using LLM
-        Expands medical abbreviations and adds synonyms
+        Query rewriting/expansion using LLM.
+        Keep the rewrite short and conservative so retrieval stays close to the original medical intent.
         """
         try:
             client = self._get_openai_client()
@@ -421,13 +421,14 @@ class AdvancedRAGRetriever:
             
             context = "\n".join(context_parts) if context_parts else "No specific context provided."
             
-            prompt = f"""Rewrite and expand the following medical question to improve retrieval effectiveness.
-Add relevant medical synonyms, expand abbreviations, and include related terms.
+            prompt = f"""Rewrite the following medical question into a short retrieval query.
+Preserve the original meaning, but only add minimal safe synonyms or abbreviations if they are directly relevant.
+Do NOT turn the question into a long differential diagnosis or a broad explanation.
 
 Original question: {question}
 {context}
 
-Return ONLY the expanded query (1-2 sentences), no explanations."""
+Return ONLY the rewritten query as a single short sentence, no explanations."""
             
             response = client.chat.completions.create(
                 model=OPENAI_MODEL or "gpt-4",
@@ -437,8 +438,18 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
             )
             
             expanded = response.choices[0].message.content.strip()
-            return expanded if expanded else question
-            
+            if not expanded:
+                return question
+
+            # Keep the rewrite from drifting too far beyond the original query.
+            expanded_clean = " ".join(expanded.split())
+            question_clean = " ".join(question.split())
+            if len(expanded_clean) > max(len(question_clean) * 2, len(question_clean) + 40):
+                _log.warning("Query rewrite was too expansive; falling back to original question")
+                return question
+
+            return expanded_clean
+
         except Exception as e:
             _log.warning("Query rewriting failed: %s", e)
             return question
@@ -523,8 +534,8 @@ Return ONLY the expanded query (1-2 sentences), no explanations."""
             _log.info("Self-reflection: validating %d retrieved candidates", len(reranked))
             validated = self._self_reflect(question, reranked, modality, body_region)
             if validated is None:  # Reflection indicated poor quality
-                _log.warning("Self-reflection flagged low quality; returning best available candidates")
-                validated = reranked[:self.top_k_final]
+                _log.warning("Self-reflection flagged low quality; returning no retrieved candidates")
+                return []
             else:
                 _log.info("Self-reflection accepted retrieved candidates")
         else:
