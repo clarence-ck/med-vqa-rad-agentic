@@ -3,6 +3,8 @@ import base64
 import json
 import os
 import time
+import threading
+from collections import OrderedDict
 from hashlib import md5
 
 import torch
@@ -23,7 +25,15 @@ _log = get_logger("routes.dataset")
 
 
 _EMBED_MODEL = None
-_SEMANTIC_THRESHOLD = 0.65  # Threshold for semantic similarity match (lowered for medical synonyms)
+_EMBED_MODEL_LOCK = threading.Lock()
+_SEMANTIC_THRESHOLD = 0.80  # Threshold for semantic similarity match for open-ended evaluation
+
+_MEDICAL_SBERT_MODEL_NAME = "pritamdeka/S-PubMedBert-MS-MARCO"
+
+# LRU cache for embeddings to avoid redundant medical SBERT encodings across evaluation rows
+_EMBEDDING_CACHE = OrderedDict()
+_EMBEDDING_CACHE_LOCK = threading.Lock()
+_MAX_EMBEDDING_CACHE_SIZE = 1000  # Limit cache size to prevent memory bloat
 
 
 def _resolve_device() -> str:
@@ -49,7 +59,7 @@ def _resolve_device() -> str:
         major, minor = torch.cuda.get_device_capability(0)
         if major < 7:
             _log.warning(
-                "GPU compute capability %d.%d is below recommended threshold; using CPU for BioBERT",
+                "GPU compute capability %d.%d is below recommended threshold; using CPU for medical SBERT",
                 major,
                 minor,
             )
@@ -58,22 +68,59 @@ def _resolve_device() -> str:
         _ = torch.zeros(1, device="cuda")
         return "cuda"
     except Exception as exc:
-        _log.warning("CUDA probe failed (%s); using CPU for BioBERT", exc)
+        _log.warning("CUDA probe failed (%s); using CPU for medical SBERT", exc)
         return "cpu"
 
 
 def _get_embedding_model():
-    """Lazy-load BioBERT embedding model for medical semantic similarity."""
+    """Lazy-load a medical SBERT embedding model for semantic similarity."""
     global _EMBED_MODEL
     if _EMBED_MODEL is None:
-        device = _resolve_device()
-        _log.info("Loading BioBERT embedding model on device: %s", device)
-        # BioBERT fine-tuned for semantic similarity (NLI + STS + Medical NLI)
-        _EMBED_MODEL = SentenceTransformer(
-            'pritamdeka/BioBERT-mnli-snli-scinli-scitail-mednli-stsb',
-            device=device
-        )
+        with _EMBED_MODEL_LOCK:
+            if _EMBED_MODEL is None:
+                device = _resolve_device()
+                _log.info("Loading medical SBERT embedding model on device: %s", device)
+                # PubMedBERT-based sentence-transformer for biomedical semantic similarity
+                _EMBED_MODEL = SentenceTransformer(
+                    _MEDICAL_SBERT_MODEL_NAME,
+                    device=device
+                )
     return _EMBED_MODEL
+
+
+def _get_cached_embedding(text: str) -> any:
+    """Get embedding from cache or compute and cache it."""
+    if not text:
+        return None
+    
+    with _EMBEDDING_CACHE_LOCK:
+        if text in _EMBEDDING_CACHE:
+            # Move to end to mark as recently used
+            _EMBEDDING_CACHE.move_to_end(text)
+            return _EMBEDDING_CACHE[text]
+    
+    # Cache miss - compute embedding
+    try:
+        model = _get_embedding_model()
+        embedding = model.encode([text])[0]
+        
+        with _EMBEDDING_CACHE_LOCK:
+            # Remove oldest if cache is full
+            if len(_EMBEDDING_CACHE) >= _MAX_EMBEDDING_CACHE_SIZE:
+                _EMBEDDING_CACHE.popitem(last=False)
+            _EMBEDDING_CACHE[text] = embedding
+        
+        return embedding
+    except Exception as exc:
+        _log.error("Failed to compute embedding for text: %s", exc)
+        return None
+
+
+def _clear_embedding_cache():
+    """Clear the embedding cache to free memory."""
+    with _EMBEDDING_CACHE_LOCK:
+        _EMBEDDING_CACHE.clear()
+        _log.info("Embedding cache cleared")
 
 
 def _semantic_similarity(prediction: str, ground_truth: str) -> float:
@@ -84,10 +131,14 @@ def _semantic_similarity(prediction: str, ground_truth: str) -> float:
     if not prediction or not ground_truth:
         return 1.0 if prediction == ground_truth else 0.0
     
-    model = _get_embedding_model()
-    embeddings = model.encode([prediction, ground_truth])
-    similarity = cosine_similarity(embeddings[0:1], embeddings[1:2])[0][0]
-    return float(similarity)
+    try:
+        model = _get_embedding_model()
+        embeddings = model.encode([prediction, ground_truth])
+        similarity = cosine_similarity(embeddings[0:1], embeddings[1:2])[0][0]
+        return float(similarity)
+    except Exception as exc:
+        _log.error("Failed to compute semantic similarity: %s", exc)
+        return 0.0
 
 
 @router.get("/samples")
@@ -163,7 +214,14 @@ def _get_cache_path(sample_id: int, question: str) -> str:
 
 _YES_TOKENS = {"yes", "true", "present", "positive", "abnormal", "found", "visible", "seen"}
 _NO_TOKENS = {"no", "false", "absent", "negative", "normal"}
-_NO_PHRASES = {"not found", "not visible", "not seen"}  # multi-word; must be checked before token split
+_NO_PHRASES = {
+    "not found",
+    "not visible",
+    "not seen",
+    "not clearly present",
+    "not present",
+    "no evidence of",
+}  # multi-word; must be checked before token split
 
 
 def _normalize_answer(text: str) -> str:
@@ -205,7 +263,7 @@ def _answers_match(predicted: str, ground_truth: str, is_close_ended: bool = Fal
     """Return True if the predicted answer is correct based on question type.
     
     For close-ended (yes/no) questions: uses synonym matching only.
-    For open-ended questions: uses semantic similarity >= 0.65 threshold only.
+    For open-ended questions: uses semantic similarity >= 0.80 threshold only.
     """
     if is_close_ended:
         # Close-ended: strict yes/no synonym matching
@@ -228,16 +286,56 @@ def _subset_accuracy(subset_rows: list[dict], key: str) -> float:
 
 
 def _has_semantic_disagreement(baseline: str, workflow: str, agentic: str) -> bool:
-    """Check if any two systems disagree using BioBERT semantic similarity.
+    """Check if any two systems disagree using medical SBERT semantic similarity with cached embeddings.
     
-    Disagreement exists if not all pairs are semantically equivalent (similarity >= 0.75).
+    Disagreement exists if not all pairs are semantically equivalent (similarity >= 0.80).
     """
-    baseline_workflow_same = _semantic_similarity(baseline, workflow) >= _SEMANTIC_THRESHOLD
-    baseline_agentic_same = _semantic_similarity(baseline, agentic) >= _SEMANTIC_THRESHOLD
-    workflow_agentic_same = _semantic_similarity(workflow, agentic) >= _SEMANTIC_THRESHOLD
+    try:
+        baseline_emb = _get_cached_embedding(baseline)
+        workflow_emb = _get_cached_embedding(workflow)
+        agentic_emb = _get_cached_embedding(agentic)
+        
+        if baseline_emb is None or workflow_emb is None or agentic_emb is None:
+            return False
+        
+        baseline_workflow_same = cosine_similarity([baseline_emb], [workflow_emb])[0][0] >= _SEMANTIC_THRESHOLD
+        baseline_agentic_same = cosine_similarity([baseline_emb], [agentic_emb])[0][0] >= _SEMANTIC_THRESHOLD
+        workflow_agentic_same = cosine_similarity([workflow_emb], [agentic_emb])[0][0] >= _SEMANTIC_THRESHOLD
+        return not (baseline_workflow_same and baseline_agentic_same and workflow_agentic_same)
+    except Exception as exc:
+        _log.error("Failed to compute semantic disagreement: %s", exc)
+        return False
+
+
+def _compute_semantic_scores_batch(baseline: str, workflow: str, agentic: str, ground_truth: str) -> dict:
+    """Compute semantic similarity scores for all systems vs ground truth using cached embeddings.
     
-    # Disagreement if any pair doesn't match semantically
-    return not (baseline_workflow_same and baseline_agentic_same and workflow_agentic_same)
+    Returns dict with baseline_semantic, workflow_semantic, agentic_semantic.
+    """
+    if not baseline or not workflow or not agentic or not ground_truth:
+        return {
+            "baseline_semantic": 1.0 if baseline == ground_truth else 0.0,
+            "workflow_semantic": 1.0 if workflow == ground_truth else 0.0,
+            "agentic_semantic": 1.0 if agentic == ground_truth else 0.0,
+        }
+    
+    try:
+        baseline_emb = _get_cached_embedding(baseline)
+        workflow_emb = _get_cached_embedding(workflow)
+        agentic_emb = _get_cached_embedding(agentic)
+        gt_emb = _get_cached_embedding(ground_truth)
+        
+        if baseline_emb is None or workflow_emb is None or agentic_emb is None or gt_emb is None:
+            return {"baseline_semantic": 0.0, "workflow_semantic": 0.0, "agentic_semantic": 0.0}
+        
+        return {
+            "baseline_semantic": float(cosine_similarity([baseline_emb], [gt_emb])[0][0]),
+            "workflow_semantic": float(cosine_similarity([workflow_emb], [gt_emb])[0][0]),
+            "agentic_semantic": float(cosine_similarity([agentic_emb], [gt_emb])[0][0]),
+        }
+    except Exception as exc:
+        _log.error("Failed to compute semantic scores batch: %s", exc)
+        return {"baseline_semantic": 0.0, "workflow_semantic": 0.0, "agentic_semantic": 0.0}
 
 
 def _extract_knowledge_retriever_details(agentic_result: dict) -> dict:
@@ -345,6 +443,8 @@ def _build_evaluation_row(payload: dict) -> dict:
     routing_rationale = routing_decision.get("routing_rationale", "")
     routing_retrieval_rationale = routing_decision.get("retrieval_rationale", "")
 
+    semantic_scores = _compute_semantic_scores_batch(baseline_normalized, workflow_normalized, agentic_normalized, ground_truth_normalized)
+
     return {
         "sample_id": sample.get("id"),
         "question": sample.get("question", ""),
@@ -364,9 +464,9 @@ def _build_evaluation_row(payload: dict) -> dict:
         "baseline_token_f1": round(_token_f1(baseline_normalized, ground_truth_normalized), 4),
         "workflow_token_f1": round(_token_f1(workflow_normalized, ground_truth_normalized), 4),
         "agentic_token_f1": round(_token_f1(agentic_normalized, ground_truth_normalized), 4),
-        "baseline_semantic": round(_semantic_similarity(baseline_normalized, ground_truth_normalized), 4),
-        "workflow_semantic": round(_semantic_similarity(workflow_normalized, ground_truth_normalized), 4),
-        "agentic_semantic": round(_semantic_similarity(agentic_normalized, ground_truth_normalized), 4),
+        "baseline_semantic": round(semantic_scores["baseline_semantic"], 4),
+        "workflow_semantic": round(semantic_scores["workflow_semantic"], 4),
+        "agentic_semantic": round(semantic_scores["agentic_semantic"], 4),
         "winner": winner,
         "disagreement": _has_semantic_disagreement(baseline_normalized, workflow_normalized, agentic_normalized),
         "verification_status": agentic_result.get("verification_status", "unknown"),
@@ -582,8 +682,14 @@ async def get_evaluation_summary():
         "Evaluation summary built  total_rows=%d  skipped=%d",
         len(rows), skipped,
     )
-    return {
+    
+    summary = {
         "summary": _build_evaluation_summary(rows),
         "rows": rows,
         "skipped_files": skipped,
     }
+    
+    # Clear embedding cache to free memory after evaluation is complete
+    _clear_embedding_cache()
+    
+    return summary

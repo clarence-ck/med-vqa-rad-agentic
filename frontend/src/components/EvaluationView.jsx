@@ -69,7 +69,7 @@ function getBreakdownTooltip(mode) {
     return 'Breakdown by Difficulty Router output. Parent rows show overall difficulty accuracy, and expanding a difficulty row reveals question-type accuracy within that bucket. easy skips retrieval and uses standard verification; medium retrieves knowledge, uses standard verification, and can add a disclaimer; hard retrieves knowledge, uses strict verification, and can flag the case for review.';
   }
 
-  return 'Breakdown by question type. Close-ended questions use yes/no synonym matching only. Open-ended questions use BioBERT semantic similarity ≥ 0.65 to capture meaning equivalence.';
+  return 'Breakdown by question type. Close-ended questions use yes/no synonym matching only. Open-ended questions use medical SBERT semantic similarity ≥ 0.80 to capture meaning equivalence.';
 }
 
 const QUESTION_TYPE_ORDER = [
@@ -191,7 +191,7 @@ function SystemPerformanceCard({ title, icon, accuracy, avgDuration, totalDurati
       </div>
       <div className="evaluation-system-stats">
         <div>
-          <div className="evaluation-list-subtitle">Overall Accuracy (Synonym + BioBERT)</div>
+          <div className="evaluation-list-subtitle">Overall Accuracy (Synonym + Medical SBERT)</div>
           <div className="evaluation-metric-value">{formatPercent(accuracy)}</div>
         </div>
         <div>
@@ -270,7 +270,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
   const breakdownRows = isDifficultyMode ? difficultyBreakdownRows : questionBreakdownRows;
   const breakdownTitle = isDifficultyMode ? 'Accuracy by Difficulty Type' : 'Accuracy by Question Type';
   const breakdownPrimaryLabel = isDifficultyMode ? 'Difficulty / Question Type' : 'Question Type';
-  const breakdownContextTag = isDifficultyMode ? 'Routing' : 'BioBERT';
+  const breakdownContextTag = isDifficultyMode ? 'Routing' : 'Medical SBERT';
   const breakdownTooltip = getBreakdownTooltip(breakdownMode);
   const filteredRows = selectedSampleIds.length
     ? rows.filter((row) => selectedSampleIds.includes(String(row.sample_id ?? '')))
@@ -307,7 +307,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
       <section className="evaluation-header-strip">
         <div>
           <h1 className="evaluation-title">Evaluation Dashboard</h1>
-          <p className="evaluation-subtitle">Aggregate accuracy metrics from cached Case Explorer runs. Close-ended: synonym matching. Open-ended: BioBERT semantic similarity ≥ 0.65.</p>
+          <p className="evaluation-subtitle">Aggregate accuracy metrics from cached Case Explorer runs. Close-ended: synonym matching. Open-ended: medical SBERT semantic similarity ≥ 0.80.</p>
         </div>
         <div className="evaluation-actions">
           <button className="btn btn-secondary" onClick={onRefresh} disabled={loading}>
@@ -368,14 +368,14 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
             <div className="card">
               <div className="card-header">
                 <span className="card-title">3-System Disagreement</span>
-                <span className="tag tag-gray" data-tooltip="Percentage of cases where at least one pair of system outputs falls below the BioBERT semantic-match threshold (0.65), so the three answers are not all semantically aligned." data-tooltip-align="left">info</span>
+                <span className="tag tag-gray" data-tooltip="Percentage of cases where at least one pair of system outputs falls below the medical SBERT semantic-match threshold (0.80), so the three answers are not all semantically aligned." data-tooltip-align="left">info</span>
               </div>
               <div className="evaluation-metric-value">{formatPercent(summary.disagreement_rate)}</div>
             </div>
             <div className="card">
               <div className="card-header">
                 <span className="card-title">Lexical Overlap</span>
-                <span className="tag tag-gray" data-tooltip="Average token F1 overlap score (0-1) across all cases. This is a surface-level diagnostic similarity metric only and is not used for correctness. Compare with BioBERT Accuracy, which uses embedding similarity with a 0.65 threshold." data-tooltip-align="left">info</span>
+                <span className="tag tag-gray" data-tooltip="Average token F1 overlap score (0-1) across all cases. This is a surface-level diagnostic similarity metric only and is not used for correctness. Compare with Medical SBERT Accuracy, which uses embedding similarity with a 0.80 threshold." data-tooltip-align="left">info</span>
               </div>
               <AccuracyMetricStack
                 baseline={avgBaselineF1}
@@ -411,10 +411,10 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
             </div>
             <div className="card">
               <div className="card-header">
-                <span className="card-title">BioBERT Accuracy (Open-ended)</span>
+                <span className="card-title">Medical SBERT Accuracy (Open-ended)</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.open_ended_cases} cases</span>
-                  <span className="tag tag-gray" data-tooltip="BioBERT Accuracy: Percentage of open-ended answers whose embedding similarity to the ground truth is ≥ 0.65. Uses a medical-domain sentence-transformer fine-tuned for semantic similarity on NLI/STS-style data. Not based on token F1." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="Medical SBERT Accuracy: Percentage of open-ended answers whose embedding similarity to the ground truth is ≥ 0.80. Uses a PubMedBERT-based sentence-transformer tuned for biomedical semantic similarity. Not based on token F1." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <AccuracyMetricStack
