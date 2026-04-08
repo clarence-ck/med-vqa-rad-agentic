@@ -4,3 +4,4 @@
 2026-04-09T02:29:01  INFO      medvqa.server  MedVisionQuery API  v1.0.0  starting up
 2026-04-09T02:29:01  INFO      medvqa.server  CORS origins: ['http://localhost:5173']
 2026-04-09T02:29:01  INFO      medvqa.server  ============================================================
+2026-04-09T02:35:37  INFO      medvqa.server  MedVisionQuery API shutting down
