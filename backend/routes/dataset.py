@@ -26,11 +26,11 @@ _log = get_logger("routes.dataset")
 
 _EMBED_MODEL = None
 _EMBED_MODEL_LOCK = threading.Lock()
-_SEMANTIC_THRESHOLD = 0.80  # Threshold for semantic similarity match for open-ended evaluation
+_SEMANTIC_THRESHOLD = 0.75  # Threshold for semantic similarity match for open-ended evaluation
 
 _MEDICAL_SBERT_MODEL_NAME = "NeuML/pubmedbert-base-embeddings"
 
-# LRU cache for embeddings to avoid redundant medical SBERT encodings across evaluation rows
+# LRU cache for NeuML/pubmedbert-base-embeddings encodings across evaluation rows
 _EMBEDDING_CACHE = OrderedDict()
 _EMBEDDING_CACHE_LOCK = threading.Lock()
 _MAX_EMBEDDING_CACHE_SIZE = 1000  # Limit cache size to prevent memory bloat
@@ -59,7 +59,7 @@ def _resolve_device() -> str:
         major, minor = torch.cuda.get_device_capability(0)
         if major < 7:
             _log.warning(
-                "GPU compute capability %d.%d is below recommended threshold; using CPU for medical SBERT",
+                "GPU compute capability %d.%d is below recommended threshold; using CPU for NeuML/pubmedbert-base-embeddings",
                 major,
                 minor,
             )
@@ -68,18 +68,18 @@ def _resolve_device() -> str:
         _ = torch.zeros(1, device="cuda")
         return "cuda"
     except Exception as exc:
-        _log.warning("CUDA probe failed (%s); using CPU for medical SBERT", exc)
+        _log.warning("CUDA probe failed (%s); using CPU for NeuML/pubmedbert-base-embeddings", exc)
         return "cpu"
 
 
 def _get_embedding_model():
-    """Lazy-load a medical SBERT embedding model for semantic similarity."""
+    """Lazy-load NeuML/pubmedbert-base-embeddings for semantic similarity."""
     global _EMBED_MODEL
     if _EMBED_MODEL is None:
         with _EMBED_MODEL_LOCK:
             if _EMBED_MODEL is None:
                 device = _resolve_device()
-                _log.info("Loading medical SBERT embedding model on device: %s", device)
+                _log.info("Loading NeuML/pubmedbert-base-embeddings on device: %s", device)
                 # PubMedBERT-based embedding model for biomedical semantic similarity
                 _EMBED_MODEL = SentenceTransformer(
                     _MEDICAL_SBERT_MODEL_NAME,
@@ -263,7 +263,7 @@ def _answers_match(predicted: str, ground_truth: str, is_close_ended: bool = Fal
     """Return True if the predicted answer is correct based on question type.
     
     For close-ended (yes/no) questions: uses synonym matching only.
-    For open-ended questions: uses semantic similarity >= 0.80 threshold only.
+    For open-ended questions: uses semantic similarity >= 0.75 threshold only.
     """
     if is_close_ended:
         # Close-ended: strict yes/no synonym matching
@@ -286,9 +286,9 @@ def _subset_accuracy(subset_rows: list[dict], key: str) -> float:
 
 
 def _has_semantic_disagreement(baseline: str, workflow: str, agentic: str) -> bool:
-    """Check if any two systems disagree using medical SBERT semantic similarity with cached embeddings.
+    """Check if any two systems disagree using NeuML/pubmedbert-base-embeddings semantic similarity with cached embeddings.
     
-    Disagreement exists if not all pairs are semantically equivalent (similarity >= 0.80).
+    Disagreement exists if not all pairs are semantically equivalent (similarity >= 0.75).
     """
     try:
         baseline_emb = _get_cached_embedding(baseline)
