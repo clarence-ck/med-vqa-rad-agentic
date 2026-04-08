@@ -128,7 +128,7 @@ flowchart LR
     GUARD --> REV[Review]
     GUARD --> ERR
 
-    T4 --> RAG[Advanced RAG Engine\nquery rewrite + FAISS/BM25 + rerank + reflection]
+    T4 --> RAG[Advanced RAG Engine\nconservative rewrite + FAISS/BM25 + rerank + reflection]
     RAG --> TRAIN[(VQA-RAD train split\nretrieval corpus)]
 
     EXP --> DATA[Dataset Analysis\n/api/dataset/sample/sample_id/analysis]
@@ -152,7 +152,7 @@ flowchart LR
 | `ImageInterpreter` | `image_interpreter.py` | Agent 1: Perception — multimodal image interpretation with auto-block for non-radiology images | OpenAI |
 | `QuestionAnalyzer` | `question_analyzer.py` | Agent 2: Task understanding — question classification and intent analysis | OpenAI |
 | `DifficultyRouter` | `difficulty_router.py` | Agent 3: Planning — sets routing metadata in shared state | OpenAI |
-| `KnowledgeRetriever` | `knowledge_retriever.py` | Agent 4: Context — optional Advanced RAG retrieval over VQA-RAD train split + LLM synthesis | OpenAI + local retrieval stack |
+| `KnowledgeRetriever` | `knowledge_retriever.py` | Agent 4: Context — optional Advanced RAG retrieval over VQA-RAD train split + answer-focused evidence synthesis | OpenAI + local retrieval stack |
 | `ReasoningAgent` | `reasoning_agent.py` | Agent 5: Synthesis — generates answer and explanation from all prior context | OpenAI |
 | `VerificationAgent` | `verification_agent.py` | Agent 6: Evaluator — grounded consistency / safety checks with 5 structured checks | OpenAI |
 | Agent Controller | `orchestrator.py` | Haystack `Agent` — routes tool calls, manages shared state, guardrails, retry | OpenAI |
@@ -197,29 +197,32 @@ Typical difficulty assignments by question type:
 
 ### Knowledge Retrieval (Advanced RAG)
 
-`KnowledgeRetriever` integrates `advanced_rag.py` to ground context in retrieved examples before synthesis.
+`KnowledgeRetriever` integrates `advanced_rag.py` to ground context in retrieved examples before synthesis, but only when retrieval quality is sufficient.
 
-1. Rewrite retrieval query from the original question (+ modality/body-region context)
+1. Rewrite retrieval query conservatively from the original question (+ modality/body-region context)
 2. Apply metadata pre-filtering (`modality`, `body_region`)
 3. Run hybrid retrieval: dense vectors (FAISS) + sparse BM25
 4. Fuse candidates via reciprocal rank fusion (RRF)
 5. Rerank with cross-encoder and keep top-k similar cases
-6. Run self-reflection on retrieval quality
-7. Inject retrieved cases into the knowledge prompt
+6. Run self-reflection on retrieval quality; reject weak/loosely related retrievals
+7. Inject only answer-focused evidence blocks into the knowledge prompt
 
 Retrieval corpus is built from the **train split** of `data/vqa-rad/vqa_rad.json`.
 
+The retriever now formats retrieved cases as compact evidence blocks (answer + minimal metadata) and explicitly ignores weak or loosely related cases instead of injecting full QA wording.
+
 ### Model Configuration
 
-The current runtime uses OpenAI for all LLM-driven stages; the Advanced RAG retrieval stack additionally uses local SentenceTransformers, CrossEncoder, FAISS, and BM25 models.
+The current runtime uses OpenAI for all LLM-driven stages; the Advanced RAG retrieval stack additionally uses local SentenceTransformers, CrossEncoder, FAISS, and BM25 models. The evaluation scorer uses a PubMedBERT-based sentence-transformer for semantic similarity on open-ended answers.
 
 | Env vars | Used by |
 |---|---|
 | `OPENAI_API_KEY` | All agents, Haystack controller, `baseline.py` |
 | `VISION_MODEL` | `ImageInterpreter`, `baseline.py` |
 | `OPENAI_MODEL` | `QuestionAnalyzer`, `KnowledgeRetriever`, `ReasoningAgent`, `VerificationAgent`, Haystack controller |
+| `EVALUATION_DEVICE` | PubMedBERT evaluation embedding model device selection (`cpu`, `cuda`, or `auto`) |
 
-Hugging Face is used to download the raw dataset via scripts. The retrieval stack itself is local, while the agentic generation steps use OpenAI.
+Hugging Face is used to download the raw dataset via scripts. The retrieval stack itself is local, while the agentic generation steps use OpenAI. Evaluation uses a cached PubMedBERT-based semantic scorer on the backend and exact yes/no matching for close-ended questions.
 
 ### Other Technology Choices
 
@@ -506,6 +509,8 @@ Hit **Refresh Metrics** to re-aggregate after running new cases in Case Explorer
 | Question styles | Yes/no (close-ended) and open-ended |
 
 The train split (1,793 cases) is used as the **retrieval corpus** for the Advanced RAG pipeline. The test split (451 cases) is used exclusively for Case Explorer browsing and evaluation — no test cases appear in the retrieval index.
+
+The evaluation scorer uses exact `yes` / `no` matching for close-ended questions and PubMedBERT semantic similarity with a 0.75 threshold for open-ended questions.
 
 The download script flattens the Hugging Face dataset into one local PNG per QA item and writes a flat `vqa_rad.json` with split labels. Local image filenames are saved as `{split}_{index:04d}.png`.
 
