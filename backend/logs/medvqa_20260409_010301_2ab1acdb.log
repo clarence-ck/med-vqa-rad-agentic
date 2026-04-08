@@ -1,0 +1,20 @@
+2026-04-09T01:03:01  INFO      medvqa  Session started  file=medvqa_20260409_010301_2ab1acdb.log  session_id=2ab1acdb
+2026-04-09T01:03:09  INFO      medvqa.agents.knowledge_retriever  Advanced RAG module loaded successfully
+2026-04-09T01:03:09  INFO      medvqa.server  ============================================================
+2026-04-09T01:03:09  INFO      medvqa.server  MedVisionQuery API  v1.0.0  starting up
+2026-04-09T01:03:09  INFO      medvqa.server  CORS origins: ['http://localhost:5173']
+2026-04-09T01:03:09  INFO      medvqa.server  ============================================================
+2026-04-09T01:04:00  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-09T01:04:00  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-09T01:04:00  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=18ms
+2026-04-09T01:04:00  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-09T01:04:00  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-09T01:04:00  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=14ms
+2026-04-09T01:04:03  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-09T01:04:03  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=200
+2026-04-09T01:04:03  WARNING   medvqa.routes.dataset  GPU compute capability 6.1 is below recommended threshold; using CPU for medical SBERT
+2026-04-09T01:04:03  INFO      medvqa.routes.dataset  Loading medical SBERT embedding model on device: cpu
+2026-04-09T01:04:52  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=200  skipped=0
+2026-04-09T01:04:52  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-09T01:04:52  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=49280ms
+2026-04-09T01:13:35  INFO      medvqa.server  MedVisionQuery API shutting down

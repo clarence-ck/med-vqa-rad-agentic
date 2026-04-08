@@ -28,7 +28,7 @@ _EMBED_MODEL = None
 _EMBED_MODEL_LOCK = threading.Lock()
 _SEMANTIC_THRESHOLD = 0.80  # Threshold for semantic similarity match for open-ended evaluation
 
-_MEDICAL_SBERT_MODEL_NAME = "pritamdeka/S-PubMedBert-MS-MARCO"
+_MEDICAL_SBERT_MODEL_NAME = "NeuML/pubmedbert-base-embeddings"
 
 # LRU cache for embeddings to avoid redundant medical SBERT encodings across evaluation rows
 _EMBEDDING_CACHE = OrderedDict()
@@ -80,7 +80,7 @@ def _get_embedding_model():
             if _EMBED_MODEL is None:
                 device = _resolve_device()
                 _log.info("Loading medical SBERT embedding model on device: %s", device)
-                # PubMedBERT-based sentence-transformer for biomedical semantic similarity
+                # PubMedBERT-based embedding model for biomedical semantic similarity
                 _EMBED_MODEL = SentenceTransformer(
                     _MEDICAL_SBERT_MODEL_NAME,
                     device=device

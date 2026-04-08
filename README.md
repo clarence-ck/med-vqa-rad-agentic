@@ -390,7 +390,7 @@ The Guardrail combines `verification_status` + `failure_categories` to produce 5
   - **Close-ended** (binary ground truth like yes/no): synonym matching using normalized yes/no tokens
   - **Open-ended** (non-binary ground truth): Medical SBERT semantic similarity ≥ 0.80
 - **Yes/no normalization** — `yes/true/present/positive/abnormal/found/visible/seen` → `yes`; `no/false/absent/negative/normal` → `no`; multi-word phrases `not found/not visible/not seen` → `no`
-- **Medical SBERT semantic similarity** — cosine similarity between answer embeddings using `pritamdeka/S-PubMedBert-MS-MARCO` (PubMedBERT-based sentence-transformer for biomedical semantic similarity)
+- **Medical SBERT semantic similarity** — cosine similarity between answer embeddings using `NeuML/pubmedbert-base-embeddings` (PubMedBERT-based sentence-transformer for biomedical semantic similarity)
 - **Lexical Overlap (Token F1)** — unigram overlap between predicted and ground-truth answer; diagnostic metric only, NOT used for accuracy
 - **Winner** — `baseline` / `workflow` / `agentic` / `tie: ...` / `tie_all_wrong`
 - **Disagreement** — whether any two systems produced semantically different answers (Medical SBERT similarity < 0.80)
