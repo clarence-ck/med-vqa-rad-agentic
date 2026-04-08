@@ -212,18 +212,6 @@ def _get_cache_path(sample_id: int, question: str) -> str:
     return os.path.join(CACHE_DIR, f"sample_{sample_id}_{question_hash}.json")
 
 
-_YES_TOKENS = {"yes", "true", "present", "positive", "abnormal", "found", "visible", "seen"}
-_NO_TOKENS = {"no", "false", "absent", "negative", "normal"}
-_NO_PHRASES = {
-    "not found",
-    "not visible",
-    "not seen",
-    "not clearly present",
-    "not present",
-    "no evidence of",
-}  # multi-word; must be checked before token split
-
-
 def _normalize_answer(text: str) -> str:
     """Normalize an answer string for comparison."""
     if text is None:
@@ -232,17 +220,8 @@ def _normalize_answer(text: str) -> str:
 
 
 def _normalize_yes_no(text: str) -> str:
-    """Collapse common yes/no synonyms to a canonical 'yes' or 'no' token."""
-    normalized = _normalize_answer(text)
-    # Multi-word NO phrases must be checked before splitting ("not found" contains "found" which is a YES token)
-    if any(phrase in normalized for phrase in _NO_PHRASES):
-        return "no"
-    tokens = set(normalized.split())
-    if tokens & _YES_TOKENS:
-        return "yes"
-    if tokens & _NO_TOKENS:
-        return "no"
-    return normalized
+    """Normalize answer text for exact yes/no comparison only."""
+    return _normalize_answer(text)
 
 
 def _token_f1(prediction: str, ground_truth: str) -> float:
@@ -262,11 +241,11 @@ def _token_f1(prediction: str, ground_truth: str) -> float:
 def _answers_match(predicted: str, ground_truth: str, is_close_ended: bool = False) -> bool:
     """Return True if the predicted answer is correct based on question type.
     
-    For close-ended (yes/no) questions: uses synonym matching only.
+    For close-ended (yes/no) questions: uses exact yes/no only.
     For open-ended questions: uses semantic similarity >= 0.75 threshold only.
     """
     if is_close_ended:
-        # Close-ended: strict yes/no synonym matching
+        # Close-ended: strict exact yes/no matching
         return _normalize_yes_no(predicted) == _normalize_yes_no(ground_truth)
     else:
         # Open-ended: Semantic similarity >= threshold

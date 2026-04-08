@@ -387,16 +387,16 @@ The Guardrail combines `verification_status` + `failure_categories` to produce 5
 
 ### Metrics computed per cached case
 - **Normalized answer match** — evaluation method depends on ground truth answer style:
-  - **Close-ended** (binary ground truth like yes/no): synonym matching using normalized yes/no tokens
+  - **Close-ended** (binary ground truth like yes/no): exact yes/no only
   - **Open-ended** (non-binary ground truth): PubMedBERT semantic similarity ≥ 0.75
-- **Yes/no normalization** — `yes/true/present/positive/abnormal/found/visible/seen` → `yes`; `no/false/absent/negative/normal` → `no`; multi-word phrases `not found/not visible/not seen` → `no`
+- **Yes/no normalization** — exact `yes` / `no` only
 - **PubMedBERT semantic similarity** — cosine similarity between answer embeddings using a PubMedBERT-based sentence-transformer for biomedical semantic similarity
 - **Lexical Overlap (Token F1)** — unigram overlap between predicted and ground-truth answer; diagnostic metric only, NOT used for accuracy
 - **Winner** — `baseline` / `workflow` / `agentic` / `tie: ...` / `tie_all_wrong`
 - **Disagreement** — whether any two systems produced semantically different answers (PubMedBERT similarity < 0.75)
 
 ### Aggregate evaluation summary
-- Overall accuracy per system (baseline / workflow / agentic) — combines close-ended (synonym) and open-ended (PubMedBERT) correctness
+- Overall accuracy per system (baseline / workflow / agentic) — combines close-ended (exact yes/no) and open-ended (PubMedBERT) correctness
 - Close-ended and open-ended accuracy per system
 - 3-System Disagreement rate — percentage of cases where systems produce semantically different answers
 - Win counts, average duration (ms), and per-question-type accuracy breakdown
@@ -474,8 +474,8 @@ Purpose: **aggregate performance comparison across all cached analyses**.
 
 Reads all cached Case Explorer results automatically and displays:
 
-- **System Performance Cards** — Overall accuracy (synonym + PubMedBERT), average runtime, and total runtime for Baseline, Workflow, and Agentic
-- **Metrics Grid** — Total cases, 3-system disagreement rate, lexical overlap (Token F1), win counts per system, close-ended accuracy (synonym matching), PubMedBERT accuracy (open-ended, threshold ≥ 0.75)
+- **System Performance Cards** — Overall accuracy (Exact yes/no + PubMedBERT), average runtime, and total runtime for Baseline, Workflow, and Agentic
+- **Metrics Grid** — Total cases, 3-system disagreement rate, lexical overlap (Token F1), win counts per system, close-ended accuracy (exact yes/no), PubMedBERT accuracy (open-ended, threshold ≥ 0.75)
 - **Breakdown Table** — Dropdown selector for two modes:
   - **Question Type** — Flat list with accuracy bars per question category
   - **Difficulty Type** — Expandable parent rows (easy/medium/hard) with nested question-type breakdowns; reflects Difficulty Router policy (retrieval trigger, verification strictness, fallback)
