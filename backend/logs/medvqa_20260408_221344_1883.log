@@ -1,0 +1,106 @@
+2026-04-08T23:08:54  INFO      medvqa.routes.dataset  Cache MISS for sample 1883  question='are there calcifications present on the abdominal aorta?'  refresh=False  running all 3 pipelines in parallel
+2026-04-08T23:08:54  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=424987 bytes  question='are there calcifications present on the abdominal aorta?'
+2026-04-08T23:08:54  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are there calcifications present on the abdominal aorta?'  mime_type=image/png  size=424987 bytes ===
+2026-04-08T23:08:54  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-08T23:08:54  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=424987 bytes)
+2026-04-08T23:08:55  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-08T23:08:55  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=424987 bytes)
+2026-04-08T23:08:56  DEBUG     medvqa.agents.baseline  Raw baseline response: {"is_radiology_image":true,"answer":"Yes, there are calcifications present on the abdominal aorta.","explanation":"On this axial abdominal CT image, there are small hyperdense calcific foci along the wall of the abdominal aorta, consistent with atherosclerotic calcification.","confidence":"high"}
+2026-04-08T23:08:56  INFO      medvqa.agents.baseline  Baseline done  answer='Yes, there are calcifications present on the abdominal aorta.'  confidence=high  duration=1772ms
+2026-04-08T23:08:57  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2874ms
+2026-04-08T23:08:57  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial CT image of the abdomen showing multiple contrast-enhanced abdominal organs and bowel loops. Several fluid- and gas-filled bowel loops are visible, along with the kidneys, major vessels, and posterior spine structures.
+2026-04-08T23:08:57  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple dilated gas- and fluid-filled bowel loops are visible', 'Contrast enhancement is present in abdominal vessels and solid organs', 'No obvious free air is seen on this single image']
+2026-04-08T23:08:57  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are there calcifications present on the abdominal aorta?'
+2026-04-08T23:08:57  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T23:08:58  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2894ms
+2026-04-08T23:08:58  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial CT image through the abdomen showing multiple contrast-opacified and gas-filled bowel loops. Both kidneys and central abdominal vascular structures are visible, along with the posterior spine and surrounding soft tissues.
+2026-04-08T23:08:58  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple dilated bowel loops with mixed gas and fluid contents', 'Central mesenteric soft tissue/edematous appearance', 'Oral or intraluminal contrast visible within bowel loops']
+2026-04-08T23:08:58  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2925ms
+2026-04-08T23:08:59  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are there calcifications present on the abdominal aorta?'
+2026-04-08T23:08:59  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are there calcifications present on the abdominal aorta?'
+2026-04-08T23:08:59  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T23:08:59  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1816ms
+2026-04-08T23:08:59  DEBUG     medvqa.agents.question_analyzer  Target entity: calcifications on the abdominal aorta  Expected format: yes_no  Rephrased: Are there calcifications present on the abdominal aorta?
+2026-04-08T23:08:59  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are there calcifications present on the abdominal aorta?'  modality=CT  body_region=abdomen  question_type=yes_no
+2026-04-08T23:08:59  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['abdominal aorta']
+2026-04-08T23:08:59  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-08T23:08:59  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=high  question_type=yes_no  duration=4764ms
+2026-04-08T23:09:01  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1677ms
+2026-04-08T23:09:01  DEBUG     medvqa.agents.question_analyzer  Target entity: calcifications on the abdominal aorta  Expected format: yes_no  Rephrased: Are there calcifications present on the abdominal aorta?
+2026-04-08T23:09:01  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=presence_absence  duration=1710ms
+2026-04-08T23:09:02  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-08T23:09:02  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=presence_absence  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=abdomen
+2026-04-08T23:09:03  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1634ms
+2026-04-08T23:09:03  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic search case on a moderately complex abdominal CT with overlapping bowel loops, so the finding may be present but not immediately conspicuous and merits retrieval-backed verification.
+2026-04-08T23:09:03  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1667ms
+2026-04-08T23:09:04  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-08T23:09:04  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-08T23:09:04  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='are there calcifications present on the abdominal aorta?'  modality=CT  body_region=abdomen  question_type=presence_absence  target_entity=calcifications on the abdominal aorta  advanced_rag=True
+2026-04-08T23:09:04  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=are there calcifications present on the abdominal aorta? | modality=CT | body_region=abdomen | finding=other | rewrite=True rerank=True reflection=True
+2026-04-08T23:09:05  INFO      medvqa.agents.advanced_rag  Query rewrite | original='are there calcifications present on the abdominal aorta?'
+2026-04-08T23:09:05  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='Are there calcifications, atherosclerotic calcifications, or vascular wall calcification present in the abdominal aorta on CT of the abdomen? Evaluate for abdominal aortic calcification, aortic atherosclerosis, and intimal or mural calcified plaque.'  changed=True
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen': 209 matches
+2026-04-08T23:09:05  INFO      medvqa.agents.advanced_rag  Metadata filter result: 2 candidates after intersection
+2026-04-08T23:09:05  INFO      medvqa.agents.advanced_rag  Metadata filter: 2 candidates retained
+2026-04-08T23:09:05  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 2 candidates
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 2/2
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.4110 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.3821 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-08T23:09:05  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 2 candidates
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 2/2
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=-0.1449 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=-0.1533 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=2 sparse=2
+2026-04-08T23:09:05  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 2 unique candidates
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 2/2
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.0323 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag  Reranking skipped; using first 2 merged candidates
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 2/2
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T23:09:05  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.0323 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-08T23:09:05  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 2 retrieved candidates
+2026-04-08T23:09:05  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 2 retrieved candidates via LLM
+2026-04-08T23:09:07  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=False  confidence=low  recommendation=reject
+2026-04-08T23:09:07  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ['Neither retrieved case addresses abdominal aortic calcifications or vascular calcification.', 'Both cases are CT abdomen, so modality matches, but the clinical topics are different (renal mass, bowel obstruction/perforation).', 'The answers may be medically plausible for their own questions, but they do not help determine whether calcifications are present on the abdominal aorta.']
+2026-04-08T23:09:07  WARNING   medvqa.agents.advanced_rag  Self-reflection rejected retrieved candidates (relevant=False, recommendation=reject)
+2026-04-08T23:09:07  WARNING   medvqa.agents.advanced_rag  Self-reflection flagged low quality; returning best available candidates
+2026-04-08T23:09:07  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 2 final candidates
+2026-04-08T23:09:07  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 2/2
+2026-04-08T23:09:07  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T23:09:07  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.0323 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-08T23:09:07  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 2 similar cases  (query_rewritten=True  finding_category=other)
+2026-04-08T23:09:13  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=2  duration=9267ms
+2026-04-08T23:09:13  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Aortic calcifications on CT usually appear as bright, high-attenuation linear or punctate foci along the vessel wall.', 'A normal abdominal aorta may show no visible calcified plaque, especially in younger patients.', 'Calcification is commonly associated with atherosclerotic disease and may coexist with vascular enlargement or other vascular abnormalities.', 'Assessment should follow the course of the abdominal aorta, including the suprarenal and infrarenal segments.']
+2026-04-08T23:09:13  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On abdominal CT, the abdominal aorta is evaluated for atherosclerotic calcification, aneurysm, and mural thrombus. For a presence/absence question, the key finding is whether there is visible high-att
+2026-04-08T23:09:13  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=2  duration=9300ms
+2026-04-08T23:09:14  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-08T23:09:14  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are there calcifications present on the abdominal aorta?'  is_retry=False  question_type=presence_absence  yes_no=True
+2026-04-08T23:09:14  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=2
+2026-04-08T23:09:14  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=presence_absence
+2026-04-08T23:09:16  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=medium  duration=2459ms
+2026-04-08T23:09:16  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: 1) Identified the abdominal aorta among the central abdominal vascular structures on CT. 2) Looked for bright, dense calcified foci along the aortic wall. 3) No such calcifications were described in the image analysis or visible in the provided summary, so the most defensible answer is no.
+2026-04-08T23:09:16  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial CT abdomen with visible major abdominal vessels including the abdominal aorta', 'No reported high-attenuation calcified plaque along the aortic wall', 'Image analysis focuses on bowel dilation and mesenteric edema rather than vascular calcification']
+2026-04-08T23:09:16  DEBUG     medvqa.agents.reasoning_agent  Limitations: The assessment is based on the provided image analysis summary rather than direct pixel-level review, so subtle aortic wall calcifications could be missed.
+2026-04-08T23:09:16  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=medium  duration=2491ms
+2026-04-08T23:09:17  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-08T23:09:17  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='are there calcifications present on the abdominal aorta?'  question_type=presence_absence
+2026-04-08T23:09:20  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=3/5  duration=2267ms
+2026-04-08T23:09:20  WARNING   medvqa.agents.verification_agent  Verification issues: ['The explanation claims absence of aortic calcification, but the provided visual analysis does not explicitly confirm or describe the aortic wall appearance.', "The answer is a definitive 'no' despite limited evidence from a single axial CT image, making it somewhat stronger than warranted."]
+2026-04-08T23:09:20  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-08T23:09:20  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct yes/no format for a presence/absence question, and there is no direct contradiction with the visual summary. However, the explanation is not strongly grounded in the supplied image analysis, and the negative conclusion is slightly overconfident given the limited contextual evidence.
+2026-04-08T23:09:20  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2303ms
+2026-04-08T23:09:20  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-08T23:09:20  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-08T23:09:20  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-08T23:09:20  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-08T23:09:20  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=partially_verified  guardrail_flag=False  consistency=low  cross_modal=low  duration=25167ms
+2026-04-08T23:09:20  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='no'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-08T23:09:20  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-08T23:09:20  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-08T23:09:20  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  retries=0  total_duration=25172ms ===
+2026-04-08T23:09:20  INFO      medvqa.routes.dataset  Sample 1883 analysis complete  baseline=1780ms  workflow=4770ms  agentic=25179ms  total=25179ms
+2026-04-08T23:09:20  INFO      medvqa.routes.dataset  Sample 1883 answers  baseline='Yes, there are calcifications present on the abdominal aorta'  workflow='Yes'  agentic='no'  ground_truth='yes'

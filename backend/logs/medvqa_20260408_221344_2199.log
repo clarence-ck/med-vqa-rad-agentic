@@ -1,0 +1,60 @@
+2026-04-08T22:50:53  INFO      medvqa.routes.dataset  Cache MISS for sample 2199  question='where is the abnormality located?'  refresh=False  running all 3 pipelines in parallel
+2026-04-08T22:50:53  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=213085 bytes  question='where is the abnormality located?'
+2026-04-08T22:50:53  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='where is the abnormality located?'  mime_type=image/png  size=213085 bytes ===
+2026-04-08T22:50:53  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-08T22:50:53  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=213085 bytes)
+2026-04-08T22:50:54  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-08T22:50:54  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=213085 bytes)
+2026-04-08T22:50:54  DEBUG     medvqa.agents.baseline  Raw baseline response: {"is_radiology_image":true,"answer":"The abnormality is located in the left cerebral hemisphere, near the temporal/parietal region.","explanation":"This is an axial brain MRI showing a large cystic lesion on the left side of the brain. The mass is centered in the left temporal-parietal area with surrounding mass effect.","confidence":"high"}
+2026-04-08T22:50:54  INFO      medvqa.agents.baseline  Baseline done  answer='The abnormality is located in the left cerebral hemisphere, near the temporal/pa'  confidence=high  duration=1355ms
+2026-04-08T22:50:55  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2169ms
+2026-04-08T22:50:55  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial MRI image of the brain. A large rounded fluid-containing lesion is visible in the left temporal region, causing local mass effect on adjacent brain tissue.
+2026-04-08T22:50:55  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large cystic-appearing intracranial lesion in the left temporal region', 'Surrounding mass effect/distortion of adjacent structures', 'Prominent fluid signal intensity within the lesion']
+2026-04-08T22:50:55  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where is the abnormality located?'
+2026-04-08T22:50:55  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T22:50:56  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2117ms
+2026-04-08T22:50:56  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial brain MRI slice. A large fluid-filled cystic appearing lesion is visible along the left cerebral hemisphere, causing mass effect on adjacent brain tissue and sulcal effacement in the surrounding region.
+2026-04-08T22:50:56  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large well-circumscribed cystic-appearing intracranial lesion on the left side', 'Adjacent compression/mass effect on surrounding brain parenchyma', 'Asymmetric appearance of the left cerebral hemisphere compared with the right']
+2026-04-08T22:50:56  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain  duration=2149ms
+2026-04-08T22:50:57  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=clear  duration=1752ms
+2026-04-08T22:50:57  DEBUG     medvqa.agents.question_analyzer  Target entity: abnormality  Expected format: short_phrase  Rephrased: where is the abnormality located?
+2026-04-08T22:50:57  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='where is the abnormality located?'  modality=MRI  body_region=brain  question_type=location
+2026-04-08T22:50:57  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-08T22:50:57  DEBUG     medvqa.agents.workflow_baseline  Branch taken: location
+2026-04-08T22:50:57  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='brain'  confidence=medium  question_type=location  duration=3977ms
+2026-04-08T22:50:57  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='where is the abnormality located?'
+2026-04-08T22:50:57  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where is the abnormality located?'
+2026-04-08T22:50:57  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T22:50:58  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=clear  duration=1805ms
+2026-04-08T22:50:58  DEBUG     medvqa.agents.question_analyzer  Target entity: abnormality  Expected format: short_phrase  Rephrased: where is the abnormality located?
+2026-04-08T22:50:58  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=1836ms
+2026-04-08T22:50:59  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-08T22:50:59  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=False  modality=MRI  region=brain
+2026-04-08T22:51:01  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1656ms
+2026-04-08T22:51:01  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a straightforward localization task on an obvious cystic mass with mass effect, with minimal interpretive ambiguity despite the complex brain anatomy.
+2026-04-08T22:51:01  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1684ms
+2026-04-08T22:51:02  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-08T22:51:02  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='where is the abnormality located?'  is_retry=False  question_type=location  yes_no=False
+2026-04-08T22:51:02  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-08T22:51:04  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Left cerebral hemisphere'  confidence=high  duration=1933ms
+2026-04-08T22:51:04  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the scan as an axial brain MRI.', 'Locate the large fluid-filled/cystic lesion on the left side of the image.', 'Note associated mass effect and sulcal effacement in the adjacent left hemisphere.', 'Conclude the abnormality is in the left cerebral hemisphere.']
+2026-04-08T22:51:04  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Large well-circumscribed cystic-appearing intracranial lesion on the left side', 'Adjacent compression/mass effect on surrounding brain parenchyma', 'Asymmetric appearance of the left cerebral hemisphere compared with the right', 'Sulcal effacement in the surrounding region']
+2026-04-08T22:51:04  DEBUG     medvqa.agents.reasoning_agent  Limitations: Exact intra-axial versus extra-axial origin cannot be determined from the provided summary alone.
+2026-04-08T22:51:04  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Left cerebral hemisphere'  confidence=high  duration=1964ms
+2026-04-08T22:51:07  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-08T22:51:07  INFO      medvqa.agents.verification_agent  Verifying answer='Left cerebral hemisphere'  question='where is the abnormality located?'  question_type=location
+2026-04-08T22:51:09  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1466ms
+2026-04-08T22:51:09  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-08T22:51:09  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer is a concise location phrase and matches the question type. The explanation is consistent with the provided visual analysis, which describes a large cystic-appearing lesion along the left cerebral hemisphere with mass effect and sulcal effacement. No contradictions or overstatements are evident.
+2026-04-08T22:51:09  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1495ms
+2026-04-08T22:51:09  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed']
+2026-04-08T22:51:09  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-08T22:51:09  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-08T22:51:09  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-08T22:51:09  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Left cerebral hemisphere'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=15858ms
+2026-04-08T22:51:09  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Left cerebral hemisphere'  verification=verified  confidence=High  flag_review=False
+2026-04-08T22:51:09  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-08T22:51:09  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-08T22:51:09  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Left cerebral hemisphere'  retries=0  total_duration=15863ms ===
+2026-04-08T22:51:09  INFO      medvqa.routes.dataset  Sample 2199 analysis complete  baseline=1361ms  workflow=3980ms  agentic=15867ms  total=15867ms
+2026-04-08T22:51:09  INFO      medvqa.routes.dataset  Sample 2199 answers  baseline='The abnormality is located in the left cerebral hemisphere, '  workflow='brain'  agentic='Left cerebral hemisphere'  ground_truth='right temporal lobe'

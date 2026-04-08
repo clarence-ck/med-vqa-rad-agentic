@@ -1,0 +1,210 @@
+2026-04-08T22:05:05  INFO      medvqa  Session started  file=medvqa_20260408_220505_f820fc61.log  session_id=f820fc61
+2026-04-08T22:05:17  INFO      medvqa.agents.knowledge_retriever  Advanced RAG module loaded successfully
+2026-04-08T22:05:17  INFO      medvqa.server  ============================================================
+2026-04-08T22:05:17  INFO      medvqa.server  MedVisionQuery API  v1.0.0  starting up
+2026-04-08T22:05:17  INFO      medvqa.server  CORS origins: ['http://localhost:5173']
+2026-04-08T22:05:17  INFO      medvqa.server  ============================================================
+2026-04-08T22:05:17  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-08T22:05:17  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-08T22:05:17  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=22ms
+2026-04-08T22:05:17  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-08T22:05:17  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-08T22:05:17  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=19ms
+2026-04-08T22:06:47  INFO      medvqa.server  → POST /api/analyze
+2026-04-08T22:06:47  INFO      medvqa.server  → POST /api/analyze/workflow
+2026-04-08T22:06:47  INFO      medvqa.server  → POST /api/analyze/baseline
+2026-04-08T22:06:47  INFO      medvqa.routes.analyze  [agentic-pipeline] request  image=pikachu.png  size=33399 bytes  question='What is the body part being scanned here?'
+2026-04-08T22:06:47  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='What is the body part being scanned here?'  mime_type=image/png  size=33399 bytes ===
+2026-04-08T22:06:47  INFO      medvqa.routes.analyze  [workflow] request  image=pikachu.png  size=33399 bytes  question='What is the body part being scanned here?'
+2026-04-08T22:06:47  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-08T22:06:47  INFO      medvqa.routes.analyze  [baseline] request  image=pikachu.png  size=33399 bytes  question='What is the body part being scanned here?'
+2026-04-08T22:06:47  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=33399 bytes  question='What is the body part being scanned here?'
+2026-04-08T22:06:47  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=33399 bytes)
+2026-04-08T22:06:49  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-08T22:06:49  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=33399 bytes)
+2026-04-08T22:06:50  DEBUG     medvqa.agents.baseline  Raw baseline response: {"is_radiology_image": false,"answer":"Not a radiology image; it appears to be a pixel-art image of a cat face.","explanation":"The image is a stylized cartoon/pixel-art graphic rather than an X-ray, CT, MRI, ultrasound, or other radiology scan. Therefore there is no body part being scanned.","confidence":"high"}
+2026-04-08T22:06:50  WARNING   medvqa.agents.baseline  Non-radiology image detected in baseline. Aborting.
+2026-04-08T22:06:50  ERROR     medvqa.agents.baseline  Unexpected error in baseline: The uploaded image does not appear to be a radiology image. Please upload a valid X-ray, CT, MRI, or Ultrasound.
+2026-04-08T22:06:50  INFO      medvqa.routes.analyze  [baseline] done  answer='Baseline error.'  confidence=unverified  duration=2890ms
+2026-04-08T22:06:50  INFO      medvqa.server  ← POST /api/analyze/baseline  status=200  duration=2898ms
+2026-04-08T22:06:51  WARNING   medvqa.agents.image_interpreter  Non-radiology image detected. Aborting pipeline.
+2026-04-08T22:06:51  WARNING   medvqa.agents.orchestrator  Agentic pipeline halted by ImageBlockerAbort: The uploaded image does not appear to be a radiology image. Please upload a valid X-ray, CT, MRI, or Ultrasound.
+2026-04-08T22:06:51  INFO      medvqa.routes.analyze  [agentic-pipeline] done  answer='The uploaded image does not appear to be a radiology image. Please upload a valid X-ray, CT, MRI, or Ultrasound.'  verification=rejected  confidence=unknown  duration=3977ms
+2026-04-08T22:06:51  INFO      medvqa.server  ← POST /api/analyze  status=200  duration=3984ms
+2026-04-08T22:06:52  WARNING   medvqa.agents.image_interpreter  Non-radiology image detected. Aborting pipeline.
+2026-04-08T22:06:52  ERROR     medvqa.agents.workflow_baseline  Image interpretation failed in workflow: The uploaded image does not appear to be a radiology image. Please upload a valid X-ray, CT, MRI, or Ultrasound.
+2026-04-08T22:06:52  INFO      medvqa.routes.analyze  [workflow] done  answer='Workflow failed: image interpretation error.'  confidence=unverified  duration=4778ms
+2026-04-08T22:06:52  INFO      medvqa.server  ← POST /api/analyze/workflow  status=200  duration=4785ms
+2026-04-08T22:10:22  INFO      medvqa.server  → POST /api/analyze
+2026-04-08T22:10:22  INFO      medvqa.server  → POST /api/analyze/baseline
+2026-04-08T22:10:22  INFO      medvqa.server  → POST /api/analyze/workflow
+2026-04-08T22:10:22  INFO      medvqa.routes.analyze  [agentic-pipeline] request  image=4x4 fake mnist.png  size=47200 bytes  question='Do a prognosis'
+2026-04-08T22:10:22  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='Do a prognosis'  mime_type=image/png  size=47200 bytes ===
+2026-04-08T22:10:22  INFO      medvqa.routes.analyze  [baseline] request  image=4x4 fake mnist.png  size=47200 bytes  question='Do a prognosis'
+2026-04-08T22:10:22  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-08T22:10:22  INFO      medvqa.routes.analyze  [workflow] request  image=4x4 fake mnist.png  size=47200 bytes  question='Do a prognosis'
+2026-04-08T22:10:22  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=47200 bytes  question='Do a prognosis'
+2026-04-08T22:10:22  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=47200 bytes)
+2026-04-08T22:10:23  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-08T22:10:24  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=47200 bytes)
+2026-04-08T22:10:25  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": false,
+  "answer": "This is not a radiology image, so a medical prognosis cannot be determined from it.",
+  "explanation": "The image appears to be a grid of handwritten digits rather than an X-ray, CT, MRI, or other medical radiology study. Prognosis requires relevant clinical and imaging information.",
+  "confidence": "high"
+}
+2026-04-08T22:10:25  WARNING   medvqa.agents.baseline  Non-radiology image detected in baseline. Aborting.
+2026-04-08T22:10:25  ERROR     medvqa.agents.baseline  Unexpected error in baseline: The uploaded image does not appear to be a radiology image. Please upload a valid X-ray, CT, MRI, or Ultrasound.
+2026-04-08T22:10:25  INFO      medvqa.routes.analyze  [baseline] done  answer='Baseline error.'  confidence=unverified  duration=2104ms
+2026-04-08T22:10:25  INFO      medvqa.server  ← POST /api/analyze/baseline  status=200  duration=2108ms
+2026-04-08T22:10:25  WARNING   medvqa.agents.image_interpreter  Non-radiology image detected. Aborting pipeline.
+2026-04-08T22:10:25  ERROR     medvqa.agents.workflow_baseline  Image interpretation failed in workflow: The uploaded image does not appear to be a radiology image. Please upload a valid X-ray, CT, MRI, or Ultrasound.
+2026-04-08T22:10:25  INFO      medvqa.routes.analyze  [workflow] done  answer='Workflow failed: image interpretation error.'  confidence=unverified  duration=2315ms
+2026-04-08T22:10:25  INFO      medvqa.server  ← POST /api/analyze/workflow  status=200  duration=2321ms
+2026-04-08T22:10:25  WARNING   medvqa.agents.image_interpreter  Non-radiology image detected. Aborting pipeline.
+2026-04-08T22:10:25  WARNING   medvqa.agents.orchestrator  Agentic pipeline halted by ImageBlockerAbort: The uploaded image does not appear to be a radiology image. Please upload a valid X-ray, CT, MRI, or Ultrasound.
+2026-04-08T22:10:25  INFO      medvqa.routes.analyze  [agentic-pipeline] done  answer='The uploaded image does not appear to be a radiology image. Please upload a valid X-ray, CT, MRI, or Ultrasound.'  verification=rejected  confidence=unknown  duration=3033ms
+2026-04-08T22:10:25  INFO      medvqa.server  ← POST /api/analyze  status=200  duration=3038ms
+2026-04-08T22:11:58  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:11:59  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=0
+2026-04-08T22:11:59  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=0  skipped=0
+2026-04-08T22:11:59  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=338ms
+2026-04-08T22:12:01  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:12:01  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=0
+2026-04-08T22:12:01  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=0  skipped=0
+2026-04-08T22:12:01  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2ms
+2026-04-08T22:14:08  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:14:08  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=0
+2026-04-08T22:14:08  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=0  skipped=0
+2026-04-08T22:14:08  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=3ms
+2026-04-08T22:14:48  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:14:48  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=1
+2026-04-08T22:14:48  WARNING   medvqa.routes.dataset  GPU compute capability 6.1 is below recommended threshold; using CPU for BioBERT
+2026-04-08T22:14:48  INFO      medvqa.routes.dataset  Loading BioBERT embedding model on device: cpu
+2026-04-08T22:14:53  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=1  skipped=0
+2026-04-08T22:14:53  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=5247ms
+2026-04-08T22:15:10  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:15:10  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=2
+2026-04-08T22:15:10  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=2  skipped=0
+2026-04-08T22:15:10  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=754ms
+2026-04-08T22:16:44  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:16:44  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=6
+2026-04-08T22:16:47  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=6  skipped=0
+2026-04-08T22:16:47  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2622ms
+2026-04-08T22:17:11  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:17:11  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=6
+2026-04-08T22:17:14  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=6  skipped=0
+2026-04-08T22:17:14  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2644ms
+2026-04-08T22:17:21  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:17:21  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=6
+2026-04-08T22:17:23  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=6  skipped=0
+2026-04-08T22:17:23  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2579ms
+2026-04-08T22:19:16  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:19:16  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=11
+2026-04-08T22:19:22  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=11  skipped=0
+2026-04-08T22:19:22  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=6310ms
+2026-04-08T22:21:01  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:21:01  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=16
+2026-04-08T22:21:09  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=16  skipped=0
+2026-04-08T22:21:09  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=7179ms
+2026-04-08T22:21:48  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:21:48  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=18
+2026-04-08T22:21:57  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=18  skipped=0
+2026-04-08T22:21:57  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=8816ms
+2026-04-08T22:23:53  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:23:53  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=24
+2026-04-08T22:24:04  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=24  skipped=0
+2026-04-08T22:24:04  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=10958ms
+2026-04-08T22:24:12  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:24:12  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=25
+2026-04-08T22:24:24  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=25  skipped=0
+2026-04-08T22:24:24  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=11636ms
+2026-04-08T22:25:38  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:25:38  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=30
+2026-04-08T22:25:51  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=30  skipped=0
+2026-04-08T22:25:51  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=13393ms
+2026-04-08T22:26:13  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:26:13  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=32
+2026-04-08T22:26:27  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=32  skipped=0
+2026-04-08T22:26:27  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=13874ms
+2026-04-08T22:26:53  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:26:53  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=33
+2026-04-08T22:27:09  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=33  skipped=0
+2026-04-08T22:27:09  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=15513ms
+2026-04-08T22:27:45  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-08T22:27:45  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-08T22:27:45  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=31ms
+2026-04-08T22:27:45  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-08T22:27:45  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-08T22:27:45  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=21ms
+2026-04-08T22:27:47  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:27:47  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=36
+2026-04-08T22:28:03  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=36  skipped=0
+2026-04-08T22:28:03  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=15934ms
+2026-04-08T22:30:14  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:30:14  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=42
+2026-04-08T22:30:31  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=42  skipped=0
+2026-04-08T22:30:31  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=17879ms
+2026-04-08T22:31:04  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:31:04  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=45
+2026-04-08T22:31:23  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=45  skipped=0
+2026-04-08T22:31:23  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=18904ms
+2026-04-08T22:32:07  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:32:07  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=48
+2026-04-08T22:32:28  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=48  skipped=0
+2026-04-08T22:32:28  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=20952ms
+2026-04-08T22:34:09  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:34:09  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=53
+2026-04-08T22:34:33  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=53  skipped=0
+2026-04-08T22:34:33  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=23849ms
+2026-04-08T22:38:11  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-08T22:38:11  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-08T22:38:11  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=16ms
+2026-04-08T22:38:11  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-08T22:38:11  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-08T22:38:11  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=13ms
+2026-04-08T22:38:13  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:38:13  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=65
+2026-04-08T22:38:42  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=65  skipped=0
+2026-04-08T22:38:42  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=29172ms
+2026-04-08T22:41:19  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T22:41:19  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=73
+2026-04-08T22:41:57  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=73  skipped=0
+2026-04-08T22:41:57  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=37739ms
+2026-04-08T23:10:20  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T23:10:20  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=142
+2026-04-08T23:11:45  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=142  skipped=0
+2026-04-08T23:11:45  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=85140ms
+2026-04-08T23:14:07  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-08T23:14:07  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-08T23:14:07  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=17ms
+2026-04-08T23:14:07  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-08T23:14:07  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-08T23:14:07  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=16ms
+2026-04-08T23:14:12  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T23:14:12  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=151
+2026-04-08T23:15:30  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=151  skipped=0
+2026-04-08T23:15:30  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=78360ms
+2026-04-08T23:16:09  INFO      medvqa.server  → GET /api/dataset/sample/2032/analysis
+2026-04-08T23:16:09  INFO      medvqa.routes.dataset  Cache HIT for sample 2032 (question='what organ system is shown?')
+2026-04-08T23:16:09  INFO      medvqa.server  ← GET /api/dataset/sample/2032/analysis  status=200  duration=21ms
+2026-04-08T23:18:45  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T23:18:45  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=163
+2026-04-08T23:20:09  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=163  skipped=0
+2026-04-08T23:20:09  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=84359ms
+2026-04-08T23:21:20  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T23:21:20  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=168
+2026-04-08T23:22:48  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=168  skipped=0
+2026-04-08T23:22:48  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=87459ms
+2026-04-08T23:24:43  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T23:24:43  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=177
+2026-04-08T23:26:14  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=177  skipped=0
+2026-04-08T23:26:14  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=90964ms
+2026-04-08T23:26:58  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T23:26:58  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=183
+2026-04-08T23:28:41  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=183  skipped=0
+2026-04-08T23:28:41  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=102703ms
+2026-04-08T23:31:11  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-08T23:31:11  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=196
+2026-04-08T23:32:56  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=196  skipped=0
+2026-04-08T23:32:56  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=104724ms

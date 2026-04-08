@@ -1,0 +1,67 @@
+2026-04-08T22:59:57  INFO      medvqa.routes.dataset  Cache MISS for sample 1807  question='are the temporal bones fractured?'  refresh=False  running all 3 pipelines in parallel
+2026-04-08T22:59:57  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=125689 bytes  question='are the temporal bones fractured?'
+2026-04-08T22:59:57  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are the temporal bones fractured?'  mime_type=image/png  size=125689 bytes ===
+2026-04-08T22:59:57  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-08T22:59:57  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=125689 bytes)
+2026-04-08T22:59:58  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-08T22:59:58  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=125689 bytes)
+2026-04-08T22:59:59  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=head/brain  quality=good  findings=4  duration=1897ms
+2026-04-08T22:59:59  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the head demonstrates the intracranial contents with the skull surrounding the brain. There is a large low-attenuation cystic-appearing lesion in the left frontal/temporal region with surrounding mass effect and adjacent midline structures visible.
+2026-04-08T22:59:59  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large rounded low-density intracranial lesion on the left side', 'Mass effect on adjacent brain structures', 'Curvilinear hyperdense foci along the lesion margin', 'No acute hemorrhage is clearly visible on this single slice']
+2026-04-08T22:59:59  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the temporal bones fractured?'
+2026-04-08T22:59:59  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T22:59:59  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=head  quality=good  findings=3  duration=1755ms
+2026-04-08T22:59:59  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the head showing the brain and surrounding bony calvarium. There is a large rounded low-attenuation lesion within the left frontal region with surrounding mass effect on adjacent brain structures.
+2026-04-08T22:59:59  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large well-circumscribed hypodense intracranial lesion in the left frontal region', 'Mild mass effect on adjacent parenchyma', 'No obvious acute skull fracture visible on this slice']
+2026-04-08T22:59:59  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=head  duration=1793ms
+2026-04-08T23:00:00  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1230ms
+2026-04-08T23:00:00  DEBUG     medvqa.agents.question_analyzer  Target entity: temporal bone fracture  Expected format: yes_no  Rephrased: Are the temporal bones fractured?
+2026-04-08T23:00:00  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are the temporal bones fractured?'  modality=CT  body_region=head/brain  question_type=presence_absence
+2026-04-08T23:00:00  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-08T23:00:00  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-08T23:00:00  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=medium  question_type=presence_absence  duration=3193ms
+2026-04-08T23:00:00  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are the temporal bones fractured?'
+2026-04-08T23:00:00  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the temporal bones fractured?'
+2026-04-08T23:00:00  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T23:00:01  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=989ms
+2026-04-08T23:00:01  DEBUG     medvqa.agents.question_analyzer  Target entity: temporal bones  Expected format: yes_no  Rephrased: Are the temporal bones fractured?
+2026-04-08T23:00:01  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=1019ms
+2026-04-08T23:00:02  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No, the temporal bones do not appear fractured on this image.",
+  "explanation": "This is a head CT showing the temporal bones on both sides. I do not see a clear cortical break or displaced bony fragment to suggest a temporal bone fracture.",
+  "confidence": "medium"
+}
+2026-04-08T23:00:02  INFO      medvqa.agents.baseline  Baseline done  answer='No, the temporal bones do not appear fractured on this image.'  confidence=medium  duration=4908ms
+2026-04-08T23:00:02  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-08T23:00:02  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=head
+2026-04-08T23:00:10  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=7885ms
+2026-04-08T23:00:10  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clean, high-contrast CT with an obvious large low-attenuation mass effect lesion and uncomplicated anatomy, making it a classic easy yes/no radiology case.
+2026-04-08T23:00:10  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=7912ms
+2026-04-08T23:00:11  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-08T23:00:11  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are the temporal bones fractured?'  is_retry=False  question_type=yes_no  yes_no=True
+2026-04-08T23:00:11  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-08T23:00:11  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-08T23:00:13  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=low  duration=2359ms
+2026-04-08T23:00:13  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the question target as the temporal bones on head CT.', 'Reviewed the described visible bony structures for fracture lines or cortical disruption.', 'Noted that the image analysis explicitly states no obvious acute skull fracture is visible on this slice.', 'Concluded there is no visual evidence supporting temporal bone fracture.']
+2026-04-08T23:00:13  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['CT head image analysis noting no obvious acute skull fracture visible on this slice', 'Visible skull/temporal bone region without described cortical discontinuity or fracture line', 'Primary finding is a left frontal hypodense lesion with mild mass effect, not a bony injury']
+2026-04-08T23:00:13  DEBUG     medvqa.agents.reasoning_agent  Limitations: Only a single slice is described, and temporal bone fractures can be subtle or missed without full multi-slice review and bone-window inspection.
+2026-04-08T23:00:13  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=low  duration=2395ms
+2026-04-08T23:00:14  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-08T23:00:14  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='are the temporal bones fractured?'  question_type=yes_no
+2026-04-08T23:00:16  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Low  checks=5/5  duration=2010ms
+2026-04-08T23:00:16  WARNING   medvqa.agents.verification_agent  Verification issues: ["The answer 'no' is plausible but only weakly supported from a single axial CT slice.", 'Temporal bone fractures can be difficult to exclude definitively without reviewing the full CT series and bone windows.']
+2026-04-08T23:00:16  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-08T23:00:16  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct yes/no format and is consistent with the provided visual summary, which does not mention a temporal bone fracture. However, the conclusion is based on limited image evidence and should be treated cautiously.
+2026-04-08T23:00:16  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Low  duration=2042ms
+2026-04-08T23:00:16  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-08T23:00:16  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-08T23:00:16  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=5/5
+2026-04-08T23:00:16  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-08T23:00:16  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=19345ms
+2026-04-08T23:00:16  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='no'  verification=partially_verified  confidence=Low  flag_review=False
+2026-04-08T23:00:16  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-08T23:00:16  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-08T23:00:16  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  retries=0  total_duration=19352ms ===
+2026-04-08T23:00:16  INFO      medvqa.routes.dataset  Sample 1807 analysis complete  baseline=4913ms  workflow=3195ms  agentic=19352ms  total=19354ms
+2026-04-08T23:00:16  INFO      medvqa.routes.dataset  Sample 1807 answers  baseline='No, the temporal bones do not appear fractured on this image'  workflow='Yes'  agentic='no'  ground_truth='no'

@@ -1,0 +1,111 @@
+2026-04-08T23:12:33  INFO      medvqa.routes.dataset  Cache MISS for sample 1872  question='are there hyper attenuating material along the aortic walls?'  refresh=False  running all 3 pipelines in parallel
+2026-04-08T23:12:33  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=424987 bytes  question='are there hyper attenuating material along the aortic walls?'
+2026-04-08T23:12:33  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are there hyper attenuating material along the aortic walls?'  mime_type=image/png  size=424987 bytes ===
+2026-04-08T23:12:33  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-08T23:12:33  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=424987 bytes)
+2026-04-08T23:12:33  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-08T23:12:33  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=424987 bytes)
+2026-04-08T23:12:34  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No, there are no obvious hyperattenuating materials along the aortic walls.",
+  "explanation": "This is an axial CT image of the abdomen. The aorta is visible centrally, and there is no clear hyperattenuating lining or material along its walls on this slice.",
+  "confidence": "medium"
+}
+2026-04-08T23:12:34  INFO      medvqa.agents.baseline  Baseline done  answer='No, there are no obvious hyperattenuating materials along the aortic walls.'  confidence=medium  duration=1756ms
+2026-04-08T23:12:35  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2464ms
+2026-04-08T23:12:35  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial contrast-enhanced CT image of the abdomen. Multiple bowel loops are visible along with the kidneys, central mesenteric vessels, and lumbar spine. There is prominent bowel gas and oral contrast within the intestinal lumen.
+2026-04-08T23:12:35  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple fluid- and gas-filled bowel loops are visible', 'Oral contrast is present within several bowel segments', 'No obvious free intraperitoneal air is seen on this single slice']
+2026-04-08T23:12:35  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are there hyper attenuating material along the aortic walls?'
+2026-04-08T23:12:35  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T23:12:36  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2733ms
+2026-04-08T23:12:36  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial contrast-enhanced CT image of the abdomen. Multiple gas-filled and fluid-filled bowel loops are visible, along with the kidneys, spine, and central abdominal vessels.
+2026-04-08T23:12:36  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple dilated bowel loops with mixed gas and fluid content', 'Prominent mesenteric vessels and central mesenteric soft tissue attenuation', 'No obvious free intraperitoneal air on this single image']
+2026-04-08T23:12:36  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2762ms
+2026-04-08T23:12:36  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1061ms
+2026-04-08T23:12:36  DEBUG     medvqa.agents.question_analyzer  Target entity: hyperattenuating material along the aortic walls  Expected format: yes_no  Rephrased: Are there hyperattenuating material along the aortic walls?
+2026-04-08T23:12:36  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are there hyper attenuating material along the aortic walls?'  modality=CT  body_region=abdomen  question_type=yes_no
+2026-04-08T23:12:36  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-08T23:12:36  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-08T23:12:36  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='No'  confidence=low  question_type=yes_no  duration=3583ms
+2026-04-08T23:12:37  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are there hyper attenuating material along the aortic walls?'
+2026-04-08T23:12:37  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are there hyper attenuating material along the aortic walls?'
+2026-04-08T23:12:37  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T23:12:38  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1125ms
+2026-04-08T23:12:38  DEBUG     medvqa.agents.question_analyzer  Target entity: hyperattenuating material along the aortic walls  Expected format: yes_no  Rephrased: Are there hyperattenuating material along the aortic walls?
+2026-04-08T23:12:38  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=1153ms
+2026-04-08T23:12:39  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-08T23:12:39  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=abdomen
+2026-04-08T23:12:40  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1578ms
+2026-04-08T23:12:40  DEBUG     medvqa.agents.difficulty_router  Routing rationale: The study has moderate anatomical complexity with overlapping gas-filled bowel loops, so the case is best treated as a systematic search rather than an obvious spot diagnosis.
+2026-04-08T23:12:40  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1605ms
+2026-04-08T23:12:41  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-08T23:12:41  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-08T23:12:41  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='are there hyper attenuating material along the aortic walls?'  modality=CT  body_region=abdomen  question_type=yes_no  target_entity=hyperattenuating material along the aortic walls  advanced_rag=True
+2026-04-08T23:12:41  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=are there hyper attenuating material along the aortic walls? | modality=CT | body_region=abdomen | finding=other | rewrite=True rerank=True reflection=True
+2026-04-08T23:12:42  INFO      medvqa.agents.advanced_rag  Query rewrite | original='are there hyper attenuating material along the aortic walls?'
+2026-04-08T23:12:42  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='On abdominal CT, is there hyperattenuating material, high-attenuation mural thickening, or hyperdense plaque along the walls of the abdominal aorta, including the aortic wall or mural calcification? Evaluate for intramural hematoma, acute aortic syndrome, hemorrhage, thrombus, or other hyperdense periaortic/aortic wall abnormality.'  changed=True
+2026-04-08T23:12:42  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-08T23:12:42  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen': 209 matches
+2026-04-08T23:12:42  INFO      medvqa.agents.advanced_rag  Metadata filter result: 2 candidates after intersection
+2026-04-08T23:12:42  INFO      medvqa.agents.advanced_rag  Metadata filter: 2 candidates retained
+2026-04-08T23:12:42  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-08T23:12:43  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 2 candidates
+2026-04-08T23:12:43  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 2/2
+2026-04-08T23:12:43  DEBUG     medvqa.agents.advanced_rag    1. id=147 score=0.4674 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-08T23:12:43  DEBUG     medvqa.agents.advanced_rag    2. id=1403 score=0.4556 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T23:12:43  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-08T23:12:43  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 2 candidates
+2026-04-08T23:12:43  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 2/2
+2026-04-08T23:12:43  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=-0.2174 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T23:12:43  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=-0.2300 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-08T23:12:43  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=2 sparse=2
+2026-04-08T23:12:43  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 2 unique candidates
+2026-04-08T23:12:43  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 2/2
+2026-04-08T23:12:43  DEBUG     medvqa.agents.advanced_rag    1. id=147 score=0.0325 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-08T23:12:43  DEBUG     medvqa.agents.advanced_rag    2. id=1403 score=0.0325 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T23:12:43  DEBUG     medvqa.agents.advanced_rag  Reranking skipped; using first 2 merged candidates
+2026-04-08T23:12:43  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 2/2
+2026-04-08T23:12:43  DEBUG     medvqa.agents.advanced_rag    1. id=147 score=0.0325 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-08T23:12:43  DEBUG     medvqa.agents.advanced_rag    2. id=1403 score=0.0325 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T23:12:43  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 2 retrieved candidates
+2026-04-08T23:12:43  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 2 retrieved candidates via LLM
+2026-04-08T23:12:45  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=False  confidence=high  recommendation=reject
+2026-04-08T23:12:45  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ['Neither retrieved case addresses hyperattenuating material along the aortic walls or aortic pathology.', 'The cases focus on small bowel obstruction/perforation and a left renal mass, which are different abdominal findings.', 'Although the modality matches CT, the clinical topics are not sufficiently related to the original question.']
+2026-04-08T23:12:45  WARNING   medvqa.agents.advanced_rag  Self-reflection rejected retrieved candidates (relevant=False, recommendation=reject)
+2026-04-08T23:12:45  WARNING   medvqa.agents.advanced_rag  Self-reflection flagged low quality; returning best available candidates
+2026-04-08T23:12:45  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 2 final candidates
+2026-04-08T23:12:45  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 2/2
+2026-04-08T23:12:45  DEBUG     medvqa.agents.advanced_rag    1. id=147 score=0.0325 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-08T23:12:45  DEBUG     medvqa.agents.advanced_rag    2. id=1403 score=0.0325 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T23:12:45  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 2 similar cases  (query_rewritten=True  finding_category=other)
+2026-04-08T23:12:55  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=2  duration=13540ms
+2026-04-08T23:12:55  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The abdominal aorta is evaluated on CT for wall calcification, mural thrombus, aneurysm, and dissection.', 'Hyperattenuation along the aortic wall on noncontrast CT often corresponds to calcified atherosclerosis.', 'A normal aortic wall should not show focal linear or curvilinear high-density material.', 'Contrast phase matters: enhancement can make vessels appear denser, so comparison with surrounding structures and noncontrast images is important.', 'Associated findings such as aortic enlargement, periaortic stranding, or intimal flap may suggest more significant pathology.']
+2026-04-08T23:12:55  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On abdominal CT, the aortic walls are normally smooth and should not contain obvious hyperattenuating material. Hyperattenuating material along the aortic wall can represent calcified atherosclerotic 
+2026-04-08T23:12:55  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=2  duration=13571ms
+2026-04-08T23:12:56  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-08T23:12:56  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are there hyper attenuating material along the aortic walls?'  is_retry=False  question_type=yes_no  yes_no=True
+2026-04-08T23:12:56  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=2
+2026-04-08T23:12:56  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-08T23:12:59  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=low  duration=2889ms
+2026-04-08T23:12:59  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: 1) Identified the abdominal aorta on the axial CT image. 2) Looked for linear or curvilinear high-density material along the aortic wall. 3) No definite hyperattenuating wall material was visible on this slice, so the most defensible answer is no.
+2026-04-08T23:12:59  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial contrast-enhanced abdominal CT image', 'Aorta partially visualized without obvious focal high-density wall material', 'No clear aortic wall calcification, mural hematoma, or intimal abnormality on the provided image analysis', 'Prominent findings were bowel dilation and mesenteric soft tissue/vessels rather than aortic wall pathology']
+2026-04-08T23:12:59  DEBUG     medvqa.agents.reasoning_agent  Limitations: Only a single CT slice is provided, and contrast enhancement can obscure subtle wall calcification or mural abnormalities. Full series and noncontrast images would better assess the aortic wall.
+2026-04-08T23:12:59  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=low  duration=2921ms
+2026-04-08T23:13:00  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-08T23:13:00  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='are there hyper attenuating material along the aortic walls?'  question_type=yes_no
+2026-04-08T23:13:02  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Low  checks=5/5  duration=2229ms
+2026-04-08T23:13:02  WARNING   medvqa.agents.verification_agent  Verification issues: ["The image only partially visualizes the aorta, so a definitive 'no' is somewhat stronger than the available evidence supports.", 'The explanation appropriately notes limited visualization, but the answer itself may still be too conclusive for the slice provided.']
+2026-04-08T23:13:02  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-08T23:13:02  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct yes/no format and the explanation is consistent with the visual summary. However, because the aortic wall is only partially seen, absence of hyperattenuating material cannot be confidently confirmed from this image alone. The answer is plausible but should be qualified.
+2026-04-08T23:13:02  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Low  duration=2266ms
+2026-04-08T23:13:02  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-08T23:13:02  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-08T23:13:02  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=5/5
+2026-04-08T23:13:02  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-08T23:13:02  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=29446ms
+2026-04-08T23:13:02  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='no'  verification=partially_verified  confidence=Low  flag_review=False
+2026-04-08T23:13:02  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-08T23:13:02  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-08T23:13:02  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  retries=0  total_duration=29451ms ===
+2026-04-08T23:13:02  INFO      medvqa.routes.dataset  Sample 1872 analysis complete  baseline=1761ms  workflow=3586ms  agentic=29454ms  total=29455ms
+2026-04-08T23:13:02  INFO      medvqa.routes.dataset  Sample 1872 answers  baseline='No, there are no obvious hyperattenuating materials along th'  workflow='No'  agentic='no'  ground_truth='yes'

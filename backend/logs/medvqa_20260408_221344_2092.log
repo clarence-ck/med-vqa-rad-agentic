@@ -1,0 +1,147 @@
+2026-04-08T22:47:59  INFO      medvqa.routes.dataset  Cache MISS for sample 2092  question='how large is the mass?'  refresh=False  running all 3 pipelines in parallel
+2026-04-08T22:47:59  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=366382 bytes  question='how large is the mass?'
+2026-04-08T22:47:59  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='how large is the mass?'  mime_type=image/png  size=366382 bytes ===
+2026-04-08T22:47:59  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-08T22:47:59  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=366382 bytes)
+2026-04-08T22:48:00  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-08T22:48:00  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=366382 bytes)
+2026-04-08T22:48:02  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "The mass appears to be approximately 6 cm in size.",
+  "explanation": "This is an abdominal CT image showing a large soft-tissue mass in the upper abdomen/pancreatic region. Exact measurement is limited without image scale, but it appears roughly 6 cm across.",
+  "confidence": "low"
+}
+2026-04-08T22:48:02  INFO      medvqa.agents.baseline  Baseline done  answer='The mass appears to be approximately 6 cm in size.'  confidence=low  duration=2993ms
+2026-04-08T22:48:03  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2425ms
+2026-04-08T22:48:03  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the abdomen showing upper abdominal solid organs and bowel loops. The slice includes the liver, kidneys, pancreas region, and major retroperitoneal vessels with adjacent bowel gas.
+2026-04-08T22:48:03  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large heterogeneous soft tissue mass in the upper abdomen near the pancreatic region', 'Contrast-opacified major vessels and kidneys are visible', 'Bowel gas present without obvious obstruction on this single slice']
+2026-04-08T22:48:03  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2449ms
+2026-04-08T22:48:03  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=3651ms
+2026-04-08T22:48:03  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver, kidneys, bowel loops, and major abdominal vessels are visible, along with the lumbar spine and surrounding soft tissues.
+2026-04-08T22:48:03  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large rounded low-attenuation mass-like structure in the upper abdomen near the pancreas/stomach region', 'Small amount of gas within bowel loops in the upper abdomen', 'Contrast opacification of the renal collecting systems and abdominal vessels']
+2026-04-08T22:48:03  INFO      medvqa.agents.question_analyzer  Analyzing question: 'how large is the mass?'
+2026-04-08T22:48:03  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T22:48:03  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='how large is the mass?'
+2026-04-08T22:48:03  INFO      medvqa.agents.question_analyzer  Analyzing question: 'how large is the mass?'
+2026-04-08T22:48:03  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T22:48:05  INFO      medvqa.agents.question_analyzer  Question analysis done  type=other  reasoning=visual_recognition  med_knowledge=True  clarity=ambiguous  duration=1318ms
+2026-04-08T22:48:05  DEBUG     medvqa.agents.question_analyzer  Target entity: mass size  Expected format: short_phrase  Rephrased: What is the size of the mass?
+2026-04-08T22:48:05  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=other  duration=1355ms
+2026-04-08T22:48:05  INFO      medvqa.agents.question_analyzer  Question analysis done  type=other  reasoning=visual_recognition  med_knowledge=False  clarity=ambiguous  duration=1665ms
+2026-04-08T22:48:05  DEBUG     medvqa.agents.question_analyzer  Target entity: mass size  Expected format: short_phrase  Rephrased: What is the size of the mass?
+2026-04-08T22:48:05  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='how large is the mass?'  modality=CT  body_region=abdomen  question_type=other
+2026-04-08T22:48:05  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-08T22:48:05  DEBUG     medvqa.agents.workflow_baseline  Branch taken: fallback/other
+2026-04-08T22:48:05  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Axial contrast-enhanced CT image of the upper abdomen. The liver, kidneys, bowel'  confidence=low  question_type=other  duration=5381ms
+2026-04-08T22:48:05  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-08T22:48:05  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=other  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=abdomen
+2026-04-08T22:48:07  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1395ms
+2026-04-08T22:48:07  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic review case with moderate anatomical complexity and potential overlap, making the target finding likely subtle rather than immediately conspicuous.
+2026-04-08T22:48:07  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1426ms
+2026-04-08T22:48:07  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-08T22:48:07  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-08T22:48:07  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='how large is the mass?'  modality=CT  body_region=abdomen  question_type=other  target_entity=mass size  advanced_rag=True
+2026-04-08T22:48:07  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=how large is the mass? | modality=CT | body_region=abdomen | finding=mass | rewrite=True rerank=True reflection=True
+2026-04-08T22:48:09  INFO      medvqa.agents.advanced_rag  Query rewrite | original='how large is the mass?'
+2026-04-08T22:48:09  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='On abdominal CT, what is the size, dimensions, or maximal diameter of the mass or lesion? Include measurements in centimeters or millimeters, and consider related terms such as tumor, neoplasm, focal mass, or soft tissue lesion in the abdomen.'  changed=True
+2026-04-08T22:48:09  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-08T22:48:09  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen': 209 matches
+2026-04-08T22:48:09  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='mass': 158 matches
+2026-04-08T22:48:09  INFO      medvqa.agents.advanced_rag  Metadata filter result: 1 candidates after intersection
+2026-04-08T22:48:09  INFO      medvqa.agents.advanced_rag  Metadata filter: 1 candidates retained
+2026-04-08T22:48:09  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-08T22:48:09  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 1 candidates
+2026-04-08T22:48:09  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 1/1
+2026-04-08T22:48:09  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.4651 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T22:48:09  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-08T22:48:09  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 1 candidates
+2026-04-08T22:48:09  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 1/1
+2026-04-08T22:48:09  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=-2.7465 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T22:48:09  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=1 sparse=1
+2026-04-08T22:48:09  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 1 unique candidates
+2026-04-08T22:48:09  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 1/1
+2026-04-08T22:48:09  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T22:48:09  DEBUG     medvqa.agents.advanced_rag  Reranking skipped; using first 1 merged candidates
+2026-04-08T22:48:09  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 1/1
+2026-04-08T22:48:09  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T22:48:09  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 1 retrieved candidates
+2026-04-08T22:48:09  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 1 retrieved candidates via LLM
+2026-04-08T22:48:10  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=True  confidence=low  recommendation=augment
+2026-04-08T22:48:10  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ['The retrieved case is about identifying the organ of origin of a mass, not estimating its size.', 'Modality matches (CT abdomen), but the question focus differs from the original question.', 'The answer does not provide any quantitative information about mass size.']
+2026-04-08T22:48:10  INFO      medvqa.agents.advanced_rag  Self-reflection accepted retrieved candidates
+2026-04-08T22:48:10  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 1 final candidates
+2026-04-08T22:48:10  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 1/1
+2026-04-08T22:48:10  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T22:48:10  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 1 similar cases  (query_rewritten=True  finding_category=mass)
+2026-04-08T22:48:14  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=1  duration=6265ms
+2026-04-08T22:48:14  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Mass size on CT is typically reported in centimeters using the longest visible axis.', 'If a lesion is irregular, radiologists may provide multiple dimensions instead of a single measurement.', 'Comparing the mass to adjacent structures such as the kidney, liver, spleen, or vertebral body helps estimate scale.', 'Contrast enhancement can help define lesion margins, but measurement should be taken on the clearest sequence and plane.', 'Accurate size documentation is important for follow-up comparison and treatment planning.']
+2026-04-08T22:48:14  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On abdominal CT, the size of a mass is usually estimated by measuring its maximal diameter on axial images, and sometimes by documenting three orthogonal dimensions if needed. The retrieved similar ca
+2026-04-08T22:48:14  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=1  duration=6296ms
+2026-04-08T22:48:14  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-08T22:48:14  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='how large is the mass?'  is_retry=False  question_type=other  yes_no=False
+2026-04-08T22:48:14  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=1
+2026-04-08T22:48:17  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Large'  confidence=medium  duration=2342ms
+2026-04-08T22:48:17  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the abnormal lesion described as a large heterogeneous soft tissue mass.', 'Checked whether any measurements or labeled dimensions were provided.', 'Since only qualitative size was available, answered with the observed descriptor rather than an exact measurement.']
+2026-04-08T22:48:17  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Notable finding: large heterogeneous soft tissue mass in the upper abdomen near the pancreatic region', 'CT axial abdomen image includes adjacent structures for rough scale, but no explicit measurement markers', 'Question asks for size, but image analysis does not provide numeric dimensions']
+2026-04-08T22:48:17  DEBUG     medvqa.agents.reasoning_agent  Limitations: The exact size cannot be measured from the provided description alone; only a qualitative assessment of 'large' is supported.
+2026-04-08T22:48:17  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Large'  confidence=medium  duration=2371ms
+2026-04-08T22:48:18  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-08T22:48:18  INFO      medvqa.agents.verification_agent  Verifying answer='Large'  question='how large is the mass?'  question_type=other
+2026-04-08T22:48:21  INFO      medvqa.agents.verification_agent  Verification done  status=low_confidence  confidence=Low  checks=3/5  duration=3241ms
+2026-04-08T22:48:21  WARNING   medvqa.agents.verification_agent  Verification issues: ["The answer 'Large' is qualitative but does not provide a measurable size as implied by the question.", "The explanation mentions a 'large heterogeneous soft tissue mass' and a 'pancreatic region,' but the provided image analysis does not confirm a visible mass or its size.", 'The response may be overconfident because no actual measurement is available in the visual analysis.']
+2026-04-08T22:48:21  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-08T22:48:21  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is formatted appropriately and is not directly contradictory, but the explanation is not well grounded in the provided image analysis and the size claim is unsupported. A cautious disclaimer about the lack of measurable dimensions is warranted.
+2026-04-08T22:48:21  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=low_confidence  confidence=Low  duration=3272ms
+2026-04-08T22:48:21  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['low_confidence']
+2026-04-08T22:48:21  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=True  fallback=add_disclaimer  disclaimer=True
+2026-04-08T22:48:21  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-08T22:48:21  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-08T22:48:21  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Large'  verification=low_confidence  guardrail_flag=True  consistency=low  cross_modal=low  duration=21632ms
+2026-04-08T22:48:21  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Large'  verification=low_confidence  confidence=Low  flag_review=True
+2026-04-08T22:48:21  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=low_confidence  flag_review=True  high_severity=True  -> retry=True
+2026-04-08T22:48:21  INFO      medvqa.agents.orchestrator  Pipeline RETRY triggered  reason: verification_status=low_confidence; fallback=add_disclaimer; flag_for_review=True
+2026-04-08T22:48:21  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=True)
+2026-04-08T22:48:22  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-08T22:48:22  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=366382 bytes)
+2026-04-08T22:48:24  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=4  duration=2670ms
+2026-04-08T22:48:24  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial contrast-enhanced CT image of the upper abdomen. The liver, kidneys, major vessels, bowel gas, and retroperitoneal structures are visible on a single cross-sectional slice.
+2026-04-08T22:48:24  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large heterogeneous soft tissue mass in the central upper abdomen/retroperitoneal region', 'Adjacent bowel gas distention visible', 'Bilateral kidneys are opacified with contrast on this slice', 'Calcified vascular structure or contrast-enhanced vessel seen anterior to the spine']
+2026-04-08T22:48:24  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2703ms
+2026-04-08T22:48:25  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='how large is the mass?'
+2026-04-08T22:48:25  INFO      medvqa.agents.question_analyzer  Analyzing question: 'how large is the mass?'
+2026-04-08T22:48:25  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T22:48:26  INFO      medvqa.agents.question_analyzer  Question analysis done  type=other  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=966ms
+2026-04-08T22:48:26  DEBUG     medvqa.agents.question_analyzer  Target entity: mass size  Expected format: short_phrase  Rephrased: how large is the mass?
+2026-04-08T22:48:26  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=other  duration=994ms
+2026-04-08T22:48:27  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-08T22:48:27  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=other  reasoning=visual_recognition  med_knowledge=False  modality=CT  region=abdomen
+2026-04-08T22:48:28  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1382ms
+2026-04-08T22:48:28  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a straightforward cross-sectional abdominal CT with uncomplicated anatomy and no indicated overlap or artifact burden, so it fits an easy visual-recognition case.
+2026-04-08T22:48:28  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1410ms
+2026-04-08T22:48:29  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=True
+2026-04-08T22:48:29  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='how large is the mass?'  is_retry=True  question_type=other  yes_no=False
+2026-04-08T22:48:29  INFO      medvqa.agents.reasoning_agent  Retry context  prev_status=low_confidence  prev_confidence=Low  fallback=add_disclaimer
+2026-04-08T22:48:29  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-08T22:48:34  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Large; exact size cannot be determined from this single slice.'  confidence=low  duration=4602ms
+2026-04-08T22:48:34  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the target finding as a heterogeneous soft tissue mass in the upper abdomen/retroperitoneum.', 'Noted that the mass is explicitly described as large.', 'Checked for any numeric measurements or scale information and found none.', 'Therefore answered conservatively with the qualitative size only.']
+2026-04-08T22:48:34  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Large heterogeneous soft tissue mass in the central upper abdomen/retroperitoneal region', 'Single axial contrast-enhanced CT slice with no reported measurements', 'Visible adjacent structures without a calibrated scale']
+2026-04-08T22:48:34  DEBUG     medvqa.agents.reasoning_agent  Limitations: The exact size cannot be measured from the provided description alone; only a qualitative estimate of 'large' is supported.
+2026-04-08T22:48:34  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Large; exact size cannot be determined from this single slic'  confidence=low  duration=4633ms
+2026-04-08T22:48:35  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-08T22:48:35  INFO      medvqa.agents.verification_agent  Verifying answer='Large; exact size cannot be determined from this single slice.'  question='how large is the mass?'  question_type=other
+2026-04-08T22:48:36  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=5/5  duration=1699ms
+2026-04-08T22:48:36  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-08T22:48:36  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is consistent with the provided CT context: it describes the mass as large, which is supported by the image analysis, and appropriately notes that exact size cannot be determined from a single slice. The answer is a short phrase, matching the expected format, and there are no contradictions with the visual summary.
+2026-04-08T22:48:36  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=1728ms
+2026-04-08T22:48:36  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-08T22:48:36  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-08T22:48:36  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=5/5
+2026-04-08T22:48:36  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-08T22:48:36  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Large; exact size cannot be determined from this single slic'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=37077ms
+2026-04-08T22:48:36  INFO      medvqa.agents.orchestrator  Pipeline attempt 2 result  answer='Large; exact size cannot be determined from this single slic'  verification=partially_verified  confidence=Medium
+2026-04-08T22:48:36  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=3  confidence_rank=2  high_failures=0  review=0
+2026-04-08T22:48:36  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=2  confidence_rank=1  high_failures=1  review=1
+2026-04-08T22:48:36  INFO      medvqa.agents.orchestrator  Pipeline RETRY winner: attempt 2 (higher score)
+2026-04-08T22:48:36  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Large; exact size cannot be determined from this single slic'  retries=1  total_duration=37084ms ===
+2026-04-08T22:48:36  INFO      medvqa.routes.dataset  Sample 2092 analysis complete  baseline=2999ms  workflow=5382ms  agentic=37087ms  total=37087ms
+2026-04-08T22:48:36  INFO      medvqa.routes.dataset  Sample 2092 answers  baseline='The mass appears to be approximately 6 cm in size.'  workflow='Axial contrast-enhanced CT image of the upper abdomen. The l'  agentic='Large; exact size cannot be determined from this single slic'  ground_truth='5mm'

@@ -1,0 +1,111 @@
+2026-04-08T23:27:25  INFO      medvqa.routes.dataset  Cache MISS for sample 2207  question='does this look like a healthy liver?'  refresh=False  running all 3 pipelines in parallel
+2026-04-08T23:27:25  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=121817 bytes  question='does this look like a healthy liver?'
+2026-04-08T23:27:25  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='does this look like a healthy liver?'  mime_type=image/png  size=121817 bytes ===
+2026-04-08T23:27:25  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-08T23:27:25  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=121817 bytes)
+2026-04-08T23:27:26  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-08T23:27:26  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=121817 bytes)
+2026-04-08T23:27:27  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "The liver does not appear obviously abnormal on this single CT slice, but I cannot reliably determine if it is completely healthy from this image alone.",
+  "explanation": "This is an abdominal CT image showing the liver among other structures. A single slice is not enough to assess overall liver health, and there are no clear obvious focal abnormalities visible here.",
+  "confidence": "low"
+}
+2026-04-08T23:27:27  INFO      medvqa.agents.baseline  Baseline done  answer='The liver does not appear obviously abnormal on this single CT slice, but I cann'  confidence=low  duration=1317ms
+2026-04-08T23:27:28  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2286ms
+2026-04-08T23:27:28  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The solid abdominal organs and bowel loops are visible in cross-section, along with the spine and surrounding soft tissues.
+2026-04-08T23:27:28  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Contrast opacification of abdominal vessels and some bowel lumen', 'No obvious large acute abnormality visible on this single slice', 'Mild asymmetry of renal enhancement/appearance may be present on this image alone']
+2026-04-08T23:27:28  INFO      medvqa.agents.question_analyzer  Analyzing question: 'does this look like a healthy liver?'
+2026-04-08T23:27:28  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T23:27:28  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2061ms
+2026-04-08T23:27:28  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver, kidneys, bowel, and major abdominal vessels are visible, with oral contrast/opacified fluid in the stomach and adjacent bowel loops.
+2026-04-08T23:27:28  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Contrast opacification of upper abdominal gastrointestinal tract', 'No obvious gross free air or large fluid collection visible on this single slice', 'Limited single-image view of the abdomen']
+2026-04-08T23:27:28  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2118ms
+2026-04-08T23:27:29  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='does this look like a healthy liver?'
+2026-04-08T23:27:29  INFO      medvqa.agents.question_analyzer  Analyzing question: 'does this look like a healthy liver?'
+2026-04-08T23:27:29  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T23:27:30  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=medical_knowledge  med_knowledge=True  clarity=clear  duration=1359ms
+2026-04-08T23:27:30  DEBUG     medvqa.agents.question_analyzer  Target entity: liver health/normal appearance  Expected format: yes_no  Rephrased: Does the liver in this image appear healthy?
+2026-04-08T23:27:30  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=1420ms
+2026-04-08T23:27:31  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-08T23:27:31  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=medical_knowledge  med_knowledge=True  modality=CT  region=abdomen
+2026-04-08T23:27:33  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1625ms
+2026-04-08T23:27:33  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic-search abdominal CT case with moderate anatomic complexity and potential overlap from opacified bowel, making the answer non-obvious but not severely limited by artifacts.
+2026-04-08T23:27:33  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1672ms
+2026-04-08T23:27:33  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-08T23:27:34  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-08T23:27:34  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='does this look like a healthy liver?'  modality=CT  body_region=abdomen  question_type=yes_no  target_entity=liver health/normal appearance  advanced_rag=True
+2026-04-08T23:27:34  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=does this look like a healthy liver? | modality=CT | body_region=abdomen | finding=other | rewrite=True rerank=True reflection=True
+2026-04-08T23:27:35  INFO      medvqa.agents.advanced_rag  Query rewrite | original='does this look like a healthy liver?'
+2026-04-08T23:27:35  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='Does this abdominal computed tomography (CT) scan show a normal, healthy liver, or are there signs of hepatic abnormality such as fatty liver disease (hepatic steatosis), cirrhosis, hepatomegaly, focal liver lesion, mass, cyst, or other liver pathology? Please assess liver size, contour, attenuation/density, enhancement, and overall hepatic appearance on CT abdomen.'  changed=True
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen': 209 matches
+2026-04-08T23:27:35  INFO      medvqa.agents.advanced_rag  Metadata filter result: 2 candidates after intersection
+2026-04-08T23:27:35  INFO      medvqa.agents.advanced_rag  Metadata filter: 2 candidates retained
+2026-04-08T23:27:35  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 2 candidates
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 2/2
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.5173 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.4370 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-08T23:27:35  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 2 candidates
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 2/2
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=-0.3624 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=-0.3833 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=2 sparse=2
+2026-04-08T23:27:35  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 2 unique candidates
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 2/2
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.0323 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag  Reranking skipped; using first 2 merged candidates
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 2/2
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T23:27:35  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.0323 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-08T23:27:35  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 2 retrieved candidates
+2026-04-08T23:27:35  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 2 retrieved candidates via LLM
+2026-04-08T23:27:35  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=comparison  med_knowledge=True  clarity=clear  duration=7301ms
+2026-04-08T23:27:35  DEBUG     medvqa.agents.question_analyzer  Target entity: liver health / appearance of the liver  Expected format: yes_no  Rephrased: Does this liver appear healthy on the CT image?
+2026-04-08T23:27:35  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='does this look like a healthy liver?'  modality=CT  body_region=abdomen  question_type=yes_no
+2026-04-08T23:27:35  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['liver']
+2026-04-08T23:27:35  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-08T23:27:35  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=high  question_type=yes_no  duration=9702ms
+2026-04-08T23:27:36  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=False  confidence=low  recommendation=reject
+2026-04-08T23:27:36  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ['The original question is about assessing liver health on an abdominal CT, while the retrieved cases concern a left kidney mass and small bowel obstruction/perforated viscus.', 'Although the modality matches (CT abdomen), the clinical topics are not liver-focused and do not help answer whether the liver looks healthy.', 'The retrieved answers are not directly useful for evaluating liver appearance or hepatic pathology.']
+2026-04-08T23:27:36  WARNING   medvqa.agents.advanced_rag  Self-reflection rejected retrieved candidates (relevant=False, recommendation=reject)
+2026-04-08T23:27:36  WARNING   medvqa.agents.advanced_rag  Self-reflection flagged low quality; returning best available candidates
+2026-04-08T23:27:36  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 2 final candidates
+2026-04-08T23:27:36  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 2/2
+2026-04-08T23:27:36  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-08T23:27:36  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.0323 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-08T23:27:36  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 2 similar cases  (query_rewritten=True  finding_category=other)
+2026-04-08T23:27:39  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=2  duration=5473ms
+2026-04-08T23:27:39  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Normal liver CT appearance is homogeneous in attenuation with smooth, well-defined borders.', 'The liver should not show focal masses, cysts, abscesses, or areas of abnormal enhancement on a routine scan.', 'Signs of liver disease may include nodular contour, enlargement or shrinkage, fatty change, or dilated bile ducts.', 'Comparison with surrounding organs and vessels helps assess liver size, shape, and internal uniformity.']
+2026-04-08T23:27:39  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On abdominal CT, a healthy liver typically has smooth margins, uniform density, and no focal masses or abnormal enlargement. The retrieved similar cases show that CT questions often hinge on identifyi
+2026-04-08T23:27:39  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=2  duration=5519ms
+2026-04-08T23:27:40  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-08T23:27:40  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='does this look like a healthy liver?'  is_retry=False  question_type=yes_no  yes_no=True
+2026-04-08T23:27:40  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=2
+2026-04-08T23:27:40  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-08T23:27:44  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='yes'  confidence=medium  duration=4454ms
+2026-04-08T23:27:44  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: 1) Identified the liver on the upper abdominal CT slice. 2) Assessed its contour, size, and internal attenuation. 3) Noted smooth borders and no obvious focal lesion or diffuse abnormality visible on this single image. 4) Concluded it looks consistent with a healthy-appearing liver, while acknowledging the limited single-slice view.
+2026-04-08T23:27:44  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial contrast-enhanced CT of the upper abdomen showing the liver', 'Smooth liver contour', 'Fairly uniform hepatic attenuation', 'No obvious focal hepatic mass or cyst on the visible slice', 'No gross biliary dilation or surrounding inflammatory change seen on this single image']
+2026-04-08T23:27:44  DEBUG     medvqa.agents.reasoning_agent  Limitations: This is a single CT slice, so subtle diffuse disease or small lesions could be missed.
+2026-04-08T23:27:44  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='yes'  confidence=medium  duration=4511ms
+2026-04-08T23:27:45  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-08T23:27:45  INFO      medvqa.agents.verification_agent  Verifying answer='yes'  question='does this look like a healthy liver?'  question_type=yes_no
+2026-04-08T23:27:48  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=4/5  duration=2550ms
+2026-04-08T23:27:48  WARNING   medvqa.agents.verification_agent  Verification issues: ["The answer 'yes' is somewhat too strong for a single CT slice and cannot reliably establish that the liver is healthy.", 'The explanation is grounded in visible CT features, but it only supports absence of obvious abnormality on this image, not a definitive assessment of liver health.']
+2026-04-08T23:27:48  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-08T23:27:48  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is correctly formatted for a yes/no question and the explanation references visible CT findings. However, calling the liver 'healthy' is stronger than what can be concluded from one axial contrast-enhanced slice. A more cautious phrasing would be that there are no obvious gross abnormalities seen on this image.
+2026-04-08T23:27:48  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2642ms
+2026-04-08T23:27:48  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-08T23:27:48  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-08T23:27:48  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-08T23:27:48  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-08T23:27:48  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='yes'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=22405ms
+2026-04-08T23:27:48  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='yes'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-08T23:27:48  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-08T23:27:48  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-08T23:27:48  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='yes'  retries=0  total_duration=22412ms ===
+2026-04-08T23:27:48  INFO      medvqa.routes.dataset  Sample 2207 analysis complete  baseline=1321ms  workflow=9705ms  agentic=22417ms  total=22417ms
+2026-04-08T23:27:48  INFO      medvqa.routes.dataset  Sample 2207 answers  baseline='The liver does not appear obviously abnormal on this single '  workflow='Yes'  agentic='yes'  ground_truth='yes'

@@ -1,0 +1,117 @@
+2026-04-08T23:17:22  INFO      medvqa.routes.dataset  Cache MISS for sample 2177  question='this image is consistent with what condition?'  refresh=False  running all 3 pipelines in parallel
+2026-04-08T23:17:22  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=172142 bytes  question='this image is consistent with what condition?'
+2026-04-08T23:17:22  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='this image is consistent with what condition?'  mime_type=image/png  size=172142 bytes ===
+2026-04-08T23:17:22  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-08T23:17:22  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=172142 bytes)
+2026-04-08T23:17:23  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Acute pancreatitis",
+  "explanation": "This axial CT abdomen shows an enlarged, inflamed pancreas with surrounding peripancreatic fat stranding and fluid, which is characteristic of acute pancreatitis.",
+  "confidence": "high"
+}
+2026-04-08T23:17:23  INFO      medvqa.agents.baseline  Baseline done  answer='Acute pancreatitis'  confidence=high  duration=1390ms
+2026-04-08T23:17:24  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-08T23:17:24  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=172142 bytes)
+2026-04-08T23:17:24  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2165ms
+2026-04-08T23:17:24  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the abdomen at the level of the mid-abdomen/pelvis. Bowel loops and surrounding soft tissues are visible, with the lumbar vertebral body centered posteriorly.
+2026-04-08T23:17:24  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Single axial abdominal CT slice with bowel gas present', 'No obvious acute osseous abnormality visible on this slice', 'Limited assessment due to single image only']
+2026-04-08T23:17:24  INFO      medvqa.agents.question_analyzer  Analyzing question: 'this image is consistent with what condition?'
+2026-04-08T23:17:24  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T23:17:25  INFO      medvqa.agents.question_analyzer  Question analysis done  type=other  reasoning=medical_knowledge  med_knowledge=True  clarity=clear  duration=1217ms
+2026-04-08T23:17:25  DEBUG     medvqa.agents.question_analyzer  Target entity: medical condition  Expected format: short_phrase  Rephrased: This image is consistent with what medical condition?
+2026-04-08T23:17:25  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='this image is consistent with what condition?'  modality=CT  body_region=abdomen  question_type=other
+2026-04-08T23:17:25  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-08T23:17:25  DEBUG     medvqa.agents.workflow_baseline  Branch taken: fallback/other
+2026-04-08T23:17:25  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Axial CT image of the abdomen at the level of the mid-abdomen/pelvis. Bowel loop'  confidence=low  question_type=other  duration=3442ms
+2026-04-08T23:17:26  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2163ms
+2026-04-08T23:17:26  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the abdomen showing a cross-sectional view through the mid-abdomen. Bowel loops with intraluminal gas are visible along with the central lumbar vertebral body and surrounding soft tissues.
+2026-04-08T23:17:26  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Single axial abdominal slice', 'Bowel gas is present', 'No obvious gross abnormality can be confidently assessed from this single image alone']
+2026-04-08T23:17:26  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2197ms
+2026-04-08T23:17:27  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='this image is consistent with what condition?'
+2026-04-08T23:17:27  INFO      medvqa.agents.question_analyzer  Analyzing question: 'this image is consistent with what condition?'
+2026-04-08T23:17:27  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T23:17:28  INFO      medvqa.agents.question_analyzer  Question analysis done  type=other  reasoning=medical_knowledge  med_knowledge=True  clarity=clear  duration=1087ms
+2026-04-08T23:17:28  DEBUG     medvqa.agents.question_analyzer  Target entity: medical condition  Expected format: short_phrase  Rephrased: This image is consistent with what condition?
+2026-04-08T23:17:28  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=other  duration=1121ms
+2026-04-08T23:17:29  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-08T23:17:29  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=other  reasoning=medical_knowledge  med_knowledge=True  modality=CT  region=abdomen
+2026-04-08T23:17:30  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1450ms
+2026-04-08T23:17:30  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic-review abdomen CT case with clear but nontrivial anatomy and no described striking artifact or obvious lesion, making it a medium-difficulty routing choice.
+2026-04-08T23:17:30  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1521ms
+2026-04-08T23:17:31  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-08T23:17:31  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-08T23:17:31  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='this image is consistent with what condition?'  modality=CT  body_region=abdomen  question_type=other  target_entity=medical condition  advanced_rag=True
+2026-04-08T23:17:31  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=this image is consistent with what condition? | modality=CT | body_region=abdomen | finding=device | rewrite=True rerank=True reflection=True
+2026-04-08T23:17:33  INFO      medvqa.agents.advanced_rag  Query rewrite | original='this image is consistent with what condition?'
+2026-04-08T23:17:33  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='Abdominal CT scan: this image is consistent with what condition, diagnosis, or pathology? Include differential diagnoses for computed tomography findings in the abdomen, such as inflammatory, infectious, obstructive, ischemic, neoplastic, traumatic, or vascular conditions.'  changed=True
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen': 209 matches
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='device': 14 matches
+2026-04-08T23:17:33  WARNING   medvqa.agents.advanced_rag  Metadata filter found no intersection; falling back to full corpus
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag  Metadata filter: none applied (full corpus search)
+2026-04-08T23:17:33  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag  Dense retrieval searching full FAISS index with 1793 vectors
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/20
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag    1. id=1036 score=0.6328 | Q: is this image a ct scan? | A: no
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag    2. id=927 score=0.6326 | Q: is this a ct scan? | A: yes
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag    3. id=1555 score=0.6260 | Q: is the image an ct scan? | A: no
+2026-04-08T23:17:33  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval searching full corpus of 1793 documents
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/20
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag    1. id=255 score=18.3361 | Q: the cystic findings in the bilateral apices are consistent with what pathology? | A: emphysema
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag    2. id=707 score=17.3497 | Q: is the etiology genetic or vascular? | A: vascular
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag    3. id=1318 score=16.5626 | Q: what disease origin is the lesion(eg, vascular vs. neoplastic)? | A: vascular
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=20 sparse=20
+2026-04-08T23:17:33  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 20 unique candidates
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/20
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag    1. id=386 score=0.0305 method=hybrid_rrf | Q: was this image taken with an mri or ct scanner? | A: ct
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag    2. id=1555 score=0.0304 method=hybrid_rrf | Q: is the image an ct scan? | A: no
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag    3. id=1036 score=0.0303 method=hybrid_rrf | Q: is this image a ct scan? | A: no
+2026-04-08T23:17:33  INFO      medvqa.agents.advanced_rag  Reranking 20 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-08T23:17:33  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 20 candidates...
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag    1. id=1036 score=-0.0353 method=reranked softmax=0.2300 | Q: is this image a ct scan? | A: no
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag    2. id=386 score=-0.3508 method=reranked softmax=0.1678 | Q: was this image taken with an mri or ct scanner? | A: ct
+2026-04-08T23:17:33  DEBUG     medvqa.agents.advanced_rag    3. id=1555 score=-0.4647 method=reranked softmax=0.1497 | Q: is the image an ct scan? | A: no
+2026-04-08T23:17:33  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 3 retrieved candidates
+2026-04-08T23:17:33  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 3 retrieved candidates via LLM
+2026-04-08T23:17:35  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=False  confidence=high  recommendation=reject
+2026-04-08T23:17:35  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ['Retrieved cases only address whether the image is a CT scan, not what abdominal condition it shows.', 'They do not provide diagnostic information relevant to the original question.', 'One retrieved answer is internally inconsistent with the question wording and likely reflects poor retrieval quality.']
+2026-04-08T23:17:35  WARNING   medvqa.agents.advanced_rag  Self-reflection rejected retrieved candidates (relevant=False, recommendation=reject)
+2026-04-08T23:17:35  WARNING   medvqa.agents.advanced_rag  Self-reflection flagged low quality; returning best available candidates
+2026-04-08T23:17:35  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-08T23:17:35  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-08T23:17:35  DEBUG     medvqa.agents.advanced_rag    1. id=1036 score=-0.0353 method=reranked softmax=0.2300 | Q: is this image a ct scan? | A: no
+2026-04-08T23:17:35  DEBUG     medvqa.agents.advanced_rag    2. id=386 score=-0.3508 method=reranked softmax=0.1678 | Q: was this image taken with an mri or ct scanner? | A: ct
+2026-04-08T23:17:35  DEBUG     medvqa.agents.advanced_rag    3. id=1555 score=-0.4647 method=reranked softmax=0.1497 | Q: is the image an ct scan? | A: no
+2026-04-08T23:17:35  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases  (query_rewritten=True  finding_category=device)
+2026-04-08T23:17:38  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=3  duration=7218ms
+2026-04-08T23:17:38  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['CT of the abdomen provides cross-sectional detail of bowel loops, abdominal wall, and retroperitoneal structures.', 'Luminal gas in bowel is often visible on CT and can help assess bowel caliber and obstruction.', 'The vertebral body and paraspinal muscles are normal landmark structures in abdominal CT images.', 'Retroperitoneal soft tissues should be evaluated for stranding, fluid, hemorrhage, or masses.', 'Abdominal wall defects can lead to hernias containing bowel or fat.']
+2026-04-08T23:17:38  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: This is an abdominal CT image, likely evaluated for bowel and retroperitoneal anatomy. The referenced similar cases mainly involved identifying the modality rather than a specific disease, so the key 
+2026-04-08T23:17:38  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=3  duration=7251ms
+2026-04-08T23:17:39  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-08T23:17:39  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='this image is consistent with what condition?'  is_retry=False  question_type=other  yes_no=False
+2026-04-08T23:17:39  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=3
+2026-04-08T23:17:42  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Normal abdominal CT'  confidence=low  duration=2734ms
+2026-04-08T23:17:42  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the modality as CT and the body region as abdomen.', 'Reviewed visible anatomy: bowel loops, gas, vertebral body, paraspinal and retroperitoneal soft tissues.', 'Looked for gross abnormalities such as dilated bowel, wall thickening, free air, fluid, mass, or abdominal wall defect.', 'Since none were confidently present, concluded the image is most consistent with a normal abdominal CT appearance.']
+2026-04-08T23:17:42  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial CT of the abdomen', 'Bowel loops with intraluminal gas present', 'Central lumbar vertebral body and surrounding soft tissues visible', 'No obvious gross abnormality confidently assessed from the single slice', 'No clear signs of obstruction, free air, or inflammatory change']
+2026-04-08T23:17:42  DEBUG     medvqa.agents.reasoning_agent  Limitations: Only a single axial slice is provided, which limits assessment of the full abdomen and makes subtle pathology difficult to exclude.
+2026-04-08T23:17:42  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Normal abdominal CT'  confidence=low  duration=2770ms
+2026-04-08T23:17:43  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-08T23:17:43  INFO      medvqa.agents.verification_agent  Verifying answer='Normal abdominal CT'  question='this image is consistent with what condition?'  question_type=other
+2026-04-08T23:17:46  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Low  checks=4/5  duration=2839ms
+2026-04-08T23:17:46  WARNING   medvqa.agents.verification_agent  Verification issues: ["The answer 'Normal abdominal CT' is more of an interpretation of normality than a specific condition, which may be too strong for a single CT slice.", 'The explanation relies on absence of abnormalities on one image, but a normal diagnosis cannot be confidently confirmed from a single slice alone.']
+2026-04-08T23:17:46  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-08T23:17:46  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is broadly consistent with the visual summary: it describes a normal-appearing axial abdominal CT without obvious acute findings. However, the conclusion is somewhat overconfident because a single image cannot exclude pathology elsewhere in the scan.
+2026-04-08T23:17:46  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Low  duration=2868ms
+2026-04-08T23:17:46  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-08T23:17:46  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-08T23:17:46  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-08T23:17:46  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-08T23:17:46  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Normal abdominal CT'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=23609ms
+2026-04-08T23:17:46  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Normal abdominal CT'  verification=partially_verified  confidence=Low  flag_review=False
+2026-04-08T23:17:46  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-08T23:17:46  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-08T23:17:46  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Normal abdominal CT'  retries=0  total_duration=23615ms ===
+2026-04-08T23:17:46  INFO      medvqa.routes.dataset  Sample 2177 analysis complete  baseline=1394ms  workflow=3444ms  agentic=23617ms  total=23627ms
+2026-04-08T23:17:46  INFO      medvqa.routes.dataset  Sample 2177 answers  baseline='Acute pancreatitis'  workflow='Axial CT image of the abdomen at the level of the mid-abdome'  agentic='Normal abdominal CT'  ground_truth='appendicitis'

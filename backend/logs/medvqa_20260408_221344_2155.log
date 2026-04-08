@@ -1,0 +1,115 @@
+2026-04-08T22:51:36  INFO      medvqa.routes.dataset  Cache MISS for sample 2155  question='are the lungs hyperinflated?'  refresh=False  running all 3 pipelines in parallel
+2026-04-08T22:51:36  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=423742 bytes  question='are the lungs hyperinflated?'
+2026-04-08T22:51:36  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are the lungs hyperinflated?'  mime_type=image/png  size=423742 bytes ===
+2026-04-08T22:51:36  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-08T22:51:36  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=423742 bytes)
+2026-04-08T22:51:37  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-08T22:51:37  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=423742 bytes)
+2026-04-08T22:51:38  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Yes, the lungs appear hyperinflated.",
+  "explanation": "The lungs appear increased in volume with relatively low, flattened diaphragms and expanded lung fields, which is consistent with hyperinflation. There is also mild peribronchial/interstitial prominence.",
+  "confidence": "medium"
+}
+2026-04-08T22:51:38  INFO      medvqa.agents.baseline  Baseline done  answer='Yes, the lungs appear hyperinflated.'  confidence=medium  duration=1878ms
+2026-04-08T22:51:39  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=4  duration=2460ms
+2026-04-08T22:51:39  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing both lungs and central cardiomediastinal silhouette. The lungs appear mildly hyperinflated with bilateral coarse/interstitial-appearing pulmonary markings, more prominent in the upper to mid lungs. No pleural effusion or pneumothorax is evident on this single view.
+2026-04-08T22:51:39  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Mild hyperinflation of the lungs', 'Bilateral increased interstitial/peribronchial pulmonary markings', 'Cardiomediastinal silhouette is not enlarged', 'No focal pleural effusion or pneumothorax visible']
+2026-04-08T22:51:39  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the lungs hyperinflated?'
+2026-04-08T22:51:39  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T22:51:40  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=Chest  quality=good  findings=4  duration=2214ms
+2026-04-08T22:51:40  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing both lungs and the cardiomediastinal silhouette. There are bilateral diffuse patchy interstitial and airspace opacities, more prominent in the upper and mid lungs, with no visible pleural effusion or pneumothorax.
+2026-04-08T22:51:40  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Diffuse bilateral pulmonary opacities', 'No pleural effusion', 'No pneumothorax', 'Cardiomediastinal silhouette is not enlarged']
+2026-04-08T22:51:40  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=Chest  duration=2242ms
+2026-04-08T22:51:40  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=933ms
+2026-04-08T22:51:40  DEBUG     medvqa.agents.question_analyzer  Target entity: lung hyperinflation  Expected format: yes_no  Rephrased: Are the lungs hyperinflated?
+2026-04-08T22:51:40  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are the lungs hyperinflated?'  modality=X-ray  body_region=chest  question_type=yes_no
+2026-04-08T22:51:40  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-08T22:51:40  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-08T22:51:40  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='No'  confidence=low  question_type=yes_no  duration=3457ms
+2026-04-08T22:51:40  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are the lungs hyperinflated?'
+2026-04-08T22:51:40  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the lungs hyperinflated?'
+2026-04-08T22:51:40  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T22:51:42  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1343ms
+2026-04-08T22:51:42  DEBUG     medvqa.agents.question_analyzer  Target entity: lung hyperinflation  Expected format: yes_no  Rephrased: Are the lungs hyperinflated?
+2026-04-08T22:51:42  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=1372ms
+2026-04-08T22:51:42  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-08T22:51:42  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=visual_recognition  med_knowledge=True  modality=X-ray  region=Chest
+2026-04-08T22:51:44  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1679ms
+2026-04-08T22:51:44  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic chest radiograph review with conspicuous but non-specific bilateral opacities and limited ability to answer confidently without clinical context, making it a medium-complexity case.
+2026-04-08T22:51:44  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1709ms
+2026-04-08T22:51:46  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-08T22:51:46  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-08T22:51:46  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='are the lungs hyperinflated?'  modality=X-ray  body_region=Chest  question_type=yes_no  target_entity=lung hyperinflation  advanced_rag=True
+2026-04-08T22:51:46  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=are the lungs hyperinflated? | modality=X-ray | body_region=Chest | finding=other | rewrite=True rerank=True reflection=True
+2026-04-08T22:51:47  INFO      medvqa.agents.advanced_rag  Query rewrite | original='are the lungs hyperinflated?'
+2026-04-08T22:51:47  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='Are the lungs hyperinflated on chest radiograph (chest X-ray), with increased lung volumes, hyperaeration, or overinflation? Evaluate for signs of pulmonary hyperinflation, emphysematous change, air trapping, and flattened diaphragms on the chest imaging study.'  changed=True
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='x-ray': 41 matches
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='chest': 255 matches
+2026-04-08T22:51:47  INFO      medvqa.agents.advanced_rag  Metadata filter result: 16 candidates after intersection
+2026-04-08T22:51:47  INFO      medvqa.agents.advanced_rag  Metadata filter: 16 candidates retained
+2026-04-08T22:51:47  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 16 candidates
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/16
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag    1. id=379 score=0.6160 | Q: does this chest x-ray show signs of diffuse opacities in both right and left lung fields? | A: yes
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag    2. id=1332 score=0.5859 | Q: is the chest xray underexposed? | A: yes
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag    3. id=546 score=0.5575 | Q: is this a chest x-ray? | A: yes
+2026-04-08T22:51:47  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 16 candidates
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/16
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag    1. id=869 score=7.1188 | Q: how many ribs are present in vertical order on this chest radiograph | A: 12
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag    2. id=379 score=5.9885 | Q: does this chest x-ray show signs of diffuse opacities in both right and left lung fields? | A: yes
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag    3. id=834 score=5.2931 | Q: name one abnormality in the radiograph. | A: increased opacity in the left retrocardiac region
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=16 sparse=16
+2026-04-08T22:51:47  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 16 unique candidates
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/16
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag    1. id=379 score=0.0325 method=hybrid_rrf | Q: does this chest x-ray show signs of diffuse opacities in both right and left lung fields? | A: yes
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag    2. id=1332 score=0.0318 method=hybrid_rrf | Q: is the chest xray underexposed? | A: yes
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag    3. id=902 score=0.0306 method=hybrid_rrf | Q: is the chest x-ray normal? | A: no
+2026-04-08T22:51:47  INFO      medvqa.agents.advanced_rag  Reranking 16 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-08T22:51:47  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 16 candidates...
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag    1. id=379 score=0.9631 method=reranked softmax=0.2315 | Q: does this chest x-ray show signs of diffuse opacities in both right and left lung fields? | A: yes
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag    2. id=440 score=0.8444 method=reranked softmax=0.2056 | Q: is this a chest radiograph? | A: yes
+2026-04-08T22:51:47  DEBUG     medvqa.agents.advanced_rag    3. id=546 score=0.2163 method=reranked softmax=0.1097 | Q: is this a chest x-ray? | A: yes
+2026-04-08T22:51:47  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 3 retrieved candidates
+2026-04-08T22:51:47  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 3 retrieved candidates via LLM
+2026-04-08T22:51:48  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=False  confidence=medium  recommendation=augment
+2026-04-08T22:51:48  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ['The retrieved cases are chest X-ray related, so the modality matches, but they do not address the specific finding of lung hyperinflation.', 'Two cases are only modality-identification questions and provide no diagnostic information relevant to hyperinflation.', 'The diffuse opacities case is about a different abnormality and is not directly useful for answering whether the lungs are hyperinflated.']
+2026-04-08T22:51:48  WARNING   medvqa.agents.advanced_rag  Self-reflection rejected retrieved candidates (relevant=False, recommendation=augment)
+2026-04-08T22:51:48  WARNING   medvqa.agents.advanced_rag  Self-reflection flagged low quality; returning best available candidates
+2026-04-08T22:51:48  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-08T22:51:48  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-08T22:51:48  DEBUG     medvqa.agents.advanced_rag    1. id=379 score=0.9631 method=reranked softmax=0.2315 | Q: does this chest x-ray show signs of diffuse opacities in both right and left lung fields? | A: yes
+2026-04-08T22:51:48  DEBUG     medvqa.agents.advanced_rag    2. id=440 score=0.8444 method=reranked softmax=0.2056 | Q: is this a chest radiograph? | A: yes
+2026-04-08T22:51:48  DEBUG     medvqa.agents.advanced_rag    3. id=546 score=0.2163 method=reranked softmax=0.1097 | Q: is this a chest x-ray? | A: yes
+2026-04-08T22:51:48  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases  (query_rewritten=True  finding_category=other)
+2026-04-08T22:51:54  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=3  duration=8154ms
+2026-04-08T22:51:54  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Hyperinflated lungs appear larger than expected, often with increased radiolucency and expanded lung fields.', 'Flattening or depression of the diaphragms is a classic clue to hyperinflation.', 'An increased retrosternal air space on the lateral view also supports hyperinflation.', 'The heart may appear narrow or vertically oriented due to lung overexpansion.', 'Normal inspiratory effort can mimic mild hyperinflation, so technique matters.']
+2026-04-08T22:51:54  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On a chest X-ray, lung hyperinflation is assessed by looking for increased lung volume, low or flattened diaphragms, and a relatively narrow, elongated cardiac silhouette. The retrieved similar cases 
+2026-04-08T22:51:54  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=3  duration=8186ms
+2026-04-08T22:51:55  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-08T22:51:55  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are the lungs hyperinflated?'  is_retry=False  question_type=yes_no  yes_no=True
+2026-04-08T22:51:55  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=3
+2026-04-08T22:51:55  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-08T22:51:57  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=medium  duration=2432ms
+2026-04-08T22:51:57  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: 1) Reviewed the provided chest X-ray summary for signs of increased lung volume. 2) Checked for classic hyperinflation clues such as flattened diaphragms, expanded lung fields, and increased radiolucency. 3) Found instead diffuse bilateral opacities and no reported hyperinflation features. 4) Concluded the lungs are not hyperinflated.
+2026-04-08T22:51:57  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Bilateral diffuse patchy interstitial and airspace opacities', 'No mention of flattened or depressed diaphragms', 'No mention of increased lung lucency or overexpanded lung fields', 'Cardiomediastinal silhouette is not enlarged', 'No pleural effusion or pneumothorax']
+2026-04-08T22:51:57  DEBUG     medvqa.agents.reasoning_agent  Limitations: Assessment is based on the provided image analysis summary rather than direct image inspection, and the summary does not explicitly describe diaphragmatic contour or lung volumes.
+2026-04-08T22:51:57  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=medium  duration=2461ms
+2026-04-08T22:51:58  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-08T22:51:58  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='are the lungs hyperinflated?'  question_type=yes_no
+2026-04-08T22:52:00  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1445ms
+2026-04-08T22:52:00  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-08T22:52:00  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer 'no' correctly addresses the yes/no question about hyperinflation. The explanation is consistent with the provided image analysis, which describes bilateral diffuse patchy interstitial and airspace opacities without signs typically associated with hyperinflation. No contradictions were identified.
+2026-04-08T22:52:00  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1477ms
+2026-04-08T22:52:00  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-08T22:52:00  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-08T22:52:00  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-08T22:52:00  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=23462ms
+2026-04-08T22:52:00  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='no'  verification=verified  confidence=High  flag_review=False
+2026-04-08T22:52:00  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-08T22:52:00  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-08T22:52:00  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  retries=0  total_duration=23467ms ===
+2026-04-08T22:52:00  INFO      medvqa.routes.dataset  Sample 2155 analysis complete  baseline=1880ms  workflow=3459ms  agentic=23469ms  total=23470ms
+2026-04-08T22:52:00  INFO      medvqa.routes.dataset  Sample 2155 answers  baseline='Yes, the lungs appear hyperinflated.'  workflow='No'  agentic='no'  ground_truth='yes'

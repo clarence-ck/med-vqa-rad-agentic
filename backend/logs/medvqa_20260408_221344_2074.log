@@ -1,0 +1,67 @@
+2026-04-08T22:36:53  INFO      medvqa.routes.dataset  Cache MISS for sample 2074  question='are the clavicles fractured?'  refresh=False  running all 3 pipelines in parallel
+2026-04-08T22:36:53  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=341803 bytes  question='are the clavicles fractured?'
+2026-04-08T22:36:53  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are the clavicles fractured?'  mime_type=image/png  size=341803 bytes ===
+2026-04-08T22:36:53  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-08T22:36:53  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=341803 bytes)
+2026-04-08T22:36:54  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-08T22:36:54  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=341803 bytes)
+2026-04-08T22:36:54  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No, the clavicles do not appear fractured.",
+  "explanation": "This is a chest X-ray. Both clavicles are visualized without an obvious cortical break, displacement, or step-off to suggest fracture.",
+  "confidence": "medium"
+}
+2026-04-08T22:36:54  INFO      medvqa.agents.baseline  Baseline done  answer='No, the clavicles do not appear fractured.'  confidence=medium  duration=1632ms
+2026-04-08T22:36:55  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=Chest  quality=good  findings=3  duration=2412ms
+2026-04-08T22:36:55  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is a frontal chest radiograph. The lungs are well aerated and the cardiomediastinal silhouette is visible without marked enlargement. No focal consolidation, pleural effusion, or pneumothorax is evident on this view.
+2026-04-08T22:36:55  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Mild hyperinflation of the lungs', 'Minimal linear bibasilar scarring or atelectatic change', 'Aortic atherosclerotic calcification']
+2026-04-08T22:36:55  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the clavicles fractured?'
+2026-04-08T22:36:55  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T22:36:56  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=4  duration=2679ms
+2026-04-08T22:36:56  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is a frontal chest radiograph. The lungs are well expanded and there is no focal large pleural effusion or pneumothorax visible. The cardiomediastinal silhouette is mildly prominent with mild linear/basilar scarring or atelectatic change at the left base.
+2026-04-08T22:36:56  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Hyperinflated appearing lungs', 'Mild linear opacity at the left lung base', 'No visible pleural effusion or pneumothorax', 'Aortic atherosclerotic calcification/tortuosity']
+2026-04-08T22:36:56  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=chest  duration=2709ms
+2026-04-08T22:36:56  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1027ms
+2026-04-08T22:36:56  DEBUG     medvqa.agents.question_analyzer  Target entity: clavicles  Expected format: yes_no  Rephrased: Are the clavicles fractured?
+2026-04-08T22:36:56  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are the clavicles fractured?'  modality=X-ray  body_region=Chest  question_type=yes_no
+2026-04-08T22:36:56  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['Clavicles']
+2026-04-08T22:36:56  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-08T22:36:56  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=high  question_type=yes_no  duration=3494ms
+2026-04-08T22:36:57  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are the clavicles fractured?'
+2026-04-08T22:36:57  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the clavicles fractured?'
+2026-04-08T22:36:57  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T22:36:58  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=984ms
+2026-04-08T22:36:58  DEBUG     medvqa.agents.question_analyzer  Target entity: clavicles  Expected format: yes_no  Rephrased: Are the clavicles fractured?
+2026-04-08T22:36:58  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=1017ms
+2026-04-08T22:36:59  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-08T22:36:59  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=visual_recognition  med_knowledge=False  modality=X-ray  region=chest
+2026-04-08T22:37:00  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1666ms
+2026-04-08T22:37:00  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a straightforward frontal chest X-ray with no major obscuration or complex competing findings, so the case is best routed as an easy visual recognition task.
+2026-04-08T22:37:00  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1692ms
+2026-04-08T22:37:01  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-08T22:37:01  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are the clavicles fractured?'  is_retry=False  question_type=yes_no  yes_no=True
+2026-04-08T22:37:01  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-08T22:37:01  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-08T22:37:04  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=medium  duration=2715ms
+2026-04-08T22:37:04  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the question target: clavicles.', 'Checked the image analysis for any reported fracture or bony abnormality involving the clavicles.', 'Found no mention of clavicular fracture, displacement, or cortical break in the provided findings.', 'Concluded that the evidence supports no clavicle fracture.']
+2026-04-08T22:37:04  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Frontal chest radiograph includes visible clavicles', 'No reported clavicular fracture in the image analysis', 'No acute osseous abnormality mentioned among notable findings', 'Findings instead note hyperinflation, mild left basilar linear opacity, and aortic atherosclerotic calcification']
+2026-04-08T22:37:04  DEBUG     medvqa.agents.reasoning_agent  Limitations: This is based on the provided image analysis rather than direct pixel-level review; subtle or nondisplaced clavicle fractures could be missed on a single frontal chest radiograph.
+2026-04-08T22:37:04  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=medium  duration=2756ms
+2026-04-08T22:37:05  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-08T22:37:05  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='are the clavicles fractured?'  question_type=yes_no
+2026-04-08T22:37:11  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=3/5  duration=5878ms
+2026-04-08T22:37:11  WARNING   medvqa.agents.verification_agent  Verification issues: ["The explanation refers to a 'chest radiograph summary' and absence of clavicular fracture, but the provided visual analysis does not specifically confirm detailed clavicle cortical integrity.", "The answer 'no' may be too definitive given that clavicles are only partially assessed on a frontal chest radiograph and the available summary is not explicitly focused on the clavicles."]
+2026-04-08T22:37:11  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-08T22:37:11  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct yes/no format and is not contradicted by the provided image analysis, but the justification is only weakly grounded because the image summary does not explicitly evaluate clavicle fractures. The conclusion is therefore somewhat stronger than the available evidence supports.
+2026-04-08T22:37:11  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=5907ms
+2026-04-08T22:37:11  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-08T22:37:11  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-08T22:37:11  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-08T22:37:11  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-08T22:37:11  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=partially_verified  guardrail_flag=False  consistency=low  cross_modal=low  duration=17932ms
+2026-04-08T22:37:11  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='no'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-08T22:37:11  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-08T22:37:11  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-08T22:37:11  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  retries=0  total_duration=17937ms ===
+2026-04-08T22:37:11  INFO      medvqa.routes.dataset  Sample 2074 analysis complete  baseline=1638ms  workflow=3497ms  agentic=17940ms  total=17942ms
+2026-04-08T22:37:11  INFO      medvqa.routes.dataset  Sample 2074 answers  baseline='No, the clavicles do not appear fractured.'  workflow='Yes'  agentic='no'  ground_truth='no'

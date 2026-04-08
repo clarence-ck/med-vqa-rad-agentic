@@ -1,0 +1,115 @@
+2026-04-08T22:35:45  INFO      medvqa.routes.dataset  Cache MISS for sample 1903  question='where are the acute infarcts?'  refresh=False  running all 3 pipelines in parallel
+2026-04-08T22:35:45  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=155448 bytes  question='where are the acute infarcts?'
+2026-04-08T22:35:45  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='where are the acute infarcts?'  mime_type=image/png  size=155448 bytes ===
+2026-04-08T22:35:45  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-08T22:35:45  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=155448 bytes)
+2026-04-08T22:35:46  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-08T22:35:46  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=155448 bytes)
+2026-04-08T22:35:47  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "The acute infarcts are in the right frontal and parietal lobes, with additional scattered acute infarcts in the left frontal/centrum semiovale region.",
+  "explanation": "This is an axial brain MRI showing multiple areas of restricted diffusion consistent with acute infarction. The largest involved region is on the right frontoparietal side, with smaller scattered foci on the left.",
+  "confidence": "high"
+}
+2026-04-08T22:35:47  INFO      medvqa.agents.baseline  Baseline done  answer='The acute infarcts are in the right frontal and parietal lobes, with additional '  confidence=high  duration=1662ms
+2026-04-08T22:35:48  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2175ms
+2026-04-08T22:35:48  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial brain MRI image showing the cerebral hemispheres with prominent ventricular spaces and surrounding white matter signal abnormalities. The image demonstrates multiple patchy areas of increased signal within the white matter, with overall good anatomic detail.
+2026-04-08T22:35:48  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple bilateral white matter hyperintense foci', 'Asymmetric confluent white matter signal abnormality more prominent on one side', 'Enlargement of the lateral ventricles compared with expected size']
+2026-04-08T22:35:48  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where are the acute infarcts?'
+2026-04-08T22:35:48  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T22:35:48  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2148ms
+2026-04-08T22:35:48  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial brain MRI image showing the supratentorial brain. There are multiple areas of abnormal hyperintense signal within the cerebral white matter, with asymmetric involvement around the lateral ventricles and subcortical regions.
+2026-04-08T22:35:48  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple scattered white matter signal abnormalities', 'Periventricular and subcortical distribution of abnormal signal', 'No obvious midline shift on this slice']
+2026-04-08T22:35:48  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain  duration=2175ms
+2026-04-08T22:35:49  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=True  clarity=clear  duration=1021ms
+2026-04-08T22:35:49  DEBUG     medvqa.agents.question_analyzer  Target entity: acute infarcts  Expected format: short_phrase  Rephrased: Where are the acute infarcts located?
+2026-04-08T22:35:49  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='where are the acute infarcts?'  modality=MRI  body_region=brain  question_type=location
+2026-04-08T22:35:49  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-08T22:35:49  DEBUG     medvqa.agents.workflow_baseline  Branch taken: location
+2026-04-08T22:35:49  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='brain'  confidence=medium  question_type=location  duration=3264ms
+2026-04-08T22:35:49  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='where are the acute infarcts?'
+2026-04-08T22:35:49  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where are the acute infarcts?'
+2026-04-08T22:35:49  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T22:35:50  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=True  clarity=clear  duration=1024ms
+2026-04-08T22:35:50  DEBUG     medvqa.agents.question_analyzer  Target entity: acute infarcts  Expected format: short_phrase  Rephrased: Where are the acute infarcts located?
+2026-04-08T22:35:50  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=1056ms
+2026-04-08T22:35:51  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-08T22:35:51  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=True  modality=MRI  region=brain
+2026-04-08T22:35:53  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1934ms
+2026-04-08T22:35:53  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic localization task on a clean MRI with conspicuous but pattern-dependent white matter abnormalities, making it moderate difficulty rather than a simple spot diagnosis.
+2026-04-08T22:35:53  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1961ms
+2026-04-08T22:35:58  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-08T22:35:58  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-08T22:35:58  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='where are the acute infarcts?'  modality=MRI  body_region=brain  question_type=location  target_entity=acute infarcts  advanced_rag=True
+2026-04-08T22:35:58  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=where are the acute infarcts? | modality=MRI | body_region=brain | finding=infarct | rewrite=True rerank=True reflection=True
+2026-04-08T22:35:59  INFO      medvqa.agents.advanced_rag  Query rewrite | original='where are the acute infarcts?'
+2026-04-08T22:35:59  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='Brain MRI: Where are the acute infarcts, acute ischemic infarctions, or areas of restricted diffusion located? Identify the sites of recent cerebral infarction on diffusion-weighted imaging (DWI) and apparent diffusion coefficient (ADC) sequences.'  changed=True
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='mri': 44 matches
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='brain': no exact matches
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='infarct': 30 matches
+2026-04-08T22:35:59  WARNING   medvqa.agents.advanced_rag  Metadata filter found no intersection; falling back to full corpus
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag  Metadata filter: none applied (full corpus search)
+2026-04-08T22:35:59  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag  Dense retrieval searching full FAISS index with 1793 vectors
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/20
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag    1. id=1399 score=0.6545 | Q: do we see diffuse cerebral edema in this mri? | A: no
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag    2. id=1392 score=0.6431 | Q: what type of mri sequence is this? | A: diffusion weighted imaging (dwi)
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag    3. id=335 score=0.6387 | Q: what type of imaging is this? | A: mri diffusion weighted
+2026-04-08T22:35:59  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval searching full corpus of 1793 documents
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/20
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag    1. id=1392 score=33.8831 | Q: what type of mri sequence is this? | A: diffusion weighted imaging (dwi)
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag    2. id=335 score=31.9338 | Q: what type of imaging is this? | A: mri diffusion weighted
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag    3. id=229 score=30.0498 | Q: is there restricted diffusion? | A: no
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=20 sparse=20
+2026-04-08T22:35:59  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 20 unique candidates
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/20
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag    1. id=1392 score=0.0325 method=hybrid_rrf | Q: what type of mri sequence is this? | A: diffusion weighted imaging (dwi)
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag    2. id=335 score=0.0320 method=hybrid_rrf | Q: what type of imaging is this? | A: mri diffusion weighted
+2026-04-08T22:35:59  DEBUG     medvqa.agents.advanced_rag    3. id=590 score=0.0310 method=hybrid_rrf | Q: where are the infarcts located? | A: diffuse
+2026-04-08T22:35:59  INFO      medvqa.agents.advanced_rag  Reranking 20 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-08T22:36:00  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 20 candidates...
+2026-04-08T22:36:00  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-08T22:36:00  DEBUG     medvqa.agents.advanced_rag    1. id=1480 score=0.3544 method=reranked softmax=0.3996 | Q: in which area of the brain are the infarcts found? | A: right cerebellum
+2026-04-08T22:36:00  DEBUG     medvqa.agents.advanced_rag    2. id=1481 score=0.0430 method=reranked softmax=0.2927 | Q: where are the infarcts located? | A: right cerebellum
+2026-04-08T22:36:00  DEBUG     medvqa.agents.advanced_rag    3. id=590 score=-0.7071 method=reranked softmax=0.1382 | Q: where are the infarcts located? | A: diffuse
+2026-04-08T22:36:00  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 3 retrieved candidates
+2026-04-08T22:36:00  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 3 retrieved candidates via LLM
+2026-04-08T22:36:01  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=True  confidence=high  recommendation=use
+2026-04-08T22:36:01  INFO      medvqa.agents.advanced_rag  Self-reflection accepted retrieved candidates
+2026-04-08T22:36:01  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-08T22:36:01  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-08T22:36:01  DEBUG     medvqa.agents.advanced_rag    1. id=1480 score=0.3544 method=reranked softmax=0.3996 | Q: in which area of the brain are the infarcts found? | A: right cerebellum
+2026-04-08T22:36:01  DEBUG     medvqa.agents.advanced_rag    2. id=1481 score=0.0430 method=reranked softmax=0.2927 | Q: where are the infarcts located? | A: right cerebellum
+2026-04-08T22:36:01  DEBUG     medvqa.agents.advanced_rag    3. id=590 score=-0.7071 method=reranked softmax=0.1382 | Q: where are the infarcts located? | A: diffuse
+2026-04-08T22:36:01  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases  (query_rewritten=True  finding_category=infarct)
+2026-04-08T22:36:05  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=3  duration=6429ms
+2026-04-08T22:36:05  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Acute infarcts on MRI are most commonly seen as diffusion restriction on DWI with low signal on ADC maps.', 'Location should be described by brain region and side when possible, such as left frontal lobe, right cerebellum, or deep gray matter.', 'The cerebral hemispheres include cortical and subcortical white matter regions supplied by major cerebral arteries.', 'Deep gray matter structures include the basal ganglia and thalamus, which can be affected by small-vessel or vascular territory infarcts.']
+2026-04-08T22:36:05  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On brain MRI, acute infarcts are typically identified as focal areas of restricted diffusion, often in the cerebral hemispheres but they can also involve the cerebellum or deep gray structures dependi
+2026-04-08T22:36:05  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=3  duration=6458ms
+2026-04-08T22:36:07  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-08T22:36:07  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='where are the acute infarcts?'  is_retry=False  question_type=location  yes_no=False
+2026-04-08T22:36:07  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=3
+2026-04-08T22:36:10  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Periventricular and subcortical white matter of the cerebral hemispheres.'  confidence=medium  duration=2831ms
+2026-04-08T22:36:10  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the modality as brain MRI and focus on the abnormal signal areas.', 'Note that the abnormalities are described in the cerebral white matter.', 'Use the stated distribution around the lateral ventricles and in subcortical regions to localize the lesions.', 'Formulate the answer as an anatomic location rather than a diagnosis.']
+2026-04-08T22:36:10  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Multiple scattered white matter signal abnormalities', 'Periventricular and subcortical distribution of abnormal signal', 'Asymmetric involvement around the lateral ventricles', 'Visible cerebral hemispheres and lateral ventricles on axial brain MRI']
+2026-04-08T22:36:10  DEBUG     medvqa.agents.reasoning_agent  Limitations: The provided image summary does not explicitly confirm diffusion restriction on DWI/ADC, so the localization is based on the described abnormal MRI signal rather than direct confirmation of acute infarction on the image slice.
+2026-04-08T22:36:10  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Periventricular and subcortical white matter of the cerebral'  confidence=medium  duration=2861ms
+2026-04-08T22:36:10  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-08T22:36:10  INFO      medvqa.agents.verification_agent  Verifying answer='Periventricular and subcortical white matter of the cerebral hemispheres.'  question='where are the acute infarcts?'  question_type=location
+2026-04-08T22:36:13  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=4/5  duration=2507ms
+2026-04-08T22:36:13  WARNING   medvqa.agents.verification_agent  Verification issues: ["The image analysis supports abnormal hyperintense white matter lesions, but labeling them definitively as 'acute infarcts' is stronger than the available visual evidence alone.", 'The answer may be over-specific in asserting infarct etiology without explicit supporting imaging descriptors such as diffusion restriction or radiology report text.']
+2026-04-08T22:36:13  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-08T22:36:13  DEBUG     medvqa.agents.verification_agent  Verification notes: The location phrase is consistent with the described MRI findings and answers the question type appropriately. However, the conclusion that these represent acute infarcts is not fully justified from the provided visual summary alone, so the response is only partially verified.
+2026-04-08T22:36:13  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2534ms
+2026-04-08T22:36:13  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-08T22:36:13  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-08T22:36:13  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-08T22:36:13  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-08T22:36:13  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Periventricular and subcortical white matter of the cerebral'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=27617ms
+2026-04-08T22:36:13  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Periventricular and subcortical white matter of the cerebral'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-08T22:36:13  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-08T22:36:13  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-08T22:36:13  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Periventricular and subcortical white matter of the cerebral'  retries=0  total_duration=27621ms ===
+2026-04-08T22:36:13  INFO      medvqa.routes.dataset  Sample 1903 analysis complete  baseline=1666ms  workflow=3266ms  agentic=27624ms  total=27626ms
+2026-04-08T22:36:13  INFO      medvqa.routes.dataset  Sample 1903 answers  baseline='The acute infarcts are in the right frontal and parietal lob'  workflow='brain'  agentic='Periventricular and subcortical white matter of the cerebral'  ground_truth='r frontal lobe'

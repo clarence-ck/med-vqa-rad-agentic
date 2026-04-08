@@ -1,0 +1,114 @@
+2026-04-08T22:36:13  INFO      medvqa.routes.dataset  Cache MISS for sample 1885  question='what abnormality is seen on the left side of the frontal lobe?'  refresh=False  running all 3 pipelines in parallel
+2026-04-08T22:36:13  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=297433 bytes  question='what abnormality is seen on the left side of the frontal lobe?'
+2026-04-08T22:36:13  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what abnormality is seen on the left side of the frontal lobe?'  mime_type=image/png  size=297433 bytes ===
+2026-04-08T22:36:13  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-08T22:36:13  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=297433 bytes)
+2026-04-08T22:36:14  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-08T22:36:14  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=297433 bytes)
+2026-04-08T22:36:15  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "A round left frontal lobe mass lesion, most consistent with a glioma/tumor.",
+  "explanation": "This is an axial brain MRI showing a well-defined abnormal mass in the left frontal lobe with surrounding signal change. The appearance is suspicious for a brain tumor.",
+  "confidence": "medium"
+}
+2026-04-08T22:36:15  INFO      medvqa.agents.baseline  Baseline done  answer='A round left frontal lobe mass lesion, most consistent with a glioma/tumor.'  confidence=medium  duration=1561ms
+2026-04-08T22:36:15  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2196ms
+2026-04-08T22:36:15  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial brain MRI image showing the cerebral hemispheres and ventricles. There is a focal rounded area of abnormal signal in the left frontoparietal/periventricular region with surrounding white matter signal change and mild local mass effect.
+2026-04-08T22:36:15  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Rounded intra-axial lesion in the left cerebral hemisphere', 'Surrounding hyperintense-appearing white matter signal change', 'Mild mass effect on adjacent structures']
+2026-04-08T22:36:15  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what abnormality is seen on the left side of the frontal lobe?'
+2026-04-08T22:36:15  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T22:36:16  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2307ms
+2026-04-08T22:36:16  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial brain MRI image showing the cerebral hemispheres and ventricular system. There is a focal round area of abnormal signal in the left frontal deep brain region adjacent to the lateral ventricle with surrounding signal change.
+2026-04-08T22:36:16  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Round focal intra-axial lesion in the left frontal white matter/periventricular region', 'Mild surrounding high signal/edema-like change', 'Mass effect with mild distortion of the adjacent left lateral ventricle']
+2026-04-08T22:36:16  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain  duration=2340ms
+2026-04-08T22:36:16  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1219ms
+2026-04-08T22:36:16  DEBUG     medvqa.agents.question_analyzer  Target entity: abnormality in the left frontal lobe/frontoparietal region  Expected format: short_phrase  Rephrased: What abnormality is seen on the left side of the frontal lobe?
+2026-04-08T22:36:16  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what abnormality is seen on the left side of the frontal lobe?'  modality=MRI  body_region=brain  question_type=abnormality_description
+2026-04-08T22:36:16  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-08T22:36:16  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-08T22:36:16  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Rounded intra-axial lesion in the left cerebral hemisphere; Surrounding hyperint'  confidence=medium  question_type=abnormality_description  duration=3475ms
+2026-04-08T22:36:17  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what abnormality is seen on the left side of the frontal lobe?'
+2026-04-08T22:36:17  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what abnormality is seen on the left side of the frontal lobe?'
+2026-04-08T22:36:17  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T22:36:18  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1538ms
+2026-04-08T22:36:18  DEBUG     medvqa.agents.question_analyzer  Target entity: abnormality in the left frontal lobe  Expected format: short_phrase  Rephrased: What abnormality is seen on the left side of the frontal lobe?
+2026-04-08T22:36:18  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1572ms
+2026-04-08T22:36:19  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-08T22:36:19  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  reasoning=visual_recognition  med_knowledge=True  modality=MRI  region=brain
+2026-04-08T22:36:21  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1559ms
+2026-04-08T22:36:21  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic MRI brain finding with a conspicuous lesion, but the anatomical context and signal characterization are not fully straightforward, making it a medium-complexity case.
+2026-04-08T22:36:21  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1592ms
+2026-04-08T22:36:22  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-08T22:36:22  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-08T22:36:22  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='what abnormality is seen on the left side of the frontal lobe?'  modality=MRI  body_region=brain  question_type=abnormality_description  target_entity=abnormality in the left frontal lobe  advanced_rag=True
+2026-04-08T22:36:22  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=what abnormality is seen on the left side of the frontal lobe? | modality=MRI | body_region=brain | finding=normal | rewrite=True rerank=True reflection=True
+2026-04-08T22:36:23  INFO      medvqa.agents.advanced_rag  Query rewrite | original='what abnormality is seen on the left side of the frontal lobe?'
+2026-04-08T22:36:23  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='What abnormality is seen in the left frontal lobe of the brain on MRI, including any focal lesion, mass, tumor, infarct, hemorrhage, edema, demyelinating plaque, or structural abnormality? What is the MRI finding in the left frontal cerebral hemisphere or left frontal cortex?'  changed=True
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='mri': 44 matches
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='brain': no exact matches
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 170 matches
+2026-04-08T22:36:23  WARNING   medvqa.agents.advanced_rag  Metadata filter found no intersection; falling back to full corpus
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag  Metadata filter: none applied (full corpus search)
+2026-04-08T22:36:23  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag  Dense retrieval searching full FAISS index with 1793 vectors
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/20
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag    1. id=1395 score=0.6634 | Q: what lobe of the brain is the lesion found in? | A: the right frontal lobe
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag    2. id=746 score=0.6417 | Q: where is the abnormality? | A: right upper lobe
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag    3. id=1522 score=0.6408 | Q: where is the brain lesion located? | A: right frontal lobe
+2026-04-08T22:36:23  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval searching full corpus of 1793 documents
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/20
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag    1. id=1395 score=35.4952 | Q: what lobe of the brain is the lesion found in? | A: the right frontal lobe
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag    2. id=1521 score=35.2754 | Q: what lobe of the brain is the lesion located in? | A: right frontal lobe
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag    3. id=1522 score=32.2611 | Q: where is the brain lesion located? | A: right frontal lobe
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=20 sparse=20
+2026-04-08T22:36:23  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 20 unique candidates
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/20
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag    1. id=1395 score=0.0328 method=hybrid_rrf | Q: what lobe of the brain is the lesion found in? | A: the right frontal lobe
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag    2. id=1521 score=0.0318 method=hybrid_rrf | Q: what lobe of the brain is the lesion located in? | A: right frontal lobe
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag    3. id=1522 score=0.0317 method=hybrid_rrf | Q: where is the brain lesion located? | A: right frontal lobe
+2026-04-08T22:36:23  INFO      medvqa.agents.advanced_rag  Reranking 20 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-08T22:36:23  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 20 candidates...
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag    1. id=1258 score=1.5827 method=reranked softmax=0.3519 | Q: what is the primary abnormality in this image? | A: ring enhancing lesion in the left occipital lobe
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag    2. id=600 score=0.6059 method=reranked softmax=0.1325 | Q: the image shows what abnormality? | A: abnormal hyperintensity in the right occipital lobe
+2026-04-08T22:36:23  DEBUG     medvqa.agents.advanced_rag    3. id=1571 score=0.0595 method=reranked softmax=0.0767 | Q: where is the abnormality? | A: left temporal lobe
+2026-04-08T22:36:23  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 3 retrieved candidates
+2026-04-08T22:36:23  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 3 retrieved candidates via LLM
+2026-04-08T22:36:25  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=True  confidence=medium  recommendation=augment
+2026-04-08T22:36:25  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ['All retrieved cases are brain MRI cases, so modality matches.', 'The abnormalities are in different brain regions (occipital and temporal lobes) rather than the left frontal lobe asked about in the original question.', 'The retrieved answers describe lesion/hyperintensity findings, which are medically plausible, but they do not directly support localization to the left frontal lobe.']
+2026-04-08T22:36:25  INFO      medvqa.agents.advanced_rag  Self-reflection accepted retrieved candidates
+2026-04-08T22:36:25  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-08T22:36:25  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-08T22:36:25  DEBUG     medvqa.agents.advanced_rag    1. id=1258 score=1.5827 method=reranked softmax=0.3519 | Q: what is the primary abnormality in this image? | A: ring enhancing lesion in the left occipital lobe
+2026-04-08T22:36:25  DEBUG     medvqa.agents.advanced_rag    2. id=600 score=0.6059 method=reranked softmax=0.1325 | Q: the image shows what abnormality? | A: abnormal hyperintensity in the right occipital lobe
+2026-04-08T22:36:25  DEBUG     medvqa.agents.advanced_rag    3. id=1571 score=0.0595 method=reranked softmax=0.0767 | Q: where is the abnormality? | A: left temporal lobe
+2026-04-08T22:36:25  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases  (query_rewritten=True  finding_category=normal)
+2026-04-08T22:36:29  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=3  duration=7220ms
+2026-04-08T22:36:29  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The frontal lobe is part of the cerebral hemispheres and lies anteriorly, above the lateral ventricles.', 'MRI commonly characterizes lesions by laterality (left/right), lobe, and signal intensity or enhancement pattern.', 'A focal left frontal lobe abnormality may reflect a mass, infarct, demyelination, infection, or post-traumatic change depending on appearance.', 'Normal MRI should show symmetric cerebral hemispheres with preserved gray-white differentiation and no focal mass or abnormal signal.', 'The left frontal lobe includes regions involved in motor planning, executive function, and language in the dominant hemisphere.']
+2026-04-08T22:36:29  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On brain MRI, a focal abnormality in the left frontal lobe is often described by its signal characteristics and location, such as a hyperintense lesion, mass, or area of encephalomalacia. The retrieve
+2026-04-08T22:36:29  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=3  duration=7249ms
+2026-04-08T22:36:30  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-08T22:36:30  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what abnormality is seen on the left side of the frontal lobe?'  is_retry=False  question_type=abnormality_description  yes_no=False
+2026-04-08T22:36:30  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=3
+2026-04-08T22:36:33  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Round intra-axial lesion in the left frontal white matter/periventricular region'  confidence=high  duration=2664ms
+2026-04-08T22:36:33  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the provided MRI analysis for the location of the abnormality.', 'Noted that the lesion is described as focal, round, and intra-axial in the left frontal white matter/periventricular region.', 'Included associated findings of surrounding signal change and mild ventricular mass effect to support the abnormality description.']
+2026-04-08T22:36:33  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Focal round area of abnormal signal in the left frontal deep brain region adjacent to the lateral ventricle', 'Round focal intra-axial lesion in the left frontal white matter/periventricular region', 'Mild surrounding high signal/edema-like change', 'Mass effect with mild distortion of the adjacent left lateral ventricle']
+2026-04-08T22:36:33  DEBUG     medvqa.agents.reasoning_agent  Limitations: The exact diagnosis cannot be determined from the provided description alone; the answer is limited to the observed anatomic abnormality.
+2026-04-08T22:36:33  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Round intra-axial lesion in the left frontal white matter/pe'  confidence=high  duration=2698ms
+2026-04-08T22:36:34  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-08T22:36:34  INFO      medvqa.agents.verification_agent  Verifying answer='Round intra-axial lesion in the left frontal white matter/periventricular region'  question='what abnormality is seen on the left side of the frontal lobe?'  question_type=abnormality_description
+2026-04-08T22:36:36  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1701ms
+2026-04-08T22:36:36  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-08T22:36:36  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer directly identifies the abnormality described in the image analysis and matches the requested short-phrase format. The explanation is consistent with the visual summary of a focal round lesion in the left frontal deep white matter near the lateral ventricle. No contradictions or unsupported claims are evident from the provided evidence.
+2026-04-08T22:36:36  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1729ms
+2026-04-08T22:36:36  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-08T22:36:36  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-08T22:36:36  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-08T22:36:36  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Round intra-axial lesion in the left frontal white matter/pe'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=22648ms
+2026-04-08T22:36:36  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Round intra-axial lesion in the left frontal white matter/pe'  verification=verified  confidence=High  flag_review=False
+2026-04-08T22:36:36  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-08T22:36:36  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-08T22:36:36  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Round intra-axial lesion in the left frontal white matter/pe'  retries=0  total_duration=22652ms ===
+2026-04-08T22:36:36  INFO      medvqa.routes.dataset  Sample 1885 analysis complete  baseline=1565ms  workflow=3478ms  agentic=22654ms  total=22654ms
+2026-04-08T22:36:36  INFO      medvqa.routes.dataset  Sample 1885 answers  baseline='A round left frontal lobe mass lesion, most consistent with '  workflow='Rounded intra-axial lesion in the left cerebral hemisphere; '  agentic='Round intra-axial lesion in the left frontal white matter/pe'  ground_truth='regression of left frontal mass'

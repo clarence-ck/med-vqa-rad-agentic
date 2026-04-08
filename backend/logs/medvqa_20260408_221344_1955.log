@@ -1,0 +1,114 @@
+2026-04-08T22:34:55  INFO      medvqa.routes.dataset  Cache MISS for sample 1955  question='what abnormality is present?'  refresh=False  running all 3 pipelines in parallel
+2026-04-08T22:34:55  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=303901 bytes  question='what abnormality is present?'
+2026-04-08T22:34:55  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what abnormality is present?'  mime_type=image/png  size=303901 bytes ===
+2026-04-08T22:34:55  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-08T22:34:55  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=303901 bytes)
+2026-04-08T22:34:56  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-08T22:34:56  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=303901 bytes)
+2026-04-08T22:34:57  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Bilateral maxillary sinusitis with mucosal thickening/opacification of the maxillary sinuses.",
+  "explanation": "This is an axial CT image of the face/sinuses. Both maxillary sinuses show abnormal soft tissue density along the walls, consistent with mucosal thickening from sinusitis.",
+  "confidence": "high"
+}
+2026-04-08T22:34:57  INFO      medvqa.agents.baseline  Baseline done  answer='Bilateral maxillary sinusitis with mucosal thickening/opacification of the maxil'  confidence=high  duration=1688ms
+2026-04-08T22:34:58  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=head / paranasal sinuses  quality=good  findings=3  duration=2911ms
+2026-04-08T22:34:58  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial CT image through the upper face and skull base, showing the paranasal sinuses and posterior fossa structures. The maxillary sinuses are visible bilaterally, along with the nasal cavity and adjacent bony anatomy.
+2026-04-08T22:34:58  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Mild mucosal thickening/opacification in the maxillary sinuses', 'No obvious acute bony abnormality on this single slice', 'Visualized mastoid air cells appear aerated']
+2026-04-08T22:34:58  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what abnormality is present?'
+2026-04-08T22:34:58  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T22:34:59  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=head / skull base  quality=good  findings=3  duration=2829ms
+2026-04-08T22:34:59  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image through the skull base shows the paranasal sinuses, orbits, and posterior fossa structures. The maxillary sinuses are aerated with mild asymmetric mucosal thickening/opacification along the sinus walls, and the intracranial posterior fossa structures are partially visualized on this slice.
+2026-04-08T22:34:59  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Mild mucosal thickening / partial opacification in the maxillary sinuses', 'No obvious acute osseous abnormality visible on this single slice', 'Symmetric appearance of the posterior fossa structures on this image']
+2026-04-08T22:34:59  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=head / skull base  duration=2858ms
+2026-04-08T22:34:59  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=True  clarity=ambiguous  duration=1201ms
+2026-04-08T22:34:59  DEBUG     medvqa.agents.question_analyzer  Target entity: abnormality  Expected format: short_phrase  Rephrased: What abnormality is visible on this axial CT image of the upper face and skull base?
+2026-04-08T22:34:59  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what abnormality is present?'  modality=CT  body_region=head / paranasal sinuses  question_type=abnormality_description
+2026-04-08T22:34:59  DEBUG     medvqa.agents.workflow_baseline  Matched findings: ['No obvious acute bony abnormality on this single slice']  Matched structures: []
+2026-04-08T22:34:59  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-08T22:34:59  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='No obvious acute bony abnormality on this single slice'  confidence=high  question_type=abnormality_description  duration=4171ms
+2026-04-08T22:35:00  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what abnormality is present?'
+2026-04-08T22:35:00  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what abnormality is present?'
+2026-04-08T22:35:00  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-08T22:35:01  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=True  clarity=ambiguous  duration=977ms
+2026-04-08T22:35:01  DEBUG     medvqa.agents.question_analyzer  Target entity: abnormality  Expected format: short_phrase  Rephrased: What abnormality is present in the image?
+2026-04-08T22:35:01  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1008ms
+2026-04-08T22:35:02  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-08T22:35:02  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=head / skull base
+2026-04-08T22:35:03  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1404ms
+2026-04-08T22:35:03  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic, low-conspicuity CT skull base case with mild sinus mucosal thickening and some anatomical overlap, so it is best treated as a medium-difficulty interpretation task.
+2026-04-08T22:35:03  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1430ms
+2026-04-08T22:35:05  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-08T22:35:05  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-08T22:35:05  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='what abnormality is present?'  modality=CT  body_region=head / skull base  question_type=abnormality_description  target_entity=abnormality  advanced_rag=True
+2026-04-08T22:35:05  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=what abnormality is present? | modality=CT | body_region=head / skull base | finding=normal | rewrite=True rerank=True reflection=True
+2026-04-08T22:35:06  INFO      medvqa.agents.advanced_rag  Query rewrite | original='what abnormality is present?'
+2026-04-08T22:35:06  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='What abnormality is present on computed tomography (CT) of the head and skull base? Identify any intracranial, calvarial, skull base, or craniofacial abnormality, lesion, fracture, mass, hemorrhage, edema, calcification, or other pathological finding.'  changed=True
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='head / skull base': 158 matches
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 170 matches
+2026-04-08T22:35:06  WARNING   medvqa.agents.advanced_rag  Metadata filter found no intersection; falling back to full corpus
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag  Metadata filter: none applied (full corpus search)
+2026-04-08T22:35:06  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag  Dense retrieval searching full FAISS index with 1793 vectors
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/20
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag    1. id=656 score=0.6020 | Q: what test or procedure might reveal the diagnosis? | A: head/neck ct
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag    2. id=1362 score=0.5602 | Q: is there acute blood present on this head ct? | A: no
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag    3. id=385 score=0.5405 | Q: what imaging modality is seen here? | A: ct
+2026-04-08T22:35:06  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval searching full corpus of 1793 documents
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/20
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag    1. id=1633 score=21.0669 | Q: is a skull fracture present? | A: no
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag    2. id=453 score=20.4785 | Q: are the ground glass opacities located more in the apex or base of the lung? | A: base
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag    3. id=1709 score=19.8509 | Q: is there a skull fracture present? | A: no
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=20 sparse=20
+2026-04-08T22:35:06  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 20 unique candidates
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/20
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag    1. id=656 score=0.0299 method=hybrid_rrf | Q: what test or procedure might reveal the diagnosis? | A: head/neck ct
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag    2. id=1362 score=0.0295 method=hybrid_rrf | Q: is there acute blood present on this head ct? | A: no
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag    3. id=950 score=0.0274 method=hybrid_rrf | Q: is there a skull fracture pictured? | A: no
+2026-04-08T22:35:06  INFO      medvqa.agents.advanced_rag  Reranking 20 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-08T22:35:06  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 20 candidates...
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag    1. id=1362 score=0.2113 method=reranked softmax=0.7869 | Q: is there acute blood present on this head ct? | A: no
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag    2. id=656 score=-1.9093 method=reranked softmax=0.0944 | Q: what test or procedure might reveal the diagnosis? | A: head/neck ct
+2026-04-08T22:35:06  DEBUG     medvqa.agents.advanced_rag    3. id=1633 score=-3.2460 method=reranked softmax=0.0248 | Q: is a skull fracture present? | A: no
+2026-04-08T22:35:06  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 3 retrieved candidates
+2026-04-08T22:35:06  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 3 retrieved candidates via LLM
+2026-04-08T22:35:07  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=True  confidence=medium  recommendation=augment
+2026-04-08T22:35:07  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ['All retrieved cases are CT head/skull base related, so modality and anatomy match reasonably well.', "The cases are only loosely related to the original question because they address specific abnormalities (acute blood, skull fracture) rather than a general 'what abnormality is present?' query.", 'One case asks about a test/procedure rather than an imaging finding, making it less directly useful.']
+2026-04-08T22:35:07  INFO      medvqa.agents.advanced_rag  Self-reflection accepted retrieved candidates
+2026-04-08T22:35:07  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-08T22:35:07  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-08T22:35:07  DEBUG     medvqa.agents.advanced_rag    1. id=1362 score=0.2113 method=reranked softmax=0.7869 | Q: is there acute blood present on this head ct? | A: no
+2026-04-08T22:35:07  DEBUG     medvqa.agents.advanced_rag    2. id=656 score=-1.9093 method=reranked softmax=0.0944 | Q: what test or procedure might reveal the diagnosis? | A: head/neck ct
+2026-04-08T22:35:07  DEBUG     medvqa.agents.advanced_rag    3. id=1633 score=-3.2460 method=reranked softmax=0.0248 | Q: is a skull fracture present? | A: no
+2026-04-08T22:35:07  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases  (query_rewritten=True  finding_category=normal)
+2026-04-08T22:35:12  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=3  duration=7293ms
+2026-04-08T22:35:12  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['CT is excellent for detecting bony defects, fractures, sinus opacification, and calcified or hyperdense lesions.', 'The skull base includes the sphenoid/temporal bones, posterior fossa structures, and adjacent sinuses and orbits.', 'Common abnormalities on this exam include fracture, hemorrhage, sinus disease, and mass effect.', 'Normal findings include symmetric skull base anatomy, clear paranasal sinuses, and no abnormal extra-axial or parenchymal hyperdensity.']
+2026-04-08T22:35:12  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: Noncontrast head CT at the skull base is useful for evaluating bone, paranasal sinuses, orbits, posterior fossa, and temporal bones for traumatic or inflammatory abnormalities. In similar head CT case
+2026-04-08T22:35:12  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=3  duration=7322ms
+2026-04-08T22:35:13  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-08T22:35:13  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what abnormality is present?'  is_retry=False  question_type=abnormality_description  yes_no=False
+2026-04-08T22:35:13  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=3
+2026-04-08T22:35:15  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Mild maxillary sinus mucosal thickening'  confidence=high  duration=2411ms
+2026-04-08T22:35:15  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the skull base CT structures visible on the slice.', 'Noted that the maxillary sinuses are not completely clear and show mild wall-based mucosal thickening/partial opacification.', 'Checked for other obvious abnormalities such as fracture, hemorrhage, or mass effect and none were apparent on this image.', 'Selected the visible abnormality most directly supported by the image.']
+2026-04-08T22:35:15  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Mild asymmetric mucosal thickening/opacification along the maxillary sinus walls', 'Maxillary sinuses otherwise aerated', 'No obvious acute osseous abnormality visible on this single slice', 'Symmetric posterior fossa structures on this image']
+2026-04-08T22:35:15  DEBUG     medvqa.agents.reasoning_agent  Limitations: Only a single axial slice is provided, so subtle additional abnormalities elsewhere in the head or skull base cannot be excluded.
+2026-04-08T22:35:15  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Mild maxillary sinus mucosal thickening'  confidence=high  duration=2444ms
+2026-04-08T22:35:16  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-08T22:35:16  INFO      medvqa.agents.verification_agent  Verifying answer='Mild maxillary sinus mucosal thickening'  question='what abnormality is present?'  question_type=abnormality_description
+2026-04-08T22:35:18  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1688ms
+2026-04-08T22:35:18  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-08T22:35:18  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer is a short abnormality description consistent with the visual analysis. The image summary supports mild asymmetric maxillary sinus mucosal thickening/opacification, and the explanation stays within what is visible on the CT slice. There is no contradiction and the level of certainty is appropriate for the described finding.
+2026-04-08T22:35:18  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1714ms
+2026-04-08T22:35:18  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-08T22:35:18  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-08T22:35:18  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-08T22:35:18  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Mild maxillary sinus mucosal thickening'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=22587ms
+2026-04-08T22:35:18  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Mild maxillary sinus mucosal thickening'  verification=verified  confidence=High  flag_review=False
+2026-04-08T22:35:18  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-08T22:35:18  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-08T22:35:18  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Mild maxillary sinus mucosal thickening'  retries=0  total_duration=22592ms ===
+2026-04-08T22:35:18  INFO      medvqa.routes.dataset  Sample 1955 analysis complete  baseline=1692ms  workflow=4174ms  agentic=22596ms  total=22596ms
+2026-04-08T22:35:18  INFO      medvqa.routes.dataset  Sample 1955 answers  baseline='Bilateral maxillary sinusitis with mucosal thickening/opacif'  workflow='No obvious acute bony abnormality on this single slice'  agentic='Mild maxillary sinus mucosal thickening'  ground_truth='bleeding in the right posteroinferior cerebellum'
