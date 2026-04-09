@@ -245,26 +245,6 @@ This prevents low-relevance training cases from contaminating the reasoning proc
 
 This graceful degradation prevents over-filtering while still using metadata whenever it helps.
 
-#### Corpus & Runtime Characteristics
-
-- **Corpus**: VQA-RAD train split (1,793 radiology Q&A pairs)
-- **Runtime**: the retrieval stack runs locally on CPU or GPU depending on the configured device
-- **Safety**: the confidence gate blocks weak matches so the prompt receives either high-quality context or no RAG context
-
-#### Evidence Format & Safety
-
-Retrieved cases are injected as compact evidence blocks:
-
-```
-Case 1:
-  Answer: yes
-  Modality: x-ray
-  Region: chest
-  Relevance Score: 0.976
-```
-
-The knowledge prompt includes an explicit **safety disclaimer**: "These retrieved answers come from DIFFERENT images. Do NOT assume they are correct for the current case. Use them only for terminology, anatomy reference, and what to look for."
-
 ### Model Configuration
 
 The current runtime uses OpenAI for all LLM-driven stages. The Advanced RAG retrieval stack additionally uses local SentenceTransformers, CrossEncoder, FAISS, and BM25 models. The evaluation scorer uses a PubMedBERT-based sentence-transformer (`NeuML/pubmedbert-base-embeddings`) for semantic similarity on open-ended answers.
