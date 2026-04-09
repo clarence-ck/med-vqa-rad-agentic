@@ -39,20 +39,17 @@ function getKnowledgeSupportDetails(agenticResult) {
       status: 'unknown',
       keyFactsCount: 0,
       summary: '',
-      hydeUsed: false,
     };
   }
 
   const status = String(knowledgeStep.status || 'unknown').toLowerCase();
   const keyFacts = knowledgeStep.output?.key_facts || [];
-  const ragMetadata = knowledgeStep.output?.rag_retrieval?.metadata || {};
 
   return {
     triggered: status !== 'skipped',
     status,
     keyFactsCount: keyFacts.length,
     summary: knowledgeStep.summary || '',
-    hydeUsed: ragMetadata.hyde_used || false,
   };
 }
 
@@ -458,12 +455,6 @@ export default function CaseExplorer({
                             <span className="summary-stat-label" data-tooltip="Whether the Knowledge Retriever agent was invoked. Determined by the Difficulty Router based on complexity and requires_medical_knowledge flag.">Knowledge retriever</span>
                             <span className={`tag ${hasRetrieverDetails ? 'tag-green' : 'tag-gray'}`}>
                               {hasRetrieverDetails ? 'triggered' : 'skipped'}
-                            </span>
-                          </div>
-                          <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label" data-tooltip="HyDE (Hypothetical Document Embeddings) fallback was used when retrieval confidence was low.">HyDE expansion</span>
-                            <span className={`tag ${knowledgeSupport.hydeUsed ? 'tag-amber' : 'tag-gray'}`}>
-                              {knowledgeSupport.hydeUsed ? 'used' : 'not used'}
                             </span>
                           </div>
                           <div className="summary-stat-row summary-stat-row-inline">

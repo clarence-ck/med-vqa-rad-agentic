@@ -362,7 +362,6 @@ def _extract_knowledge_retriever_details(agentic_result: dict) -> dict:
     status = str(knowledge_step.get("status", "unknown")).strip().lower()
     key_facts = knowledge_step.get("output", {}).get("key_facts", []) or []
     summary = knowledge_step.get("summary", "")
-    rag_metadata = knowledge_step.get("output", {}).get("rag_retrieval", {}).get("metadata", {}) or {}
     triggered = status not in {"", "unknown", "skipped"}
 
     return {
@@ -370,7 +369,6 @@ def _extract_knowledge_retriever_details(agentic_result: dict) -> dict:
         "knowledge_retriever_status": status or "unknown",
         "knowledge_key_facts_count": len(key_facts),
         "knowledge_summary": summary,
-        "knowledge_retriever_hyde_used": bool(rag_metadata.get("hyde_used", False)),
     }
 
 

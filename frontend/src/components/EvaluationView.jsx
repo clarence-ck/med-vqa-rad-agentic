@@ -731,11 +731,6 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                                 ? (row.knowledge_retriever_status || 'triggered')
                                 : 'skipped'}
                             </span>
-                            {row.knowledge_retriever_triggered && (
-                              <span className={`tag ${row.knowledge_retriever_hyde_used ? 'tag-amber' : 'tag-gray'}`} data-tooltip={row.knowledge_retriever_hyde_used ? 'HyDE fallback was used to expand retrieval.' : 'HyDE fallback was not used.'}>
-                                {row.knowledge_retriever_hyde_used ? 'HyDE used' : 'HyDE off'}
-                              </span>
-                            )}
                             <span className="evaluation-list-subtitle">facts {row.knowledge_key_facts_count ?? 0}</span>
                           </div>
                         </td>

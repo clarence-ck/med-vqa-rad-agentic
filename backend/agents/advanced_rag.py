@@ -1,7 +1,7 @@
 """
 Advanced RAG Retriever for Medical VQA
 Implements: hybrid search (dense + BM25), metadata filtering,
-cross-encoder reranking, confidence-based validation, and HyDE fallback.
+cross-encoder reranking, and confidence-based validation.
 Uses FAISS for efficient vector similarity search.
 """
 
@@ -20,9 +20,7 @@ import faiss
 
 from sentence_transformers import SentenceTransformer, CrossEncoder
 from rank_bm25 import BM25Okapi
-from openai import OpenAI
 
-from config import OPENAI_API_KEY, OPENAI_MODEL
 from logger import get_logger
 
 _log = get_logger("agents.advanced_rag")
@@ -45,7 +43,6 @@ class AdvancedRAGRetriever:
     - Metadata pre-filtering (modality, body_region, finding_category)
     - Mandatory cross-encoder reranking
     - Multi-signal confidence-based validation
-    - HyDE fallback on low-confidence retrieval
     """
     
     def __init__(
@@ -74,7 +71,6 @@ class AdvancedRAGRetriever:
         # Models (loaded lazily)
         self._embedding_model: Optional[SentenceTransformer] = None
         self._cross_encoder: Optional[CrossEncoder] = None
-        self._openai_client: Optional[OpenAI] = None
         
         # Index storage
         self._train_examples: List[Dict[str, Any]] = []
@@ -88,7 +84,6 @@ class AdvancedRAGRetriever:
         self._modality_index: Dict[str, List[int]] = defaultdict(list)
         self._body_region_index: Dict[str, List[int]] = defaultdict(list)
         self._finding_index: Dict[str, List[int]] = defaultdict(list)
-        self._hyde_used: bool = False  # True if HyDE fallback was triggered
         self._device = self._resolve_device()
         _log.info("Using device: %s", self._device)
 
@@ -183,12 +178,6 @@ class AdvancedRAGRetriever:
             _log.info("Loading cross-encoder: %s on %s", self.cross_encoder_name, self._device)
             self._cross_encoder = CrossEncoder(self.cross_encoder_name, device=self._device)
         return self._cross_encoder
-
-    def _get_openai_client(self) -> OpenAI:
-        """Lazy load OpenAI client for HyDE generation"""
-        if self._openai_client is None:
-            self._openai_client = OpenAI(api_key=OPENAI_API_KEY)
-        return self._openai_client
 
     def load_train_data(self) -> bool:
         """Load and index VQA-RAD train split"""
@@ -454,59 +443,12 @@ class AdvancedRAGRetriever:
         tokens = re.findall(r'\b[a-zA-Z]+\b', text.lower())
         return tokens
 
-    def generate_hypothetical_answer(
-        self,
-        question: str,
-        modality: str = None,
-        body_region: str = None
-    ) -> str:
-        """
-        HyDE (Hypothetical Document Embeddings): Generate a hypothetical ideal answer.
-        This bridges the gap between query space and document space for better retrieval.
-        """
-        try:
-            client = self._get_openai_client()
-            
-            context_parts = []
-            if modality and modality != 'unknown':
-                context_parts.append(f"Imaging modality: {modality}")
-            if body_region and body_region != 'unknown':
-                context_parts.append(f"Body region: {body_region}")
-            
-            context = "\n".join(context_parts) if context_parts else "No specific context provided."
-            
-            prompt = f"""You are generating a hypothetical ideal answer for retrieval purposes.
-Given a medical imaging question, write a short, factual answer as if you had seen the image.
-This will be used to find similar real cases from a database.
-
-Question: {question}
-{context}
-
-Generate a hypothetical answer (1-2 sentences) that would be typical for this type of question.
-Be specific and medical but do not make up findings. Return ONLY the answer text, no preamble."""
-            
-            response = client.chat.completions.create(
-                model=OPENAI_MODEL,
-                messages=[{"role": "user", "content": prompt}],
-                max_completion_tokens=150,
-                temperature=0.2
-            )
-            
-            hypothetical = response.choices[0].message.content.strip()
-            if not hypothetical:
-                return question
-            
-            return hypothetical
-
-        except Exception as e:
-            _log.warning("HyDE generation failed: %s", e)
-            return question
-    
     # Retrieval confidence thresholds
-    _TOP1_SOFTMAX_THRESHOLD = 0.55
-    _SOFTMAX_MARGIN_THRESHOLD = 0.15
-    _DENSE_TOP1_THRESHOLD = 0.35
-    _AGREEMENT_TOPK = 5
+    # Lowered from original (0.55, 0.15) to allow more valid retrievals through
+    _TOP1_SOFTMAX_THRESHOLD = 0.30  # Was 0.55 - cross-encoder softmax confidence
+    _SOFTMAX_MARGIN_THRESHOLD = 0.08  # Was 0.15 - gap between top 1 and 2
+    _DENSE_TOP1_THRESHOLD = 0.35  # Dense retrieval minimum score
+    _AGREEMENT_TOPK = 5  # Check if top reranked candidate appears in both dense/sparse top-5
 
     def retrieve(
         self,
@@ -518,16 +460,14 @@ Be specific and medical but do not make up findings. Return ONLY the answer text
         """
         Full advanced RAG retrieval pipeline.
         No LLM calls during retrieval — uses a multi-signal confidence gate instead of
-        self-reflection, and skips query rewriting. HyDE is used as a fallback when
-        the initial retrieval confidence is low.
+        self-reflection, and skips query rewriting.
         """
         if not self._is_indexed:
             if not self.build_index():
                 return []
 
         _log.info(
-            "Retrieval pipeline started | question=%s | modality=%s | body_region=%s | "
-            "finding=%s | rerank=mandatory",
+            "Retrieval pipeline started | question=%s | modality=%s | body_region=%s | finding=%s | rerank=mandatory",
             self._shorten_text(question, 140),
             modality or "unknown",
             body_region or "unknown",
@@ -536,7 +476,6 @@ Be specific and medical but do not make up findings. Return ONLY the answer text
 
         # 1. Use original question directly (no LLM rewrite)
         query = question
-        self._hyde_used = False
         _log.debug("Using original question as query (no LLM rewrite)")
 
         # 2. Metadata Filtering
@@ -585,41 +524,7 @@ Be specific and medical but do not make up findings. Return ONLY the answer text
         )
 
         if confidence["level"] == "medium":
-            _log.warning("Retrieval confidence is medium; returning results without HyDE")
-
-        # 6. HyDE Fallback: If confidence is low, retry with HyDE on full corpus
-        if not confidence["is_confident"]:
-            _log.warning("Initial retrieval confidence is low; retrying with HyDE")
-            hyde_answer = self.generate_hypothetical_answer(question, modality, body_region)
-            _log.info("HyDE generation | original=%r", question)
-            _log.info("HyDE generation | hypothetical=%r", hyde_answer)
-            query = f"{question} {hyde_answer}"
-            self._hyde_used = True
-            
-            # Retry on FULL corpus (relax metadata filter)
-            dense_results = self._dense_retrieval(query, None)
-            sparse_results = self._sparse_retrieval(query, None)
-            merged = self._merge_results(dense_results, sparse_results)
-            
-            reranked = self._rerank(query, merged)
-            
-            confidence = self._compute_retrieval_confidence(dense_results, sparse_results, reranked)
-            validated = reranked if confidence["is_confident"] else []
-
-            _log.info(
-                "HyDE confidence | level=%s weak_signals=%d top1_softmax=%.3f margin=%.3f dense_top1=%.3f agreement=%s",
-                confidence["level"],
-                confidence["weak_signals"],
-                confidence["top1_softmax"],
-                confidence["softmax_margin"],
-                confidence["dense_top1"],
-                confidence["top_candidate_in_dense_and_sparse_top5"],
-            )
-
-            if not validated:
-                _log.warning("HyDE retry also returned low confidence results")
-            else:
-                _log.info("HyDE retry complete: returning %d final candidates", len(validated))
+            _log.warning("Retrieval confidence is medium; returning results")
 
         _log.info("Retrieval complete: returning %d final candidates", len(validated))
         self._log_top_hits("Final retrieved cases", validated)
@@ -632,12 +537,20 @@ Be specific and medical but do not make up findings. Return ONLY the answer text
         body_region: str = None,
         finding_category: str = None,
     ) -> Optional[List[int]]:
-        """Apply metadata pre-filtering to reduce search space"""
+        """Apply metadata pre-filtering to reduce search space.
+
+        Uses smart intersection: tries full filter (modality + body_region + finding),
+        but gracefully degrades to partial filters if intersection is empty.
+        Finding category is sparse, so it's applied last and skipped if it causes emptiness.
+        """
         if not modality and not body_region and not finding_category:
             _log.debug("Metadata filter inputs empty; skipping filter")
             return None  # No filtering
 
-        candidates = None
+        # Build individual filter sets
+        modality_set = None
+        body_region_set = None
+        finding_set = None
 
         if modality and modality != 'unknown':
             modality_lower = modality.lower()
@@ -649,7 +562,7 @@ Be specific and medical but do not make up findings. Return ONLY the answer text
                         break
             if matching:
                 _log.debug("Metadata filter modality='%s': %d matches", modality_lower, len(matching))
-                candidates = set(matching)
+                modality_set = set(matching)
             else:
                 _log.debug("Metadata filter modality='%s': no exact matches", modality_lower)
 
@@ -663,10 +576,7 @@ Be specific and medical but do not make up findings. Return ONLY the answer text
                         break
             if matching:
                 _log.debug("Metadata filter body_region='%s': %d matches", region_lower, len(matching))
-                if candidates is not None:
-                    candidates = candidates.intersection(set(matching))
-                else:
-                    candidates = set(matching)
+                body_region_set = set(matching)
             else:
                 _log.debug("Metadata filter body_region='%s': no exact matches", region_lower)
 
@@ -680,20 +590,50 @@ Be specific and medical but do not make up findings. Return ONLY the answer text
                         break
             if matching:
                 _log.debug("Metadata filter finding='%s': %d matches", finding_lower, len(matching))
-                if candidates is not None:
-                    candidates = candidates.intersection(set(matching))
-                else:
-                    candidates = set(matching)
+                finding_set = set(matching)
             else:
                 _log.debug("Metadata filter finding='%s': no exact matches", finding_lower)
 
+        # Smart intersection: try full filter first, then degrade gracefully
+        candidates = None
+        filter_applied = []
+
+        # Step 1: Apply modality filter (base)
+        if modality_set is not None:
+            candidates = modality_set
+            filter_applied.append(f"modality({len(modality_set)})")
+
+        # Step 2: Intersect with body_region if available
+        if body_region_set is not None:
+            if candidates is not None:
+                intersected = candidates.intersection(body_region_set)
+                if intersected:
+                    candidates = intersected
+                    filter_applied.append(f"body_region({len(body_region_set)})")
+                else:
+                    _log.warning("Modality+body_region intersection empty; using body_region only")
+                    candidates = body_region_set
+                    filter_applied = [f"body_region({len(body_region_set)})"]
+            else:
+                candidates = body_region_set
+                filter_applied.append(f"body_region({len(body_region_set)})")
+
+        # Step 3: Try to intersect with finding, but skip if it causes emptiness
+        if finding_set is not None and candidates is not None:
+            intersected = candidates.intersection(finding_set)
+            if intersected:
+                candidates = intersected
+                filter_applied.append(f"finding({len(finding_set)})")
+            else:
+                _log.info("Skipping finding_category filter: would reduce candidates to zero")
+
         if candidates:
             result = list(candidates)
-            _log.info("Metadata filter result: %d candidates after intersection", len(result))
+            _log.info("Metadata filter result: %d candidates (%s)", len(result), " + ".join(filter_applied))
             return result
 
         if modality or body_region:
-            _log.warning("Metadata filter found no intersection; falling back to full corpus")
+            _log.warning("Metadata filter found no candidates; falling back to full corpus")
 
         return None
     
@@ -938,8 +878,7 @@ def retrieve_knowledge_advanced(
     Convenience function for advanced RAG retrieval.
     
     No LLM calls during retrieval — uses score thresholds instead of self-reflection,
-    and skips query rewriting. HyDE (Hypothetical Document Embeddings) is automatically
-    used as a fallback when initial retrieval produces no candidates above the threshold.
+    and skips query rewriting.
     """
     retriever = get_rag_retriever()
     results = retriever.retrieve(
@@ -960,6 +899,5 @@ def retrieve_knowledge_advanced(
             }
             for r in results
         ],
-        "count": len(results),
-        "hyde_used": retriever._hyde_used  # True if HyDE expanded the query
+        "count": len(results)
     }

@@ -128,7 +128,7 @@ flowchart LR
     GUARD --> REV[Review]
     GUARD --> ERR
 
-    T4 --> RAG[Advanced RAG Engine\nconservative rewrite + FAISS/BM25 + rerank + reflection]
+    T4 --> RAG[Advanced RAG Engine\nFAISS/BM25 + rerank + confidence gating]
     RAG --> TRAIN[(VQA-RAD train split\nretrieval corpus)]
 
     EXP --> DATA[Dataset Analysis\n/api/dataset/sample/sample_id/analysis]
@@ -199,12 +199,12 @@ Typical difficulty assignments by question type:
 
 `KnowledgeRetriever` integrates `advanced_rag.py` to ground context in retrieved examples before synthesis, but only when retrieval quality is sufficient.
 
-1. Rewrite retrieval query conservatively from the original question (+ modality/body-region context)
-2. Apply metadata pre-filtering (`modality`, `body_region`)
+1. Use the original question directly as the retrieval query
+2. Apply metadata pre-filtering (`modality`, `body_region`, `finding_category`)
 3. Run hybrid retrieval: dense vectors (FAISS) + sparse BM25
 4. Fuse candidates via reciprocal rank fusion (RRF)
-5. Rerank with cross-encoder and keep top-k similar cases
-6. Run self-reflection on retrieval quality; reject weak/loosely related retrievals
+5. Rerank with a cross-encoder and keep the top-k similar cases
+6. Validate the retrieval with a multi-signal confidence gate
 7. Inject only answer-focused evidence blocks into the knowledge prompt
 
 Retrieval corpus is built from the **train split** of `data/vqa-rad/vqa_rad.json`.
@@ -213,7 +213,7 @@ The retriever now formats retrieved cases as compact evidence blocks (answer + m
 
 ### Model Configuration
 
-The current runtime uses OpenAI for all LLM-driven stages; the Advanced RAG retrieval stack additionally uses local SentenceTransformers, CrossEncoder, FAISS, and BM25 models. The evaluation scorer uses a PubMedBERT-based sentence-transformer for semantic similarity on open-ended answers.
+The current runtime uses OpenAI for all LLM-driven stages. The Advanced RAG retrieval stack additionally uses local SentenceTransformers, CrossEncoder, FAISS, and BM25 models. The evaluation scorer uses a PubMedBERT-based sentence-transformer for semantic similarity on open-ended answers.
 
 | Env vars | Used by |
 |---|---|
@@ -616,7 +616,7 @@ Medical-VQA-Explanation-Agent/
 │   │   ├── image_interpreter.py     # Agent 1: multimodal image interpretation (OpenAI)
 │   │   ├── question_analyzer.py     # Agent 2: question classification and intent analysis (OpenAI)
 │   │   ├── difficulty_router.py     # Agent 3: planning — sets difficulty, retrieval flag, verification policy, fallback policy
-│   │   ├── advanced_rag.py          # Advanced RAG engine: query rewrite, FAISS+BM25 retrieval, reranking, reflection
+│   │   ├── advanced_rag.py          # Advanced RAG engine: hybrid retrieval, reranking, confidence gating
 │   │   ├── knowledge_retriever.py   # Agent 4: optional medical context retrieval with Advanced RAG grounding
 │   │   ├── reasoning_agent.py       # Agent 5: answer synthesis with retry context support (OpenAI)
 │   │   ├── verification_agent.py    # Agent 6: structured verification and fallback recommendations (OpenAI)
