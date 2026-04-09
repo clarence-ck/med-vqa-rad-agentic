@@ -1,6 +1,6 @@
 # MedVisionQuery — Agentic Multimodal Medical VQA System
 
-MedVisionQuery is an **agentic multimodal system** for medical visual question answering (VQA) over radiology images. It decomposes the task into 6 specialized agent stages — image interpretation, question understanding, difficulty routing, knowledge support, reasoning, and verification — orchestrated by a **Haystack Agent** with LLM-driven tool selection. The knowledge stage now uses an **Advanced RAG pipeline** (query rewriting, hybrid retrieval, reranking, and self-reflection). Results are exposed through a demo UI with **Dashboard**, **Case Explorer**, and **Evaluation** views.
+MedVisionQuery is an **agentic multimodal system** for medical visual question answering (VQA) over radiology images. It decomposes the task into 6 specialized agent stages — image interpretation, question understanding, difficulty routing, knowledge support, reasoning, and verification — orchestrated by a **Haystack Agent** with LLM-driven tool selection. The knowledge stage now uses an **Advanced RAG pipeline** with metadata-aware hybrid retrieval, reciprocal-rank fusion, mandatory cross-encoder reranking, and confidence gating. Results are exposed through a demo UI with **Dashboard**, **Case Explorer**, and **Evaluation** views.
 
 > ⚠️ **For educational and research purposes only. Not for clinical use.**
 
@@ -213,7 +213,7 @@ The retriever now formats retrieved cases as compact evidence blocks (answer + m
 
 ### Model Configuration
 
-The current runtime uses OpenAI for all LLM-driven stages. The Advanced RAG retrieval stack additionally uses local SentenceTransformers, CrossEncoder, FAISS, and BM25 models. The evaluation scorer uses a PubMedBERT-based sentence-transformer for semantic similarity on open-ended answers.
+The current runtime uses OpenAI for all LLM-driven stages. The Advanced RAG retrieval stack additionally uses local SentenceTransformers, CrossEncoder, FAISS, and BM25 models. The evaluation scorer uses a PubMedBERT-based sentence-transformer (`NeuML/pubmedbert-base-embeddings`) for semantic similarity on open-ended answers.
 
 | Env vars | Used by |
 |---|---|
@@ -222,7 +222,7 @@ The current runtime uses OpenAI for all LLM-driven stages. The Advanced RAG retr
 | `OPENAI_MODEL` | `QuestionAnalyzer`, `KnowledgeRetriever`, `ReasoningAgent`, `VerificationAgent`, Haystack controller |
 | `EVALUATION_DEVICE` | PubMedBERT evaluation embedding model device selection (`cpu`, `cuda`, or `auto`) |
 
-Hugging Face is used to download the raw dataset via scripts. The retrieval stack itself is local, while the agentic generation steps use OpenAI. Evaluation uses a cached PubMedBERT-based semantic scorer on the backend and exact yes/no matching for close-ended questions.
+Hugging Face is used to download the raw dataset via scripts. The retrieval stack itself is local, while the agentic generation steps use OpenAI. Evaluation uses a cached PubMedBERT-based semantic scorer on the backend, prefix-based normalization for yes/no answers, and exact matching for other binary medical assessments such as normal/abnormal and present/absent.
 
 ### Other Technology Choices
 
@@ -390,9 +390,9 @@ The Guardrail combines `verification_status` + `failure_categories` to produce 5
 
 ### Metrics computed per cached case
 - **Normalized answer match** — evaluation method depends on ground truth answer style:
-  - **Close-ended** (binary ground truth like yes/no): exact yes/no only
+  - **Close-ended** (yes/no and other binary medical assessments such as normal/abnormal, present/absent, positive/negative): yes/no answers are normalized by trimming punctuation and matching responses that start with `yes` or `no`; other binary medical assessments use exact match only
   - **Open-ended** (non-binary ground truth): PubMedBERT semantic similarity ≥ 0.75
-- **Yes/no normalization** — exact `yes` / `no` only
+- **Yes/no normalization** — responses beginning with `yes` or `no` count as `yes` / `no` after punctuation trimming
 - **PubMedBERT semantic similarity** — cosine similarity between answer embeddings using a PubMedBERT-based sentence-transformer for biomedical semantic similarity
 - **Lexical Overlap (Token F1)** — unigram overlap between predicted and ground-truth answer; diagnostic metric only, NOT used for accuracy
 - **Winner** — `baseline` / `workflow` / `agentic` / `tie: ...` / `tie_all_wrong`
@@ -409,6 +409,7 @@ The Guardrail combines `verification_status` + `failure_categories` to produce 5
 1. Selecting a sample in Case Explorer runs all 3 systems concurrently via `asyncio.gather` and writes results to `backend/.case_explorer_cache/sample_{id}_{question_hash}.json`
 2. Subsequent opens serve from cache — use the **Refresh** button to force a re-run
 3. The Evaluation tab reads all cache files and computes the aggregate summary live
+4. `scripts/run_case_explorer_cache.py` can warm or inspect the curated Case Explorer cache (`--refresh`, `--all`, `--dry-run`, `--status`)
 
 ### Systems compared
 | System | File | Approach |
@@ -613,10 +614,10 @@ Medical-VQA-Explanation-Agent/
 │   ├── requirements.txt             # pip dependencies
 │   ├── agents/
 │   │   ├── orchestrator.py          # Haystack Agent controller, tool routing, retry logic, guardrails
-│   │   ├── image_interpreter.py     # Agent 1: multimodal image interpretation (OpenAI)
+│   │   ├── image_interpreter.py     # Agent 1: multimodal image interpretation (OpenAI-backed vision model)
 │   │   ├── question_analyzer.py     # Agent 2: question classification and intent analysis (OpenAI)
 │   │   ├── difficulty_router.py     # Agent 3: planning — sets difficulty, retrieval flag, verification policy, fallback policy
-│   │   ├── advanced_rag.py          # Advanced RAG engine: hybrid retrieval, reranking, confidence gating
+│   │   ├── advanced_rag.py          # Advanced RAG engine: hybrid retrieval, metadata filtering, reranking, confidence gating
 │   │   ├── knowledge_retriever.py   # Agent 4: optional medical context retrieval with Advanced RAG grounding
 │   │   ├── reasoning_agent.py       # Agent 5: answer synthesis with retry context support (OpenAI)
 │   │   ├── verification_agent.py    # Agent 6: structured verification and fallback recommendations (OpenAI)
@@ -655,6 +656,7 @@ Medical-VQA-Explanation-Agent/
 │           └── useEvaluation.js     # evaluation summary fetch
 ├── scripts/
 │   ├── download_dataset.py          # downloads VQA-RAD from Hugging Face, writes JSON + images
+│   ├── run_case_explorer_cache.py   # warms/inspects the curated Case Explorer cache
 │   ├── system_diagram.py            # regenerates the architecture figure
 ├── system_diagram.png               # rendered system diagram asset
 ├── eval-dashboard-screenshots/      # UI screenshots of the evaluation dashboard

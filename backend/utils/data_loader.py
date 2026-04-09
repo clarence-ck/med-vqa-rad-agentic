@@ -47,6 +47,8 @@ def get_sample_cases(limit: int = 200) -> list:
 
     buckets = {}
     for i, item in enumerate(data):
+        if i == 0:
+            continue
         q_type = _classify_question(item.get("question", ""))
         image_name = item.get("image_name", item.get("image", ""))
         sample_split = _resolve_split(item, image_name)

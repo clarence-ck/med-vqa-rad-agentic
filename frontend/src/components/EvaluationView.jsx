@@ -400,7 +400,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 <span className="card-title">Close-ended Accuracy</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.close_ended_cases} cases</span>
-                  <span className="tag tag-gray" data-tooltip="Accuracy on cases with yes/no or binary medical answers (normal/abnormal, present/absent, positive/negative, benign/malignant, acute/chronic, diffuse/focal). Exact match required." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="Yes/no answers are normalized by trimming punctuation and matching responses that start with yes or no. Other binary medical answers (normal/abnormal, present/absent, positive/negative, benign/malignant, acute/chronic, diffuse/focal) still require exact match." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <AccuracyMetricStack

@@ -5,16 +5,16 @@ and stores each analysis payload in ``backend/.case_explorer_cache`` via the
 existing ``/api/dataset/sample/{id}/analysis`` logic.
 
 Usage:
-    python scripts/run_case_explorer_cache.py
-    python scripts/run_case_explorer_cache.py --refresh
-    python scripts/run_case_explorer_cache.py --skip 30 --limit 170
-    python scripts/run_case_explorer_cache.py --skip 0 --limit 200
+    python scripts/run_case_explorer_cache.py           # Process all 200 cases (skip existing)
+    python scripts/run_case_explorer_cache.py --refresh # Force reprocess all
+    python scripts/run_case_explorer_cache.py --all     # Alias for skip=0, limit=200
+    python scripts/run_case_explorer_cache.py --dry-run # Preview what would be processed
+    python scripts/run_case_explorer_cache.py --status  # Show cache coverage stats
 """
 from __future__ import annotations
 
 import argparse
 import asyncio
-import json
 import sys
 from pathlib import Path
 
@@ -34,7 +34,33 @@ def _cache_path_for(sample_id: int, question: str) -> Path:
     return Path(CACHE_DIR) / f"sample_{sample_id}_{question_hash}.json"
 
 
-async def warm_cache(skip: int, limit: int, refresh: bool) -> None:
+def _show_cache_status(selected_samples: list) -> None:
+    """Display cache coverage statistics."""
+    total = len(selected_samples)
+    cached = 0
+    missing = 0
+
+    for sample in selected_samples:
+        sample_id = int(sample["id"])
+        question = str(sample.get("question", ""))
+        cache_path = _cache_path_for(sample_id, question)
+        if cache_path.exists():
+            cached += 1
+        else:
+            missing += 1
+
+    coverage_pct = (cached / total * 100) if total else 0
+    print("=" * 50)
+    print("Case Explorer Cache Status")
+    print("=" * 50)
+    print(f"Cache directory: {CACHE_DIR}")
+    print(f"Total curated samples: {total}")
+    print(f"Cached: {cached} ({coverage_pct:.1f}%)")
+    print(f"Missing: {missing} ({100 - coverage_pct:.1f}%)")
+    print("=" * 50)
+
+
+async def warm_cache(skip: int, limit: int, refresh: bool, dry_run: bool = False, status_only: bool = False) -> None:
     if skip < 0:
         raise ValueError("skip must be >= 0")
     if limit < 0:
@@ -50,47 +76,68 @@ async def warm_cache(skip: int, limit: int, refresh: bool) -> None:
         print(f"No curated test cases found for skip={skip}, limit={limit}.")
         return
 
+    # Status-only mode
+    if status_only:
+        _show_cache_status(selected_samples)
+        return
+
+    # Show header
     print(f"Loaded {len(samples)} curated Case Explorer samples (skip={skip}, limit={limit})")
     print(f"Cache directory: {CACHE_DIR}")
     print(f"Refresh mode: {'on' if refresh else 'off'}")
+    print(f"Dry-run mode: {'on' if dry_run else 'off'}")
     print()
 
+    # Preview what would be processed
+    to_process = []
+    already_cached = []
+
+    for sample in samples:
+        sample_id = int(sample["id"])
+        question = str(sample.get("question", ""))
+        cache_path = _cache_path_for(sample_id, question)
+
+        if cache_path.exists() and not refresh:
+            already_cached.append(sample)
+        else:
+            to_process.append(sample)
+
+    print(f"Preview: {len(to_process)} to process, {len(already_cached)} already cached")
+    print()
+
+    if dry_run:
+        print("Dry-run mode - no analysis will be performed.")
+        for index, sample in enumerate(to_process, start=1):
+            sample_id = sample["id"]
+            q_type = sample.get("question_type", "unknown")
+            print(f"  [{index}] sample_id={sample_id} question_type={q_type}")
+        return
+
+    # Process samples
     completed = 0
-    skipped = 0
+    errors = 0
     for index, sample in enumerate(samples, start=1):
         sample_id = int(sample["id"])
         question = str(sample.get("question", ""))
         question_type = sample.get("question_type", "unknown")
         cache_path = _cache_path_for(sample_id, question)
+
         if cache_path.exists() and not refresh:
-            try:
-                cached_payload = json.loads(cache_path.read_text(encoding="utf-8"))
-                if isinstance(cached_payload, dict):
-                    print(f"[{index}/{len(samples)}] sample_id={sample_id}  question_type={question_type}")
-                    print("  -> skipped (already cached)")
-                    skipped += 1
-                    continue
-            except Exception:
-                pass
+            continue  # Skip silently (already counted in preview)
 
         print(f"[{index}/{len(samples)}] sample_id={sample_id}  question_type={question_type}")
         payload = await analyze_sample_case(sample_id, refresh=refresh)
         if isinstance(payload, dict) and payload.get("error"):
             print(f"  -> ERROR: {payload['error']}")
+            errors += 1
         else:
             cached_flag = payload.get("cached", False) if isinstance(payload, dict) else False
             print(f"  -> stored in cache (cached={cached_flag})")
-        completed += 1
+            completed += 1
 
     print()
-    print(f"Done. Processed {completed} curated Case Explorer samples.")
-    print(f"Skipped {skipped} already-cached samples.")
-    total = len(samples)
-    if total:
-        processed_pct = (completed / total) * 100
-        skipped_pct = (skipped / total) * 100
-        print(f"Processed: {processed_pct:.1f}% | Skipped: {skipped_pct:.1f}% | Total: {total}")
-    print("Cache files are written under backend/.case_explorer_cache")
+    print(f"Done. Successfully cached: {completed} | Errors: {errors}")
+    print(f"Cache files are written under backend/.case_explorer_cache")
 
 
 def parse_args() -> argparse.Namespace:
@@ -99,26 +146,53 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--skip",
         type=int,
-        default=30,
-        help="Number of curated UI cases to skip before processing (default: 30).",
+        default=0,
+        help="Number of curated UI cases to skip before processing (default: 0).",
     )
     parser.add_argument(
         "--limit",
         type=int,
-        default=170,
-        help="Number of curated UI test cases to run after skipping (default: 170).",
+        default=200,
+        help="Number of curated UI test cases to run after skipping (default: 200).",
+    )
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Process all 200 cases (alias for skip=0, limit=200).",
     )
     parser.add_argument(
         "--refresh",
         action="store_true",
         help="Force recomputation even if a cache file already exists.",
     )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview which cases would be processed without running analysis.",
+    )
+    parser.add_argument(
+        "--status",
+        action="store_true",
+        help="Show cache coverage statistics and exit.",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    asyncio.run(warm_cache(skip=args.skip, limit=args.limit, refresh=args.refresh))
+
+    # Handle --all flag
+    if args.all:
+        args.skip = 0
+        args.limit = 200
+
+    asyncio.run(warm_cache(
+        skip=args.skip,
+        limit=args.limit,
+        refresh=args.refresh,
+        dry_run=args.dry_run,
+        status_only=args.status
+    ))
 
 
 if __name__ == "__main__":
