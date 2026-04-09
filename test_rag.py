@@ -2,11 +2,17 @@
 """
 RAG Pipeline Test Script
 Tests the Advanced RAG retrieval system with various scenarios.
+
+Usage:
+    python test_rag.py                    # Run default 6 tests
+    python test_rag.py --sample 30        # Run 30 real cases from VQA-RAD dataset
+    python test_rag.py --sample 30 --skip 100  # Skip first 100, then sample 30
 """
 
 import sys
 import time
 import json
+import argparse
 from pathlib import Path
 
 # Add backend to path
@@ -18,6 +24,7 @@ from agents.advanced_rag import (
     get_rag_retriever,
 )
 from agents.knowledge_retriever import KnowledgeRetriever
+from utils.data_loader import get_dataset, get_sample_cases
 
 
 def test_direct_rag_retrieval():
@@ -268,10 +275,168 @@ def test_rag_vs_no_rag():
         print(f"    - {c['metadata']} | {c['answer'][:50]}...")
 
 
+def test_sample_cases(sample_size: int = 30, skip: int = 0):
+    """Run RAG on N cases from the 200 curated Case Explorer samples.
+    
+    This provides a more realistic assessment of RAG performance across
+    diverse question types and modalities, using the same cases shown in the UI.
+    """
+    print("\n" + "="*60)
+    print(f"SAMPLE TEST: {sample_size} Curated Case Explorer Samples (skip={skip})")
+    print("="*60)
+
+    # Load the 200 curated samples (same as Case Explorer dropdown)
+    try:
+        all_samples = get_sample_cases(limit=200)
+    except Exception as e:
+        print(f"❌ Failed to load curated samples: {e}")
+        return None
+
+    if not all_samples:
+        print("❌ No curated samples found")
+        return None
+
+    # Select sample from the 200 curated cases
+    total_available = len(all_samples)
+    start_idx = min(skip, total_available)
+    end_idx = min(start_idx + sample_size, total_available)
+    selected = all_samples[start_idx:end_idx]
+
+    print(f"Curated pool: {total_available} cases (Case Explorer selection)")
+    print(f"Testing: {len(selected)} cases (indices {start_idx}-{end_idx-1})")
+    print()
+
+    retriever = get_rag_retriever()
+
+    # Statistics
+    stats = {
+        "total": len(selected),
+        "retrieved_any": 0,
+        "high_confidence": 0,
+        "medium_confidence": 0,
+        "low_confidence": 0,
+        "zero_candidates": 0,
+        "by_question_type": {},
+    }
+
+    results_summary = []
+
+    for i, sample in enumerate(selected, 1):
+        question = sample.get("question", "")
+        question_type = sample.get("question_type", "unknown")
+        sample_id = sample.get("id", -1)
+
+        # Curated samples don't have modality/body_region directly
+        # Run retrieval without metadata filters (inference only)
+        start = time.perf_counter()
+        result = retriever.retrieve(
+            question=question,
+            modality=None,  # Let RAG work without pre-filtering
+            body_region=None,
+            finding_category=None,  # Let it infer
+        )
+        elapsed = (time.perf_counter() - start) * 1000
+
+        count = len(result)
+        confidence_level = "unknown"
+        
+        if count > 0:
+            stats["retrieved_any"] += 1
+            # Estimate confidence based on scores
+            top_score = result[0].score
+            if top_score > -5.0:
+                confidence_level = "high"
+                stats["high_confidence"] += 1
+            elif top_score > -8.0:
+                confidence_level = "medium"
+                stats["medium_confidence"] += 1
+            else:
+                confidence_level = "low"
+                stats["low_confidence"] += 1
+        else:
+            stats["zero_candidates"] += 1
+
+        # Track by question type
+        qt_key = question_type if question_type != "unknown" else "unknown"
+        if qt_key not in stats["by_question_type"]:
+            stats["by_question_type"][qt_key] = {"total": 0, "retrieved": 0}
+        stats["by_question_type"][qt_key]["total"] += 1
+        if count > 0:
+            stats["by_question_type"][qt_key]["retrieved"] += 1
+
+        results_summary.append({
+            "idx": sample_id,
+            "question": question[:60],
+            "q_type": qt_key,
+            "count": count,
+            "confidence": confidence_level,
+            "duration_ms": elapsed,
+        })
+
+        # Print progress every 10 cases
+        if i % 10 == 0 or i == len(selected):
+            print(f"  Progress: {i}/{len(selected)} cases processed...")
+
+    # Print detailed results
+    print("\n" + "-"*60)
+    print("DETAILED RESULTS (first 10)")
+    print("-"*60)
+    for r in results_summary[:10]:
+        status = "✓" if r["count"] > 0 else "✗"
+        print(f"  [id={r['idx']:4d}] {status} {r['q_type'][:12]:12} | {r['count']} cases | {r['confidence']:8} | {r['question'][:45]}...")
+
+    # Print summary
+    print("\n" + "="*60)
+    print("SAMPLE TEST SUMMARY")
+    print("="*60)
+    
+    retrieval_rate = (stats["retrieved_any"] / stats["total"] * 100) if stats["total"] > 0 else 0
+    print(f"\nOverall Retrieval Rate: {stats['retrieved_any']}/{stats['total']} ({retrieval_rate:.1f}%)")
+    print(f"  - High confidence:   {stats['high_confidence']}")
+    print(f"  - Medium confidence: {stats['medium_confidence']}")
+    print(f"  - Low confidence:    {stats['low_confidence']}")
+    print(f"  - Zero candidates:   {stats['zero_candidates']}")
+
+    print(f"\nBy Question Type:")
+    for qt, counts in sorted(stats["by_question_type"].items(), key=lambda x: -x[1]["total"]):
+        rate = (counts["retrieved"] / counts["total"] * 100) if counts["total"] > 0 else 0
+        print(f"  - {qt[:25]:25}: {counts['retrieved']:3d}/{counts['total']:3d} ({rate:5.1f}%)")
+
+    return stats
+
+
 def main():
+    # Parse arguments
+    parser = argparse.ArgumentParser(description="RAG Pipeline Test Suite")
+    parser.add_argument(
+        "--sample",
+        type=int,
+        default=None,
+        help="Run N real cases from VQA-RAD dataset instead of default tests",
+    )
+    parser.add_argument(
+        "--skip",
+        type=int,
+        default=0,
+        help="Number of cases to skip before sampling (default: 0)",
+    )
+    args = parser.parse_args()
+
     print("RAG Pipeline Test Suite")
     print("="*60)
 
+    # Sample mode: run real cases from dataset
+    if args.sample is not None:
+        try:
+            test_sample_cases(sample_size=args.sample, skip=args.skip)
+            print("\n✅ Sample Test Completed")
+        except Exception as e:
+            print(f"\n❌ Sample Test FAILED: {e}")
+            import traceback
+            traceback.print_exc()
+        return
+
+    # Default mode: run 6 targeted tests
     tests = [
         ("Direct RAG Retrieval", test_direct_rag_retrieval),
         ("Metadata Filtering", test_metadata_filtering),
