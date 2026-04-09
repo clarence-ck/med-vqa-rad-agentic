@@ -4,12 +4,14 @@ This script runs the same 200 test cases shown in the Case Explorer dropdown
 and stores each analysis payload in ``backend/.case_explorer_cache`` via the
 existing ``/api/dataset/sample/{id}/analysis`` logic.
 
-Usage:
-    python scripts/run_case_explorer_cache.py           # Process all 200 cases (skip existing)
-    python scripts/run_case_explorer_cache.py --refresh # Force reprocess all
-    python scripts/run_case_explorer_cache.py --all     # Alias for skip=0, limit=200
-    python scripts/run_case_explorer_cache.py --dry-run # Preview what would be processed
-    python scripts/run_case_explorer_cache.py --status  # Show cache coverage stats
+Purpose of each command:
+    (no flags)            # Resume cache warming by processing only missing cases.
+
+    --refresh             # Recompute every case and overwrite existing cache results.
+
+    --dry-run             # Show what would run without generating cache files.
+
+    --status              # Show cache coverage and exit.
 """
 from __future__ import annotations
 
@@ -156,11 +158,6 @@ def parse_args() -> argparse.Namespace:
         help="Number of curated UI test cases to run after skipping (default: 200).",
     )
     parser.add_argument(
-        "--all",
-        action="store_true",
-        help="Process all 200 cases (alias for skip=0, limit=200).",
-    )
-    parser.add_argument(
         "--refresh",
         action="store_true",
         help="Force recomputation even if a cache file already exists.",
@@ -180,11 +177,6 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-
-    # Handle --all flag
-    if args.all:
-        args.skip = 0
-        args.limit = 200
 
     asyncio.run(warm_cache(
         skip=args.skip,
