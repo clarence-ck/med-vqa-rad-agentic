@@ -74,14 +74,21 @@ Return a JSON object with:
   "verification_policy": "One of: standard, strict",
   "fallback_policy": "One of: none, add_disclaimer, flag_for_review",
   "routing_rationale": "One sentence summarizing the overall routing decision"
+
+}}
+
 ROUTING RULES:
-1. RADIOLOGY-STYLE DIFFICULTY LEVEL (Combine Question + Image Context)
+1. ROUTING PRIORITY
+- Prefer "easy" and no retrieval when the question is direct, image-grounded, and can be answered from the current visual analysis.
+- Use retrieval only when the question genuinely needs broader medical context, is ambiguous, or cannot be answered confidently from the current image interpretation alone.
+
+2. RADIOLOGY-STYLE DIFFICULTY LEVEL (Combine Question + Image Context)
 - "easy": A classic spot diagnosis on a clean study. The abnormality is conspicuous, the anatomy is straightforward, and the answer should be evident on first pass: obvious fracture, large consolidation, large foreign body, textbook anatomy, or a direct yes/no answer on an uncomplicated image.
 - "medium": A systematic search case. The finding is present but subtle, partially obscured, or easy to overlook, so the image requires deliberate step-by-step review: hairline or non-displaced fracture, small nodule, early disease, mild overlap, or an anatomic variant that must be separated from true pathology.
 - "hard": A perception challenge. The abnormality is near the limits of visibility or buried in a noisy study, with blind-spot locations, tiny pneumothorax, subtle mediastinal change, ICU lines/tubes, summation effects, or multiple competing clues that must be integrated to avoid a false-negative interpretation.
-- When in doubt between medium and hard, favor "hard" when the study is noisy, obscured, or prone to a false-negative read because pathology must be separated from normal variants, artifacts, or overlapping anatomy.
+- When in doubt between easy and medium, prefer "easy" if the current image analysis is sufficient; when in doubt between medium and hard, favor "hard" when the study is noisy, obscured, or prone to a false-negative read.
 
-2. STRICT POLICY MAPPING
+3. STRICT POLICY MAPPING
 Policies are strictly determined by the holistic difficulty level:
 - If difficulty="easy":
    -> needs_retrieval=false
