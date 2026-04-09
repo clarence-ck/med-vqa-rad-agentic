@@ -1,0 +1,66 @@
+2026-04-09T20:52:13  INFO      medvqa.routes.dataset  Cache MISS for sample 1992  question='does this image show a pneumothorax?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:52:13  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=396343 bytes  question='does this image show a pneumothorax?'
+2026-04-09T20:52:13  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='does this image show a pneumothorax?'  mime_type=image/png  size=396343 bytes ===
+2026-04-09T20:52:13  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:52:13  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=396343 bytes)
+2026-04-09T20:52:14  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:52:14  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=396343 bytes)
+2026-04-09T20:52:16  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No, this image does not show a pneumothorax.",
+  "explanation": "This is a chest X-ray, and there is no visible pleural line or collapse of the lung to suggest pneumothorax. The lung markings extend to the chest wall bilaterally.",
+  "confidence": "high"
+}
+2026-04-09T20:52:16  INFO      medvqa.agents.baseline  Baseline done  answer='No, this image does not show a pneumothorax.'  confidence=high  duration=2821ms
+2026-04-09T20:52:16  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=4  duration=2795ms
+2026-04-09T20:52:16  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing both lungs, the mediastinum, and the cardiac silhouette. The lungs appear well expanded without focal air-space opacity, pleural effusion, or pneumothorax on this view.
+2026-04-09T20:52:16  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Mild hyperinflation of the lungs', 'Cardiomediastinal silhouette is not enlarged', 'No focal consolidation visible', 'No pleural effusion or pneumothorax visible']
+2026-04-09T20:52:16  INFO      medvqa.agents.question_analyzer  Analyzing question: 'does this image show a pneumothorax?'
+2026-04-09T20:52:16  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:52:18  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1264ms
+2026-04-09T20:52:18  DEBUG     medvqa.agents.question_analyzer  Target entity: pneumothorax  Expected format: yes_no  Rephrased: Does this chest radiograph show a pneumothorax?
+2026-04-09T20:52:18  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='does this image show a pneumothorax?'  modality=X-ray  body_region=chest  question_type=yes_no
+2026-04-09T20:52:18  DEBUG     medvqa.agents.workflow_baseline  Matched findings: ['No pleural effusion or pneumothorax visible']  Matched structures: []
+2026-04-09T20:52:18  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-09T20:52:18  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=high  question_type=yes_no  duration=4161ms
+2026-04-09T20:52:18  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=Chest  quality=good  findings=4  duration=3307ms
+2026-04-09T20:52:18  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing both lungs and the cardiomediastinal silhouette. The lungs appear well aerated without focal air-space opacity, pleural effusion, or pneumothorax.
+2026-04-09T20:52:18  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Mild hyperinflation of the lungs', 'Cardiomediastinal silhouette is not enlarged', 'No focal consolidation identified', 'No pleural effusion or pneumothorax seen']
+2026-04-09T20:52:18  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=Chest  duration=3367ms
+2026-04-09T20:52:19  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='does this image show a pneumothorax?'
+2026-04-09T20:52:19  INFO      medvqa.agents.question_analyzer  Analyzing question: 'does this image show a pneumothorax?'
+2026-04-09T20:52:19  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:52:21  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=2573ms
+2026-04-09T20:52:21  DEBUG     medvqa.agents.question_analyzer  Target entity: pneumothorax  Expected format: yes_no  Rephrased: Does this chest radiograph show a pneumothorax?
+2026-04-09T20:52:21  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=2604ms
+2026-04-09T20:52:22  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:52:22  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=visual_recognition  med_knowledge=True  modality=X-ray  region=Chest
+2026-04-09T20:52:24  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1516ms
+2026-04-09T20:52:24  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is an uncomplicated yes/no chest X-ray with conspicuous absence of pathology and a simple anatomical background, so it should be handled as an easy case.
+2026-04-09T20:52:24  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1550ms
+2026-04-09T20:52:25  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:52:25  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='does this image show a pneumothorax?'  is_retry=False  question_type=yes_no  yes_no=True
+2026-04-09T20:52:25  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T20:52:25  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-09T20:52:28  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=high  duration=2331ms
+2026-04-09T20:52:28  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the chest X-ray summary for signs of pneumothorax.', 'Checked for pleural line, collapsed lung edge, and absent peripheral lung markings.', 'Found explicit note that no pneumothorax is seen.']
+2026-04-09T20:52:28  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Frontal chest radiograph', 'Lungs appear well aerated', 'No pleural effusion or pneumothorax seen', 'No focal air-space opacity', 'No visible pleural line or lung collapse described']
+2026-04-09T20:52:28  DEBUG     medvqa.agents.reasoning_agent  Limitations: Assessment is based on the provided image analysis rather than direct image inspection; subtle small pneumothorax would be harder to exclude if image quality were limited.
+2026-04-09T20:52:28  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=high  duration=2367ms
+2026-04-09T20:52:31  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:52:31  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='does this image show a pneumothorax?'  question_type=yes_no
+2026-04-09T20:52:33  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1773ms
+2026-04-09T20:52:33  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-09T20:52:33  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer 'no' appropriately addresses the yes/no question. The explanation is consistent with the visual analysis, citing absence of pleural line and peripheral loss of lung markings, which matches the described chest X-ray findings. No contradictions or formatting issues are present.
+2026-04-09T20:52:33  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1808ms
+2026-04-09T20:52:33  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed']
+2026-04-09T20:52:33  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-09T20:52:33  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-09T20:52:33  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T20:52:33  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=19221ms
+2026-04-09T20:52:33  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='no'  verification=verified  confidence=High  flag_review=False
+2026-04-09T20:52:33  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:52:33  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:52:33  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  retries=0  total_duration=19226ms ===
+2026-04-09T20:52:33  INFO      medvqa.routes.dataset  Sample 1992 analysis complete  baseline=2829ms  workflow=4166ms  agentic=19232ms  total=19236ms
+2026-04-09T20:52:33  INFO      medvqa.routes.dataset  Sample 1992 answers  baseline='No, this image does not show a pneumothorax.'  workflow='Yes'  agentic='no'  ground_truth='no'

@@ -1,0 +1,108 @@
+2026-04-09T20:50:49  INFO      medvqa.routes.dataset  Cache MISS for sample 1810  question='what are these opacities anterior to the right kidney?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:50:49  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=184853 bytes  question='what are these opacities anterior to the right kidney?'
+2026-04-09T20:50:49  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what are these opacities anterior to the right kidney?'  mime_type=image/png  size=184853 bytes ===
+2026-04-09T20:50:49  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:50:49  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=184853 bytes)
+2026-04-09T20:50:51  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "These opacities are likely contrast-opacified bowel loops (most likely colon) anterior to the right kidney.",
+  "explanation": "This is an axial CT abdomen image with oral/IV contrast. The bright rounded opacities anterior to the right kidney follow the appearance and location of contrasted bowel rather than a renal lesion.",
+  "confidence": "medium"
+}
+2026-04-09T20:50:51  INFO      medvqa.agents.baseline  Baseline done  answer='These opacities are likely contrast-opacified bowel loops (most likely colon) an'  confidence=medium  duration=1690ms
+2026-04-09T20:50:51  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:50:51  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=184853 bytes)
+2026-04-09T20:50:51  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2152ms
+2026-04-09T20:50:51  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial contrast-enhanced CT image of the upper abdomen. The liver, spleen, kidneys, and central vascular structures are visible along with the upper lumbar spine and surrounding soft tissues.
+2026-04-09T20:50:51  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Contrast opacification of abdominal vessels is present', 'No obvious large acute abnormality is evident on this single slice', 'Mild image artifact/partial field-of-view at the lower edge']
+2026-04-09T20:50:51  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what are these opacities anterior to the right kidney?'
+2026-04-09T20:50:51  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:50:52  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=True  clarity=ambiguous  duration=1234ms
+2026-04-09T20:50:52  DEBUG     medvqa.agents.question_analyzer  Target entity: opacities anterior to the right kidney  Expected format: short_phrase  Rephrased: What are the opacities located anterior to the right kidney?
+2026-04-09T20:50:52  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what are these opacities anterior to the right kidney?'  modality=CT  body_region=abdomen  question_type=abnormality_description
+2026-04-09T20:50:52  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T20:50:52  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-09T20:50:52  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Contrast opacification of abdominal vessels is present; No obvious large acute a'  confidence=medium  question_type=abnormality_description  duration=3453ms
+2026-04-09T20:50:53  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=2  duration=1978ms
+2026-04-09T20:50:53  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver and spleen are partially visualized along with both kidneys, central abdominal vessels, and the vertebral body.
+2026-04-09T20:50:53  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Single axial slice of the upper abdomen with intravenous contrast enhancement', 'No obvious large focal abnormality can be reliably assessed on this single image alone']
+2026-04-09T20:50:53  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2037ms
+2026-04-09T20:50:54  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what are these opacities anterior to the right kidney?'
+2026-04-09T20:50:54  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what are these opacities anterior to the right kidney?'
+2026-04-09T20:50:54  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:50:57  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=spatial_reasoning  med_knowledge=True  clarity=ambiguous  duration=3569ms
+2026-04-09T20:50:57  DEBUG     medvqa.agents.question_analyzer  Target entity: the opacities anterior to the right kidney  Expected format: short_phrase  Rephrased: What anatomical structure or finding corresponds to the opacities located anterior to the right kidney?
+2026-04-09T20:50:57  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=anatomy_identification  duration=3607ms
+2026-04-09T20:50:58  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:50:58  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=anatomy_identification  reasoning=spatial_reasoning  med_knowledge=True  modality=CT  region=abdomen
+2026-04-09T20:51:00  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1905ms
+2026-04-09T20:51:00  DEBUG     medvqa.agents.difficulty_router  Routing rationale: The anatomy is not highly obscured, but the question is ambiguous and requires deliberate spatial correlation among upper abdominal structures, making it a systematic search rather than an obvious one-pass identification.
+2026-04-09T20:51:00  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1935ms
+2026-04-09T20:51:01  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T20:51:01  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='what are these opacities anterior to the right kidney?'  modality=CT  body_region=abdomen  question_type=anatomy_identification  target_entity=the opacities anterior to the right kidney  advanced_rag=True
+2026-04-09T20:51:01  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='normal' from notable_findings
+2026-04-09T20:51:01  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=what are these opacities anterior to the right kidney? | modality=CT | body_region=abdomen | finding=normal | rerank=mandatory
+2026-04-09T20:51:01  DEBUG     medvqa.agents.advanced_rag  Using original question as query (no LLM rewrite)
+2026-04-09T20:51:01  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-09T20:51:01  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen': 209 matches
+2026-04-09T20:51:01  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 170 matches
+2026-04-09T20:51:01  INFO      medvqa.agents.advanced_rag  Skipping finding_category filter: would reduce candidates to zero
+2026-04-09T20:51:01  INFO      medvqa.agents.advanced_rag  Metadata filter result: 2 candidates (modality(33) + body_region(209))
+2026-04-09T20:51:01  INFO      medvqa.agents.advanced_rag  Metadata filter: 2 candidates retained
+2026-04-09T20:51:01  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T20:51:01  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 2 candidates
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 2/2
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.3291 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.2680 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:51:02  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 2 candidates
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 2/2
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0000 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.0000 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=2 sparse=2
+2026-04-09T20:51:02  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 2 unique candidates
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 2/2
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.0323 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:51:02  INFO      medvqa.agents.advanced_rag  Reranking 2 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-09T20:51:02  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 2 candidates...
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 2/2
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=-10.2609 method=reranked softmax=0.7575 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=-11.4002 method=reranked softmax=0.2425 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:51:02  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=medium weak_signals=1 top1_softmax=0.758 margin=0.515 dense_top1=0.329 agreement=True
+2026-04-09T20:51:02  WARNING   medvqa.agents.advanced_rag  Retrieval confidence is medium; returning results
+2026-04-09T20:51:02  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 2 final candidates
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 2/2
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=-10.2609 method=reranked softmax=0.7575 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:51:02  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=-11.4002 method=reranked softmax=0.2425 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:51:02  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 2 similar cases
+2026-04-09T20:51:06  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=2  duration=4077ms
+2026-04-09T20:51:06  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The right kidney lies in the retroperitoneum, posterior to the liver and adjacent bowel.', 'Anterior to the right kidney on CT may be bowel loops, duodenum, or colon, which can appear as soft-tissue or gas-containing opacities.', 'True pathologic opacities near the kidney can include renal/ureteral calculi, lymph nodes, calcified vessels, or inflammatory masses.', 'Comparison across slices helps determine whether a density is within bowel, in the renal collecting system, or outside the kidney.']
+2026-04-09T20:51:06  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On axial CT of the abdomen, structures anterior to the right kidney commonly include the liver edge, duodenum, ascending colon, and perinephric fat or adjacent bowel. The retrieved similar cases were 
+2026-04-09T20:51:06  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=2  duration=4108ms
+2026-04-09T20:51:06  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:51:07  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what are these opacities anterior to the right kidney?'  is_retry=False  question_type=anatomy_identification  yes_no=False
+2026-04-09T20:51:07  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=2
+2026-04-09T20:51:09  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Adjacent bowel/soft tissue anterior to the right kidney'  confidence=low  duration=2884ms
+2026-04-09T20:51:09  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the right kidney on axial upper abdominal CT.', 'Reviewed the area anterior to the kidney, where normal adjacent bowel, duodenum, or colon are commonly seen.', 'Noted that the provided image does not show a clear focal calcified lesion or mass on this single slice.', 'Concluded the opacities are most likely adjacent bowel/soft tissue.']
+2026-04-09T20:51:09  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial contrast-enhanced CT of the upper abdomen', 'Right kidney visible in expected retroperitoneal location', 'Structures anterior to the right kidney commonly include bowel/duodenum/colon', 'No obvious large focal abnormality reliably assessed on this single image']
+2026-04-09T20:51:09  DEBUG     medvqa.agents.reasoning_agent  Limitations: Only a single axial slice is provided, so the finding cannot be localized with certainty across adjacent slices. Small calculi or subtle soft-tissue lesions cannot be excluded.
+2026-04-09T20:51:09  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Adjacent bowel/soft tissue anterior to the right kidney'  confidence=low  duration=2915ms
+2026-04-09T20:51:10  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:51:10  INFO      medvqa.agents.verification_agent  Verifying answer='Adjacent bowel/soft tissue anterior to the right kidney'  question='what are these opacities anterior to the right kidney?'  question_type=anatomy_identification
+2026-04-09T20:51:12  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Low  checks=5/5  duration=2080ms
+2026-04-09T20:51:12  WARNING   medvqa.agents.verification_agent  Verification issues: ['The answer is plausible but not definitive from a single CT slice.', "The term 'opacities' is somewhat nonspecific; the explanation appropriately hedges with low confidence."]
+2026-04-09T20:51:12  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T20:51:12  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is consistent with the image analysis and appropriately cautious. It identifies the anterior structures as adjacent bowel/soft tissue, which fits the available evidence, but the finding cannot be confirmed definitively from one image alone.
+2026-04-09T20:51:12  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Low  duration=2110ms
+2026-04-09T20:51:12  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-09T20:51:12  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T20:51:12  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=5/5
+2026-04-09T20:51:12  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T20:51:12  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Adjacent bowel/soft tissue anterior to the right kidney'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=23333ms
+2026-04-09T20:51:12  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Adjacent bowel/soft tissue anterior to the right kidney'  verification=partially_verified  confidence=Low  flag_review=False
+2026-04-09T20:51:12  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:51:12  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:51:12  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Adjacent bowel/soft tissue anterior to the right kidney'  retries=0  total_duration=23340ms ===
+2026-04-09T20:51:12  INFO      medvqa.routes.dataset  Sample 1810 analysis complete  baseline=1710ms  workflow=3456ms  agentic=23343ms  total=23343ms
+2026-04-09T20:51:12  INFO      medvqa.routes.dataset  Sample 1810 answers  baseline='These opacities are likely contrast-opacified bowel loops (m'  workflow='Contrast opacification of abdominal vessels is present; No o'  agentic='Adjacent bowel/soft tissue anterior to the right kidney'  ground_truth='the small intestines'

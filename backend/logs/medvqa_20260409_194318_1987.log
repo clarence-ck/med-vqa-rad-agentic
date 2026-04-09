@@ -1,0 +1,67 @@
+2026-04-09T20:43:59  INFO      medvqa.routes.dataset  Cache MISS for sample 1987  question='are there skull fractures present?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:43:59  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=280426 bytes  question='are there skull fractures present?'
+2026-04-09T20:43:59  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are there skull fractures present?'  mime_type=image/png  size=280426 bytes ===
+2026-04-09T20:43:59  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:43:59  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=280426 bytes)
+2026-04-09T20:44:00  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:44:00  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=280426 bytes)
+2026-04-09T20:44:02  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2683ms
+2026-04-09T20:44:02  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial MRI image of the brain at the level of the skull base and posterior fossa. The orbits and surrounding soft tissues are visible superiorly, with the brainstem and cerebellum prominently seen inferiorly and centrally.
+2026-04-09T20:44:02  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Single axial slice displayed', 'No obvious gross asymmetry on this image alone', 'Image appears to be a FLAIR sequence based on on-screen labeling']
+2026-04-09T20:44:02  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are there skull fractures present?'
+2026-04-09T20:44:02  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:44:03  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=head/brain  quality=good  findings=3  duration=2893ms
+2026-04-09T20:44:03  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial MRI image of the head showing the posterior fossa and adjacent brain structures. The orbits and skull base are partially visible, with the cerebellum and brainstem seen in cross-section.
+2026-04-09T20:44:03  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Single axial brain MRI slice', 'Symmetric appearance of the posterior fossa structures on this image', 'No obvious large focal mass or midline shift visible on this slice']
+2026-04-09T20:44:03  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=head/brain  duration=2924ms
+2026-04-09T20:44:03  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1164ms
+2026-04-09T20:44:03  DEBUG     medvqa.agents.question_analyzer  Target entity: skull fractures  Expected format: yes_no  Rephrased: Are skull fractures present?
+2026-04-09T20:44:03  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are there skull fractures present?'  modality=MRI  body_region=brain  question_type=presence_absence
+2026-04-09T20:44:03  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T20:44:03  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-09T20:44:03  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=medium  question_type=presence_absence  duration=3923ms
+2026-04-09T20:44:04  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are there skull fractures present?'
+2026-04-09T20:44:04  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are there skull fractures present?'
+2026-04-09T20:44:04  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:44:05  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No obvious skull fractures are visible on this image.",
+  "explanation": "This is a radiology image (axial head MRI). On this slice, there is no clear cortical discontinuity or displaced bony fragment to suggest a skull fracture, though MRI is not ideal for detecting subtle fractures.",
+  "confidence": "low"
+}
+2026-04-09T20:44:05  INFO      medvqa.agents.baseline  Baseline done  answer='No obvious skull fractures are visible on this image.'  confidence=low  duration=5859ms
+2026-04-09T20:44:05  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1407ms
+2026-04-09T20:44:05  DEBUG     medvqa.agents.question_analyzer  Target entity: skull fractures  Expected format: yes_no  Rephrased: Are there any skull fractures present?
+2026-04-09T20:44:05  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=presence_absence  duration=1431ms
+2026-04-09T20:44:06  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:44:06  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=presence_absence  reasoning=visual_recognition  med_knowledge=True  modality=MRI  region=head/brain
+2026-04-09T20:44:08  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=2426ms
+2026-04-09T20:44:08  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clear yes/no visual recognition task on a relatively interpretable brain MRI with standard anatomy and no indication of difficult overlap or artifact, so it routes as an easy case.
+2026-04-09T20:44:08  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=2456ms
+2026-04-09T20:44:10  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:44:10  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are there skull fractures present?'  is_retry=False  question_type=presence_absence  yes_no=True
+2026-04-09T20:44:10  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T20:44:10  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=presence_absence
+2026-04-09T20:44:12  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=low  duration=2457ms
+2026-04-09T20:44:12  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: 1) Reviewed the single axial MRI image of the head. 2) Looked for cortical discontinuity, displaced bone fragments, or abnormal skull base defect. 3) None were apparent on the provided slice, so the answer is no.
+2026-04-09T20:44:12  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Single axial head MRI slice', 'Symmetric posterior fossa structures', 'No obvious skull base disruption or bony defect visible', 'No focal mass or midline shift, suggesting no major acute intracranial distortion on this slice']
+2026-04-09T20:44:12  DEBUG     medvqa.agents.reasoning_agent  Limitations: Only one MRI slice is provided, and MRI is relatively insensitive for subtle skull fractures compared with CT. The visible skull is only partially included, so small or nondisplaced fractures could be missed.
+2026-04-09T20:44:12  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=low  duration=2505ms
+2026-04-09T20:44:13  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:44:13  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='are there skull fractures present?'  question_type=presence_absence
+2026-04-09T20:44:15  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Low  checks=4/5  duration=2244ms
+2026-04-09T20:44:15  WARNING   medvqa.agents.verification_agent  Verification issues: ["MRI is not the ideal modality for confidently excluding skull fractures, so the definitive 'no' may be stronger than the evidence supports.", 'The explanation relies on a single axial slice and acknowledges limited sensitivity, which makes the conclusion only partially supported.']
+2026-04-09T20:44:15  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T20:44:15  DEBUG     medvqa.agents.verification_agent  Verification notes: The yes/no answer format matches the question, and the explanation is generally consistent with the visible MRI anatomy. However, because skull fractures are poorly assessed on MRI and only one slice is provided, the negative answer is not strongly supported and should be hedged.
+2026-04-09T20:44:15  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Low  duration=2276ms
+2026-04-09T20:44:15  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-09T20:44:15  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T20:44:15  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-09T20:44:15  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T20:44:15  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=16626ms
+2026-04-09T20:44:15  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='no'  verification=partially_verified  confidence=Low  flag_review=False
+2026-04-09T20:44:15  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:44:15  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:44:15  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  retries=0  total_duration=16630ms ===
+2026-04-09T20:44:15  INFO      medvqa.routes.dataset  Sample 1987 analysis complete  baseline=5863ms  workflow=3926ms  agentic=16632ms  total=16632ms
+2026-04-09T20:44:15  INFO      medvqa.routes.dataset  Sample 1987 answers  baseline='No obvious skull fractures are visible on this image.'  workflow='Yes'  agentic='no'  ground_truth='no'

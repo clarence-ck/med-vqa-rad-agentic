@@ -1,0 +1,108 @@
+2026-04-09T20:45:18  INFO      medvqa.routes.dataset  Cache MISS for sample 1830  question='do the kidneys appear to be normal?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:45:18  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=88972 bytes  question='do the kidneys appear to be normal?'
+2026-04-09T20:45:18  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='do the kidneys appear to be normal?'  mime_type=image/png  size=88972 bytes ===
+2026-04-09T20:45:18  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:45:18  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=88972 bytes)
+2026-04-09T20:45:20  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Yes, the kidneys appear to be normal in size and shape on this image.",
+  "explanation": "This is an axial CT image of the abdomen. Both kidneys are visible and appear symmetric without obvious enlargement, mass, or hydronephrosis on this single slice.",
+  "confidence": "medium"
+}
+2026-04-09T20:45:20  INFO      medvqa.agents.baseline  Baseline done  answer='Yes, the kidneys appear to be normal in size and shape on this image.'  confidence=medium  duration=1642ms
+2026-04-09T20:45:21  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:45:21  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=88972 bytes)
+2026-04-09T20:45:23  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=4387ms
+2026-04-09T20:45:23  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the upper abdomen showing solid organs and surrounding bowel. The kidneys, liver, spleen, and central vertebral structures are visible on this single slice.
+2026-04-09T20:45:23  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Small focal high-attenuation object/marker near the central upper abdomen', 'Scattered bowel gas and stool are visible', 'No obvious large acute abnormality is apparent on this single image']
+2026-04-09T20:45:23  INFO      medvqa.agents.question_analyzer  Analyzing question: 'do the kidneys appear to be normal?'
+2026-04-09T20:45:23  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:45:24  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2195ms
+2026-04-09T20:45:24  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the upper abdomen showing solid abdominal organs and bowel loops. The image includes both kidneys, liver, spleen, and adjacent bowel with a small central hyperdense focus visible near the upper mid-abdomen.
+2026-04-09T20:45:24  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Single axial upper abdominal CT slice', 'Small focal hyperdense object/structure near the central upper abdomen', 'Bowel gas and stool are visible within the colon']
+2026-04-09T20:45:24  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2239ms
+2026-04-09T20:45:24  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1179ms
+2026-04-09T20:45:24  DEBUG     medvqa.agents.question_analyzer  Target entity: kidneys  Expected format: short_phrase  Rephrased: Do the kidneys appear normal or abnormal?
+2026-04-09T20:45:24  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='do the kidneys appear to be normal?'  modality=CT  body_region=abdomen  question_type=abnormality_description
+2026-04-09T20:45:24  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['both kidneys']
+2026-04-09T20:45:24  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-09T20:45:24  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Small focal high-attenuation object/marker near the central upper abdomen; Scatt'  confidence=medium  question_type=abnormality_description  duration=5657ms
+2026-04-09T20:45:24  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='do the kidneys appear to be normal?'
+2026-04-09T20:45:25  INFO      medvqa.agents.question_analyzer  Analyzing question: 'do the kidneys appear to be normal?'
+2026-04-09T20:45:25  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:45:26  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1214ms
+2026-04-09T20:45:26  DEBUG     medvqa.agents.question_analyzer  Target entity: kidneys  Expected format: short_phrase  Rephrased: Do the kidneys appear normal or abnormal?
+2026-04-09T20:45:26  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1263ms
+2026-04-09T20:45:27  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:45:27  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=abdomen
+2026-04-09T20:45:28  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1661ms
+2026-04-09T20:45:28  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic-search abdominal CT case with a small, not immediately conspicuous focus amid complex overlapping organs and bowel, making the finding more subtle than easy but not highly obscured.
+2026-04-09T20:45:28  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1700ms
+2026-04-09T20:45:30  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T20:45:30  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='do the kidneys appear to be normal?'  modality=CT  body_region=abdomen  question_type=abnormality_description  target_entity=kidneys  advanced_rag=True
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='normal' from notable_findings
+2026-04-09T20:45:30  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=do the kidneys appear to be normal? | modality=CT | body_region=abdomen | finding=normal | rerank=mandatory
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag  Using original question as query (no LLM rewrite)
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen': 209 matches
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 170 matches
+2026-04-09T20:45:30  INFO      medvqa.agents.advanced_rag  Skipping finding_category filter: would reduce candidates to zero
+2026-04-09T20:45:30  INFO      medvqa.agents.advanced_rag  Metadata filter result: 2 candidates (modality(33) + body_region(209))
+2026-04-09T20:45:30  INFO      medvqa.agents.advanced_rag  Metadata filter: 2 candidates retained
+2026-04-09T20:45:30  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 2 candidates
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 2/2
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.2536 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.2008 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:45:30  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 2 candidates
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 2/2
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0000 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.0000 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=2 sparse=2
+2026-04-09T20:45:30  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 2 unique candidates
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 2/2
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.0323 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:45:30  INFO      medvqa.agents.advanced_rag  Reranking 2 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-09T20:45:30  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 2 candidates...
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 2/2
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=-9.7060 method=reranked softmax=0.8230 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=-11.2431 method=reranked softmax=0.1770 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:45:30  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=medium weak_signals=1 top1_softmax=0.823 margin=0.646 dense_top1=0.254 agreement=True
+2026-04-09T20:45:30  WARNING   medvqa.agents.advanced_rag  Retrieval confidence is medium; returning results
+2026-04-09T20:45:30  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 2 final candidates
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 2/2
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=-9.7060 method=reranked softmax=0.8230 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:45:30  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=-11.2431 method=reranked softmax=0.1770 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:45:30  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 2 similar cases
+2026-04-09T20:45:34  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=2  duration=3882ms
+2026-04-09T20:45:34  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Normal kidneys are usually smooth, bean-shaped, and similar in size, with expected cortical-medullary differentiation on contrast CT.', 'Both kidneys should generally be located in the retroperitoneum, one on each side of the spine, with the left often slightly higher than the right.', 'Abnormality may be suggested by asymmetry, enlargement, scarring, hydronephrosis, stones, cysts, or abnormal enhancement.', 'Perinephric fat stranding or distortion of the collecting system can indicate inflammation, obstruction, or other pathology.']
+2026-04-09T20:45:34  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On abdominal CT, the kidneys are typically assessed for size, shape, position, symmetry, and enhancement, as well as the collecting systems and surrounding fat. The retrieved similar cases included a 
+2026-04-09T20:45:34  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=2  duration=3924ms
+2026-04-09T20:45:35  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:45:35  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='do the kidneys appear to be normal?'  is_retry=False  question_type=abnormality_description  yes_no=False
+2026-04-09T20:45:35  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=2
+2026-04-09T20:45:37  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Yes, they appear normal.'  confidence=medium  duration=2155ms
+2026-04-09T20:45:37  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified both kidneys on the axial CT image.', 'Checked for gross abnormality such as asymmetry, enlargement, mass, hydronephrosis, or perinephric stranding.', 'No such abnormal features were reported in the image analysis, so the kidneys are most consistent with normal appearance.']
+2026-04-09T20:45:37  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Both kidneys are visible on the CT image.', 'Expected retroperitoneal location of the kidneys.', 'No reported asymmetry, hydronephrosis, focal mass, or perinephric inflammatory change.', 'Visual summary did not describe a renal abnormality.']
+2026-04-09T20:45:37  DEBUG     medvqa.agents.reasoning_agent  Limitations: This is based on a single axial slice and the provided image analysis summary, so subtle renal abnormalities cannot be excluded.
+2026-04-09T20:45:37  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Yes, they appear normal.'  confidence=medium  duration=2206ms
+2026-04-09T20:45:38  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:45:38  INFO      medvqa.agents.verification_agent  Verifying answer='Yes, they appear normal.'  question='do the kidneys appear to be normal?'  question_type=abnormality_description
+2026-04-09T20:45:40  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=4/5  duration=2185ms
+2026-04-09T20:45:40  WARNING   medvqa.agents.verification_agent  Verification issues: ['The answer is somewhat too definitive for a single axial CT slice and limited visual analysis.', 'The explanation infers absence of hydronephrosis, focal mass, and inflammatory change, but these findings are not explicitly established from the provided image summary alone.']
+2026-04-09T20:45:40  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T20:45:40  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is consistent with the visible image summary and matches the short-phrase question type. However, it overstates certainty by declaring the kidneys normal based on limited information from one slice, so a cautious qualifier would be more appropriate.
+2026-04-09T20:45:40  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2234ms
+2026-04-09T20:45:40  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-09T20:45:40  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T20:45:40  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-09T20:45:40  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T20:45:40  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Yes, they appear normal.'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=21719ms
+2026-04-09T20:45:40  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Yes, they appear normal.'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-09T20:45:40  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:45:40  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:45:40  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Yes, they appear normal.'  retries=0  total_duration=21725ms ===
+2026-04-09T20:45:40  INFO      medvqa.routes.dataset  Sample 1830 analysis complete  baseline=1649ms  workflow=5660ms  agentic=21730ms  total=21730ms
+2026-04-09T20:45:40  INFO      medvqa.routes.dataset  Sample 1830 answers  baseline='Yes, the kidneys appear to be normal in size and shape on th'  workflow='Small focal high-attenuation object/marker near the central '  agentic='Yes, they appear normal.'  ground_truth='yes'

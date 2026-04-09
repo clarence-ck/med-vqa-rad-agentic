@@ -1,0 +1,97 @@
+2026-04-09T20:04:15  INFO      medvqa.routes.dataset  Cache MISS for sample 1934  question='where are the brain lesions located?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:04:15  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=28699 bytes  question='where are the brain lesions located?'
+2026-04-09T20:04:15  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='where are the brain lesions located?'  mime_type=image/png  size=28699 bytes ===
+2026-04-09T20:04:15  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:04:15  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=28699 bytes)
+2026-04-09T20:04:16  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:04:16  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=28699 bytes)
+2026-04-09T20:04:16  DEBUG     medvqa.agents.baseline  Raw baseline response: {"is_radiology_image":true,"answer":"The brain lesions are located in the right frontal lobe and bilateral occipital regions.","explanation":"This is an axial brain MRI showing multiple hyperintense lesions. The most prominent lesion is in the right frontal lobe, with additional lesions seen in both occipital lobes.","confidence":"medium"}
+2026-04-09T20:04:16  INFO      medvqa.agents.baseline  Baseline done  answer='The brain lesions are located in the right frontal lobe and bilateral occipital '  confidence=medium  duration=1544ms
+2026-04-09T20:04:17  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=fair  findings=3  duration=1901ms
+2026-04-09T20:04:17  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial brain MRI image showing the cerebral hemispheres and ventricular structures. There are focal areas of abnormal high signal intensity visible within the brain parenchyma on this slice.
+2026-04-09T20:04:17  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Two focal hyperintense lesions are visible in the cerebral white matter/parenchyma on this slice', 'Mild motion or graininess is present', 'No obvious midline shift is seen on this image']
+2026-04-09T20:04:17  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where are the brain lesions located?'
+2026-04-09T20:04:17  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:04:18  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=fair  findings=3  duration=2033ms
+2026-04-09T20:04:18  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial brain MRI image showing the cerebral hemispheres at the level of the deep brain structures. There are focal areas of abnormal high signal intensity within the brain parenchyma on this sequence.
+2026-04-09T20:04:18  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Focal hyperintense lesion in the left deep cerebral region', 'Additional small hyperintense focus in the posterior right cerebral hemisphere', 'Mild image noise and low resolution limit fine detail']
+2026-04-09T20:04:18  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain  duration=2067ms
+2026-04-09T20:04:18  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=clear  duration=1335ms
+2026-04-09T20:04:18  DEBUG     medvqa.agents.question_analyzer  Target entity: brain lesions  Expected format: short_phrase  Rephrased: Where are the brain lesions located?
+2026-04-09T20:04:18  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='where are the brain lesions located?'  modality=MRI  body_region=brain  question_type=location
+2026-04-09T20:04:18  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T20:04:18  DEBUG     medvqa.agents.workflow_baseline  Branch taken: location
+2026-04-09T20:04:18  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='brain'  confidence=medium  question_type=location  duration=3289ms
+2026-04-09T20:04:19  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='where are the brain lesions located?'
+2026-04-09T20:04:19  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where are the brain lesions located?'
+2026-04-09T20:04:19  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:04:21  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=True  clarity=clear  duration=2366ms
+2026-04-09T20:04:21  DEBUG     medvqa.agents.question_analyzer  Target entity: brain lesions  Expected format: short_phrase  Rephrased: Where are the brain lesions located?
+2026-04-09T20:04:21  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=2399ms
+2026-04-09T20:04:22  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:04:22  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=True  modality=MRI  region=brain
+2026-04-09T20:04:24  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1607ms
+2026-04-09T20:04:24  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic localization task on a brain MRI with visible but not instantly self-evident pathology, and the deep gray-matter anatomy adds enough complexity to favor a medium routing strategy.
+2026-04-09T20:04:24  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1637ms
+2026-04-09T20:04:25  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T20:04:25  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='where are the brain lesions located?'  modality=MRI  body_region=brain  question_type=location  target_entity=brain lesions  advanced_rag=True
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='lesion' from notable_findings
+2026-04-09T20:04:25  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=where are the brain lesions located? | modality=MRI | body_region=brain | finding=lesion | rerank=mandatory
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag  Using original question as query (no LLM rewrite)
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='mri': 44 matches
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='brain': no exact matches
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='lesion': 166 matches
+2026-04-09T20:04:25  INFO      medvqa.agents.advanced_rag  Metadata filter result: 1 candidates (modality(44) + finding(166))
+2026-04-09T20:04:25  INFO      medvqa.agents.advanced_rag  Metadata filter: 1 candidates retained
+2026-04-09T20:04:25  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 1 candidates
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 1/1
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag    1. id=1492 score=0.3409 | Q: what is the best mri weighting for ring enhancing lesions? | A: t2
+2026-04-09T20:04:25  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 1 candidates
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 1/1
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag    1. id=1492 score=-0.5493 | Q: what is the best mri weighting for ring enhancing lesions? | A: t2
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=1 sparse=1
+2026-04-09T20:04:25  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 1 unique candidates
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 1/1
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag    1. id=1492 score=0.0328 method=hybrid_rrf | Q: what is the best mri weighting for ring enhancing lesions? | A: t2
+2026-04-09T20:04:25  INFO      medvqa.agents.advanced_rag  Reranking 1 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-09T20:04:25  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 1 candidates...
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 1/1
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag    1. id=1492 score=-10.5653 method=reranked softmax=1.0000 | Q: what is the best mri weighting for ring enhancing lesions? | A: t2
+2026-04-09T20:04:25  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=medium weak_signals=1 top1_softmax=1.000 margin=1.000 dense_top1=0.341 agreement=True
+2026-04-09T20:04:25  WARNING   medvqa.agents.advanced_rag  Retrieval confidence is medium; returning results
+2026-04-09T20:04:25  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 1 final candidates
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 1/1
+2026-04-09T20:04:25  DEBUG     medvqa.agents.advanced_rag    1. id=1492 score=-10.5653 method=reranked softmax=1.0000 | Q: what is the best mri weighting for ring enhancing lesions? | A: t2
+2026-04-09T20:04:25  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 1 similar cases
+2026-04-09T20:04:28  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=1  duration=3617ms
+2026-04-09T20:04:28  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Cortical lesions involve the gray matter lining the cerebral surface.', 'Subcortical lesions are located just beneath the cortex, often at the gray-white junction.', 'Deep white matter lesions are farther from the cortex and may be near the ventricles or in the centrum semiovale.', 'Periventricular lesions abut or are immediately adjacent to the lateral ventricles.', 'Lesion distribution can help narrow the differential diagnosis, but MRI sequence and contrast enhancement are also important.']
+2026-04-09T20:04:28  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On brain MRI, lesion location is usually described by anatomic compartment: cortical gray matter, subcortical white matter, deep white matter, periventricular regions near the lateral ventricles, or i
+2026-04-09T20:04:28  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=1  duration=3645ms
+2026-04-09T20:04:29  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:04:29  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='where are the brain lesions located?'  is_retry=False  question_type=location  yes_no=False
+2026-04-09T20:04:29  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=1
+2026-04-09T20:04:32  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Left deep cerebral region and posterior right cerebral hemisphere'  confidence=medium  duration=2436ms
+2026-04-09T20:04:32  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the modality as axial brain MRI.', 'Read the visual analysis for the described abnormal hyperintense foci.', 'Map the noted foci to their anatomical locations: left deep cerebral region and posterior right cerebral hemisphere.', 'Provide the location without adding unobserved detail.']
+2026-04-09T20:04:32  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Focal hyperintense lesion in the left deep cerebral region', 'Additional small hyperintense focus in the posterior right cerebral hemisphere', 'Axial brain MRI showing abnormal high signal intensity within the brain parenchyma']
+2026-04-09T20:04:32  DEBUG     medvqa.agents.reasoning_agent  Limitations: Low resolution and image noise limit finer anatomic detail; the answer is based on the provided image analysis rather than a precise radiology read.
+2026-04-09T20:04:32  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Left deep cerebral region and posterior right cerebral hemis'  confidence=medium  duration=2464ms
+2026-04-09T20:04:32  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:04:33  INFO      medvqa.agents.verification_agent  Verifying answer='Left deep cerebral region and posterior right cerebral hemisphere'  question='where are the brain lesions located?'  question_type=location
+2026-04-09T20:04:37  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=3/5  duration=4735ms
+2026-04-09T20:04:37  WARNING   medvqa.agents.verification_agent  Verification issues: ["The explanation mentions a 'MRI summary' and specific lesion locations not directly verifiable from the provided image analysis alone.", 'The answer is more specific than the visual evidence supports, especially regarding laterality and precise anatomical localization.', 'The visual summary only confirms focal high-signal abnormalities in the brain parenchyma, not the exact left deep and posterior right locations.']
+2026-04-09T20:04:37  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T20:04:37  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct short location format and is not contradicted by the image analysis, but it overstates precision beyond what the visual evidence clearly supports. A more cautious phrasing would be better.
+2026-04-09T20:04:37  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=4765ms
+2026-04-09T20:04:37  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-09T20:04:37  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T20:04:37  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-09T20:04:37  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-09T20:04:37  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Left deep cerebral region and posterior right cerebral hemis'  verification=partially_verified  guardrail_flag=False  consistency=low  cross_modal=low  duration=22607ms
+2026-04-09T20:04:37  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Left deep cerebral region and posterior right cerebral hemis'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-09T20:04:37  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:04:37  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:04:37  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Left deep cerebral region and posterior right cerebral hemis'  retries=0  total_duration=22613ms ===
+2026-04-09T20:04:37  INFO      medvqa.routes.dataset  Sample 1934 analysis complete  baseline=1546ms  workflow=3291ms  agentic=22614ms  total=22616ms
+2026-04-09T20:04:37  INFO      medvqa.routes.dataset  Sample 1934 answers  baseline='The brain lesions are located in the right frontal lobe and '  workflow='brain'  agentic='Left deep cerebral region and posterior right cerebral hemis'  ground_truth='right hemisphere'

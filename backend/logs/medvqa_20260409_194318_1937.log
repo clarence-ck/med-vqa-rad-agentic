@@ -1,0 +1,65 @@
+2026-04-09T20:26:57  INFO      medvqa.routes.dataset  Cache MISS for sample 1937  question='where is the lesion located?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:26:57  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=235656 bytes  question='where is the lesion located?'
+2026-04-09T20:26:57  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='where is the lesion located?'  mime_type=image/png  size=235656 bytes ===
+2026-04-09T20:26:57  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:26:57  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=235656 bytes)
+2026-04-09T20:26:58  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:26:58  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=235656 bytes)
+2026-04-09T20:26:59  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "The lesion is located in the left cerebellopontine angle region.",
+  "explanation": "This is an axial brain MRI showing a mass at the left cerebellopontine angle, adjacent to the brainstem and posterior fossa structures.",
+  "confidence": "high"
+}
+2026-04-09T20:26:59  INFO      medvqa.agents.baseline  Baseline done  answer='The lesion is located in the left cerebellopontine angle region.'  confidence=high  duration=2066ms
+2026-04-09T20:27:00  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain/posterior fossa  quality=good  findings=3  duration=2813ms
+2026-04-09T20:27:00  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced MRI of the head through the posterior fossa and skull base is shown. A well-defined enhancing mass is visible in the left cerebellopontine angle region, adjacent to the brainstem and cerebellum.
+2026-04-09T20:27:00  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Enhancing mass in the left cerebellopontine angle/posterior fossa region', 'Mass effect on adjacent posterior fossa structures', 'Post-contrast appearance with bright lesion enhancement']
+2026-04-09T20:27:00  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where is the lesion located?'
+2026-04-09T20:27:00  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:27:01  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=clear  duration=1167ms
+2026-04-09T20:27:01  DEBUG     medvqa.agents.question_analyzer  Target entity: lesion  Expected format: short_phrase  Rephrased: Where is the lesion located?
+2026-04-09T20:27:01  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='where is the lesion located?'  modality=MRI  body_region=brain/posterior fossa  question_type=location
+2026-04-09T20:27:01  DEBUG     medvqa.agents.workflow_baseline  Matched findings: ['Post-contrast appearance with bright lesion enhancement']  Matched structures: []
+2026-04-09T20:27:01  DEBUG     medvqa.agents.workflow_baseline  Branch taken: location
+2026-04-09T20:27:01  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='brain/posterior fossa'  confidence=medium  question_type=location  duration=4050ms
+2026-04-09T20:27:02  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain/posterior fossa  quality=good  findings=3  duration=3845ms
+2026-04-09T20:27:02  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial MRI image through the posterior fossa and skull base with contrast enhancement. A rounded enhancing mass is visible in the cerebellopontine angle/near the petrous temporal bone, adjacent to the brainstem and cerebellum.
+2026-04-09T20:27:02  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Well-defined enhancing mass in the left cerebellopontine angle region', 'Mass effect on adjacent posterior fossa structures', 'Bilateral orbits and skull base partially visualized']
+2026-04-09T20:27:02  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain/posterior fossa  duration=3878ms
+2026-04-09T20:27:03  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='where is the lesion located?'
+2026-04-09T20:27:03  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where is the lesion located?'
+2026-04-09T20:27:03  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:27:04  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=clear  duration=1158ms
+2026-04-09T20:27:04  DEBUG     medvqa.agents.question_analyzer  Target entity: lesion  Expected format: short_phrase  Rephrased: Where is the lesion located?
+2026-04-09T20:27:04  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=1191ms
+2026-04-09T20:27:05  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:27:05  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=False  modality=MRI  region=brain/posterior fossa
+2026-04-09T20:27:07  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1438ms
+2026-04-09T20:27:07  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a straightforward spatial localization task on a clearly visible enhancing lesion with limited background complexity or artifact, so it routes as easy.
+2026-04-09T20:27:07  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1470ms
+2026-04-09T20:27:08  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:27:08  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='where is the lesion located?'  is_retry=False  question_type=location  yes_no=False
+2026-04-09T20:27:08  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T20:27:10  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Left cerebellopontine angle region'  confidence=high  duration=1916ms
+2026-04-09T20:27:10  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the axial MRI summary of the posterior fossa.', 'Identified the described enhancing rounded mass.', 'Matched its stated position to the left cerebellopontine angle region.']
+2026-04-09T20:27:10  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Well-defined enhancing mass in the left cerebellopontine angle region', 'Mass effect on adjacent posterior fossa structures', 'Adjacency to the brainstem and cerebellum', 'Location near the petrous temporal bone']
+2026-04-09T20:27:10  DEBUG     medvqa.agents.reasoning_agent  Limitations: Localization is based on the provided image analysis summary rather than direct image inspection; exact extent may be limited by slice level and contrast appearance.
+2026-04-09T20:27:10  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Left cerebellopontine angle region'  confidence=high  duration=1945ms
+2026-04-09T20:27:11  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:27:11  INFO      medvqa.agents.verification_agent  Verifying answer='Left cerebellopontine angle region'  question='where is the lesion located?'  question_type=location
+2026-04-09T20:27:12  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1730ms
+2026-04-09T20:27:12  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-09T20:27:12  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer is a concise location phrase that directly answers the question. The explanation is consistent with the visual analysis describing an enhancing mass in the left cerebellopontine angle near the petrous temporal bone, brainstem, and cerebellum. There are no apparent contradictions or overstatements.
+2026-04-09T20:27:12  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1760ms
+2026-04-09T20:27:12  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed']
+2026-04-09T20:27:12  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-09T20:27:12  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-09T20:27:12  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T20:27:12  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Left cerebellopontine angle region'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=15033ms
+2026-04-09T20:27:12  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Left cerebellopontine angle region'  verification=verified  confidence=High  flag_review=False
+2026-04-09T20:27:12  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:27:12  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:27:12  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Left cerebellopontine angle region'  retries=0  total_duration=15039ms ===
+2026-04-09T20:27:12  INFO      medvqa.routes.dataset  Sample 1937 analysis complete  baseline=2071ms  workflow=4054ms  agentic=15042ms  total=15042ms
+2026-04-09T20:27:12  INFO      medvqa.routes.dataset  Sample 1937 answers  baseline='The lesion is located in the left cerebellopontine angle reg'  workflow='brain/posterior fossa'  agentic='Left cerebellopontine angle region'  ground_truth='right cerebellopontine angle'

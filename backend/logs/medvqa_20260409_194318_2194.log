@@ -1,0 +1,65 @@
+2026-04-09T20:19:51  INFO      medvqa.routes.dataset  Cache MISS for sample 2194  question='are the lungs normal?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:19:51  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=383368 bytes  question='are the lungs normal?'
+2026-04-09T20:19:51  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are the lungs normal?'  mime_type=image/png  size=383368 bytes ===
+2026-04-09T20:19:51  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:19:51  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=383368 bytes)
+2026-04-09T20:19:52  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:19:52  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=383368 bytes)
+2026-04-09T20:19:53  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No, the lungs are not normal.",
+  "explanation": "The chest X-ray shows a large right-sided pleural effusion with adjacent right lung airspace opacity/compression. The left lung appears relatively clear.",
+  "confidence": "high"
+}
+2026-04-09T20:19:53  INFO      medvqa.agents.baseline  Baseline done  answer='No, the lungs are not normal.'  confidence=high  duration=2420ms
+2026-04-09T20:19:54  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=4  duration=3436ms
+2026-04-09T20:19:54  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing the thorax and upper abdomen. There is asymmetry in lung aeration with marked right-sided opacification compared with the left, and the cardiomediastinal silhouette is visible in the center of the image.
+2026-04-09T20:19:54  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Diffuse increased opacity throughout the right hemithorax', 'Right-sided pleural fluid/blunted costophrenic angle appearance', 'Left lung appears relatively clear and well aerated', 'No visible pneumothorax']
+2026-04-09T20:19:54  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the lungs normal?'
+2026-04-09T20:19:54  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:19:55  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=4  duration=3467ms
+2026-04-09T20:19:55  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing the thorax with asymmetric opacity throughout the right hemithorax, most pronounced in the mid to lower lung region. The left lung is relatively well aerated, and the cardiomediastinal silhouette is partially obscured on the right side.
+2026-04-09T20:19:55  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Extensive right-sided pleural and/or parenchymal opacity', 'Reduced visualization of the right hemidiaphragm and right heart border', 'Left lung appears relatively clear', 'No obvious pneumothorax visible']
+2026-04-09T20:19:55  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=chest  duration=3509ms
+2026-04-09T20:19:56  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1775ms
+2026-04-09T20:19:56  DEBUG     medvqa.agents.question_analyzer  Target entity: lungs  Expected format: yes_no  Rephrased: Are the lungs normal?
+2026-04-09T20:19:56  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are the lungs normal?'  modality=X-ray  body_region=chest  question_type=yes_no
+2026-04-09T20:19:56  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['lungs']
+2026-04-09T20:19:56  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-09T20:19:56  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=high  question_type=yes_no  duration=5274ms
+2026-04-09T20:19:57  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are the lungs normal?'
+2026-04-09T20:19:57  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the lungs normal?'
+2026-04-09T20:19:57  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:19:59  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1906ms
+2026-04-09T20:19:59  DEBUG     medvqa.agents.question_analyzer  Target entity: lungs  Expected format: single_word  Rephrased: Are the lungs normal or abnormal?
+2026-04-09T20:19:59  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1939ms
+2026-04-09T20:20:02  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:20:02  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  reasoning=visual_recognition  med_knowledge=False  modality=X-ray  region=chest
+2026-04-09T20:20:03  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1516ms
+2026-04-09T20:20:03  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clear, high-salience chest X-ray abnormality with straightforward anatomy and limited interpretive ambiguity, making it a classic easy visual recognition case.
+2026-04-09T20:20:03  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1549ms
+2026-04-09T20:20:06  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:20:06  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are the lungs normal?'  is_retry=False  question_type=abnormality_description  yes_no=False
+2026-04-09T20:20:06  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T20:20:10  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='abnormal'  confidence=high  duration=4171ms
+2026-04-09T20:20:10  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the chest X-ray for lung aeration and symmetry.', 'Identified extensive right-sided pleural/parenchymal opacity.', 'Noted loss of normal visualization of the right hemidiaphragm and right heart border.', 'Compared with the left lung, which is relatively well aerated.']
+2026-04-09T20:20:10  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Extensive right-sided pleural and/or parenchymal opacity', 'Asymmetric opacity throughout the right hemithorax', 'Reduced visualization of the right hemidiaphragm', 'Reduced visualization of the right heart border', 'Left lung relatively clear', 'No obvious pneumothorax visible']
+2026-04-09T20:20:10  DEBUG     medvqa.agents.reasoning_agent  Limitations: The exact cause of the right-sided opacity cannot be determined from the provided summary alone.
+2026-04-09T20:20:10  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='abnormal'  confidence=high  duration=4203ms
+2026-04-09T20:20:12  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:20:12  INFO      medvqa.agents.verification_agent  Verifying answer='abnormal'  question='are the lungs normal?'  question_type=abnormality_description
+2026-04-09T20:20:14  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=2199ms
+2026-04-09T20:20:14  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-09T20:20:14  DEBUG     medvqa.agents.verification_agent  Verification notes: The question asks whether the lungs are normal, and the answer 'abnormal' is consistent with the radiographic findings described in both the explanation and visual analysis, including asymmetric right-sided opacity and partial obscuration of adjacent structures. The single-word format is appropriate for the expected response.
+2026-04-09T20:20:14  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=2230ms
+2026-04-09T20:20:14  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed']
+2026-04-09T20:20:14  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-09T20:20:14  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-09T20:20:14  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T20:20:14  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='abnormal'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=22978ms
+2026-04-09T20:20:14  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='abnormal'  verification=verified  confidence=High  flag_review=False
+2026-04-09T20:20:14  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:20:14  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:20:14  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='abnormal'  retries=0  total_duration=22983ms ===
+2026-04-09T20:20:14  INFO      medvqa.routes.dataset  Sample 2194 analysis complete  baseline=2424ms  workflow=5277ms  agentic=22984ms  total=22986ms
+2026-04-09T20:20:14  INFO      medvqa.routes.dataset  Sample 2194 answers  baseline='No, the lungs are not normal.'  workflow='Yes'  agentic='abnormal'  ground_truth='no'

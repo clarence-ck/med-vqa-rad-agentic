@@ -1,0 +1,65 @@
+2026-04-09T20:29:45  INFO      medvqa.routes.dataset  Cache MISS for sample 2173  question='are the ventricles an abnormal size?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:29:45  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=121257 bytes  question='are the ventricles an abnormal size?'
+2026-04-09T20:29:45  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are the ventricles an abnormal size?'  mime_type=image/png  size=121257 bytes ===
+2026-04-09T20:29:45  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:29:45  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=121257 bytes)
+2026-04-09T20:29:46  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:29:46  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=121257 bytes)
+2026-04-09T20:29:47  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Yes, the ventricles appear enlarged.",
+  "explanation": "This is an axial brain MRI. The lateral ventricles look mildly to moderately enlarged compared with the surrounding brain structures, suggesting ventriculomegaly.",
+  "confidence": "medium"
+}
+2026-04-09T20:29:47  INFO      medvqa.agents.baseline  Baseline done  answer='Yes, the ventricles appear enlarged.'  confidence=medium  duration=2045ms
+2026-04-09T20:29:47  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2501ms
+2026-04-09T20:29:47  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial MRI image of the brain showing the cerebral hemispheres and ventricular system. The slice appears T2-weighted, with bright cerebrospinal fluid visible in the ventricles and sulci.
+2026-04-09T20:29:47  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Symmetric appearance of the cerebral hemispheres on this slice', 'No obvious large mass effect or midline shift visible', 'Ventricles and cortical sulci are clearly delineated']
+2026-04-09T20:29:47  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the ventricles an abnormal size?'
+2026-04-09T20:29:47  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:29:48  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=head/brain  quality=good  findings=3  duration=2402ms
+2026-04-09T20:29:48  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial MRI image of the brain showing the cerebral hemispheres and ventricular system. The image appears to be a T2-weighted sequence with bright cerebrospinal fluid and fairly symmetric brain anatomy.
+2026-04-09T20:29:48  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Symmetric appearance of the brain structures on this slice', 'No obvious midline shift on the provided image', 'No large focal mass effect visible on this single slice']
+2026-04-09T20:29:48  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=head/brain  duration=2443ms
+2026-04-09T20:29:49  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are the ventricles an abnormal size?'
+2026-04-09T20:29:49  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the ventricles an abnormal size?'
+2026-04-09T20:29:49  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:29:49  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=comparison  med_knowledge=True  clarity=clear  duration=1865ms
+2026-04-09T20:29:49  DEBUG     medvqa.agents.question_analyzer  Target entity: ventricles  Expected format: short_phrase  Rephrased: Are the ventricles enlarged or normal in size?
+2026-04-09T20:29:49  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are the ventricles an abnormal size?'  modality=MRI  body_region=brain  question_type=abnormality_description
+2026-04-09T20:29:49  DEBUG     medvqa.agents.workflow_baseline  Matched findings: ['Ventricles and cortical sulci are clearly delineated']  Matched structures: ['lateral ventricles']
+2026-04-09T20:29:49  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-09T20:29:49  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Ventricles and cortical sulci are clearly delineated'  confidence=high  question_type=abnormality_description  duration=4473ms
+2026-04-09T20:29:52  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=3027ms
+2026-04-09T20:29:52  DEBUG     medvqa.agents.question_analyzer  Target entity: ventricles  Expected format: short_phrase  Rephrased: Are the ventricles abnormally sized?
+2026-04-09T20:29:52  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=3078ms
+2026-04-09T20:29:53  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:29:53  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  reasoning=visual_recognition  med_knowledge=False  modality=MRI  region=head/brain
+2026-04-09T20:29:55  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1524ms
+2026-04-09T20:29:55  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clean brain MRI with simple anatomy and no indicated artifact or overlap burden, making the expected visual answer likely conspicuous and direct.
+2026-04-09T20:29:55  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1568ms
+2026-04-09T20:29:56  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:29:56  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are the ventricles an abnormal size?'  is_retry=False  question_type=abnormality_description  yes_no=False
+2026-04-09T20:29:56  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T20:29:59  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='No, the ventricles do not appear abnormally enlarged.'  confidence=medium  duration=3497ms
+2026-04-09T20:29:59  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the visible ventricular system on the axial T2-weighted MRI.', 'Checked ventricular size relative to surrounding brain structures and symmetry.', 'Looked for indirect signs of abnormal ventricular enlargement such as midline shift or mass effect.', 'Found no obvious evidence of enlarged ventricles on the provided image.']
+2026-04-09T20:29:59  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Symmetric appearance of the brain structures', 'Lateral ventricles visible and not obviously enlarged', 'No obvious midline shift', 'No large focal mass effect visible']
+2026-04-09T20:29:59  DEBUG     medvqa.agents.reasoning_agent  Limitations: Assessment is based on a single axial slice, so subtle ventricular enlargement or comparison across multiple slices cannot be fully excluded.
+2026-04-09T20:29:59  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='No, the ventricles do not appear abnormally enlarged.'  confidence=medium  duration=3544ms
+2026-04-09T20:30:05  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:30:05  INFO      medvqa.agents.verification_agent  Verifying answer='No, the ventricles do not appear abnormally enlarged.'  question='are the ventricles an abnormal size?'  question_type=abnormality_description
+2026-04-09T20:30:07  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=Medium  checks=5/5  duration=2158ms
+2026-04-09T20:30:07  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-09T20:30:07  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer directly addresses whether the ventricles are abnormally sized and is consistent with the visual summary indicating symmetric anatomy and proportionate lateral ventricles. The explanation is appropriately cautious and does not overstate certainty beyond what can be seen on a single axial MRI slice.
+2026-04-09T20:30:07  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=Medium  duration=2209ms
+2026-04-09T20:30:07  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed']
+2026-04-09T20:30:07  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-09T20:30:07  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-09T20:30:07  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T20:30:07  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='No, the ventricles do not appear abnormally enlarged.'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=21944ms
+2026-04-09T20:30:07  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='No, the ventricles do not appear abnormally enlarged.'  verification=verified  confidence=Medium  flag_review=False
+2026-04-09T20:30:07  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:30:07  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:30:07  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='No, the ventricles do not appear abnormally enlarged.'  retries=0  total_duration=21952ms ===
+2026-04-09T20:30:07  INFO      medvqa.routes.dataset  Sample 2173 analysis complete  baseline=2052ms  workflow=4476ms  agentic=21956ms  total=21961ms
+2026-04-09T20:30:07  INFO      medvqa.routes.dataset  Sample 2173 answers  baseline='Yes, the ventricles appear enlarged.'  workflow='Ventricles and cortical sulci are clearly delineated'  agentic='No, the ventricles do not appear abnormally enlarged.'  ground_truth='no'

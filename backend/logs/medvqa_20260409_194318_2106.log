@@ -1,0 +1,109 @@
+2026-04-09T20:06:23  INFO      medvqa.routes.dataset  Cache MISS for sample 2106  question='where are the infarcts?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:06:23  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=280426 bytes  question='where are the infarcts?'
+2026-04-09T20:06:23  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='where are the infarcts?'  mime_type=image/png  size=280426 bytes ===
+2026-04-09T20:06:23  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:06:23  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=280426 bytes)
+2026-04-09T20:06:24  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:06:24  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=280426 bytes)
+2026-04-09T20:06:24  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "The infarcts are in the bilateral cerebellar hemispheres, more prominently on the left.",
+  "explanation": "This is an axial brain MRI showing areas of abnormal signal in the posterior fossa consistent with infarction. The changes are located in both cerebellar hemispheres, with greater involvement on the left side.",
+  "confidence": "high"
+}
+2026-04-09T20:06:24  INFO      medvqa.agents.baseline  Baseline done  answer='The infarcts are in the bilateral cerebellar hemispheres, more prominently on th'  confidence=high  duration=1716ms
+2026-04-09T20:06:25  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=head/brain  quality=good  findings=3  duration=2673ms
+2026-04-09T20:06:25  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial MRI image of the head at the level of the posterior fossa and orbits. The cerebellum, brainstem, and adjacent supratentorial structures are visible, along with the orbits and skull base. The image appears to be a fluid-attenuated sequence (FLAIR) based on the on-image label.
+2026-04-09T20:06:25  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Single axial slice only', 'No obvious large mass effect or midline shift on this image', 'Limited by being a single image for assessment']
+2026-04-09T20:06:25  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where are the infarcts?'
+2026-04-09T20:06:25  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:06:26  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain/orbits  quality=good  findings=3  duration=2417ms
+2026-04-09T20:06:26  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial MRI image of the head at the level of the posterior fossa and orbits. The cerebellum, brainstem region, and bilateral orbital structures are visible on this slice.
+2026-04-09T20:06:26  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Single axial slice shown with clear delineation of posterior fossa anatomy', 'No obvious large mass effect or midline shift on this image', 'Bilateral orbital structures are included in the field of view']
+2026-04-09T20:06:26  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain/orbits  duration=2448ms
+2026-04-09T20:06:27  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1467ms
+2026-04-09T20:06:27  DEBUG     medvqa.agents.question_analyzer  Target entity: infarcts  Expected format: short_phrase  Rephrased: Where are the infarcts located?
+2026-04-09T20:06:27  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='where are the infarcts?'  modality=MRI  body_region=head/brain  question_type=location
+2026-04-09T20:06:27  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T20:06:27  DEBUG     medvqa.agents.workflow_baseline  Branch taken: location
+2026-04-09T20:06:27  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='head/brain'  confidence=medium  question_type=location  duration=4201ms
+2026-04-09T20:06:27  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='where are the infarcts?'
+2026-04-09T20:06:27  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where are the infarcts?'
+2026-04-09T20:06:27  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:06:31  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=True  clarity=clear  duration=3438ms
+2026-04-09T20:06:31  DEBUG     medvqa.agents.question_analyzer  Target entity: infarcts  Expected format: short_phrase  Rephrased: Where are the infarcts located in the brain?
+2026-04-09T20:06:31  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=3469ms
+2026-04-09T20:06:31  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:06:31  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=True  modality=MRI  region=brain/orbits
+2026-04-09T20:06:33  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1621ms
+2026-04-09T20:06:33  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic spatial localization task on a complex brain/orbit MRI slice where anatomy is clear but not trivial, making it moderately difficult rather than conspicuously easy or severely limited by artifact.
+2026-04-09T20:06:33  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1654ms
+2026-04-09T20:06:34  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T20:06:34  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='where are the infarcts?'  modality=MRI  body_region=brain/orbits  question_type=location  target_entity=infarcts  advanced_rag=True
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='infarct' from notable_findings
+2026-04-09T20:06:34  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=where are the infarcts? | modality=MRI | body_region=brain/orbits | finding=infarct | rerank=mandatory
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag  Using original question as query (no LLM rewrite)
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='mri': 44 matches
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='brain/orbits': no exact matches
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='infarct': 30 matches
+2026-04-09T20:06:34  INFO      medvqa.agents.advanced_rag  Skipping finding_category filter: would reduce candidates to zero
+2026-04-09T20:06:34  INFO      medvqa.agents.advanced_rag  Metadata filter result: 44 candidates (modality(44))
+2026-04-09T20:06:34  INFO      medvqa.agents.advanced_rag  Metadata filter: 44 candidates retained
+2026-04-09T20:06:34  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 44 candidates
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/20
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag    1. id=1553 score=0.1918 | Q: what mri imaging sequence is shown above? | A: t2 weighted
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag    2. id=1376 score=0.1909 | Q: in what plane is this mri taken? | A: axial
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag    3. id=1399 score=0.1789 | Q: do we see diffuse cerebral edema in this mri? | A: no
+2026-04-09T20:06:34  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 44 candidates
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/20
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag    1. id=1407 score=1.3138 | Q: which lobe of the brain demonstrates a hyper-intense signal in this t2 weighted mri image? | A: the left occipital lobe
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag    2. id=60 score=1.2945 | Q: the imaging modality is...? | A: mri/flair
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag    3. id=1550 score=1.2526 | Q: what is the modality of this mri? | A: t2
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=20 sparse=20
+2026-04-09T20:06:34  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 20 unique candidates
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/20
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag    1. id=1577 score=0.0310 method=hybrid_rrf | Q: what type of mri is the above image? | A: dwi
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag    2. id=1554 score=0.0301 method=hybrid_rrf | Q: what type of mri is shown in the above image? | A: t2 weighted
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag    3. id=1553 score=0.0297 method=hybrid_rrf | Q: what mri imaging sequence is shown above? | A: t2 weighted
+2026-04-09T20:06:34  INFO      medvqa.agents.advanced_rag  Reranking 20 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-09T20:06:34  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 20 candidates...
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag    1. id=1407 score=-11.3679 method=reranked softmax=0.0544 | Q: which lobe of the brain demonstrates a hyper-intense signal in this t2 weighted mri image? | A: the left occipital lobe
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag    2. id=4 score=-11.4196 method=reranked softmax=0.0517 | Q: how was this image taken? | A: mri
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag    3. id=1127 score=-11.4252 method=reranked softmax=0.0514 | Q: is this a mri of the chest? | A: no
+2026-04-09T20:06:34  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=low weak_signals=4 top1_softmax=0.054 margin=0.003 dense_top1=0.192 agreement=False
+2026-04-09T20:06:34  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 0 final candidates
+2026-04-09T20:06:34  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: no hits
+2026-04-09T20:06:34  INFO      medvqa.agents.knowledge_retriever  Advanced RAG returned 0 similar cases for this question; proceeding without RAG context
+2026-04-09T20:06:38  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=0  duration=3669ms
+2026-04-09T20:06:38  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Acute infarcts are often best seen on diffusion-weighted imaging (DWI) as areas of restricted diffusion with low ADC.', 'Chronic infarcts may appear as encephalomalacia, volume loss, and gliosis with CSF-like signal.', 'Infarcts can occur in the cerebrum, cerebellum, or brainstem; less commonly they may involve the optic pathways or orbit-related structures if there is vascular compromise.', 'The report should localize infarcts by side, region, and vascular territory when possible.', 'Associated findings may include edema, mass effect, and loss of gray-white differentiation in acute settings.']
+2026-04-09T20:06:38  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On brain MRI, infarcts are most commonly identified as focal areas of abnormal signal in the cerebral hemispheres, cerebellum, or brainstem depending on the vascular territory involved. Location is us
+2026-04-09T20:06:38  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=0  duration=3698ms
+2026-04-09T20:06:39  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:06:39  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='where are the infarcts?'  is_retry=False  question_type=location  yes_no=False
+2026-04-09T20:06:39  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=0
+2026-04-09T20:06:42  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Posterior fossa, involving the cerebellum and/or brainstem.'  confidence=medium  duration=3103ms
+2026-04-09T20:06:42  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the modality and slice level as axial brain MRI through the posterior fossa.', 'Noted visible posterior fossa structures: cerebellum and brainstem.', 'Used the image analysis to localize the likely infarct region to the posterior fossa.', 'Avoided specifying laterality or vascular territory because the provided evidence does not support it.']
+2026-04-09T20:06:42  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial MRI image at the level of the posterior fossa and orbits', 'Visible cerebellum and brainstem region on the slice', 'No other focal localization details provided', 'No side-specific infarct description in the analysis']
+2026-04-09T20:06:42  DEBUG     medvqa.agents.reasoning_agent  Limitations: The image description does not explicitly identify the infarcted area, side, or vascular territory; localization is inferred only from the slice level and visible anatomy.
+2026-04-09T20:06:42  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Posterior fossa, involving the cerebellum and/or brainstem.'  confidence=medium  duration=3138ms
+2026-04-09T20:06:44  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:06:44  INFO      medvqa.agents.verification_agent  Verifying answer='Posterior fossa, involving the cerebellum and/or brainstem.'  question='where are the infarcts?'  question_type=location
+2026-04-09T20:06:46  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=4/5  duration=2344ms
+2026-04-09T20:06:46  WARNING   medvqa.agents.verification_agent  Verification issues: ['The answer is somewhat too specific: the image shows the posterior fossa level, but it does not definitively establish the infarct location within the cerebellum and/or brainstem.', "The phrase 'and/or' reflects uncertainty, but the answer still implies infarcts are present in the posterior fossa without direct lesion confirmation from the provided visual analysis."]
+2026-04-09T20:06:46  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T20:06:46  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is consistent with the described MRI slice level and the visible anatomy (posterior fossa with cerebellum and brainstem). However, the available evidence does not clearly prove the exact infarct location, so the wording should be more cautious.
+2026-04-09T20:06:46  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2373ms
+2026-04-09T20:06:46  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-09T20:06:46  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T20:06:46  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-09T20:06:46  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T20:06:46  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Posterior fossa, involving the cerebellum and/or brainstem.'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=23315ms
+2026-04-09T20:06:46  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Posterior fossa, involving the cerebellum and/or brainstem.'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-09T20:06:46  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:06:46  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:06:46  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Posterior fossa, involving the cerebellum and/or brainstem.'  retries=0  total_duration=23319ms ===
+2026-04-09T20:06:46  INFO      medvqa.routes.dataset  Sample 2106 analysis complete  baseline=1720ms  workflow=4205ms  agentic=23323ms  total=23323ms
+2026-04-09T20:06:46  INFO      medvqa.routes.dataset  Sample 2106 answers  baseline='The infarcts are in the bilateral cerebellar hemispheres, mo'  workflow='head/brain'  agentic='Posterior fossa, involving the cerebellum and/or brainstem.'  ground_truth='basal ganglia, cerebellum, cerebral cortex'

@@ -1,0 +1,66 @@
+2026-04-09T19:48:55  INFO      medvqa.routes.dataset  Cache MISS for sample 2046  question='are liver findings normal?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T19:48:55  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=136234 bytes  question='are liver findings normal?'
+2026-04-09T19:48:55  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are liver findings normal?'  mime_type=image/png  size=136234 bytes ===
+2026-04-09T19:48:55  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T19:48:55  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=136234 bytes)
+2026-04-09T19:48:56  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T19:48:56  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=136234 bytes)
+2026-04-09T19:48:57  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Yes, the liver findings appear normal on this image.",
+  "explanation": "This is an abdominal CT image. The liver appears homogeneous without a focal mass, obvious enlargement, or other clear abnormality on this slice.",
+  "confidence": "medium"
+}
+2026-04-09T19:48:57  INFO      medvqa.agents.baseline  Baseline done  answer='Yes, the liver findings appear normal on this image.'  confidence=medium  duration=2107ms
+2026-04-09T19:48:57  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2351ms
+2026-04-09T19:48:57  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver, spleen, kidneys, bowel loops, and major retroperitoneal vessels are visible on this slice, with moderate amounts of bowel gas and stool present.
+2026-04-09T19:48:57  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['No obvious free intraperitoneal air on this slice', 'Bowel contains gas and stool', 'Solid abdominal organs are partially visualized on a single axial level']
+2026-04-09T19:48:57  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are liver findings normal?'
+2026-04-09T19:48:57  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T19:48:58  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2056ms
+2026-04-09T19:48:58  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen showing solid abdominal organs and bowel loops. The liver, spleen, kidneys, and major vessels are visible, along with gas and stool within the colon.
+2026-04-09T19:48:58  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large amount of colonic stool and gas', 'No obvious free intraperitoneal air on this slice', 'Single axial slice without complete survey of the abdomen']
+2026-04-09T19:48:58  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2087ms
+2026-04-09T19:48:58  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1401ms
+2026-04-09T19:48:58  DEBUG     medvqa.agents.question_analyzer  Target entity: liver findings  Expected format: single_word  Rephrased: Are the liver findings normal or abnormal?
+2026-04-09T19:48:58  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are liver findings normal?'  modality=CT  body_region=abdomen  question_type=abnormality_description
+2026-04-09T19:48:58  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['liver']
+2026-04-09T19:48:58  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-09T19:48:58  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='No obvious free intraperitoneal air on this slice; Bowel contains gas and stool'  confidence=medium  question_type=abnormality_description  duration=3822ms
+2026-04-09T19:48:59  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are liver findings normal?'
+2026-04-09T19:48:59  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are liver findings normal?'
+2026-04-09T19:48:59  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T19:49:00  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1700ms
+2026-04-09T19:49:00  DEBUG     medvqa.agents.question_analyzer  Target entity: liver findings  Expected format: single_word  Rephrased: Are the liver findings normal or abnormal?
+2026-04-09T19:49:00  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1742ms
+2026-04-09T19:49:02  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T19:49:02  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=abdomen
+2026-04-09T19:49:03  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1440ms
+2026-04-09T19:49:03  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clean abdominal CT context where an abnormality description question can usually be answered directly from conspicuous visual findings without additional retrieval or heightened verification.
+2026-04-09T19:49:03  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1465ms
+2026-04-09T19:49:04  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T19:49:04  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are liver findings normal?'  is_retry=False  question_type=abnormality_description  yes_no=False
+2026-04-09T19:49:04  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T19:49:06  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='normal'  confidence=medium  duration=2203ms
+2026-04-09T19:49:06  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the provided CT image summary for liver-specific abnormalities.', 'Noted that the analysis did not describe any focal liver lesion or structural abnormality.', 'Considered the limitation that only a single axial slice is available, so assessment is partial.']
+2026-04-09T19:49:06  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Visible liver on axial contrast-enhanced CT', 'No obvious liver abnormality reported in the image analysis', 'Single axial slice without complete survey of the abdomen']
+2026-04-09T19:49:06  DEBUG     medvqa.agents.reasoning_agent  Limitations: Assessment is limited to one axial slice; subtle or non-visible liver abnormalities could be missed.
+2026-04-09T19:49:06  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='normal'  confidence=medium  duration=2238ms
+2026-04-09T19:49:09  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T19:49:09  INFO      medvqa.agents.verification_agent  Verifying answer='normal'  question='are liver findings normal?'  question_type=abnormality_description
+2026-04-09T19:49:11  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=4/5  duration=1958ms
+2026-04-09T19:49:11  WARNING   medvqa.agents.verification_agent  Verification issues: ["The answer 'normal' is likely too definitive for a single CT slice and should be treated cautiously.", 'The explanation mentions absence of abnormality on one slice, but this does not fully establish that all liver findings are normal.']
+2026-04-09T19:49:11  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T19:49:11  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer is consistent with the visible image and matches the expected single-word format, but the evidence is limited to one axial CT slice. The conclusion is therefore somewhat strong relative to the available evidence.
+2026-04-09T19:49:11  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=1997ms
+2026-04-09T19:49:11  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-09T19:49:11  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T19:49:11  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-09T19:49:11  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T19:49:11  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='normal'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=16026ms
+2026-04-09T19:49:11  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='normal'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-09T19:49:11  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T19:49:11  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T19:49:11  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='normal'  retries=0  total_duration=16033ms ===
+2026-04-09T19:49:11  INFO      medvqa.routes.dataset  Sample 2046 analysis complete  baseline=2112ms  workflow=3823ms  agentic=16034ms  total=16036ms
+2026-04-09T19:49:11  INFO      medvqa.routes.dataset  Sample 2046 answers  baseline='Yes, the liver findings appear normal on this image.'  workflow='No obvious free intraperitoneal air on this slice; Bowel con'  agentic='normal'  ground_truth='yes'

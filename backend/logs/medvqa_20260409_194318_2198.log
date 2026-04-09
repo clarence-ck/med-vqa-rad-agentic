@@ -1,0 +1,66 @@
+2026-04-09T19:58:53  INFO      medvqa.routes.dataset  Cache MISS for sample 2198  question='what lobe is the lesion located in?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T19:58:53  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=213085 bytes  question='what lobe is the lesion located in?'
+2026-04-09T19:58:53  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what lobe is the lesion located in?'  mime_type=image/png  size=213085 bytes ===
+2026-04-09T19:58:53  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T19:58:53  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=213085 bytes)
+2026-04-09T19:58:54  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T19:58:54  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=213085 bytes)
+2026-04-09T19:58:55  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Temporal lobe",
+  "explanation": "This is an axial brain MRI showing a large lesion in the left temporal region, near the temporal lobe. The lesion’s location and surrounding anatomy indicate it is in the temporal lobe.",
+  "confidence": "high"
+}
+2026-04-09T19:58:55  INFO      medvqa.agents.baseline  Baseline done  answer='Temporal lobe'  confidence=high  duration=2278ms
+2026-04-09T19:58:56  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2696ms
+2026-04-09T19:58:56  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial brain MRI image with fluid appearing bright, consistent with a T2-weighted sequence. A large rounded cystic-appearing lesion is visible in the left cerebral hemisphere with surrounding mass effect on adjacent brain tissue.
+2026-04-09T19:58:56  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large left hemispheric cystic-appearing lesion', 'Surrounding mass effect with compression of adjacent structures', 'Asymmetric distortion of the left lateral cerebral region']
+2026-04-09T19:58:56  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what lobe is the lesion located in?'
+2026-04-09T19:58:56  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T19:58:56  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2489ms
+2026-04-09T19:58:56  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial brain MRI image. A large rounded fluid-containing lesion is visible in the left cerebral hemisphere with surrounding mass effect and displacement of adjacent brain tissue.
+2026-04-09T19:58:56  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large well-circumscribed cystic-appearing lesion in the left hemisphere', 'Surrounding compression/distortion of adjacent brain parenchyma', 'Mild effacement of nearby cerebrospinal fluid spaces']
+2026-04-09T19:58:56  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain  duration=2518ms
+2026-04-09T19:58:57  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what lobe is the lesion located in?'
+2026-04-09T19:58:57  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what lobe is the lesion located in?'
+2026-04-09T19:58:57  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T19:58:58  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=True  clarity=ambiguous  duration=2455ms
+2026-04-09T19:58:58  DEBUG     medvqa.agents.question_analyzer  Target entity: lobe of the brain lesion  Expected format: short_phrase  Rephrased: In which cerebral lobe is the lesion located?
+2026-04-09T19:58:58  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what lobe is the lesion located in?'  modality=MRI  body_region=brain  question_type=location
+2026-04-09T19:58:58  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T19:58:58  DEBUG     medvqa.agents.workflow_baseline  Branch taken: location
+2026-04-09T19:58:58  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='brain'  confidence=medium  question_type=location  duration=5210ms
+2026-04-09T19:58:59  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=True  clarity=clear  duration=1451ms
+2026-04-09T19:58:59  DEBUG     medvqa.agents.question_analyzer  Target entity: lobe of the brain lesion  Expected format: short_phrase  Rephrased: Which brain lobe is the lesion located in?
+2026-04-09T19:58:59  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=1484ms
+2026-04-09T19:59:00  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T19:59:00  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=True  modality=MRI  region=brain
+2026-04-09T19:59:01  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1512ms
+2026-04-09T19:59:01  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a classic, high-salience intracranial abnormality on a clean study, making the location question straightforward with minimal risk of perceptual error.
+2026-04-09T19:59:01  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1542ms
+2026-04-09T19:59:02  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T19:59:02  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what lobe is the lesion located in?'  is_retry=False  question_type=location  yes_no=False
+2026-04-09T19:59:02  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T19:59:06  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Left cerebral hemisphere, likely the temporal lobe'  confidence=medium  duration=3862ms
+2026-04-09T19:59:06  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the lesion as being in the left cerebral hemisphere.', 'Use the axial position within the hemisphere to infer the most likely lobe.', 'Infer temporal lobe based on the lateral, inferior hemispheric location described.']
+2026-04-09T19:59:06  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Large rounded fluid-containing lesion in the left cerebral hemisphere', 'Axial brain MRI view', 'Surrounding mass effect and distortion of adjacent brain tissue', 'Lesion described as located in the left hemisphere with nearby CSF space effacement']
+2026-04-09T19:59:06  DEBUG     medvqa.agents.reasoning_agent  Limitations: The provided image analysis does not explicitly name the lobe, so the lobe assignment is based on inferred anatomic location rather than direct labeling.
+2026-04-09T19:59:06  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Left cerebral hemisphere, likely the temporal lobe'  confidence=medium  duration=3897ms
+2026-04-09T19:59:07  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T19:59:07  INFO      medvqa.agents.verification_agent  Verifying answer='Left cerebral hemisphere, likely the temporal lobe'  question='what lobe is the lesion located in?'  question_type=location
+2026-04-09T19:59:11  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=4/5  duration=3518ms
+2026-04-09T19:59:11  WARNING   medvqa.agents.verification_agent  Verification issues: ['The image analysis supports a lesion in the left cerebral hemisphere, but not a definitive lobar assignment.', '“Likely the temporal lobe” is somewhat speculative given the available evidence.']
+2026-04-09T19:59:11  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T19:59:11  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is consistent with the general left-sided hemispheric location seen on the MRI and matches the short location-answer format. However, the specific temporal lobe attribution is not directly confirmed by the provided image analysis, so the answer is a reasonable inference rather than a fully supported finding.
+2026-04-09T19:59:11  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=3549ms
+2026-04-09T19:59:11  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-09T19:59:11  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T19:59:11  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-09T19:59:11  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T19:59:11  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Left cerebral hemisphere, likely the temporal lobe'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=17872ms
+2026-04-09T19:59:11  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Left cerebral hemisphere, likely the temporal lobe'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-09T19:59:11  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T19:59:11  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T19:59:11  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Left cerebral hemisphere, likely the temporal lobe'  retries=0  total_duration=17877ms ===
+2026-04-09T19:59:11  INFO      medvqa.routes.dataset  Sample 2198 analysis complete  baseline=2282ms  workflow=5213ms  agentic=17879ms  total=17880ms
+2026-04-09T19:59:11  INFO      medvqa.routes.dataset  Sample 2198 answers  baseline='Temporal lobe'  workflow='brain'  agentic='Left cerebral hemisphere, likely the temporal lobe'  ground_truth='right temporal lobe'

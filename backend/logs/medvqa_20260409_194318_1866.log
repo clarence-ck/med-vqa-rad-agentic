@@ -1,0 +1,67 @@
+2026-04-09T20:39:54  INFO      medvqa.routes.dataset  Cache MISS for sample 1866  question='are there increased vascular markings'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:39:54  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=500354 bytes  question='are there increased vascular markings'
+2026-04-09T20:39:54  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are there increased vascular markings'  mime_type=image/png  size=500354 bytes ===
+2026-04-09T20:39:54  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:39:54  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=500354 bytes)
+2026-04-09T20:39:55  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:39:55  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=500354 bytes)
+2026-04-09T20:39:56  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No, there are no definite increased vascular markings.",
+  "explanation": "This is a chest radiograph. The pulmonary vascularity does not appear prominently increased; there is no clear perihilar congestion or vascular crowding.",
+  "confidence": "high"
+}
+2026-04-09T20:39:56  INFO      medvqa.agents.baseline  Baseline done  answer='No, there are no definite increased vascular markings.'  confidence=high  duration=2165ms
+2026-04-09T20:39:57  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=4  duration=2560ms
+2026-04-09T20:39:57  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing the thoracic cavity with both lungs, cardiac silhouette, and mediastinal contours. The image includes the lower neck and upper abdomen, with the diaphragms and gastric bubble visible.
+2026-04-09T20:39:57  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Mild central/perihilar prominence of bronchovascular markings', 'No focal lobar air-space consolidation visible', 'Cardiomediastinal silhouette appears within normal size limits', 'No pleural effusion or pneumothorax evident']
+2026-04-09T20:39:57  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are there increased vascular markings'
+2026-04-09T20:39:57  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:39:58  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=Chest  quality=good  findings=4  duration=2769ms
+2026-04-09T20:39:58  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing the thoracic cavity with both lungs, central mediastinal structures, and upper abdominal gas beneath the diaphragm. The cardiac silhouette is visible and appears mildly prominent for the projection, with no focal dense air-space opacity evident.
+2026-04-09T20:39:58  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Low-volume pediatric frontal chest view', 'Mild prominence of the cardiomediastinal silhouette', 'No pleural effusion or pneumothorax visible', 'Mild central/perihilar increased bronchovascular markings']
+2026-04-09T20:39:58  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=Chest  duration=2801ms
+2026-04-09T20:39:58  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1176ms
+2026-04-09T20:39:58  DEBUG     medvqa.agents.question_analyzer  Target entity: increased vascular markings  Expected format: yes_no  Rephrased: Are there increased vascular markings?
+2026-04-09T20:39:58  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are there increased vascular markings'  modality=X-ray  body_region=chest  question_type=presence_absence
+2026-04-09T20:39:58  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T20:39:58  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-09T20:39:58  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='No'  confidence=low  question_type=presence_absence  duration=3810ms
+2026-04-09T20:39:59  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are there increased vascular markings'
+2026-04-09T20:39:59  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are there increased vascular markings'
+2026-04-09T20:39:59  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:40:00  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1224ms
+2026-04-09T20:40:00  DEBUG     medvqa.agents.question_analyzer  Target entity: increased vascular markings  Expected format: yes_no  Rephrased: Are there increased vascular markings?
+2026-04-09T20:40:00  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=presence_absence  duration=1268ms
+2026-04-09T20:40:01  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:40:01  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=presence_absence  reasoning=visual_recognition  med_knowledge=False  modality=X-ray  region=Chest
+2026-04-09T20:40:03  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1590ms
+2026-04-09T20:40:03  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clear yes/no chest X-ray question with no major obscuration or complex overlap, and the suspected abnormality is only mild and visually apparent rather than subtle.
+2026-04-09T20:40:03  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1625ms
+2026-04-09T20:40:04  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:40:04  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are there increased vascular markings'  is_retry=False  question_type=presence_absence  yes_no=True
+2026-04-09T20:40:04  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T20:40:04  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=presence_absence
+2026-04-09T20:40:06  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='yes'  confidence=high  duration=1948ms
+2026-04-09T20:40:06  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the provided image analysis for the target finding.', 'Noted the explicit finding of mild central/perihilar increased bronchovascular markings.', 'Mapped bronchovascular markings to increased vascular markings in the yes/no question.']
+2026-04-09T20:40:06  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Mild central/perihilar increased bronchovascular markings', 'Frontal chest radiograph description', 'No focal dense air-space opacity evident']
+2026-04-09T20:40:06  DEBUG     medvqa.agents.reasoning_agent  Limitations: The finding is mild and the view is low-volume pediatric frontal chest, but the provided analysis explicitly reports increased bronchovascular markings.
+2026-04-09T20:40:06  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='yes'  confidence=high  duration=1977ms
+2026-04-09T20:40:07  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:40:07  INFO      medvqa.agents.verification_agent  Verifying answer='yes'  question='are there increased vascular markings'  question_type=presence_absence
+2026-04-09T20:40:09  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=5/5  duration=2254ms
+2026-04-09T20:40:09  WARNING   medvqa.agents.verification_agent  Verification issues: ["The explanation infers 'increased vascular markings' from 'mild central/perihilar increased bronchovascular markings,' which is plausible but slightly interpretive.", 'The visual summary provided does not explicitly confirm increased vascular markings; it only notes a mildly prominent cardiac silhouette and no focal opacity.']
+2026-04-09T20:40:09  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T20:40:09  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer is a valid yes/no response and is consistent with the explanation. However, the evidence is somewhat indirect because the image analysis summary does not explicitly mention increased vascular markings, so the claim is only moderately grounded.
+2026-04-09T20:40:09  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2288ms
+2026-04-09T20:40:09  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-09T20:40:09  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T20:40:09  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=5/5
+2026-04-09T20:40:09  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T20:40:09  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='yes'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=14891ms
+2026-04-09T20:40:09  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='yes'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-09T20:40:09  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:40:09  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:40:09  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='yes'  retries=0  total_duration=14896ms ===
+2026-04-09T20:40:09  INFO      medvqa.routes.dataset  Sample 1866 analysis complete  baseline=2170ms  workflow=3836ms  agentic=14899ms  total=14899ms
+2026-04-09T20:40:09  INFO      medvqa.routes.dataset  Sample 1866 answers  baseline='No, there are no definite increased vascular markings.'  workflow='No'  agentic='yes'  ground_truth='yes'

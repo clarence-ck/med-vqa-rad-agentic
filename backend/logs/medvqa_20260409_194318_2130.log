@@ -1,0 +1,66 @@
+2026-04-09T20:07:05  INFO      medvqa.routes.dataset  Cache MISS for sample 2130  question='how big is the mass in cm?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:07:05  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=144907 bytes  question='how big is the mass in cm?'
+2026-04-09T20:07:05  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='how big is the mass in cm?'  mime_type=image/png  size=144907 bytes ===
+2026-04-09T20:07:05  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:07:05  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=144907 bytes)
+2026-04-09T20:07:06  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:07:06  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=144907 bytes)
+2026-04-09T20:07:07  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "The mass is approximately 1 cm in size.",
+  "explanation": "This is an axial CT scan of the brain. The visible rounded lesion near the center appears to measure about 1 cm, though no scale marker is shown for exact measurement.",
+  "confidence": "low"
+}
+2026-04-09T20:07:07  INFO      medvqa.agents.baseline  Baseline done  answer='The mass is approximately 1 cm in size.'  confidence=low  duration=1561ms
+2026-04-09T20:07:07  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=head  quality=good  findings=3  duration=2169ms
+2026-04-09T20:07:07  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial non-contrast CT image of the head showing the brain at the level of the basal cisterns. The skull and intracranial soft tissues are visible with a small circular hyperdense structure near the midline.
+2026-04-09T20:07:07  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Small circular hyperdense object near the midline intracranially', 'No obvious large acute intracranial hemorrhage or mass effect on this single image', 'Mild image artifact near the hyperdense object']
+2026-04-09T20:07:07  INFO      medvqa.agents.question_analyzer  Analyzing question: 'how big is the mass in cm?'
+2026-04-09T20:07:07  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:07:08  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=head  quality=good  findings=3  duration=2129ms
+2026-04-09T20:07:08  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial non-contrast CT image of the head showing the brain in cross-section. The skull outline and intracranial structures are visible, with a prominent round calcified structure near the midline at the skull base region.
+2026-04-09T20:07:08  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Small round calcified-appearing focus near the central skull base region', 'No obvious large intracranial hemorrhage or mass effect on this single image', 'Mild image noise/artifact from CT display']
+2026-04-09T20:07:08  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=head  duration=2157ms
+2026-04-09T20:07:08  INFO      medvqa.agents.question_analyzer  Question analysis done  type=other  reasoning=descriptive  med_knowledge=False  clarity=ambiguous  duration=1232ms
+2026-04-09T20:07:08  DEBUG     medvqa.agents.question_analyzer  Target entity: mass  Expected format: short_phrase  Rephrased: What is the size of the mass in centimeters?
+2026-04-09T20:07:08  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='how big is the mass in cm?'  modality=CT  body_region=head  question_type=other
+2026-04-09T20:07:08  DEBUG     medvqa.agents.workflow_baseline  Matched findings: ['No obvious large acute intracranial hemorrhage or mass effect on this single image']  Matched structures: []
+2026-04-09T20:07:08  DEBUG     medvqa.agents.workflow_baseline  Branch taken: fallback/other
+2026-04-09T20:07:08  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='No obvious large acute intracranial hemorrhage or mass effect on this single ima'  confidence=medium  question_type=other  duration=3460ms
+2026-04-09T20:07:10  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='how big is the mass in cm?'
+2026-04-09T20:07:10  INFO      medvqa.agents.question_analyzer  Analyzing question: 'how big is the mass in cm?'
+2026-04-09T20:07:10  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:07:12  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1273ms
+2026-04-09T20:07:12  DEBUG     medvqa.agents.question_analyzer  Target entity: mass  Expected format: short_phrase  Rephrased: How large is the mass in centimeters?
+2026-04-09T20:07:12  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1308ms
+2026-04-09T20:07:12  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:07:12  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  reasoning=visual_recognition  med_knowledge=False  modality=CT  region=head
+2026-04-09T20:07:14  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1601ms
+2026-04-09T20:07:14  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a straightforward spot-recognition case with a clear, prominent finding and minimal interpretive ambiguity from overlap or artifact.
+2026-04-09T20:07:14  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1626ms
+2026-04-09T20:07:15  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:07:15  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='how big is the mass in cm?'  is_retry=False  question_type=abnormality_description  yes_no=False
+2026-04-09T20:07:15  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T20:07:17  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Approximately 1 cm'  confidence=low  duration=2135ms
+2026-04-09T20:07:17  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the provided CT image analysis for the described abnormality.', 'Identified the visible lesion as a small round calcified-appearing focus near the skull base.', "Used the qualitative size descriptor 'small' to estimate the lesion at roughly 1 cm."]
+2026-04-09T20:07:17  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Small round calcified-appearing focus near the central skull base region', 'No obvious large intracranial mass effect on the image', 'Single axial CT image with mild noise/artifact']
+2026-04-09T20:07:17  DEBUG     medvqa.agents.reasoning_agent  Limitations: No exact measurement scale or radiology report measurement is provided, so the size can only be estimated from the visual description.
+2026-04-09T20:07:17  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Approximately 1 cm'  confidence=low  duration=2166ms
+2026-04-09T20:07:18  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:07:18  INFO      medvqa.agents.verification_agent  Verifying answer='Approximately 1 cm'  question='how big is the mass in cm?'  question_type=abnormality_description
+2026-04-09T20:07:20  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Low  checks=4/5  duration=2144ms
+2026-04-09T20:07:20  WARNING   medvqa.agents.verification_agent  Verification issues: ['The answer gives an approximate size (1 cm) but the evidence shown only supports a visible calcified-appearing focus, not a confidently measured mass size.', 'The explanation infers a lesion size without direct measurement from the image description.', 'The answer may overstate certainty despite the stated low confidence.']
+2026-04-09T20:07:20  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T20:07:20  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct short-phrase format and aligns generally with the visible calcified focus, but the exact 1 cm size is not directly verifiable from the provided image analysis alone. It should be framed more cautiously.
+2026-04-09T20:07:20  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Low  duration=2173ms
+2026-04-09T20:07:20  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-09T20:07:20  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T20:07:20  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-09T20:07:20  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T20:07:20  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Approximately 1 cm'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=15154ms
+2026-04-09T20:07:20  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Approximately 1 cm'  verification=partially_verified  confidence=Low  flag_review=False
+2026-04-09T20:07:20  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:07:20  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:07:20  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Approximately 1 cm'  retries=0  total_duration=15158ms ===
+2026-04-09T20:07:20  INFO      medvqa.routes.dataset  Sample 2130 analysis complete  baseline=1566ms  workflow=3463ms  agentic=15161ms  total=15161ms
+2026-04-09T20:07:20  INFO      medvqa.routes.dataset  Sample 2130 answers  baseline='The mass is approximately 1 cm in size.'  workflow='No obvious large acute intracranial hemorrhage or mass effec'  agentic='Approximately 1 cm'  ground_truth='2.5cm x 1.7cm x 1.6cm'

@@ -1,0 +1,66 @@
+2026-04-09T20:01:16  INFO      medvqa.routes.dataset  Cache MISS for sample 1811  question='are the brain gyri atrophied?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:01:16  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=89647 bytes  question='are the brain gyri atrophied?'
+2026-04-09T20:01:16  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are the brain gyri atrophied?'  mime_type=image/png  size=89647 bytes ===
+2026-04-09T20:01:16  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:01:16  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=89647 bytes)
+2026-04-09T20:01:17  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:01:17  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=89647 bytes)
+2026-04-09T20:01:17  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No, the brain gyri do not appear atrophied.",
+  "explanation": "This is an MRI brain image. The cortical sulci are not markedly widened and the gyri are preserved, without obvious diffuse cortical volume loss.",
+  "confidence": "medium"
+}
+2026-04-09T20:01:17  INFO      medvqa.agents.baseline  Baseline done  answer='No, the brain gyri do not appear atrophied.'  confidence=medium  duration=1506ms
+2026-04-09T20:01:19  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=3324ms
+2026-04-09T20:01:19  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial MRI image of the brain showing a slice through the deep gray matter and temporal lobes. The ventricular system and surrounding brain parenchyma are visible with symmetric anatomy on this view.
+2026-04-09T20:01:19  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Symmetric appearance of the lateral ventricles and deep gray matter structures', 'No obvious large mass effect or midline shift on this single image', 'No gross focal hemorrhage is apparent on this view']
+2026-04-09T20:01:19  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the brain gyri atrophied?'
+2026-04-09T20:01:19  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:01:19  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=3  duration=2347ms
+2026-04-09T20:01:19  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial brain MRI image showing the intracranial structures in a symmetric slice through the deep gray matter and temporal lobes. The ventricles and surrounding brain parenchyma are visible with no obvious gross distortion on this single image.
+2026-04-09T20:01:19  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Symmetric appearance of the cerebral hemispheres on this slice', 'No obvious large mass effect or midline shift visible on this image', 'Mildly prominent CSF spaces/ventricular system may be present']
+2026-04-09T20:01:19  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain  duration=2377ms
+2026-04-09T20:01:20  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are the brain gyri atrophied?'
+2026-04-09T20:01:20  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the brain gyri atrophied?'
+2026-04-09T20:01:20  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:01:21  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=medical_knowledge  med_knowledge=True  clarity=clear  duration=1224ms
+2026-04-09T20:01:21  DEBUG     medvqa.agents.question_analyzer  Target entity: brain gyri atrophy  Expected format: yes_no  Rephrased: Are the brain gyri atrophied?
+2026-04-09T20:01:21  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are the brain gyri atrophied?'  modality=MRI  body_region=brain  question_type=presence_absence
+2026-04-09T20:01:21  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T20:01:21  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-09T20:01:21  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=high  question_type=presence_absence  duration=4609ms
+2026-04-09T20:01:21  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1254ms
+2026-04-09T20:01:21  DEBUG     medvqa.agents.question_analyzer  Target entity: brain gyri / cortical atrophy  Expected format: yes_no  Rephrased: Are the brain gyri atrophied?
+2026-04-09T20:01:21  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=1289ms
+2026-04-09T20:01:22  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:01:22  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=visual_recognition  med_knowledge=True  modality=MRI  region=brain
+2026-04-09T20:01:24  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1617ms
+2026-04-09T20:01:24  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a straightforward brain MRI with uncomplicated anatomy and no conspicuous artifact or overlap burden, making it an easy visual recognition case.
+2026-04-09T20:01:24  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1644ms
+2026-04-09T20:01:25  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:01:25  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are the brain gyri atrophied?'  is_retry=False  question_type=yes_no  yes_no=True
+2026-04-09T20:01:25  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T20:01:25  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-09T20:01:28  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=low  duration=2402ms
+2026-04-09T20:01:28  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the axial MRI slice for signs of cortical volume loss.', 'Checked for widened sulci, thinning of the cortical ribbon, and enlarged ventricles/CSF spaces.', 'Found no obvious cortical atrophy on this image, only mild prominence of CSF spaces that is nonspecific.']
+2026-04-09T20:01:28  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Symmetric cerebral hemispheres on the slice', 'No obvious gross distortion on the image', 'No visible large mass effect or midline shift', 'Only mildly prominent CSF spaces/ventricular system may be present']
+2026-04-09T20:01:28  DEBUG     medvqa.agents.reasoning_agent  Limitations: This is based on a single axial MRI slice, which is insufficient to assess cortical atrophy reliably across the whole brain.
+2026-04-09T20:01:28  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=low  duration=2433ms
+2026-04-09T20:01:29  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:01:29  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='are the brain gyri atrophied?'  question_type=yes_no
+2026-04-09T20:01:31  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Low  checks=5/5  duration=1794ms
+2026-04-09T20:01:31  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T20:01:31  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer is consistent with the question type and with the provided visual analysis. The explanation is grounded in the visible MRI slice and appropriately cautious, noting that only a single image is available. However, the evidence is limited, so the conclusion should remain low-confidence rather than definitive.
+2026-04-09T20:01:31  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Low  duration=1822ms
+2026-04-09T20:01:31  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-09T20:01:31  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T20:01:31  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=5/5
+2026-04-09T20:01:31  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T20:01:31  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=14649ms
+2026-04-09T20:01:31  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='no'  verification=partially_verified  confidence=Low  flag_review=False
+2026-04-09T20:01:31  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:01:31  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:01:31  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  retries=0  total_duration=14653ms ===
+2026-04-09T20:01:31  INFO      medvqa.routes.dataset  Sample 1811 analysis complete  baseline=1510ms  workflow=4611ms  agentic=14655ms  total=14656ms
+2026-04-09T20:01:31  INFO      medvqa.routes.dataset  Sample 1811 answers  baseline='No, the brain gyri do not appear atrophied.'  workflow='Yes'  agentic='no'  ground_truth='no'

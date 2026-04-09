@@ -1,0 +1,108 @@
+2026-04-09T20:30:33  INFO      medvqa.routes.dataset  Cache MISS for sample 2067  question='term for the enhancement of the luminal surface seen in the image?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:30:33  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=235838 bytes  question='term for the enhancement of the luminal surface seen in the image?'
+2026-04-09T20:30:33  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='term for the enhancement of the luminal surface seen in the image?'  mime_type=image/png  size=235838 bytes ===
+2026-04-09T20:30:33  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:30:33  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=235838 bytes)
+2026-04-09T20:30:34  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:30:34  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=235838 bytes)
+2026-04-09T20:30:35  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Mucosal hyperenhancement",
+  "explanation": "This is an abdominal CT image. The term for increased enhancement of the luminal surface is mucosal hyperenhancement.",
+  "confidence": "high"
+}
+2026-04-09T20:30:35  INFO      medvqa.agents.baseline  Baseline done  answer='Mucosal hyperenhancement'  confidence=high  duration=2143ms
+2026-04-09T20:30:36  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=3106ms
+2026-04-09T20:30:36  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the abdomen showing multiple abdominal soft tissue structures, bowel loops with intraluminal gas, and the spine centrally/posteriorly. Both kidneys are partially visualized along with surrounding mesenteric and retroperitoneal tissues.
+2026-04-09T20:30:36  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Single axial abdominal CT slice with contrast enhancement of vascular structures', 'Bowel gas and fluid are visible within loops of bowel', 'Bilateral renal structures are partially seen']
+2026-04-09T20:30:36  INFO      medvqa.agents.question_analyzer  Analyzing question: 'term for the enhancement of the luminal surface seen in the image?'
+2026-04-09T20:30:36  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:30:36  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2563ms
+2026-04-09T20:30:36  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the abdomen showing multiple bowel loops and surrounding mesenteric/retroperitoneal structures. The slice includes the central vertebral body and adjacent abdominal organs and soft tissues.
+2026-04-09T20:30:36  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Mildly distended bowel loops are visible', 'Heterogeneous soft tissue density and stranding are present in the mesentery/abdomen', 'A hyperdense focus/opacified bowel segment is seen on the left side of the image']
+2026-04-09T20:30:36  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2598ms
+2026-04-09T20:30:37  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='term for the enhancement of the luminal surface seen in the image?'
+2026-04-09T20:30:37  INFO      medvqa.agents.question_analyzer  Analyzing question: 'term for the enhancement of the luminal surface seen in the image?'
+2026-04-09T20:30:37  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:30:39  INFO      medvqa.agents.question_analyzer  Question analysis done  type=explanation_request  reasoning=medical_knowledge  med_knowledge=True  clarity=ambiguous  duration=1614ms
+2026-04-09T20:30:39  DEBUG     medvqa.agents.question_analyzer  Target entity: term for the enhancement of the luminal surface  Expected format: short_phrase  Rephrased: What is the medical term used to describe enhancement of the luminal surface seen on the CT image?
+2026-04-09T20:30:39  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=explanation_request  duration=1645ms
+2026-04-09T20:30:39  INFO      medvqa.agents.question_analyzer  Question analysis done  type=other  reasoning=medical_knowledge  med_knowledge=True  clarity=ambiguous  duration=3096ms
+2026-04-09T20:30:39  DEBUG     medvqa.agents.question_analyzer  Target entity: medical imaging finding / enhancement pattern  Expected format: short_phrase  Rephrased: What is the medical term for the enhancement of the luminal surface seen in the image?
+2026-04-09T20:30:39  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='term for the enhancement of the luminal surface seen in the image?'  modality=CT  body_region=abdomen  question_type=other
+2026-04-09T20:30:39  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T20:30:39  DEBUG     medvqa.agents.workflow_baseline  Branch taken: fallback/other
+2026-04-09T20:30:39  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Axial CT image of the abdomen showing multiple abdominal soft tissue structures,'  confidence=low  question_type=other  duration=6265ms
+2026-04-09T20:30:40  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:30:40  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=explanation_request  reasoning=medical_knowledge  med_knowledge=True  modality=CT  region=abdomen
+2026-04-09T20:30:41  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=hard  needs_retrieval=True  verification=strict  fallback=flag_for_review  duration=1377ms
+2026-04-09T20:30:41  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is an ambiguous explanation request on a crowded abdominal CT slice where pathology may be obscured by overlapping anatomy, so the case should be handled as a hard perception challenge with strict verification.
+2026-04-09T20:30:41  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=hard  needs_retrieval=True  duration=1408ms
+2026-04-09T20:30:42  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T20:30:42  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='term for the enhancement of the luminal surface seen in the image?'  modality=CT  body_region=abdomen  question_type=explanation_request  target_entity=term for the enhancement of the luminal surface  advanced_rag=True
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='lesion' from notable_findings
+2026-04-09T20:30:42  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=term for the enhancement of the luminal surface seen in the image? | modality=CT | body_region=abdomen | finding=lesion | rerank=mandatory
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag  Using original question as query (no LLM rewrite)
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen': 209 matches
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='lesion': 166 matches
+2026-04-09T20:30:42  INFO      medvqa.agents.advanced_rag  Skipping finding_category filter: would reduce candidates to zero
+2026-04-09T20:30:42  INFO      medvqa.agents.advanced_rag  Metadata filter result: 2 candidates (modality(33) + body_region(209))
+2026-04-09T20:30:42  INFO      medvqa.agents.advanced_rag  Metadata filter: 2 candidates retained
+2026-04-09T20:30:42  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 2 candidates
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 2/2
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.2823 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.1685 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:30:42  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 2 candidates
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 2/2
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0000 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.0000 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=2 sparse=2
+2026-04-09T20:30:42  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 2 unique candidates
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 2/2
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:30:42  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.0323 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:30:42  INFO      medvqa.agents.advanced_rag  Reranking 2 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-09T20:30:42  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 2 candidates...
+2026-04-09T20:30:43  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 2/2
+2026-04-09T20:30:43  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=-11.1240 method=reranked softmax=0.5613 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:30:43  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=-11.3704 method=reranked softmax=0.4387 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:30:43  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=medium weak_signals=1 top1_softmax=0.561 margin=0.123 dense_top1=0.282 agreement=True
+2026-04-09T20:30:43  WARNING   medvqa.agents.advanced_rag  Retrieval confidence is medium; returning results
+2026-04-09T20:30:43  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 2 final candidates
+2026-04-09T20:30:43  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 2/2
+2026-04-09T20:30:43  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=-11.1240 method=reranked softmax=0.5613 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:30:43  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=-11.3704 method=reranked softmax=0.4387 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:30:43  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 2 similar cases
+2026-04-09T20:30:46  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=2  duration=3415ms
+2026-04-09T20:30:46  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The bowel wall normally has a thin enhancing mucosal layer after IV contrast administration.', 'Hyperenhancement of the luminal surface often reflects increased mucosal perfusion or inflammation.', 'Accurate assessment depends on good bowel distension and appropriate contrast timing.', 'Associated findings such as wall thickening, edema, or mesenteric stranding help interpret the significance of enhancement.']
+2026-04-09T20:30:46  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On contrast-enhanced abdominal CT, the "enhancement of the luminal surface" of bowel usually refers to mucosal or mural hyperenhancement, which can be assessed when the bowel wall is well distended. T
+2026-04-09T20:30:46  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=2  duration=3444ms
+2026-04-09T20:30:48  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:30:48  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='term for the enhancement of the luminal surface seen in the image?'  is_retry=False  question_type=explanation_request  yes_no=False
+2026-04-09T20:30:48  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=2
+2026-04-09T20:30:51  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='mucosal hyperenhancement'  confidence=high  duration=2505ms
+2026-04-09T20:30:51  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the question as asking for radiologic terminology rather than a diagnosis.', "Recognize that the 'luminal surface' of bowel on contrast CT corresponds to the mucosa/mural inner layer.", 'Use standard CT terminology for increased enhancement of that layer: mucosal hyperenhancement.']
+2026-04-09T20:30:51  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['CT abdomen with bowel loops visible', 'Hyperdense focus/opacified bowel segment noted', 'Supporting knowledge that enhancement of the luminal surface on contrast CT is termed mucosal or mural hyperenhancement']
+2026-04-09T20:30:51  DEBUG     medvqa.agents.reasoning_agent  Limitations: The image analysis does not provide a direct labeled view of the bowel mucosa, so the answer is based on standard CT terminology applied to the described finding.
+2026-04-09T20:30:51  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='mucosal hyperenhancement'  confidence=high  duration=2537ms
+2026-04-09T20:30:52  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:30:52  INFO      medvqa.agents.verification_agent  Verifying answer='mucosal hyperenhancement'  question='term for the enhancement of the luminal surface seen in the image?'  question_type=explanation_request
+2026-04-09T20:30:54  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=3/5  duration=2562ms
+2026-04-09T20:30:54  WARNING   medvqa.agents.verification_agent  Verification issues: ['The image analysis does not specifically confirm visible mucosal or luminal surface enhancement; it only states there are bowel loops and surrounding structures on CT.', "The explanation introduces findings such as 'hyperdense/opacified bowel segment' and 'surrounding bowel/mesenteric abnormalities' that are not clearly supported by the provided visual summary.", 'The answer may be plausible radiologic terminology, but it is stronger than the evidence available from the image analysis.']
+2026-04-09T20:30:54  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T20:30:54  DEBUG     medvqa.agents.verification_agent  Verification notes: The short phrase format fits the question, and 'mucosal hyperenhancement' is a plausible term for enhancement of the bowel mucosal/luminal surface on contrast CT. However, the provided image analysis does not explicitly document that this enhancement is visible, so the explanation is not well grounded and the claim is somewhat overconfident.
+2026-04-09T20:30:54  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2595ms
+2026-04-09T20:30:54  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-09T20:30:54  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T20:30:54  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-09T20:30:54  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-09T20:30:54  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='mucosal hyperenhancement'  verification=partially_verified  guardrail_flag=False  consistency=low  cross_modal=low  duration=21424ms
+2026-04-09T20:30:54  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='mucosal hyperenhancement'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-09T20:30:54  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:30:54  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:30:54  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='mucosal hyperenhancement'  retries=0  total_duration=21430ms ===
+2026-04-09T20:30:54  INFO      medvqa.routes.dataset  Sample 2067 analysis complete  baseline=2147ms  workflow=6267ms  agentic=21433ms  total=21433ms
+2026-04-09T20:30:54  INFO      medvqa.routes.dataset  Sample 2067 answers  baseline='Mucosal hyperenhancement'  workflow='Axial CT image of the abdomen showing multiple abdominal sof'  agentic='mucosal hyperenhancement'  ground_truth='mucosal hyperemia'

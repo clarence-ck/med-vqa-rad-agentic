@@ -1,0 +1,66 @@
+2026-04-09T20:03:44  INFO      medvqa.routes.dataset  Cache MISS for sample 1931  question='evidence of hemorrhage in the kidneys?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:03:44  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=269465 bytes  question='evidence of hemorrhage in the kidneys?'
+2026-04-09T20:03:44  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='evidence of hemorrhage in the kidneys?'  mime_type=image/png  size=269465 bytes ===
+2026-04-09T20:03:44  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:03:44  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=269465 bytes)
+2026-04-09T20:03:45  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:03:45  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=269465 bytes)
+2026-04-09T20:03:46  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No clear evidence of hemorrhage in the kidneys.",
+  "explanation": "This is an axial CT abdomen with contrast. The kidneys do not show a definite hyperdense collection or other obvious imaging signs of renal hemorrhage on this slice.",
+  "confidence": "medium"
+}
+2026-04-09T20:03:46  INFO      medvqa.agents.baseline  Baseline done  answer='No clear evidence of hemorrhage in the kidneys.'  confidence=medium  duration=1843ms
+2026-04-09T20:03:48  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=3978ms
+2026-04-09T20:03:48  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the abdomen at the level of the upper abdomen. Solid organs and bowel loops are visible, with oral/enteric contrast seen within the stomach and proximal bowel. Both kidneys and the spine are also partially visualized.
+2026-04-09T20:03:48  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Contrast material is present in the upper gastrointestinal tract', 'Both kidneys are visible on this slice', 'No obvious acute abnormality can be confidently identified from this single image']
+2026-04-09T20:03:48  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=3124ms
+2026-04-09T20:03:48  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver, spleen, kidneys, and adjacent bowel loops are visible, with oral/enteric contrast seen within the stomach or proximal bowel.
+2026-04-09T20:03:48  INFO      medvqa.agents.question_analyzer  Analyzing question: 'evidence of hemorrhage in the kidneys?'
+2026-04-09T20:03:48  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Contrast material is present within the upper gastrointestinal tract', 'Both kidneys are visible on this slice', 'No obvious large mass, free air, or gross ascites is evident on this single image']
+2026-04-09T20:03:48  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:03:48  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=3155ms
+2026-04-09T20:03:49  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='evidence of hemorrhage in the kidneys?'
+2026-04-09T20:03:49  INFO      medvqa.agents.question_analyzer  Analyzing question: 'evidence of hemorrhage in the kidneys?'
+2026-04-09T20:03:49  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:03:49  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1203ms
+2026-04-09T20:03:49  DEBUG     medvqa.agents.question_analyzer  Target entity: hemorrhage in the kidneys  Expected format: yes_no  Rephrased: Is there evidence of hemorrhage in the kidneys?
+2026-04-09T20:03:49  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='evidence of hemorrhage in the kidneys?'  modality=CT  body_region=abdomen  question_type=presence_absence
+2026-04-09T20:03:49  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['kidneys']
+2026-04-09T20:03:49  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-09T20:03:49  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=high  question_type=presence_absence  duration=5239ms
+2026-04-09T20:03:50  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1283ms
+2026-04-09T20:03:50  DEBUG     medvqa.agents.question_analyzer  Target entity: hemorrhage in the kidneys  Expected format: yes_no  Rephrased: Is there evidence of hemorrhage in the kidneys?
+2026-04-09T20:03:50  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=presence_absence  duration=1319ms
+2026-04-09T20:03:51  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:03:51  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=presence_absence  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=abdomen
+2026-04-09T20:03:53  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1443ms
+2026-04-09T20:03:53  DEBUG     medvqa.agents.difficulty_router  Routing rationale: The study appears clean and anatomically uncomplicated, so the yes/no judgment should be made directly from the image without retrieval or enhanced verification.
+2026-04-09T20:03:53  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1472ms
+2026-04-09T20:03:54  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:03:54  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='evidence of hemorrhage in the kidneys?'  is_retry=False  question_type=presence_absence  yes_no=True
+2026-04-09T20:03:54  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T20:03:54  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=presence_absence
+2026-04-09T20:03:56  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=medium  duration=2210ms
+2026-04-09T20:03:56  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: 1) Identified both kidneys on the CT image. 2) Looked for hyperdense blood products or surrounding fluid/collection. 3) No such abnormality was apparent on the provided slice, so hemorrhage is not evident.
+2026-04-09T20:03:56  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial contrast-enhanced CT of the upper abdomen', 'Both kidneys are visible on the slice', 'No obvious large mass or free fluid around the kidneys', 'No visible hyperdense collection suggesting renal hemorrhage']
+2026-04-09T20:03:56  DEBUG     medvqa.agents.reasoning_agent  Limitations: This is based on a single provided CT slice; subtle renal hemorrhage or findings on other slices cannot be excluded.
+2026-04-09T20:03:56  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=medium  duration=2243ms
+2026-04-09T20:03:57  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:03:57  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='evidence of hemorrhage in the kidneys?'  question_type=presence_absence
+2026-04-09T20:03:59  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=5/5  duration=1588ms
+2026-04-09T20:03:59  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-09T20:03:59  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer 'no' is appropriate for a yes/no question asking about evidence of renal hemorrhage. The explanation is consistent with the provided CT image analysis, which does not describe any obvious hemorrhage. However, this conclusion is limited by the use of a single image slice, so the certainty should remain moderate rather than absolute.
+2026-04-09T20:03:59  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=1616ms
+2026-04-09T20:03:59  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-09T20:03:59  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-09T20:03:59  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=5/5
+2026-04-09T20:03:59  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T20:03:59  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=14989ms
+2026-04-09T20:03:59  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='no'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-09T20:03:59  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:03:59  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:03:59  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  retries=0  total_duration=14994ms ===
+2026-04-09T20:03:59  INFO      medvqa.routes.dataset  Sample 1931 analysis complete  baseline=1847ms  workflow=5241ms  agentic=14997ms  total=14998ms
+2026-04-09T20:03:59  INFO      medvqa.routes.dataset  Sample 1931 answers  baseline='No clear evidence of hemorrhage in the kidneys.'  workflow='Yes'  agentic='no'  ground_truth='no'

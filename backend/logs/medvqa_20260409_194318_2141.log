@@ -1,0 +1,143 @@
+2026-04-09T20:49:34  INFO      medvqa.routes.dataset  Cache MISS for sample 2141  question='does the liver contain at least one hypodensity?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:49:34  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=376443 bytes  question='does the liver contain at least one hypodensity?'
+2026-04-09T20:49:34  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='does the liver contain at least one hypodensity?'  mime_type=image/png  size=376443 bytes ===
+2026-04-09T20:49:34  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:49:34  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=376443 bytes)
+2026-04-09T20:49:35  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:49:35  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=376443 bytes)
+2026-04-09T20:49:35  DEBUG     medvqa.agents.baseline  Raw baseline response: {"is_radiology_image": true,"answer":"Yes","explanation":"This is an axial contrast-enhanced CT of the abdomen. The liver shows at least one focal hypodense lesion near the dome.","confidence":"high"}
+2026-04-09T20:49:35  INFO      medvqa.agents.baseline  Baseline done  answer='Yes'  confidence=high  duration=1751ms
+2026-04-09T20:49:38  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=upper abdomen  quality=good  findings=3  duration=3293ms
+2026-04-09T20:49:38  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver, spleen, stomach, and adjacent upper abdominal structures are visible, along with the aorta and spine in cross-section.
+2026-04-09T20:49:38  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Low-attenuation lesion in the liver', 'Round low-attenuation lesion in the spleen', 'Small amount of free intraperitoneal air under the anterior abdominal wall/diaphragm']
+2026-04-09T20:49:38  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=upper abdomen  duration=3332ms
+2026-04-09T20:49:38  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=upper abdomen  quality=good  findings=3  duration=4444ms
+2026-04-09T20:49:38  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image through the upper abdomen. The liver and spleen are partially visualized along with the stomach and adjacent upper abdominal structures, and the vertebral body is seen posteriorly.
+2026-04-09T20:49:38  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Well-defined low-attenuation lesion in the left hepatic lobe', 'Additional rounded low-attenuation lesion in the spleen', 'No obvious free intraperitoneal air on this slice']
+2026-04-09T20:49:38  INFO      medvqa.agents.question_analyzer  Analyzing question: 'does the liver contain at least one hypodensity?'
+2026-04-09T20:49:38  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:49:39  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='does the liver contain at least one hypodensity?'
+2026-04-09T20:49:39  INFO      medvqa.agents.question_analyzer  Analyzing question: 'does the liver contain at least one hypodensity?'
+2026-04-09T20:49:39  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:49:40  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1302ms
+2026-04-09T20:49:40  DEBUG     medvqa.agents.question_analyzer  Target entity: hypodensity in the liver  Expected format: yes_no  Rephrased: Does the liver contain at least one hypodense area?
+2026-04-09T20:49:40  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='does the liver contain at least one hypodensity?'  modality=CT  body_region=upper abdomen  question_type=presence_absence
+2026-04-09T20:49:40  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['liver']
+2026-04-09T20:49:40  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-09T20:49:40  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=high  question_type=presence_absence  duration=5811ms
+2026-04-09T20:49:40  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1201ms
+2026-04-09T20:49:40  DEBUG     medvqa.agents.question_analyzer  Target entity: liver hypodensity  Expected format: yes_no  Rephrased: Does the liver contain at least one hypodense lesion?
+2026-04-09T20:49:40  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=presence_absence  duration=1234ms
+2026-04-09T20:49:43  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:49:43  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=presence_absence  reasoning=visual_recognition  med_knowledge=False  modality=CT  region=upper abdomen
+2026-04-09T20:49:45  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1480ms
+2026-04-09T20:49:45  DEBUG     medvqa.agents.difficulty_router  Routing rationale: The study appears clean and anatomically straightforward, and the yes/no answer should be determined by direct visual inspection without added retrieval or enhanced review.
+2026-04-09T20:49:45  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1514ms
+2026-04-09T20:49:47  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:49:47  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='does the liver contain at least one hypodensity?'  is_retry=False  question_type=presence_absence  yes_no=True
+2026-04-09T20:49:47  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T20:49:47  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=presence_absence
+2026-04-09T20:49:49  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='yes'  confidence=high  duration=2002ms
+2026-04-09T20:49:49  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the target finding: liver hypodensity.', 'Review the provided image analysis for liver findings.', 'Note that a low-attenuation lesion in the liver is explicitly reported.', 'Conclude that at least one liver hypodensity is present.']
+2026-04-09T20:49:49  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Notable findings: Low-attenuation lesion in the liver', 'CT upper abdomen showing the liver']
+2026-04-09T20:49:49  DEBUG     medvqa.agents.reasoning_agent  Limitations: The conclusion is based on the provided image analysis summary rather than direct pixel-level inspection.
+2026-04-09T20:49:49  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='yes'  confidence=high  duration=2032ms
+2026-04-09T20:49:50  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:49:50  INFO      medvqa.agents.verification_agent  Verifying answer='yes'  question='does the liver contain at least one hypodensity?'  question_type=presence_absence
+2026-04-09T20:49:51  INFO      medvqa.agents.verification_agent  Verification done  status=unsupported  confidence=Low  checks=3/5  duration=1753ms
+2026-04-09T20:49:51  WARNING   medvqa.agents.verification_agent  Verification issues: ['The explanation asserts a low-attenuation liver lesion, but the provided visual analysis does not explicitly confirm a hypodense lesion in the liver.', 'The answer is more definitive than the available evidence supports.']
+2026-04-09T20:49:51  INFO      medvqa.agents.verification_agent  Fallback recommendation: flag_for_review
+2026-04-09T20:49:51  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct yes/no format and matches the question type, but the justification is not grounded in the provided image analysis. Without explicit confirmation of a liver hypodensity, 'yes' is not adequately supported.
+2026-04-09T20:49:51  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=unsupported  confidence=Low  duration=1789ms
+2026-04-09T20:49:51  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'unsupported_claim']
+2026-04-09T20:49:51  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=True  fallback=flag_for_review  disclaimer=True
+2026-04-09T20:49:51  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-09T20:49:51  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-09T20:49:51  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='yes'  verification=unsupported  guardrail_flag=True  consistency=low  cross_modal=low  duration=17664ms
+2026-04-09T20:49:51  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='yes'  verification=unsupported  confidence=Low  flag_review=True
+2026-04-09T20:49:51  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=unsupported  flag_review=True  high_severity=True  -> retry=True
+2026-04-09T20:49:51  INFO      medvqa.agents.orchestrator  Pipeline RETRY triggered  reason: verification_status=unsupported; fallback=flag_for_review; flag_for_review=True
+2026-04-09T20:49:51  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=True)
+2026-04-09T20:49:52  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:49:52  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=376443 bytes)
+2026-04-09T20:49:55  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=upper abdomen  quality=good  findings=4  duration=3095ms
+2026-04-09T20:49:55  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen shows the liver on the left side of the image, the stomach and spleen on the right side, and the upper portion of the spine centrally posteriorly. Several low-attenuation round lesions are visible within the liver and adjacent upper abdominal structures are partially opacified.
+2026-04-09T20:49:55  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Round low-attenuation lesion in the liver', 'Additional small low-density foci near the upper abdomen', 'Contrast opacification of major abdominal vessels', 'No obvious free air on this single slice']
+2026-04-09T20:49:55  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=upper abdomen  duration=3125ms
+2026-04-09T20:49:56  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='does the liver contain at least one hypodensity?'
+2026-04-09T20:49:56  INFO      medvqa.agents.question_analyzer  Analyzing question: 'does the liver contain at least one hypodensity?'
+2026-04-09T20:49:56  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:49:58  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1235ms
+2026-04-09T20:49:58  DEBUG     medvqa.agents.question_analyzer  Target entity: hypodensity in the liver  Expected format: yes_no  Rephrased: Does the liver contain at least one hypodense lesion?
+2026-04-09T20:49:58  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=presence_absence  duration=1268ms
+2026-04-09T20:49:59  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:49:59  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=presence_absence  reasoning=visual_recognition  med_knowledge=False  modality=CT  region=upper abdomen
+2026-04-09T20:50:01  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1865ms
+2026-04-09T20:50:01  DEBUG     medvqa.agents.difficulty_router  Routing rationale: The pathology is reasonably conspicuous, but the upper abdominal CT includes overlapping organs and partially opacified adjacent structures, so the case is best treated as a moderate-complexity presence/absence question needing retrieval support.
+2026-04-09T20:50:01  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1893ms
+2026-04-09T20:50:02  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T20:50:02  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='does the liver contain at least one hypodensity?'  modality=CT  body_region=upper abdomen  question_type=presence_absence  target_entity=hypodensity in the liver  advanced_rag=True
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='lesion' from notable_findings
+2026-04-09T20:50:02  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=does the liver contain at least one hypodensity? | modality=CT | body_region=upper abdomen | finding=lesion | rerank=mandatory
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag  Using original question as query (no LLM rewrite)
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='upper abdomen': 209 matches
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='lesion': 166 matches
+2026-04-09T20:50:02  INFO      medvqa.agents.advanced_rag  Skipping finding_category filter: would reduce candidates to zero
+2026-04-09T20:50:02  INFO      medvqa.agents.advanced_rag  Metadata filter result: 2 candidates (modality(33) + body_region(209))
+2026-04-09T20:50:02  INFO      medvqa.agents.advanced_rag  Metadata filter: 2 candidates retained
+2026-04-09T20:50:02  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 2 candidates
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 2/2
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag    1. id=147 score=0.2145 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag    2. id=1403 score=0.2105 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:50:02  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 2 candidates
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 2/2
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0000 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.0000 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=2 sparse=2
+2026-04-09T20:50:02  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 2 unique candidates
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 2/2
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag    1. id=147 score=0.0325 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag    2. id=1403 score=0.0325 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:50:02  INFO      medvqa.agents.advanced_rag  Reranking 2 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-09T20:50:02  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 2 candidates...
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 2/2
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag    1. id=147 score=-11.4312 method=reranked softmax=0.5002 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag    2. id=1403 score=-11.4321 method=reranked softmax=0.4998 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:50:02  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=low weak_signals=2 top1_softmax=0.500 margin=0.000 dense_top1=0.215 agreement=True
+2026-04-09T20:50:02  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 0 final candidates
+2026-04-09T20:50:02  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: no hits
+2026-04-09T20:50:02  INFO      medvqa.agents.knowledge_retriever  Advanced RAG returned 0 similar cases for this question; proceeding without RAG context
+2026-04-09T20:50:05  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=0  duration=3576ms
+2026-04-09T20:50:05  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['A liver hypodensity is a region of lower attenuation than normal liver parenchyma on CT.', 'Simple hepatic cysts commonly appear as well-defined hypodense lesions.', 'Focal hypodense liver lesions may also represent hemangiomas, metastases, abscesses, or focal fat.', 'Assessment depends on whether the lesion is focal, its density, enhancement pattern, and margins.']
+2026-04-09T20:50:05  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On contrast-enhanced CT of the upper abdomen, the liver is usually a fairly homogeneous solid organ; a hypodensity refers to an area that appears darker than the surrounding liver tissue. Small focal 
+2026-04-09T20:50:05  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=0  duration=3606ms
+2026-04-09T20:50:06  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=True
+2026-04-09T20:50:06  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='does the liver contain at least one hypodensity?'  is_retry=True  question_type=presence_absence  yes_no=True
+2026-04-09T20:50:06  INFO      medvqa.agents.reasoning_agent  Retry context  prev_status=unsupported  prev_confidence=Low  fallback=flag_for_review
+2026-04-09T20:50:06  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=0
+2026-04-09T20:50:06  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=presence_absence
+2026-04-09T20:50:09  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='yes'  confidence=medium  duration=2353ms
+2026-04-09T20:50:09  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the target structure: the liver on the left side of the axial upper abdominal CT.', 'Check for focal areas darker than the surrounding liver parenchyma.', 'The image analysis explicitly notes a round low-attenuation lesion in the liver.', 'A discrete low-attenuation lesion corresponds to a hepatic hypodensity.']
+2026-04-09T20:50:09  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial contrast-enhanced CT of the upper abdomen', 'Round low-attenuation lesion in the liver', 'Several low-attenuation round lesions visible within the liver']
+2026-04-09T20:50:09  DEBUG     medvqa.agents.reasoning_agent  Limitations: This is based on the provided image analysis rather than direct pixel-level review, and the exact lesion characterization cannot be confirmed from a single slice.
+2026-04-09T20:50:09  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='yes'  confidence=medium  duration=2386ms
+2026-04-09T20:50:10  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:50:10  INFO      medvqa.agents.verification_agent  Verifying answer='yes'  question='does the liver contain at least one hypodensity?'  question_type=presence_absence
+2026-04-09T20:50:11  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1672ms
+2026-04-09T20:50:11  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-09T20:50:11  DEBUG     medvqa.agents.verification_agent  Verification notes: The question asks whether the liver contains at least one hypodensity. The visual analysis explicitly notes several low-attenuation round lesions within the liver, which supports a yes answer. The response is in the correct yes/no format and is consistent with the image summary.
+2026-04-09T20:50:11  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1705ms
+2026-04-09T20:50:11  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-09T20:50:11  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-09T20:50:11  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T20:50:11  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='yes'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=37554ms
+2026-04-09T20:50:11  INFO      medvqa.agents.orchestrator  Pipeline attempt 2 result  answer='yes'  verification=verified  confidence=High
+2026-04-09T20:50:11  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=4  confidence_rank=3  high_failures=0  review=0
+2026-04-09T20:50:11  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=1  confidence_rank=1  high_failures=1  review=1
+2026-04-09T20:50:11  INFO      medvqa.agents.orchestrator  Pipeline RETRY winner: attempt 2 (higher score)
+2026-04-09T20:50:11  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='yes'  retries=1  total_duration=37561ms ===
+2026-04-09T20:50:11  INFO      medvqa.routes.dataset  Sample 2141 analysis complete  baseline=1756ms  workflow=5814ms  agentic=37565ms  total=37565ms
+2026-04-09T20:50:11  INFO      medvqa.routes.dataset  Sample 2141 answers  baseline='Yes'  workflow='Yes'  agentic='yes'  ground_truth='yes'

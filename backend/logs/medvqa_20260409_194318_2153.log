@@ -1,0 +1,107 @@
+2026-04-09T20:47:52  INFO      medvqa.routes.dataset  Cache MISS for sample 2153  question='what are the hyperdense lesions noted at the edges of the aorta?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:47:52  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=168589 bytes  question='what are the hyperdense lesions noted at the edges of the aorta?'
+2026-04-09T20:47:52  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what are the hyperdense lesions noted at the edges of the aorta?'  mime_type=image/png  size=168589 bytes ===
+2026-04-09T20:47:52  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:47:52  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=168589 bytes)
+2026-04-09T20:47:53  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:47:53  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=168589 bytes)
+2026-04-09T20:47:53  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "The hyperdense lesions at the edges of the aorta are atherosclerotic calcifications (calcified plaques).",
+  "explanation": "This is an axial CT image of the abdomen. The bright hyperdense foci adjacent to the aortic wall represent vascular wall calcification from atherosclerosis.",
+  "confidence": "high"
+}
+2026-04-09T20:47:53  INFO      medvqa.agents.baseline  Baseline done  answer='The hyperdense lesions at the edges of the aorta are atherosclerotic calcificati'  confidence=high  duration=1570ms
+2026-04-09T20:47:54  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=4  duration=2260ms
+2026-04-09T20:47:54  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the upper abdomen showing solid organs, major vessels, bowel loops, and the lumbar spine. There is oral/contrast material seen within bowel, and the image includes both kidneys and surrounding retroperitoneal structures.
+2026-04-09T20:47:54  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Prominent bowel gas and stool/contents within bowel loops', 'Bilateral renal parenchyma is visible', 'Atherosclerotic calcification is seen in the abdominal aorta', 'No obvious large free air or large fluid collection is visible on this single slice']
+2026-04-09T20:47:54  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what are the hyperdense lesions noted at the edges of the aorta?'
+2026-04-09T20:47:54  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:47:55  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=True  clarity=ambiguous  duration=1330ms
+2026-04-09T20:47:55  DEBUG     medvqa.agents.question_analyzer  Target entity: hyperdense lesions at the edges of the aorta  Expected format: short_phrase  Rephrased: What are the hyperdense lesions seen along the edges of the aorta?
+2026-04-09T20:47:55  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what are the hyperdense lesions noted at the edges of the aorta?'  modality=CT  body_region=abdomen  question_type=abnormality_description
+2026-04-09T20:47:55  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T20:47:55  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-09T20:47:55  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Prominent bowel gas and stool/contents within bowel loops; Bilateral renal paren'  confidence=medium  question_type=abnormality_description  duration=3649ms
+2026-04-09T20:47:55  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2696ms
+2026-04-09T20:47:55  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the abdomen showing upper abdominal solid organs and bowel loops. Intravenous contrast is present within vascular and renal structures, with a single slice through the mid-abdomen. Image quality is adequate for basic anatomical assessment.
+2026-04-09T20:47:55  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Contrast opacification is visible in the abdominal vessels and renal collecting systems', 'Multiple bowel loops with intraluminal gas are seen', 'No obvious acute abnormality can be confidently identified on this single image']
+2026-04-09T20:47:55  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2723ms
+2026-04-09T20:47:56  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what are the hyperdense lesions noted at the edges of the aorta?'
+2026-04-09T20:47:56  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what are the hyperdense lesions noted at the edges of the aorta?'
+2026-04-09T20:47:56  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:47:58  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  clarity=ambiguous  duration=1349ms
+2026-04-09T20:47:58  DEBUG     medvqa.agents.question_analyzer  Target entity: hyperdense lesions at the edges of the aorta  Expected format: short_phrase  Rephrased: What are the hyperdense structures seen adjacent to the edges of the aorta on this abdominal CT image?
+2026-04-09T20:47:58  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=anatomy_identification  duration=1378ms
+2026-04-09T20:47:59  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:47:59  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=abdomen
+2026-04-09T20:48:01  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=2096ms
+2026-04-09T20:48:01  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic anatomy-recognition task on a clean but context-limited abdominal CT slice, with moderate complexity from overlapping organs and the need to distinguish normal structures rather than obvious pathology.
+2026-04-09T20:48:01  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=2156ms
+2026-04-09T20:48:02  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T20:48:02  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='what are the hyperdense lesions noted at the edges of the aorta?'  modality=CT  body_region=abdomen  question_type=anatomy_identification  target_entity=hyperdense lesions at the edges of the aorta  advanced_rag=True
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='normal' from notable_findings
+2026-04-09T20:48:02  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=what are the hyperdense lesions noted at the edges of the aorta? | modality=CT | body_region=abdomen | finding=normal | rerank=mandatory
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag  Using original question as query (no LLM rewrite)
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen': 209 matches
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 170 matches
+2026-04-09T20:48:02  INFO      medvqa.agents.advanced_rag  Skipping finding_category filter: would reduce candidates to zero
+2026-04-09T20:48:02  INFO      medvqa.agents.advanced_rag  Metadata filter result: 2 candidates (modality(33) + body_region(209))
+2026-04-09T20:48:02  INFO      medvqa.agents.advanced_rag  Metadata filter: 2 candidates retained
+2026-04-09T20:48:02  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 2 candidates
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 2/2
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag    1. id=147 score=0.4722 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag    2. id=1403 score=0.4066 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:48:02  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 2 candidates
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 2/2
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0000 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.0000 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=2 sparse=2
+2026-04-09T20:48:02  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 2 unique candidates
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 2/2
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag    1. id=147 score=0.0325 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag    2. id=1403 score=0.0325 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:48:02  INFO      medvqa.agents.advanced_rag  Reranking 2 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-09T20:48:02  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 2 candidates...
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 2/2
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag    1. id=147 score=-11.0910 method=reranked softmax=0.5626 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag    2. id=1403 score=-11.3428 method=reranked softmax=0.4374 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:48:02  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=high weak_signals=0 top1_softmax=0.563 margin=0.125 dense_top1=0.472 agreement=True
+2026-04-09T20:48:02  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 2 final candidates
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 2/2
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag    1. id=147 score=-11.0910 method=reranked softmax=0.5626 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:48:02  DEBUG     medvqa.agents.advanced_rag    2. id=1403 score=-11.3428 method=reranked softmax=0.4374 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:48:02  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 2 similar cases
+2026-04-09T20:48:06  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=2  duration=4270ms
+2026-04-09T20:48:06  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The abdominal aorta lies in the retroperitoneum, typically left of midline, anterior to the vertebral body.', 'Hyperdense material near the aortic margin on CT is often due to calcification, though contrast, metallic artifacts, or calcified nodes can also appear hyperdense.', 'Periaortic lymph nodes are usually soft tissue density unless pathologically enlarged or calcified.', 'Aortic wall calcification tends to track along the contour of the vessel rather than form discrete separate masses.']
+2026-04-09T20:48:06  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On abdominal CT, the structures immediately adjacent to the aorta are usually retroperitoneal tissues such as lymph nodes, small vessels, the pancreas, or the adjacent bowel depending on slice level. 
+2026-04-09T20:48:06  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=2  duration=4300ms
+2026-04-09T20:48:07  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:48:07  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what are the hyperdense lesions noted at the edges of the aorta?'  is_retry=False  question_type=anatomy_identification  yes_no=False
+2026-04-09T20:48:07  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=2
+2026-04-09T20:48:10  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Likely aortic wall calcifications'  confidence=medium  duration=2670ms
+2026-04-09T20:48:10  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the target structure as the abdominal aorta on an axial CT slice.', 'Considered what hyperdense material along the aortic edge typically represents on CT.', 'Noted that the finding is at the vessel margins rather than as a separate retroperitoneal soft tissue mass.', 'Selected the most likely explanation: calcified aortic wall/atherosclerotic plaque.']
+2026-04-09T20:48:10  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial abdominal CT shows the aorta in the retroperitoneum near the vertebral body', 'Hyperdense material at the aortic margin on CT is commonly calcification', 'No obvious acute abnormality or discrete adjacent mass was identified in the image analysis', 'Supporting knowledge that aortic wall calcification tracks along the vessel contour']
+2026-04-09T20:48:10  DEBUG     medvqa.agents.reasoning_agent  Limitations: This is based on a single CT slice and the image analysis does not explicitly confirm calcification; small calcified lymph nodes or artifact cannot be fully excluded.
+2026-04-09T20:48:10  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Likely aortic wall calcifications'  confidence=medium  duration=2699ms
+2026-04-09T20:48:13  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:48:13  INFO      medvqa.agents.verification_agent  Verifying answer='Likely aortic wall calcifications'  question='what are the hyperdense lesions noted at the edges of the aorta?'  question_type=anatomy_identification
+2026-04-09T20:48:15  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=4/5  duration=2354ms
+2026-04-09T20:48:15  WARNING   medvqa.agents.verification_agent  Verification issues: ['The answer is plausible but somewhat inferential; the image summary does not explicitly confirm calcification at the aortic wall.', "The wording 'Likely' is appropriate, but the explanation may overstate certainty by implying the lesions are most commonly calcified plaque without direct image confirmation."]
+2026-04-09T20:48:15  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T20:48:15  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is consistent with a CT abdomen finding of hyperdense foci near the aorta and is formatted appropriately for a short anatomy-identification answer. However, the evidence provided is limited to a single slice and does not definitively establish the lesions as aortic wall calcifications, so the conclusion should remain tentative.
+2026-04-09T20:48:15  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2395ms
+2026-04-09T20:48:15  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-09T20:48:16  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T20:48:16  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-09T20:48:16  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T20:48:16  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Likely aortic wall calcifications'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=23926ms
+2026-04-09T20:48:16  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Likely aortic wall calcifications'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-09T20:48:16  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:48:16  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:48:16  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Likely aortic wall calcifications'  retries=0  total_duration=23931ms ===
+2026-04-09T20:48:16  INFO      medvqa.routes.dataset  Sample 2153 analysis complete  baseline=1573ms  workflow=3651ms  agentic=23932ms  total=23941ms
+2026-04-09T20:48:16  INFO      medvqa.routes.dataset  Sample 2153 answers  baseline='The hyperdense lesions at the edges of the aorta are atheros'  workflow='Prominent bowel gas and stool/contents within bowel loops; B'  agentic='Likely aortic wall calcifications'  ground_truth='calcified atherosclerosis'

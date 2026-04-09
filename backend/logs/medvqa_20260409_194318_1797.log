@@ -1,0 +1,108 @@
+2026-04-09T20:07:36  INFO      medvqa.routes.dataset  Cache MISS for sample 1797  question='where are the kidney?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:07:36  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=310292 bytes  question='where are the kidney?'
+2026-04-09T20:07:36  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='where are the kidney?'  mime_type=image/png  size=310292 bytes ===
+2026-04-09T20:07:36  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:07:36  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=310292 bytes)
+2026-04-09T20:07:37  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:07:37  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=310292 bytes)
+2026-04-09T20:07:38  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "The kidneys are not clearly visible in this slice of the CT scan.",
+  "explanation": "This is an axial abdominal CT image. The slice appears to be at the upper abdomen level, where the kidneys are only partially included or not seen clearly.",
+  "confidence": "medium"
+}
+2026-04-09T20:07:38  INFO      medvqa.agents.baseline  Baseline done  answer='The kidneys are not clearly visible in this slice of the CT scan.'  confidence=medium  duration=1894ms
+2026-04-09T20:07:38  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2152ms
+2026-04-09T20:07:38  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver, spleen, stomach, pancreas region, and adjacent bowel loops are visible along with the major vessels and posterior spine.
+2026-04-09T20:07:38  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Contrast opacification of major abdominal vessels', 'Fluid- or gas-containing bowel loops visible', 'No gross acute abnormality can be reliably assessed from this single slice']
+2026-04-09T20:07:38  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where are the kidney?'
+2026-04-09T20:07:38  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:07:41  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=3985ms
+2026-04-09T20:07:41  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The solid organs and major vessels are visible along with gas-filled bowel loops and surrounding abdominal structures.
+2026-04-09T20:07:41  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Single axial upper abdominal slice with intravenous contrast enhancement', 'No obvious acute abnormality can be reliably assessed from this single image alone', 'Small amounts of intraluminal gas are visible in the stomach and bowel']
+2026-04-09T20:07:41  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=4021ms
+2026-04-09T20:07:41  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=ambiguous  duration=2970ms
+2026-04-09T20:07:41  DEBUG     medvqa.agents.question_analyzer  Target entity: kidneys  Expected format: short_phrase  Rephrased: Where are the kidneys located in this CT image?
+2026-04-09T20:07:41  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='where are the kidney?'  modality=CT  body_region=abdomen  question_type=location
+2026-04-09T20:07:41  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['kidneys']
+2026-04-09T20:07:41  DEBUG     medvqa.agents.workflow_baseline  Branch taken: location
+2026-04-09T20:07:41  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='abdomen'  confidence=medium  question_type=location  duration=5181ms
+2026-04-09T20:07:42  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='where are the kidney?'
+2026-04-09T20:07:42  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where are the kidney?'
+2026-04-09T20:07:42  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:07:43  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=ambiguous  duration=1207ms
+2026-04-09T20:07:43  DEBUG     medvqa.agents.question_analyzer  Target entity: kidneys  Expected format: short_phrase  Rephrased: Where are the kidneys located in this CT image?
+2026-04-09T20:07:43  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=1258ms
+2026-04-09T20:07:44  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:07:44  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=False  modality=CT  region=abdomen
+2026-04-09T20:07:45  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1571ms
+2026-04-09T20:07:45  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic search case on a complex abdominal CT with moderate overlap and an ambiguous spatial question, making the answer potentially present but not instantly obvious.
+2026-04-09T20:07:45  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1599ms
+2026-04-09T20:07:46  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T20:07:46  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='where are the kidney?'  modality=CT  body_region=abdomen  question_type=location  target_entity=kidneys  advanced_rag=True
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='normal' from notable_findings
+2026-04-09T20:07:46  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=where are the kidney? | modality=CT | body_region=abdomen | finding=normal | rerank=mandatory
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag  Using original question as query (no LLM rewrite)
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen': 209 matches
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 170 matches
+2026-04-09T20:07:46  INFO      medvqa.agents.advanced_rag  Skipping finding_category filter: would reduce candidates to zero
+2026-04-09T20:07:46  INFO      medvqa.agents.advanced_rag  Metadata filter result: 2 candidates (modality(33) + body_region(209))
+2026-04-09T20:07:46  INFO      medvqa.agents.advanced_rag  Metadata filter: 2 candidates retained
+2026-04-09T20:07:46  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 2 candidates
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 2/2
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.2709 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.1355 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:07:46  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 2 candidates
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 2/2
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0000 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.0000 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=2 sparse=2
+2026-04-09T20:07:46  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 2 unique candidates
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 2/2
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=0.0323 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:07:46  INFO      medvqa.agents.advanced_rag  Reranking 2 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-09T20:07:46  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 2 candidates...
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 2/2
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=-3.9015 method=reranked softmax=0.9994 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=-11.3503 method=reranked softmax=0.0006 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:07:46  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=medium weak_signals=1 top1_softmax=0.999 margin=0.999 dense_top1=0.271 agreement=True
+2026-04-09T20:07:46  WARNING   medvqa.agents.advanced_rag  Retrieval confidence is medium; returning results
+2026-04-09T20:07:46  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 2 final candidates
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 2/2
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag    1. id=1403 score=-3.9015 method=reranked softmax=0.9994 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T20:07:46  DEBUG     medvqa.agents.advanced_rag    2. id=147 score=-11.3503 method=reranked softmax=0.0006 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T20:07:46  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 2 similar cases
+2026-04-09T20:07:50  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=2  duration=3314ms
+2026-04-09T20:07:50  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The kidneys sit retroperitoneally, one on the right and one on the left, adjacent to the vertebral bodies.', 'The right kidney is usually slightly lower than the left because of the liver.', 'On CT, kidneys are bean-shaped soft tissue structures with a central renal sinus and collecting system.', 'They are located posterior to many upper abdominal organs and anterior to the psoas muscles.']
+2026-04-09T20:07:50  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On abdominal CT, the kidneys are typically retroperitoneal organs located in the upper posterior abdomen on either side of the spine, usually extending from about T12 to L3. They are often seen poster
+2026-04-09T20:07:50  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=2  duration=3350ms
+2026-04-09T20:07:51  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:07:51  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='where are the kidney?'  is_retry=False  question_type=location  yes_no=False
+2026-04-09T20:07:51  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=2
+2026-04-09T20:07:53  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='In the upper posterior abdomen, on either side of the spine.'  confidence=medium  duration=2501ms
+2026-04-09T20:07:53  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the modality as axial abdominal CT.', 'Used standard anatomic knowledge that kidneys lie retroperitoneally in the upper posterior abdomen.', 'Located them relative to the spine and other upper abdominal organs.']
+2026-04-09T20:07:53  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial contrast-enhanced CT of the upper abdomen', 'Visible vertebral body and abdominal aorta', 'Typical kidney anatomy: retroperitoneal organs adjacent to the vertebral bodies', 'Kidneys usually lie posterior to upper abdominal organs and anterior to the psoas muscles']
+2026-04-09T20:07:53  DEBUG     medvqa.agents.reasoning_agent  Limitations: This single axial slice does not clearly show both kidneys, so the answer is based on expected anatomic location rather than direct visualization.
+2026-04-09T20:07:53  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='In the upper posterior abdomen, on either side of the spine.'  confidence=medium  duration=2534ms
+2026-04-09T20:07:55  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:07:55  INFO      medvqa.agents.verification_agent  Verifying answer='In the upper posterior abdomen, on either side of the spine.'  question='where are the kidney?'  question_type=location
+2026-04-09T20:07:58  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=4/5  duration=2230ms
+2026-04-09T20:07:58  WARNING   medvqa.agents.verification_agent  Verification issues: ['The explanation describes kidney anatomy and typical location, but the kidneys are not actually visible in the provided CT image.', 'The answer is anatomically correct in general, but it is not directly supported by the visual evidence in this specific image.']
+2026-04-09T20:07:58  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T20:07:58  DEBUG     medvqa.agents.verification_agent  Verification notes: The response correctly answers the location question in a concise phrase and matches the expected format. However, the explanation relies on general anatomical knowledge rather than visible evidence from the image, so it should be treated as only partially supported by the image.
+2026-04-09T20:07:58  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2262ms
+2026-04-09T20:07:58  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-09T20:07:58  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T20:07:58  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-09T20:07:58  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-09T20:07:58  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='In the upper posterior abdomen, on either side of the spine.'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=low  duration=21978ms
+2026-04-09T20:07:58  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='In the upper posterior abdomen, on either side of the spine.'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-09T20:07:58  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:07:58  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:07:58  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='In the upper posterior abdomen, on either side of the spine.'  retries=0  total_duration=21983ms ===
+2026-04-09T20:07:58  INFO      medvqa.routes.dataset  Sample 1797 analysis complete  baseline=1899ms  workflow=5184ms  agentic=21988ms  total=21990ms
+2026-04-09T20:07:58  INFO      medvqa.routes.dataset  Sample 1797 answers  baseline='The kidneys are not clearly visible in this slice of the CT '  workflow='abdomen'  agentic='In the upper posterior abdomen, on either side of the spine.'  ground_truth='not seen here'

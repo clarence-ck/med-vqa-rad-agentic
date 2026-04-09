@@ -1,0 +1,148 @@
+2026-04-09T20:41:25  INFO      medvqa.routes.dataset  Cache MISS for sample 2055  question='which ventricle is the mass located in?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:41:25  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=343105 bytes  question='which ventricle is the mass located in?'
+2026-04-09T20:41:25  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='which ventricle is the mass located in?'  mime_type=image/png  size=343105 bytes ===
+2026-04-09T20:41:25  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:41:25  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=343105 bytes)
+2026-04-09T20:41:26  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:41:26  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=343105 bytes)
+2026-04-09T20:41:27  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=head / brain  quality=good  findings=3  duration=2475ms
+2026-04-09T20:41:27  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial MRI image of the head at the level of the posterior fossa and orbits. The cerebellum and brainstem are visible inferiorly, with the orbits and nasal cavity seen anteriorly and the paranasal sinuses laterally.
+2026-04-09T20:41:27  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Axial posterior fossa MRI slice', 'Symmetric appearance of the cerebellar hemispheres and brainstem on this single image', 'Paranasal sinus and orbital structures are partially visualized']
+2026-04-09T20:41:27  INFO      medvqa.agents.question_analyzer  Analyzing question: 'which ventricle is the mass located in?'
+2026-04-09T20:41:27  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:41:29  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=head / brain  quality=good  findings=3  duration=2700ms
+2026-04-09T20:41:29  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial MRI image of the head through the posterior fossa level. The cerebellum and brainstem are prominently visible, along with the orbits and nasal cavity anteriorly. There is a conspicuous bright signal region in the posterior fossa/cerebellar area on this slice.
+2026-04-09T20:41:29  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Prominent hyperintense area in the posterior fossa involving the cerebellar region on this slice', 'Symmetric appearance of the orbits and facial structures on this image', 'No obvious gross midline shift visible on this single slice']
+2026-04-09T20:41:29  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=head / brain  duration=2760ms
+2026-04-09T20:41:29  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=True  clarity=ambiguous  duration=1404ms
+2026-04-09T20:41:29  DEBUG     medvqa.agents.question_analyzer  Target entity: ventricle containing the mass  Expected format: short_phrase  Rephrased: Which cerebral ventricle is the mass located in?
+2026-04-09T20:41:29  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='which ventricle is the mass located in?'  modality=MRI  body_region=head / brain  question_type=location
+2026-04-09T20:41:29  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T20:41:29  DEBUG     medvqa.agents.workflow_baseline  Branch taken: location
+2026-04-09T20:41:29  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='head / brain'  confidence=medium  question_type=location  duration=3975ms
+2026-04-09T20:41:29  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Fourth ventricle",
+  "explanation": "This is an axial brain MRI showing a mass centered in the posterior fossa at the midline, where the fourth ventricle is located. The lesion appears to arise from and expand the fourth ventricle region.",
+  "confidence": "high"
+}
+2026-04-09T20:41:29  INFO      medvqa.agents.baseline  Baseline done  answer='Fourth ventricle'  confidence=high  duration=4554ms
+2026-04-09T20:41:29  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='which ventricle is the mass located in?'
+2026-04-09T20:41:29  INFO      medvqa.agents.question_analyzer  Analyzing question: 'which ventricle is the mass located in?'
+2026-04-09T20:41:29  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:41:31  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=ambiguous  duration=1218ms
+2026-04-09T20:41:31  DEBUG     medvqa.agents.question_analyzer  Target entity: mass  Expected format: short_phrase  Rephrased: In which ventricle is the mass located?
+2026-04-09T20:41:31  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=1263ms
+2026-04-09T20:41:32  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:41:32  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=False  modality=MRI  region=head / brain
+2026-04-09T20:41:33  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1541ms
+2026-04-09T20:41:33  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a direct spatial localization task on a clean, high-contrast MRI slice with an obvious abnormality, so no retrieval or enhanced verification is needed.
+2026-04-09T20:41:33  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1613ms
+2026-04-09T20:41:34  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:41:34  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='which ventricle is the mass located in?'  is_retry=False  question_type=location  yes_no=False
+2026-04-09T20:41:34  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T20:41:37  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Fourth ventricle'  confidence=medium  duration=2576ms
+2026-04-09T20:41:37  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the modality and slice level as axial MRI through the posterior fossa.', 'Noted the hyperintense mass is described in the posterior fossa/cerebellar region.', 'Mapped the posterior fossa midline ventricular structure at this level to the fourth ventricle.', 'Selected the most likely ventricle location based on the available image summary.']
+2026-04-09T20:41:37  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial MRI through the posterior fossa level', 'Prominent hyperintense area in the posterior fossa involving the cerebellar region', 'Visible brainstem and cerebellum at the level of the fourth ventricle', 'No obvious gross midline shift on the slice']
+2026-04-09T20:41:37  DEBUG     medvqa.agents.reasoning_agent  Limitations: The ventricular boundaries are not directly described in the provided image analysis, so the location is inferred from the posterior fossa anatomy and slice level.
+2026-04-09T20:41:37  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Fourth ventricle'  confidence=medium  duration=2636ms
+2026-04-09T20:41:40  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:41:40  INFO      medvqa.agents.verification_agent  Verifying answer='Fourth ventricle'  question='which ventricle is the mass located in?'  question_type=location
+2026-04-09T20:41:44  INFO      medvqa.agents.verification_agent  Verification done  status=low_confidence  confidence=Low  checks=2/5  duration=4330ms
+2026-04-09T20:41:44  WARNING   medvqa.agents.verification_agent  Verification issues: ['The image analysis only supports a posterior fossa/cerebellar-brainstem level, not definite localization within the fourth ventricle.', 'The explanation infers ventricle involvement from slice level rather than direct visualization of ventricle boundaries.', 'The answer is too specific/strong given the available evidence and may be incorrect if the mass is in cerebellum, brainstem, or adjacent posterior fossa structures rather than the ventricle.']
+2026-04-09T20:41:44  INFO      medvqa.agents.verification_agent  Fallback recommendation: flag_for_review
+2026-04-09T20:41:44  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct short-location format, but the evidence does not clearly establish that the mass is in the fourth ventricle. The visual summary only confirms a posterior fossa hyperintense lesion near the cerebellum/brainstem, so the conclusion is not well grounded.
+2026-04-09T20:41:44  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=low_confidence  confidence=Low  duration=4361ms
+2026-04-09T20:41:44  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'low_confidence']
+2026-04-09T20:41:44  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=True  fallback=flag_for_review  disclaimer=True
+2026-04-09T20:41:44  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=2/5
+2026-04-09T20:41:44  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=False
+2026-04-09T20:41:44  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Fourth ventricle'  verification=low_confidence  guardrail_flag=True  consistency=low  cross_modal=low  duration=19249ms
+2026-04-09T20:41:44  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Fourth ventricle'  verification=low_confidence  confidence=Low  flag_review=True
+2026-04-09T20:41:44  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=low_confidence  flag_review=True  high_severity=True  -> retry=True
+2026-04-09T20:41:44  INFO      medvqa.agents.orchestrator  Pipeline RETRY triggered  reason: verification_status=low_confidence; fallback=flag_for_review; flag_for_review=True
+2026-04-09T20:41:44  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=True)
+2026-04-09T20:41:46  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:41:46  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=343105 bytes)
+2026-04-09T20:41:49  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=head/brain  quality=good  findings=3  duration=2372ms
+2026-04-09T20:41:49  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial MRI image through the posterior fossa and skull base. The cerebellum, brainstem, and surrounding intracranial structures are visible, along with portions of the orbits and paranasal sinuses.
+2026-04-09T20:41:49  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Prominent hyperintense signal in the posterior fossa/brainstem region', 'Mass effect or distortion of the adjacent cerebellar structures is suggested', 'Visible paranasal sinuses and orbits without obvious acute bony abnormality on this single slice']
+2026-04-09T20:41:49  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=head/brain  duration=2405ms
+2026-04-09T20:41:49  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='which ventricle is the mass located in?'
+2026-04-09T20:41:50  INFO      medvqa.agents.question_analyzer  Analyzing question: 'which ventricle is the mass located in?'
+2026-04-09T20:41:50  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:41:51  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=ambiguous  duration=1217ms
+2026-04-09T20:41:51  DEBUG     medvqa.agents.question_analyzer  Target entity: mass  Expected format: short_phrase  Rephrased: In which ventricle is the mass located?
+2026-04-09T20:41:51  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=1246ms
+2026-04-09T20:41:52  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:41:52  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=False  modality=MRI  region=head/brain
+2026-04-09T20:41:53  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1588ms
+2026-04-09T20:41:53  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic spatial reasoning task on a moderately complex brain MRI where the answer is likely present but may depend on careful anatomic localization rather than an obvious conspicuous lesion.
+2026-04-09T20:41:53  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1616ms
+2026-04-09T20:41:55  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T20:41:55  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='which ventricle is the mass located in?'  modality=MRI  body_region=head/brain  question_type=location  target_entity=mass  advanced_rag=True
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='normal' from notable_findings
+2026-04-09T20:41:55  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=which ventricle is the mass located in? | modality=MRI | body_region=head/brain | finding=normal | rerank=mandatory
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag  Using original question as query (no LLM rewrite)
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='mri': 44 matches
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='head/brain': 158 matches
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 170 matches
+2026-04-09T20:41:55  INFO      medvqa.agents.advanced_rag  Skipping finding_category filter: would reduce candidates to zero
+2026-04-09T20:41:55  INFO      medvqa.agents.advanced_rag  Metadata filter result: 2 candidates (modality(44) + body_region(158))
+2026-04-09T20:41:55  INFO      medvqa.agents.advanced_rag  Metadata filter: 2 candidates retained
+2026-04-09T20:41:55  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 2 candidates
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 2/2
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag    1. id=1407 score=0.2980 | Q: which lobe of the brain demonstrates a hyper-intense signal in this t2 weighted mri image? | A: the left occipital lobe
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag    2. id=1399 score=0.2113 | Q: do we see diffuse cerebral edema in this mri? | A: no
+2026-04-09T20:41:55  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 2 candidates
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 2/2
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag    1. id=1407 score=-0.1157 | Q: which lobe of the brain demonstrates a hyper-intense signal in this t2 weighted mri image? | A: the left occipital lobe
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag    2. id=1399 score=-0.1289 | Q: do we see diffuse cerebral edema in this mri? | A: no
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=2 sparse=2
+2026-04-09T20:41:55  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 2 unique candidates
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 2/2
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag    1. id=1407 score=0.0328 method=hybrid_rrf | Q: which lobe of the brain demonstrates a hyper-intense signal in this t2 weighted mri image? | A: the left occipital lobe
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag    2. id=1399 score=0.0323 method=hybrid_rrf | Q: do we see diffuse cerebral edema in this mri? | A: no
+2026-04-09T20:41:55  INFO      medvqa.agents.advanced_rag  Reranking 2 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-09T20:41:55  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 2 candidates...
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 2/2
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag    1. id=1407 score=-11.2407 method=reranked softmax=0.5205 | Q: which lobe of the brain demonstrates a hyper-intense signal in this t2 weighted mri image? | A: the left occipital lobe
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag    2. id=1399 score=-11.3229 method=reranked softmax=0.4795 | Q: do we see diffuse cerebral edema in this mri? | A: no
+2026-04-09T20:41:55  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=low weak_signals=2 top1_softmax=0.521 margin=0.041 dense_top1=0.298 agreement=True
+2026-04-09T20:41:55  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 0 final candidates
+2026-04-09T20:41:55  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: no hits
+2026-04-09T20:41:55  INFO      medvqa.agents.knowledge_retriever  Advanced RAG returned 0 similar cases for this question; proceeding without RAG context
+2026-04-09T20:41:58  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=0  duration=3444ms
+2026-04-09T20:41:58  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The lateral ventricles are paired cavities in the cerebral hemispheres.', 'The third ventricle is a midline structure in the diencephalon.', 'The fourth ventricle lies between the brainstem and cerebellum.', 'Mass effect from a lesion can distort or displace adjacent ventricles, making precise localization important.', 'MRI is well suited for identifying whether a lesion is intraventricular, periventricular, or compressing a ventricle.']
+2026-04-09T20:41:58  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: To determine which ventricle a brain mass is located in on MRI, the key reference points are the midline ventricular system and nearby structures such as the cerebellum, brainstem, and cerebral hemisp
+2026-04-09T20:41:58  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=0  duration=3477ms
+2026-04-09T20:41:59  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=True
+2026-04-09T20:41:59  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='which ventricle is the mass located in?'  is_retry=True  question_type=location  yes_no=False
+2026-04-09T20:41:59  INFO      medvqa.agents.reasoning_agent  Retry context  prev_status=low_confidence  prev_confidence=Low  fallback=flag_for_review
+2026-04-09T20:41:59  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=0
+2026-04-09T20:42:02  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='fourth ventricle'  confidence=medium  duration=3606ms
+2026-04-09T20:42:02  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the MRI as an axial posterior fossa/skull base image.', 'Noted the prominent abnormal hyperintense signal in the posterior fossa/brainstem region with adjacent cerebellar distortion.', 'Mapped the anatomic location to the ventricular system, where the fourth ventricle is between the brainstem and cerebellum.']
+2026-04-09T20:42:02  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial MRI through the posterior fossa and skull base', 'Prominent hyperintense signal in the posterior fossa/brainstem region', 'Mass effect or distortion of adjacent cerebellar structures', 'Anatomy of the fourth ventricle lies between the brainstem and cerebellum']
+2026-04-09T20:42:02  DEBUG     medvqa.agents.reasoning_agent  Limitations: This is based on a single described slice and indirect anatomic localization; the ventricles are not clearly outlined, so exact intraventricular involvement cannot be confirmed with high certainty.
+2026-04-09T20:42:02  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='fourth ventricle'  confidence=medium  duration=3638ms
+2026-04-09T20:42:03  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:42:03  INFO      medvqa.agents.verification_agent  Verifying answer='fourth ventricle'  question='which ventricle is the mass located in?'  question_type=location
+2026-04-09T20:42:07  INFO      medvqa.agents.verification_agent  Verification done  status=low_confidence  confidence=Low  checks=3/5  duration=3583ms
+2026-04-09T20:42:07  WARNING   medvqa.agents.verification_agent  Verification issues: ['The explanation infers a specific ventricle location without direct visual evidence of the mass being in the fourth ventricle.', 'The image summary only confirms a posterior fossa/skull base MRI with brainstem and cerebellum visible; it does not establish the ventricle containing the mass.', 'The answer is overly specific for the available evidence.']
+2026-04-09T20:42:07  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T20:42:07  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct short-phrase format and does not contradict the provided image analysis, but the claim that the mass is in the fourth ventricle is not sufficiently supported by the available visual evidence. The explanation relies on anatomical inference rather than directly observed location.
+2026-04-09T20:42:07  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=low_confidence  confidence=Low  duration=3612ms
+2026-04-09T20:42:07  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['low_confidence']
+2026-04-09T20:42:07  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=True  fallback=add_disclaimer  disclaimer=True
+2026-04-09T20:42:07  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-09T20:42:07  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-09T20:42:07  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='fourth ventricle'  verification=low_confidence  guardrail_flag=True  consistency=low  cross_modal=low  duration=42130ms
+2026-04-09T20:42:07  INFO      medvqa.agents.orchestrator  Pipeline attempt 2 result  answer='fourth ventricle'  verification=low_confidence  confidence=Low
+2026-04-09T20:42:07  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=2  confidence_rank=1  high_failures=1  review=1
+2026-04-09T20:42:07  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=2  confidence_rank=1  high_failures=1  review=1
+2026-04-09T20:42:07  INFO      medvqa.agents.orchestrator  Pipeline RETRY winner: attempt 1 (kept original)
+2026-04-09T20:42:07  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Fourth ventricle'  retries=1  total_duration=42136ms ===
+2026-04-09T20:42:07  INFO      medvqa.routes.dataset  Sample 2055 analysis complete  baseline=4560ms  workflow=3978ms  agentic=42140ms  total=42142ms
+2026-04-09T20:42:07  INFO      medvqa.routes.dataset  Sample 2055 answers  baseline='Fourth ventricle'  workflow='head / brain'  agentic='Fourth ventricle'  ground_truth='4th ventricle'

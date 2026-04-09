@@ -1,0 +1,109 @@
+2026-04-09T20:01:31  INFO      medvqa.routes.dataset  Cache MISS for sample 1927  question='what structures are located near the hemorrhage shown?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:01:31  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=57525 bytes  question='what structures are located near the hemorrhage shown?'
+2026-04-09T20:01:31  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what structures are located near the hemorrhage shown?'  mime_type=image/png  size=57525 bytes ===
+2026-04-09T20:01:31  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:01:31  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=57525 bytes)
+2026-04-09T20:01:32  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:01:32  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=57525 bytes)
+2026-04-09T20:01:32  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "The hemorrhage is located near the midline brain structures, adjacent to the lateral ventricles and deep gray matter/white matter tracts.",
+  "explanation": "This is an axial brain MRI showing a central intracranial hemorrhagic focus. Nearby structures include the lateral ventricles and surrounding deep brain tissue.",
+  "confidence": "medium"
+}
+2026-04-09T20:01:32  INFO      medvqa.agents.baseline  Baseline done  answer='The hemorrhage is located near the midline brain structures, adjacent to the lat'  confidence=medium  duration=1508ms
+2026-04-09T20:01:33  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=fair  findings=3  duration=2258ms
+2026-04-09T20:01:33  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial brain MRI image showing intracranial anatomy. There is a focal irregular area of mixed signal intensity in the central brain, with surrounding parenchymal abnormality visible on this slice.
+2026-04-09T20:01:33  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Focal central intracranial lesion/abnormal signal focus', 'Adjacent surrounding signal abnormality in the brain parenchyma', 'No obvious skull fracture or extra-axial collection visible on this single image']
+2026-04-09T20:01:33  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what structures are located near the hemorrhage shown?'
+2026-04-09T20:01:33  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:01:33  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=fair  findings=3  duration=1869ms
+2026-04-09T20:01:33  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial brain MRI image showing the intracranial structures at the level of the lateral ventricles and deep brain. There is a prominent dark signal area near the midline with surrounding areas of abnormal signal in the brain parenchyma.
+2026-04-09T20:01:33  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Focal region of very low signal intensity near the midline', 'Surrounding heterogeneous parenchymal signal abnormality', 'Image is a single axial slice with limited anatomic coverage']
+2026-04-09T20:01:33  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain  duration=1896ms
+2026-04-09T20:01:34  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=clear  duration=1189ms
+2026-04-09T20:01:34  DEBUG     medvqa.agents.question_analyzer  Target entity: structures near the hemorrhage  Expected format: short_phrase  Rephrased: What anatomical structures are located near the hemorrhage shown in the image?
+2026-04-09T20:01:34  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what structures are located near the hemorrhage shown?'  modality=MRI  body_region=brain  question_type=location
+2026-04-09T20:01:34  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T20:01:34  DEBUG     medvqa.agents.workflow_baseline  Branch taken: location
+2026-04-09T20:01:34  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='brain'  confidence=medium  question_type=location  duration=3502ms
+2026-04-09T20:01:34  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what structures are located near the hemorrhage shown?'
+2026-04-09T20:01:34  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what structures are located near the hemorrhage shown?'
+2026-04-09T20:01:34  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:01:36  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=True  clarity=clear  duration=1254ms
+2026-04-09T20:01:36  DEBUG     medvqa.agents.question_analyzer  Target entity: structures near the hemorrhage  Expected format: short_phrase  Rephrased: What anatomical structures are adjacent to or near the hemorrhage shown in the image?
+2026-04-09T20:01:36  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=1283ms
+2026-04-09T20:01:37  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:01:37  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=True  modality=MRI  region=brain
+2026-04-09T20:01:38  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1600ms
+2026-04-09T20:01:38  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic localization task on a relatively clear brain MRI with conspicuous abnormal signal, but deep midline anatomy and lesion localization still warrant moderate caution rather than an easy direct read.
+2026-04-09T20:01:38  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1627ms
+2026-04-09T20:01:39  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T20:01:39  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='what structures are located near the hemorrhage shown?'  modality=MRI  body_region=brain  question_type=location  target_entity=structures near the hemorrhage  advanced_rag=True
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='normal' from notable_findings
+2026-04-09T20:01:39  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=what structures are located near the hemorrhage shown? | modality=MRI | body_region=brain | finding=normal | rerank=mandatory
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag  Using original question as query (no LLM rewrite)
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='mri': 44 matches
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='brain': no exact matches
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 170 matches
+2026-04-09T20:01:39  INFO      medvqa.agents.advanced_rag  Skipping finding_category filter: would reduce candidates to zero
+2026-04-09T20:01:39  INFO      medvqa.agents.advanced_rag  Metadata filter result: 44 candidates (modality(44))
+2026-04-09T20:01:39  INFO      medvqa.agents.advanced_rag  Metadata filter: 44 candidates retained
+2026-04-09T20:01:39  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 44 candidates
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/20
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag    1. id=1554 score=0.3842 | Q: what type of mri is shown in the above image? | A: t2 weighted
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag    2. id=1577 score=0.3802 | Q: what type of mri is the above image? | A: dwi
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag    3. id=1340 score=0.3710 | Q: what modality is shown? | A: flair mri
+2026-04-09T20:01:39  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 44 candidates
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/20
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag    1. id=1554 score=3.9198 | Q: what type of mri is shown in the above image? | A: t2 weighted
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag    2. id=1340 score=3.2810 | Q: what modality is shown? | A: flair mri
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag    3. id=1553 score=3.0753 | Q: what mri imaging sequence is shown above? | A: t2 weighted
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=20 sparse=20
+2026-04-09T20:01:39  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 20 unique candidates
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/20
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag    1. id=1554 score=0.0328 method=hybrid_rrf | Q: what type of mri is shown in the above image? | A: t2 weighted
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag    2. id=1340 score=0.0320 method=hybrid_rrf | Q: what modality is shown? | A: flair mri
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag    3. id=1553 score=0.0313 method=hybrid_rrf | Q: what mri imaging sequence is shown above? | A: t2 weighted
+2026-04-09T20:01:39  INFO      medvqa.agents.advanced_rag  Reranking 20 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-09T20:01:39  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 20 candidates...
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag    1. id=1261 score=-9.9247 method=reranked softmax=0.1597 | Q: is there evidence of midlight shift of structures on this mri? | A: yes
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag    2. id=1340 score=-10.5759 method=reranked softmax=0.0832 | Q: what modality is shown? | A: flair mri
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag    3. id=1554 score=-10.7477 method=reranked softmax=0.0701 | Q: what type of mri is shown in the above image? | A: t2 weighted
+2026-04-09T20:01:39  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=low weak_signals=3 top1_softmax=0.160 margin=0.076 dense_top1=0.384 agreement=False
+2026-04-09T20:01:39  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 0 final candidates
+2026-04-09T20:01:39  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: no hits
+2026-04-09T20:01:39  INFO      medvqa.agents.knowledge_retriever  Advanced RAG returned 0 similar cases for this question; proceeding without RAG context
+2026-04-09T20:01:43  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=0  duration=3442ms
+2026-04-09T20:01:43  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The cerebral hemispheres contain cortical gray matter and underlying white matter, which may lie adjacent to lobar hemorrhages.', 'Deep hemorrhages are often near the basal ganglia, thalamus, internal capsule, and lateral ventricles.', 'Infratentorial hemorrhages may be close to the brainstem and cerebellum.', 'MRI can show associated edema, mass effect, and blood-product signal changes around the hemorrhage.']
+2026-04-09T20:01:43  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: In brain MRI, the structures near a hemorrhage depend on its location, but common nearby anatomy includes cerebral cortex and subcortical white matter, deep gray nuclei, the ventricles, and the brains
+2026-04-09T20:01:43  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=0  duration=3482ms
+2026-04-09T20:01:44  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:01:44  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what structures are located near the hemorrhage shown?'  is_retry=False  question_type=location  yes_no=False
+2026-04-09T20:01:44  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=0
+2026-04-09T20:01:46  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Adjacent deep brain structures near the lateral ventricles'  confidence=medium  duration=2255ms
+2026-04-09T20:01:46  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the lesion as a hemorrhage based on the focal very low-signal area.', 'Used the slice level described in the image analysis (lateral ventricles and deep brain).', 'Matched nearby anatomy visible on this slice: deep gray matter, white matter, and lateral ventricles.']
+2026-04-09T20:01:46  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Focal region of very low signal intensity near the midline', 'Axial brain MRI at the level of the lateral ventricles and deep brain', 'Visible structures include cerebral hemispheres, lateral ventricles, deep gray matter, and white matter', 'Supporting knowledge that deep hemorrhages are often near the basal ganglia/thalamus and lateral ventricles']
+2026-04-09T20:01:46  DEBUG     medvqa.agents.reasoning_agent  Limitations: Single axial slice with limited anatomic coverage; exact named adjacent structure cannot be determined with certainty from the provided summary alone.
+2026-04-09T20:01:46  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Adjacent deep brain structures near the lateral ventricles'  confidence=medium  duration=2286ms
+2026-04-09T20:01:47  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:01:47  INFO      medvqa.agents.verification_agent  Verifying answer='Adjacent deep brain structures near the lateral ventricles'  question='what structures are located near the hemorrhage shown?'  question_type=location
+2026-04-09T20:01:49  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=4/5  duration=2107ms
+2026-04-09T20:01:49  WARNING   medvqa.agents.verification_agent  Verification issues: ['The answer is somewhat vague and does not name specific nearby structures despite the image analysis indicating the lateral ventricles, deep gray matter, and white matter are visible.', "The phrase 'adjacent deep brain structures' is plausible but slightly stronger than the directly supported visual evidence."]
+2026-04-09T20:01:49  INFO      medvqa.agents.verification_agent  Fallback recommendation: rephrase_answer
+2026-04-09T20:01:49  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is consistent with the axial brain MRI at the level of the lateral ventricles and deep brain, but it generalizes the location rather than identifying specific nearby structures. It is acceptable as a short location phrase, though a more precise answer would be better grounded.
+2026-04-09T20:01:49  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2140ms
+2026-04-09T20:01:49  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-09T20:01:49  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=rephrase_answer  disclaimer=False
+2026-04-09T20:01:49  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-09T20:01:49  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T20:01:49  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Adjacent deep brain structures near the lateral ventricles'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=18332ms
+2026-04-09T20:01:49  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Adjacent deep brain structures near the lateral ventricles'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-09T20:01:49  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:01:49  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:01:49  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Adjacent deep brain structures near the lateral ventricles'  retries=0  total_duration=18337ms ===
+2026-04-09T20:01:49  INFO      medvqa.routes.dataset  Sample 1927 analysis complete  baseline=1512ms  workflow=3504ms  agentic=18338ms  total=18345ms
+2026-04-09T20:01:49  INFO      medvqa.routes.dataset  Sample 1927 answers  baseline='The hemorrhage is located near the midline brain structures,'  workflow='brain'  agentic='Adjacent deep brain structures near the lateral ventricles'  ground_truth='left thalamus and basal ganglia'

@@ -1,0 +1,67 @@
+2026-04-09T20:51:12  INFO      medvqa.routes.dataset  Cache MISS for sample 1973  question='does the liver show an enhancing mass or lesion?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T20:51:12  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=284647 bytes  question='does the liver show an enhancing mass or lesion?'
+2026-04-09T20:51:12  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='does the liver show an enhancing mass or lesion?'  mime_type=image/png  size=284647 bytes ===
+2026-04-09T20:51:12  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T20:51:12  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=284647 bytes)
+2026-04-09T20:51:13  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T20:51:13  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=284647 bytes)
+2026-04-09T20:51:14  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No, the liver does not show an obvious enhancing mass or lesion.",
+  "explanation": "This is an axial contrast-enhanced CT image of the abdomen. The visible liver parenchyma appears homogeneous without a focal enhancing lesion on this slice.",
+  "confidence": "medium"
+}
+2026-04-09T20:51:14  INFO      medvqa.agents.baseline  Baseline done  answer='No, the liver does not show an obvious enhancing mass or lesion.'  confidence=medium  duration=1595ms
+2026-04-09T20:51:15  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2323ms
+2026-04-09T20:51:15  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver, stomach, kidneys, major vessels, and surrounding soft tissues are visible in a single cross-sectional slice.
+2026-04-09T20:51:15  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Contrast opacification is present in the abdominal vessels and kidneys.', 'No obvious large acute abnormality is apparent on this single image.', 'Small gas/fluid contents are visible within the stomach and bowel.']
+2026-04-09T20:51:15  INFO      medvqa.agents.question_analyzer  Analyzing question: 'does the liver show an enhancing mass or lesion?'
+2026-04-09T20:51:15  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:51:16  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1279ms
+2026-04-09T20:51:16  DEBUG     medvqa.agents.question_analyzer  Target entity: enhancing mass or lesion in the liver  Expected format: yes_no  Rephrased: Does the liver show an enhancing mass or lesion?
+2026-04-09T20:51:16  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='does the liver show an enhancing mass or lesion?'  modality=CT  body_region=abdomen  question_type=presence_absence
+2026-04-09T20:51:16  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['liver']
+2026-04-09T20:51:16  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-09T20:51:16  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=high  question_type=presence_absence  duration=3665ms
+2026-04-09T20:51:16  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=3087ms
+2026-04-09T20:51:16  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver, stomach, bowel, kidneys, major vessels, and posterior spinal structures are visible in cross-section.
+2026-04-09T20:51:16  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Contrast enhancement is present in the abdominal vessels and kidneys', 'No obvious acute abnormality is directly apparent on this single slice', 'Bowel gas and stool are visible within the upper abdomen']
+2026-04-09T20:51:16  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=3116ms
+2026-04-09T20:51:17  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='does the liver show an enhancing mass or lesion?'
+2026-04-09T20:51:17  INFO      medvqa.agents.question_analyzer  Analyzing question: 'does the liver show an enhancing mass or lesion?'
+2026-04-09T20:51:17  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T20:51:19  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1258ms
+2026-04-09T20:51:19  DEBUG     medvqa.agents.question_analyzer  Target entity: enhancing mass or lesion in the liver  Expected format: yes_no  Rephrased: Does the liver show an enhancing mass or lesion?
+2026-04-09T20:51:19  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=presence_absence  duration=1287ms
+2026-04-09T20:51:19  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T20:51:19  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=presence_absence  reasoning=visual_recognition  med_knowledge=False  modality=CT  region=abdomen
+2026-04-09T20:51:21  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1606ms
+2026-04-09T20:51:21  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clear presence/absence CT case with conspicuous abdominal anatomy and no major artifact or overlap making the expected finding a direct visual assessment.
+2026-04-09T20:51:21  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1632ms
+2026-04-09T20:51:22  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T20:51:22  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='does the liver show an enhancing mass or lesion?'  is_retry=False  question_type=presence_absence  yes_no=True
+2026-04-09T20:51:22  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T20:51:22  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=presence_absence
+2026-04-09T20:51:25  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=medium  duration=2467ms
+2026-04-09T20:51:25  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the provided CT image summary for liver findings.', 'Looked for any focal enhancing hepatic lesion or mass.', 'Noted that no obvious acute abnormality or focal liver lesion was described.', "Selected 'no' because there is no visible enhancing liver mass on the provided slice."]
+2026-04-09T20:51:25  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial contrast-enhanced CT of the upper abdomen', 'Liver is visible but no focal enhancing hepatic lesion is described', 'No obvious acute abnormality directly apparent on this single slice', 'Contrast enhancement noted in abdominal vessels and kidneys, not in a liver mass']
+2026-04-09T20:51:25  DEBUG     medvqa.agents.reasoning_agent  Limitations: Assessment is limited to a single axial CT slice and the provided image analysis; subtle or small hepatic lesions cannot be excluded.
+2026-04-09T20:51:25  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=medium  duration=2497ms
+2026-04-09T20:51:25  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T20:51:26  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='does the liver show an enhancing mass or lesion?'  question_type=presence_absence
+2026-04-09T20:51:28  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=5/5  duration=2103ms
+2026-04-09T20:51:28  WARNING   medvqa.agents.verification_agent  Verification issues: ['The negative answer is based on a single CT slice, so it may miss small or subtle enhancing liver lesions.', "The explanation is cautious and appropriately notes the limitation, but the certainty implied by 'no' should be interpreted in context."]
+2026-04-09T20:51:28  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T20:51:28  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is consistent with a yes/no presence-absence question and the explanation is grounded in the visible CT image. However, because only one axial slice is available, the absence of a lesion cannot be confirmed with high confidence.
+2026-04-09T20:51:28  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2137ms
+2026-04-09T20:51:28  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-09T20:51:28  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T20:51:28  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=5/5
+2026-04-09T20:51:28  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T20:51:28  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=15294ms
+2026-04-09T20:51:28  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='no'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-09T20:51:28  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T20:51:28  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T20:51:28  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  retries=0  total_duration=15298ms ===
+2026-04-09T20:51:28  INFO      medvqa.routes.dataset  Sample 1973 analysis complete  baseline=1599ms  workflow=3668ms  agentic=15301ms  total=15301ms
+2026-04-09T20:51:28  INFO      medvqa.routes.dataset  Sample 1973 answers  baseline='No, the liver does not show an obvious enhancing mass or les'  workflow='Yes'  agentic='no'  ground_truth='no'
