@@ -92,7 +92,11 @@ class KnowledgeRetriever:
         # Advanced RAG: Retrieve similar cases from train set
         rag_context = ""
         similar_cases = []
-        rag_metadata = {}
+        rag_metadata = {
+            "count": 0,
+            "hyde_used": False,
+            "triggered": False,
+        }
 
         if self.use_advanced_rag and original_question:
             try:
@@ -117,7 +121,8 @@ class KnowledgeRetriever:
                 similar_cases = rag_result.get("similar_cases", [])
                 rag_metadata = {
                     "count": rag_result.get("count", 0),
-                    "hyde_used": rag_result.get("hyde_used", False)  # True if HyDE expanded the query
+                    "hyde_used": rag_result.get("hyde_used", False),  # True if HyDE expanded the query
+                    "triggered": True,
                 }
 
                 if similar_cases:
@@ -159,8 +164,8 @@ class KnowledgeRetriever:
             result = json.loads(raw)
             result["status"] = "success"
 
-            # Add RAG metadata to result
-            if similar_cases:
+            # Add RAG metadata to result (always include if RAG was triggered, even if no cases found)
+            if self.use_advanced_rag:
                 result["rag_retrieval"] = {
                     "similar_cases": similar_cases,
                     "metadata": rag_metadata

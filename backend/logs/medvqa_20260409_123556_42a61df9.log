@@ -1,0 +1,30 @@
+2026-04-09T12:35:56  INFO      medvqa  Session started  file=medvqa_20260409_123556_42a61df9.log  session_id=42a61df9
+2026-04-09T12:36:08  INFO      medvqa.agents.knowledge_retriever  Advanced RAG module loaded successfully
+2026-04-09T12:36:08  INFO      medvqa.server  ============================================================
+2026-04-09T12:36:08  INFO      medvqa.server  MedVisionQuery API  v1.0.0  starting up
+2026-04-09T12:36:08  INFO      medvqa.server  CORS origins: ['http://localhost:5173']
+2026-04-09T12:36:08  INFO      medvqa.server  ============================================================
+2026-04-09T12:36:08  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-09T12:36:08  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=18
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_1951_b4ef34e28e.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_1880_b9fa197655.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_2051_b942d27fd4.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_2102_a5468181c1.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_2130_5040f2ca12.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_1869_74d2a9f490.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_2166_b769804305.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_2072_0d329ac550.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_1882_680f4eeb8a.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_2099_a3dd8f79a1.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_0_26ddff1985.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_2136_b377e2a67c.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_2159_7208aa7d85.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_1840_0f6ee2bea7.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_1809_ec466354bf.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_2236_665a59ba5f.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_2197_41a98ab3cc.json: name 're' is not defined
+2026-04-09T12:36:08  WARNING   medvqa.routes.dataset  Skipping cache file sample_2191_26827f7720.json: name 're' is not defined
+2026-04-09T12:36:08  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=0  skipped=18
+2026-04-09T12:36:08  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-09T12:36:08  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=28ms
+2026-04-09T12:36:20  INFO      medvqa.server  MedVisionQuery API shutting down

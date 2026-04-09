@@ -69,7 +69,7 @@ function getBreakdownTooltip(mode) {
     return 'Breakdown by Difficulty Router output. Parent rows show overall difficulty accuracy, and expanding a difficulty row reveals question-type accuracy within that bucket. easy skips retrieval and uses standard verification; medium retrieves knowledge, uses standard verification, and can add a disclaimer; hard retrieves knowledge, uses strict verification, and can flag the case for review.';
   }
 
-  return 'Breakdown by question type. Close-ended questions use exact yes/no only. Open-ended questions use PubMedBERT semantic similarity ≥ 0.75 to capture meaning equivalence.';
+  return 'Breakdown by question type. Close-ended questions use exact match for yes/no and binary medical assessments (normal/abnormal, present/absent, positive/negative, etc.). Open-ended questions use PubMedBERT semantic similarity ≥ 0.75 to capture meaning equivalence.';
 }
 
 const QUESTION_TYPE_ORDER = [
@@ -191,7 +191,7 @@ function SystemPerformanceCard({ title, icon, accuracy, avgDuration, totalDurati
       </div>
       <div className="evaluation-system-stats">
         <div>
-          <div className="evaluation-list-subtitle">Overall Accuracy (Exact yes/no + PubMedBERT)</div>
+          <div className="evaluation-list-subtitle">Overall Accuracy (Exact match + PubMedBERT)</div>
           <div className="evaluation-metric-value">{formatPercent(accuracy)}</div>
         </div>
         <div>
@@ -307,7 +307,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
       <section className="evaluation-header-strip">
         <div>
           <h1 className="evaluation-title">Evaluation Dashboard</h1>
-          <p className="evaluation-subtitle">Aggregate accuracy metrics from cached Case Explorer runs. Close-ended: exact yes/no only. Open-ended: PubMedBERT semantic similarity ≥ 0.75.</p>
+          <p className="evaluation-subtitle">Aggregate accuracy metrics from cached Case Explorer runs. Close-ended: exact match for yes/no and binary medical terms (normal/abnormal, present/absent, etc.). Open-ended: PubMedBERT semantic similarity ≥ 0.75.</p>
         </div>
         <div className="evaluation-actions">
           <button className="btn btn-secondary" onClick={onRefresh} disabled={loading}>
@@ -400,7 +400,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 <span className="card-title">Close-ended Accuracy</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.close_ended_cases} cases</span>
-                  <span className="tag tag-gray" data-tooltip="Accuracy on cases whose ground-truth answer is exactly yes or no. No fallback is used." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="Accuracy on cases with yes/no or binary medical answers (normal/abnormal, present/absent, positive/negative, benign/malignant, acute/chronic, diffuse/focal). Exact match required." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <AccuracyMetricStack
@@ -731,6 +731,11 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                                 ? (row.knowledge_retriever_status || 'triggered')
                                 : 'skipped'}
                             </span>
+                            {row.knowledge_retriever_triggered && (
+                              <span className={`tag ${row.knowledge_retriever_hyde_used ? 'tag-amber' : 'tag-gray'}`} data-tooltip={row.knowledge_retriever_hyde_used ? 'HyDE fallback was used to expand retrieval.' : 'HyDE fallback was not used.'}>
+                                {row.knowledge_retriever_hyde_used ? 'HyDE used' : 'HyDE off'}
+                              </span>
+                            )}
                             <span className="evaluation-list-subtitle">facts {row.knowledge_key_facts_count ?? 0}</span>
                           </div>
                         </td>

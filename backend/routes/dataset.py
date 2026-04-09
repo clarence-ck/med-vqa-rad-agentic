@@ -2,6 +2,7 @@ import asyncio
 import base64
 import json
 import os
+import re
 import time
 import threading
 from collections import OrderedDict
@@ -216,7 +217,11 @@ def _normalize_answer(text: str) -> str:
     """Normalize an answer string for comparison."""
     if text is None:
         return ""
-    return " ".join(str(text).strip().lower().replace("\n", " ").split())
+    # Lowercase, normalize whitespace, strip punctuation
+    cleaned = str(text).strip().lower().replace("\n", " ")
+    # Remove common punctuation for exact matching
+    cleaned = re.sub(r'[.,;:!?]+$', '', cleaned)
+    return " ".join(cleaned.split())
 
 
 def _normalize_yes_no(text: str) -> str:
@@ -262,8 +267,27 @@ def _answers_match(predicted: str, ground_truth: str, is_close_ended: bool = Fal
 
 
 def _is_close_ended_answer(text: str) -> bool:
+    """Check if answer is close-ended (yes/no or binary medical assessment).
+
+    Binary medical assessments like normal/abnormal, present/absent, positive/negative
+    should also use exact matching, not semantic similarity.
+    """
     normalized = _normalize_yes_no(text)
-    return normalized in {"yes", "no"}
+    # Traditional yes/no answers
+    if normalized in {"yes", "no"}:
+        return True
+    # Binary medical assessments that are opposites (should not use semantic similarity)
+    binary_medical_terms = {
+        "normal", "abnormal",
+        "present", "absent",
+        "positive", "negative",
+        "benign", "malignant",
+        "acute", "chronic",
+        "diffuse", "focal",
+    }
+    if normalized in binary_medical_terms:
+        return True
+    return False
 
 
 def _subset_accuracy(subset_rows: list[dict], key: str) -> float:
@@ -338,6 +362,7 @@ def _extract_knowledge_retriever_details(agentic_result: dict) -> dict:
     status = str(knowledge_step.get("status", "unknown")).strip().lower()
     key_facts = knowledge_step.get("output", {}).get("key_facts", []) or []
     summary = knowledge_step.get("summary", "")
+    rag_metadata = knowledge_step.get("output", {}).get("rag_retrieval", {}).get("metadata", {}) or {}
     triggered = status not in {"", "unknown", "skipped"}
 
     return {
@@ -345,6 +370,7 @@ def _extract_knowledge_retriever_details(agentic_result: dict) -> dict:
         "knowledge_retriever_status": status or "unknown",
         "knowledge_key_facts_count": len(key_facts),
         "knowledge_summary": summary,
+        "knowledge_retriever_hyde_used": bool(rag_metadata.get("hyde_used", False)),
     }
 
 

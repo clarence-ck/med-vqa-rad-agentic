@@ -1,0 +1,66 @@
+2026-04-09T12:53:15  INFO      medvqa.routes.dataset  Cache MISS for sample 2147  question='did this patient receive iv contrast?'  refresh=False  running all 3 pipelines in parallel
+2026-04-09T12:53:15  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=170575 bytes  question='did this patient receive iv contrast?'
+2026-04-09T12:53:15  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='did this patient receive iv contrast?'  mime_type=image/png  size=170575 bytes ===
+2026-04-09T12:53:15  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T12:53:15  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=170575 bytes)
+2026-04-09T12:53:16  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T12:53:16  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=170575 bytes)
+2026-04-09T12:53:16  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Yes, this appears to be a contrast-enhanced CT scan.",
+  "explanation": "The aorta and abdominal vessels are visibly opacified, which indicates intravenous contrast was administered.",
+  "confidence": "high"
+}
+2026-04-09T12:53:16  INFO      medvqa.agents.baseline  Baseline done  answer='Yes, this appears to be a contrast-enhanced CT scan.'  confidence=high  duration=1486ms
+2026-04-09T12:53:17  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=upper abdomen  quality=good  findings=3  duration=1957ms
+2026-04-09T12:53:17  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver occupies much of the right side of the image, with the stomach and spleen visible on the left side and central retroperitoneal vascular structures in view.
+2026-04-09T12:53:17  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Single axial slice with contrast enhancement of abdominal vessels and solid organs', 'Large air-containing stomach bubble in the upper abdomen', 'No obvious acute abnormality visible on this single image']
+2026-04-09T12:53:17  INFO      medvqa.agents.question_analyzer  Analyzing question: 'did this patient receive iv contrast?'
+2026-04-09T12:53:17  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T12:53:18  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=upper abdomen  quality=good  findings=3  duration=1969ms
+2026-04-09T12:53:18  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the upper abdomen obtained with intravenous contrast. The liver occupies most of the left side of the image, with the stomach and spleen seen on the opposite side, along with major vascular and bony structures in the posterior midline.
+2026-04-09T12:53:18  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Contrast-enhanced abdominal organs are visible', 'Large air-filled stomach bubble in the upper abdomen', 'No obvious acute abnormality is apparent on this single image']
+2026-04-09T12:53:18  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=upper abdomen  duration=1999ms
+2026-04-09T12:53:18  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1064ms
+2026-04-09T12:53:18  DEBUG     medvqa.agents.question_analyzer  Target entity: intravenous contrast administration  Expected format: yes_no  Rephrased: Did this patient receive intravenous contrast?
+2026-04-09T12:53:18  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='did this patient receive iv contrast?'  modality=CT  body_region=upper abdomen  question_type=yes_no
+2026-04-09T12:53:18  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T12:53:18  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-09T12:53:18  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='No'  confidence=low  question_type=yes_no  duration=3088ms
+2026-04-09T12:53:18  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='did this patient receive iv contrast?'
+2026-04-09T12:53:18  INFO      medvqa.agents.question_analyzer  Analyzing question: 'did this patient receive iv contrast?'
+2026-04-09T12:53:18  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T12:53:19  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1037ms
+2026-04-09T12:53:19  DEBUG     medvqa.agents.question_analyzer  Target entity: intravenous contrast administration  Expected format: yes_no  Rephrased: Did this patient receive intravenous contrast on this CT scan?
+2026-04-09T12:53:19  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=1076ms
+2026-04-09T12:53:20  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T12:53:20  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=visual_recognition  med_knowledge=False  modality=CT  region=upper abdomen
+2026-04-09T12:53:21  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1283ms
+2026-04-09T12:53:21  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clean abdominal CT with clear anatomy and a direct visual question, so the expected interpretation should be evident without retrieval or heightened verification.
+2026-04-09T12:53:21  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1310ms
+2026-04-09T12:53:22  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T12:53:22  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='did this patient receive iv contrast?'  is_retry=False  question_type=yes_no  yes_no=True
+2026-04-09T12:53:22  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T12:53:22  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-09T12:53:24  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='yes'  confidence=high  duration=1882ms
+2026-04-09T12:53:24  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Checked the modality and image description for contrast use.', 'Noted the explicit statement that the scan was obtained with intravenous contrast.', 'Confirmed supporting detail that abdominal organs appear contrast-enhanced.']
+2026-04-09T12:53:24  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ["Visual summary states: 'Axial CT image of the upper abdomen obtained with intravenous contrast'", "Notable findings mention 'Contrast-enhanced abdominal organs are visible'", 'Visible major vascular structures consistent with contrast-enhanced CT']
+2026-04-09T12:53:24  DEBUG     medvqa.agents.reasoning_agent  Limitations: Only a single image is provided, but the accompanying image analysis explicitly indicates IV contrast use.
+2026-04-09T12:53:24  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='yes'  confidence=high  duration=1915ms
+2026-04-09T12:53:25  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T12:53:25  INFO      medvqa.agents.verification_agent  Verifying answer='yes'  question='did this patient receive iv contrast?'  question_type=yes_no
+2026-04-09T12:53:26  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1338ms
+2026-04-09T12:53:26  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-09T12:53:26  DEBUG     medvqa.agents.verification_agent  Verification notes: The question is yes/no and the answer 'yes' is appropriately formatted. The visual analysis explicitly states that the CT was obtained with intravenous contrast and describes contrast-enhanced abdominal structures, which supports the answer. There are no contradictions between the answer and the image analysis.
+2026-04-09T12:53:26  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1368ms
+2026-04-09T12:53:26  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed']
+2026-04-09T12:53:26  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-09T12:53:26  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-09T12:53:26  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T12:53:26  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='yes'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=11449ms
+2026-04-09T12:53:26  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='yes'  verification=verified  confidence=High  flag_review=False
+2026-04-09T12:53:26  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T12:53:26  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T12:53:26  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='yes'  retries=0  total_duration=11453ms ===
+2026-04-09T12:53:26  INFO      medvqa.routes.dataset  Sample 2147 analysis complete  baseline=1491ms  workflow=3090ms  agentic=11454ms  total=11454ms
+2026-04-09T12:53:26  INFO      medvqa.routes.dataset  Sample 2147 answers  baseline='Yes, this appears to be a contrast-enhanced CT scan.'  workflow='No'  agentic='yes'  ground_truth='yes'

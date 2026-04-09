@@ -39,17 +39,20 @@ function getKnowledgeSupportDetails(agenticResult) {
       status: 'unknown',
       keyFactsCount: 0,
       summary: '',
+      hydeUsed: false,
     };
   }
 
   const status = String(knowledgeStep.status || 'unknown').toLowerCase();
   const keyFacts = knowledgeStep.output?.key_facts || [];
+  const ragMetadata = knowledgeStep.output?.rag_retrieval?.metadata || {};
 
   return {
     triggered: status !== 'skipped',
     status,
     keyFactsCount: keyFacts.length,
     summary: knowledgeStep.summary || '',
+    hydeUsed: ragMetadata.hyde_used || false,
   };
 }
 
@@ -458,8 +461,10 @@ export default function CaseExplorer({
                             </span>
                           </div>
                           <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label" data-tooltip="Verification strictness set by the Difficulty Router. Strict mode applies tighter checks for complex or ambiguous questions.">Verification policy</span>
-                            <span className={`tag ${routingVerificationPolicy === 'strict' ? 'tag-amber' : 'tag-gray'}`}>{routingVerificationPolicy}</span>
+                            <span className="summary-stat-label" data-tooltip="HyDE (Hypothetical Document Embeddings) fallback was used when retrieval confidence was low.">HyDE expansion</span>
+                            <span className={`tag ${knowledgeSupport.hydeUsed ? 'tag-amber' : 'tag-gray'}`}>
+                              {knowledgeSupport.hydeUsed ? 'used' : 'not used'}
+                            </span>
                           </div>
                           <div className="summary-stat-row summary-stat-row-inline">
                             <span className="summary-stat-label" data-tooltip="Fallback policy set by the Difficulty Router. Controls whether a disclaimer is added or the case is flagged for review on low confidence.">Fallback policy</span>

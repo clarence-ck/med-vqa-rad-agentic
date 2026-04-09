@@ -1,0 +1,145 @@
+2026-04-09T12:52:12  INFO      medvqa.routes.dataset  Cache MISS for sample 2036  question='are the borders of the mass well-defined?'  refresh=False  running all 3 pipelines in parallel
+2026-04-09T12:52:12  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=133952 bytes  question='are the borders of the mass well-defined?'
+2026-04-09T12:52:12  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are the borders of the mass well-defined?'  mime_type=image/png  size=133952 bytes ===
+2026-04-09T12:52:12  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T12:52:12  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=133952 bytes)
+2026-04-09T12:52:13  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T12:52:13  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=133952 bytes)
+2026-04-09T12:52:13  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Yes, the mass appears well-defined.",
+  "explanation": "This is an axial CT image. The lesion has a smooth, relatively sharp margin and is clearly separated from the surrounding structures.",
+  "confidence": "high"
+}
+2026-04-09T12:52:13  INFO      medvqa.agents.baseline  Baseline done  answer='Yes, the mass appears well-defined.'  confidence=high  duration=1242ms
+2026-04-09T12:52:14  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=1974ms
+2026-04-09T12:52:14  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the upper abdomen showing solid abdominal organs and surrounding bowel loops. The slice includes the liver, spleen, kidneys, and central spine with visible abdominal gas and soft tissues.
+2026-04-09T12:52:14  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large low-attenuation cystic-appearing lesion occupies much of the left side of the image within the upper abdomen', 'Prominent intraluminal bowel gas and fecal material are visible in the anterior abdomen', 'No obvious acute osseous abnormality is seen on this slice']
+2026-04-09T12:52:14  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the borders of the mass well-defined?'
+2026-04-09T12:52:14  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T12:52:15  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2079ms
+2026-04-09T12:52:15  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the upper abdomen showing solid organs and bowel loops. The slice includes the liver on the left side of the image, spleen and kidney on the right side of the image, with prominent gas-filled bowel in the anterior abdomen.
+2026-04-09T12:52:15  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large well-defined low-attenuation lesion occupies much of the left side of the upper abdomen adjacent to the liver/kidney region', 'Scattered intraluminal gas throughout bowel loops', 'No obvious free air on this single image']
+2026-04-09T12:52:15  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2115ms
+2026-04-09T12:52:15  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1004ms
+2026-04-09T12:52:15  DEBUG     medvqa.agents.question_analyzer  Target entity: mass  Expected format: yes_no  Rephrased: Are the borders of the mass well-defined?
+2026-04-09T12:52:15  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are the borders of the mass well-defined?'  modality=CT  body_region=abdomen  question_type=abnormality_description
+2026-04-09T12:52:15  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T12:52:15  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-09T12:52:15  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Large low-attenuation cystic-appearing lesion occupies much of the left side of '  confidence=medium  question_type=abnormality_description  duration=3042ms
+2026-04-09T12:52:16  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are the borders of the mass well-defined?'
+2026-04-09T12:52:16  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the borders of the mass well-defined?'
+2026-04-09T12:52:16  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T12:52:17  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=False  clarity=ambiguous  duration=1247ms
+2026-04-09T12:52:17  DEBUG     medvqa.agents.question_analyzer  Target entity: mass  Expected format: short_phrase  Rephrased: Are the borders of the mass well-defined or ill-defined?
+2026-04-09T12:52:17  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1289ms
+2026-04-09T12:52:18  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T12:52:18  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  reasoning=visual_recognition  med_knowledge=False  modality=CT  region=abdomen
+2026-04-09T12:52:19  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1266ms
+2026-04-09T12:52:19  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic-search abdominal CT case with moderate anatomic overlap and an ambiguous question prompt, making the finding potentially subtle but not severely limited enough to require hard-case strict handling.
+2026-04-09T12:52:19  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1308ms
+2026-04-09T12:52:20  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T12:52:20  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-09T12:52:20  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='are the borders of the mass well-defined?'  modality=CT  body_region=abdomen  question_type=abnormality_description  target_entity=mass  advanced_rag=True
+2026-04-09T12:52:20  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=are the borders of the mass well-defined? | modality=CT | body_region=abdomen | finding=mass | rerank=mandatory
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag  Using original question as query (no LLM rewrite)
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen': 209 matches
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='mass': 158 matches
+2026-04-09T12:52:20  INFO      medvqa.agents.advanced_rag  Metadata filter result: 1 candidates after intersection
+2026-04-09T12:52:20  INFO      medvqa.agents.advanced_rag  Metadata filter: 1 candidates retained
+2026-04-09T12:52:20  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 1 candidates
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 1/1
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.1778 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T12:52:20  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 1 candidates
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 1/1
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=-0.9417 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=1 sparse=1
+2026-04-09T12:52:20  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 1 unique candidates
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 1/1
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T12:52:20  INFO      medvqa.agents.advanced_rag  Reranking 1 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-09T12:52:20  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 1 candidates...
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 1/1
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=-11.2203 method=reranked softmax=1.0000 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T12:52:20  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=medium weak_signals=1 top1_softmax=1.000 margin=1.000 dense_top1=0.178 agreement=True
+2026-04-09T12:52:20  WARNING   medvqa.agents.advanced_rag  Retrieval confidence is medium; returning results without HyDE
+2026-04-09T12:52:20  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 1 final candidates
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 1/1
+2026-04-09T12:52:20  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=-11.2203 method=reranked softmax=1.0000 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T12:52:20  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 1 similar cases  (hyde_used=False  finding_category=mass)
+2026-04-09T12:52:25  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=1  duration=5175ms
+2026-04-09T12:52:25  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Well-defined margins usually suggest a sharply circumscribed lesion with a clear boundary on CT.', 'Ill-defined margins can indicate infiltration, inflammation, edema, or an invasive process.', 'Adjacent fat stranding or loss of normal tissue planes may make a lesion appear less well-defined.', 'Abdominal organ origin matters: a mass arising from liver, kidney, bowel, or retroperitoneum may have different margin characteristics.', 'Contrast enhancement and slice thickness can affect how clearly a mass border is seen.']
+2026-04-09T12:52:25  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On abdominal CT, the borders of a mass are described as well-defined when there is a clear, smooth interface with adjacent organs or fat planes, and as ill-defined when margins blend into surrounding 
+2026-04-09T12:52:25  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=1  duration=5204ms
+2026-04-09T12:52:26  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T12:52:26  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are the borders of the mass well-defined?'  is_retry=False  question_type=abnormality_description  yes_no=False
+2026-04-09T12:52:26  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=1
+2026-04-09T12:52:28  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Yes, the mass appears well-defined.'  confidence=high  duration=2125ms
+2026-04-09T12:52:28  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the lesion as a large low-attenuation mass in the upper abdomen.', 'Checked whether the visual summary described blurred or infiltrative margins.', 'Found language indicating the lesion is well-defined and adjacent organs are distinguishable.']
+2026-04-09T12:52:28  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Large well-defined low-attenuation lesion occupies much of the left side of the upper abdomen', 'Adjacent liver/kidney region still separately identifiable', 'No obvious free air or described surrounding infiltrative changes on this image']
+2026-04-09T12:52:28  DEBUG     medvqa.agents.reasoning_agent  Limitations: Assessment is based on a single axial CT slice and the provided image summary rather than a full multi-slice review.
+2026-04-09T12:52:28  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Yes, the mass appears well-defined.'  confidence=high  duration=2161ms
+2026-04-09T12:52:29  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T12:52:29  INFO      medvqa.agents.verification_agent  Verifying answer='Yes, the mass appears well-defined.'  question='are the borders of the mass well-defined?'  question_type=abnormality_description
+2026-04-09T12:52:31  INFO      medvqa.agents.verification_agent  Verification done  status=unsupported  confidence=Low  checks=2/5  duration=2314ms
+2026-04-09T12:52:31  WARNING   medvqa.agents.verification_agent  Verification issues: ["The explanation refers to a 'large low-attenuation lesion' and 'clear separation from adjacent abdominal structures,' but these findings are not clearly supported by the provided visual analysis.", 'The image summary does not describe the borders of a mass, so the conclusion about well-defined margins is not well grounded.', 'The answer is too strong for a single CT slice without explicit mention of lesion margins.']
+2026-04-09T12:52:31  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T12:52:31  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct short-answer style, but the reasoning relies on unsupported image details. With only the provided summary, there is insufficient evidence to confidently state that a mass is well-defined.
+2026-04-09T12:52:31  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=unsupported  confidence=Low  duration=2345ms
+2026-04-09T12:52:31  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['unsupported_claim']
+2026-04-09T12:52:31  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=True  fallback=add_disclaimer  disclaimer=True
+2026-04-09T12:52:31  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=2/5
+2026-04-09T12:52:31  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=False
+2026-04-09T12:52:31  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Yes, the mass appears well-defined.'  verification=unsupported  guardrail_flag=True  consistency=low  cross_modal=low  duration=19077ms
+2026-04-09T12:52:31  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Yes, the mass appears well-defined.'  verification=unsupported  confidence=Low  flag_review=True
+2026-04-09T12:52:31  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=unsupported  flag_review=True  high_severity=True  -> retry=True
+2026-04-09T12:52:31  INFO      medvqa.agents.orchestrator  Pipeline RETRY triggered  reason: verification_status=unsupported; fallback=add_disclaimer; flag_for_review=True
+2026-04-09T12:52:31  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=True)
+2026-04-09T12:52:32  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T12:52:32  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=133952 bytes)
+2026-04-09T12:52:34  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2113ms
+2026-04-09T12:52:34  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the upper abdomen showing solid abdominal organs and bowel loops. A large rounded low-attenuation structure is visible in the left upper abdomen, with surrounding abdominal contents and posterior spine identified.
+2026-04-09T12:52:34  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large well-defined low-attenuation rounded lesion in the left upper abdomen', 'Bowel gas/stool present in the anterior abdomen', 'No obvious free air on this single image']
+2026-04-09T12:52:34  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2152ms
+2026-04-09T12:52:35  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are the borders of the mass well-defined?'
+2026-04-09T12:52:35  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the borders of the mass well-defined?'
+2026-04-09T12:52:35  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T12:52:36  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1198ms
+2026-04-09T12:52:36  DEBUG     medvqa.agents.question_analyzer  Target entity: the mass  Expected format: yes_no  Rephrased: Are the borders of the mass well-defined?
+2026-04-09T12:52:36  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1228ms
+2026-04-09T12:52:37  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T12:52:37  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  reasoning=visual_recognition  med_knowledge=False  modality=CT  region=abdomen
+2026-04-09T12:52:38  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1355ms
+2026-04-09T12:52:38  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clear yes/no visual-recognition case with a prominent abnormality on a CT abdomen and limited interpretive ambiguity, so it routes as an easy study.
+2026-04-09T12:52:38  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1400ms
+2026-04-09T12:52:39  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=True
+2026-04-09T12:52:39  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are the borders of the mass well-defined?'  is_retry=True  question_type=abnormality_description  yes_no=False
+2026-04-09T12:52:39  INFO      medvqa.agents.reasoning_agent  Retry context  prev_status=unsupported  prev_confidence=Low  fallback=add_disclaimer
+2026-04-09T12:52:39  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T12:52:39  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=abnormality_description
+2026-04-09T12:52:41  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='yes'  confidence=high  duration=1825ms
+2026-04-09T12:52:41  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the target lesion in the left upper abdomen on the CT.', 'Check the description of its margin/contour in the image analysis.', 'The lesion is explicitly characterized as well-defined, supporting a yes answer.']
+2026-04-09T12:52:41  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Large well-defined low-attenuation rounded lesion in the left upper abdomen', 'Smooth rounded appearance on axial CT', 'Clear separation from surrounding abdominal contents']
+2026-04-09T12:52:41  DEBUG     medvqa.agents.reasoning_agent  Limitations: This is based on a single axial CT image and the provided image summary rather than full series review.
+2026-04-09T12:52:41  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='yes'  confidence=high  duration=1858ms
+2026-04-09T12:52:41  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T12:52:41  INFO      medvqa.agents.verification_agent  Verifying answer='yes'  question='are the borders of the mass well-defined?'  question_type=abnormality_description
+2026-04-09T12:52:43  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1330ms
+2026-04-09T12:52:43  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-09T12:52:43  DEBUG     medvqa.agents.verification_agent  Verification notes: The question asks whether the mass borders are well-defined, and the answer 'yes' is consistent with the visual summary describing a large rounded low-attenuation structure with smooth, clearly demarcated contours. The explanation is grounded in the CT image evidence and does not overstate beyond what is visible.
+2026-04-09T12:52:43  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1359ms
+2026-04-09T12:52:43  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed']
+2026-04-09T12:52:43  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-09T12:52:43  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-09T12:52:43  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T12:52:43  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='yes'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=30820ms
+2026-04-09T12:52:43  INFO      medvqa.agents.orchestrator  Pipeline attempt 2 result  answer='yes'  verification=verified  confidence=High
+2026-04-09T12:52:43  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=4  confidence_rank=3  high_failures=0  review=0
+2026-04-09T12:52:43  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=1  confidence_rank=1  high_failures=1  review=1
+2026-04-09T12:52:43  INFO      medvqa.agents.orchestrator  Pipeline RETRY winner: attempt 2 (higher score)
+2026-04-09T12:52:43  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='yes'  retries=1  total_duration=30826ms ===
+2026-04-09T12:52:43  INFO      medvqa.routes.dataset  Sample 2036 analysis complete  baseline=1246ms  workflow=3044ms  agentic=30829ms  total=30831ms
+2026-04-09T12:52:43  INFO      medvqa.routes.dataset  Sample 2036 answers  baseline='Yes, the mass appears well-defined.'  workflow='Large low-attenuation cystic-appearing lesion occupies much '  agentic='yes'  ground_truth='no'
