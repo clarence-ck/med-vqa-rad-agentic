@@ -197,19 +197,21 @@ These are routing outcomes, not fixed question-type rules; the actual `Difficult
 
 ### Knowledge Retrieval (Advanced RAG)
 
-`KnowledgeRetriever` integrates `advanced_rag.py` to ground context in retrieved examples before synthesis, but only when retrieval quality is sufficient.
+`KnowledgeRetriever` integrates `advanced_rag.py` to ground the answer in retrieved training examples when the router requests retrieval.
+
+The actual retrieval flow is:
 
 1. Use the original question directly as the retrieval query
-2. Apply metadata pre-filtering (`modality`, `body_region`, `finding_category`)
-3. Run hybrid retrieval: dense vectors (FAISS) + sparse BM25
-4. Fuse candidates via reciprocal rank fusion (RRF)
-5. Rerank with a cross-encoder and keep the top-k similar cases
-6. Validate the retrieval with a multi-signal confidence gate
-7. Inject only answer-focused evidence blocks into the knowledge prompt
+2. Apply best-effort metadata pre-filtering on `modality`, `body_region`, and `finding_category`
+3. Run hybrid retrieval with dense embeddings (FAISS) and sparse BM25 search
+4. Merge candidates with reciprocal rank fusion (RRF)
+5. Rerank the merged candidates with a cross-encoder
+6. Keep the retrieved cases only if the multi-signal confidence gate considers them reliable
+7. Inject compact answer-focused evidence blocks into the knowledge prompt
 
 Retrieval corpus is built from the **train split** of `data/vqa-rad/vqa_rad.json`.
 
-The retriever now formats retrieved cases as compact evidence blocks (answer + minimal metadata) and explicitly ignores weak or loosely related cases instead of injecting full QA wording.
+The retriever formats retrieved cases as compact evidence blocks (answer + minimal metadata) and can return no RAG context if retrieval confidence is too weak.
 
 ### Model Configuration
 
@@ -256,11 +258,15 @@ The image is consumed only once (stage 1); all downstream stages operate on the 
 
 ---
 
-## Agent Outputs (JSON Contracts)
+## Agent Outputs (Representative JSON Payloads)
+
+The following shapes describe the main inner `result` payload returned by each Haystack component. In the actual implementation, each agent returns `{"result": ...}` and may also include `status`, `error`, or extra wrapper metadata on success/failure.
 
 ### ImageInterpreter
 ```json
 {
+  "status": "success | error",
+  "is_radiology_image": true,
   "modality": "X-ray",
   "body_region": "chest",
   "visible_structures": ["lungs", "ribs", "heart"],
@@ -273,6 +279,7 @@ The image is consumed only once (stage 1); all downstream stages operate on the 
 ### QuestionAnalyzer
 ```json
 {
+  "status": "success | error",
   "question_type": "anatomy_identification | modality_identification | presence_absence | location | counting | abnormality_description | explanation_request | yes_no | other",
   "target_entity": "...",
   "reasoning_type": "visual_recognition | spatial_reasoning | medical_knowledge | comparison | descriptive",
@@ -286,6 +293,7 @@ The image is consumed only once (stage 1); all downstream stages operate on the 
 ### DifficultyRouter
 ```json
 {
+  "status": "success | error",
   "difficulty": "easy | medium | hard",
   "needs_retrieval": true,
   "retrieval_rationale": "...",
@@ -298,17 +306,23 @@ The image is consumed only once (stage 1); all downstream stages operate on the 
 ### KnowledgeRetriever
 ```json
 {
+  "status": "success | error",
   "contextual_notes": "...",
   "key_facts": ["..."],
   "expected_normal_findings": "...",
   "common_pathologies": ["..."],
-  "terminology": {"term": "definition"}
+  "terminology": {"term": "definition"},
+  "rag_retrieval": {
+    "similar_cases": ["..."],
+    "metadata": {"count": 0, "triggered": true}
+  }
 }
 ```
 
 ### ReasoningAgent
 ```json
 {
+  "status": "success | error",
   "answer": "...",
   "explanation": "...",
   "reasoning_trace": "...",
@@ -321,6 +335,7 @@ The image is consumed only once (stage 1); all downstream stages operate on the 
 ### VerificationAgent — 5 explicit checks
 ```json
 {
+  "status": "success | error",
   "verification_status": "verified | partially_verified | low_confidence | unsupported",
   "confidence_label": "High | Medium | Low",
   "checks": {
