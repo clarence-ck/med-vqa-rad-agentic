@@ -24,7 +24,7 @@ from agents.advanced_rag import (
     get_rag_retriever,
 )
 from agents.knowledge_retriever import KnowledgeRetriever
-from utils.data_loader import get_dataset, get_sample_cases
+from utils.data_loader import load_dataset, get_sample_cases
 
 
 def test_direct_rag_retrieval():
@@ -288,8 +288,9 @@ def test_sample_cases(sample_size: int = 30, skip: int = 0):
     # Load the 200 curated samples (same as Case Explorer dropdown)
     try:
         all_samples = get_sample_cases(limit=200)
+        full_dataset = load_dataset()
     except Exception as e:
-        print(f"❌ Failed to load curated samples: {e}")
+        print(f"❌ Failed to load samples: {e}")
         return None
 
     if not all_samples:
@@ -300,7 +301,22 @@ def test_sample_cases(sample_size: int = 30, skip: int = 0):
     total_available = len(all_samples)
     start_idx = min(skip, total_available)
     end_idx = min(start_idx + sample_size, total_available)
-    selected = all_samples[start_idx:end_idx]
+    selected_curated = all_samples[start_idx:end_idx]
+
+    # Enrich with full metadata from dataset
+    selected = []
+    for curated in selected_curated:
+        sample_id = curated.get("id", -1)
+        if 0 <= sample_id < len(full_dataset):
+            full_item = full_dataset[sample_id]
+            selected.append({
+                "id": sample_id,
+                "question": curated.get("question", ""),
+                "answer": curated.get("answer", ""),
+                "question_type": curated.get("question_type", "unknown"),
+                "modality": full_item.get("modality", "unknown"),
+                "body_region": full_item.get("body_region", "unknown"),
+            })
 
     print(f"Curated pool: {total_available} cases (Case Explorer selection)")
     print(f"Testing: {len(selected)} cases (indices {start_idx}-{end_idx-1})")
@@ -325,15 +341,16 @@ def test_sample_cases(sample_size: int = 30, skip: int = 0):
         question = sample.get("question", "")
         question_type = sample.get("question_type", "unknown")
         sample_id = sample.get("id", -1)
+        modality = sample.get("modality", "unknown")
+        body_region = sample.get("body_region", "unknown")
 
-        # Curated samples don't have modality/body_region directly
-        # Run retrieval without metadata filters (inference only)
+        # Run retrieval with metadata filters when available
         start = time.perf_counter()
         result = retriever.retrieve(
             question=question,
-            modality=None,  # Let RAG work without pre-filtering
-            body_region=None,
-            finding_category=None,  # Let it infer
+            modality=modality if modality != "unknown" else None,
+            body_region=body_region if body_region != "unknown" else None,
+            finding_category=None,  # Let it infer from question
         )
         elapsed = (time.perf_counter() - start) * 1000
 
