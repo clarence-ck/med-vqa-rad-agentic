@@ -197,7 +197,7 @@ These are routing outcomes, not fixed question-type rules; the actual `Difficult
 
 ### Knowledge Retrieval (Advanced RAG)
 
-`KnowledgeRetriever` grounds answers in retrieved training examples using a **6-stage retrieval pipeline** (`advanced_rag.py`). The entire retrieval stage runs locally with no LLM calls — embeddings, FAISS, BM25, and cross-encoder reranking operate entirely on-device.
+`KnowledgeRetriever` uses `advanced_rag.py` to retrieve supporting training examples and assemble medical context when the router requests retrieval. The retrieval logic itself is local and LLM-free: embeddings, FAISS, BM25, and cross-encoder reranking all run inside `advanced_rag.py`.
 
 #### Pipeline Overview
 
@@ -212,7 +212,7 @@ These are routing outcomes, not fixed question-type rules; the actual `Difficult
 
 #### Confidence-Based Validation
 
-The confidence gate acts as a quality filter before evidence reaches the LLM prompt:
+The confidence gate acts as a quality filter before evidence reaches the prompt:
 
 | Signal | Threshold | What It Measures |
 |--------|-----------|------------------|
@@ -223,7 +223,7 @@ The confidence gate acts as a quality filter before evidence reaches the LLM pro
 
 **Decision Logic**:
 - **High confidence** (0 weak signals): Retrieve and inject evidence
-- **Medium confidence** (1 weak signal): Retrieve with warning logged
+- **Medium confidence** (1 weak signal): Retrieve and log a warning
 - **Low confidence** (2+ weak signals): Return empty — no RAG context injected
 
 This prevents low-relevance training cases from contaminating the reasoning process.
@@ -236,21 +236,20 @@ This prevents low-relevance training cases from contaminating the reasoning proc
 - `finding_category`: pneumonia, fracture, mass, hemorrhage, etc.
 - `laterality`: left, right, bilateral
 
-**At Query Time**: The pipeline receives metadata from `ImageInterpreter` (vision model output for `modality`, `body_region`) and image-grounded `notable_findings` for `finding_category`. Smart intersection logic:
-1. Attempt `modality ∩ body_region ∩ finding`
-2. If empty, fall back to `modality ∩ body_region`
-3. Skip `finding_category` filter if it would eliminate all candidates (sparse field)
+**At Query Time**: The pipeline receives metadata from `ImageInterpreter` (vision model output for `modality`, `body_region`) and image-grounded `notable_findings` for `finding_category`. The smart intersection logic is:
+1. Start with `modality` when available.
+2. Intersect `body_region` when available.
+3. Try `finding_category` last.
+4. If `finding_category` would reduce candidates to zero, skip it.
+5. If `modality ∩ body_region` is empty, fall back to `body_region` alone.
 
-This graceful degradation ensures retrieval succeeds even when metadata intersections are tight.
+This graceful degradation prevents over-filtering while still using metadata whenever it helps.
 
-#### Corpus & Latency
+#### Corpus & Runtime Characteristics
 
 - **Corpus**: VQA-RAD train split (1,793 radiology Q&A pairs)
-- **End-to-end Latency** (CPU): ~200-400ms
-  - Metadata filtering: 30-100ms
-  - Dense + sparse retrieval: 50-100ms
-  - Cross-encoder reranking: 100-200ms
-- **Safety**: Confidence gate rejects weak matches — the LLM receives either high-quality context or no context, never misleading retrievals
+- **Runtime**: the retrieval stack runs locally on CPU or GPU depending on the configured device
+- **Safety**: the confidence gate blocks weak matches so the prompt receives either high-quality context or no RAG context
 
 #### Evidence Format & Safety
 
