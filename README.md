@@ -187,7 +187,7 @@ The `DifficultyRouter` determines the pipeline configuration from question and i
 | `medium` | true | standard | add_disclaimer |
 | `hard` | true | strict | flag_for_review |
 
-Typical difficulty assignments by question type:
+These are routing outcomes, not fixed question-type rules; the actual `DifficultyRouter` also considers image context and question clarity. Typical examples by question type are:
 
 | Question type | Typical difficulty |
 |---|---|
@@ -549,7 +549,7 @@ Optional: create `frontend/.env` if the frontend should point to a non-default b
 VITE_API_BASE=http://localhost:8000
 ```
 
-Note: The current runtime path requires `OPENAI_API_KEY`, `OPENAI_MODEL`, and `BACKEND_CORS_ORIGINS`. `HF_TOKEN` is optional but recommended to avoid Hugging Face Hub unauthenticated-rate-limit warnings and speed up model downloads.
+Note: For local browser access, `BACKEND_CORS_ORIGINS` should include the frontend origin (for example, `http://localhost:5173`). `HF_TOKEN` is optional but can help avoid Hugging Face Hub rate-limit warnings during dataset/model downloads.
 
 ### 2. Install Python dependencies
 
@@ -578,7 +578,7 @@ pip install -r backend/requirements.txt
 python scripts/download_dataset.py
 ```
 
-Downloads `flaviagiammarino/vqa-rad` from Hugging Face, saves images to `data/vqa-rad/images/`, and writes metadata to `data/vqa-rad/vqa_rad.json`. Takes ~1–2 minutes.
+Downloads `flaviagiammarino/vqa-rad` from Hugging Face, saves images to `data/vqa-rad/images/`, and writes metadata to `data/vqa-rad/vqa_rad.json`.
 
 ### 4. Start the backend
 
