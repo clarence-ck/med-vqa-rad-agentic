@@ -558,7 +558,7 @@ Hit **Refresh Metrics** to re-aggregate after running new cases in Case Explorer
 
 The train split (1,793 cases) is used as the **retrieval corpus** for the Advanced RAG pipeline. The test split (451 cases) is used exclusively for Case Explorer browsing and evaluation — no test cases appear in the retrieval index.
 
-The evaluation scorer uses exact `yes` / `no` matching for close-ended questions and `S-PubMedBert` semantic similarity with a 0.85 threshold for open-ended questions.
+The evaluation scorer uses exact `yes` / `no` matching for close-ended questions and `S-PubMedBert-MS-MARCO` semantic similarity with a 0.85 threshold for open-ended questions.
 
 The download script flattens the Hugging Face dataset into one local PNG per QA item and writes a flat `vqa_rad.json` with split labels. Local image filenames are saved as `{split}_{index:04d}.png`.
 
