@@ -197,7 +197,7 @@ These are routing outcomes, not fixed question-type rules; the actual `Difficult
 
 ### Knowledge Retrieval (Advanced RAG)
 
-`KnowledgeRetriever` uses `advanced_rag.py` to retrieve supporting training examples and assemble medical context when the router requests retrieval. The retrieval logic itself is local and LLM-free: embeddings, FAISS, BM25, and cross-encoder reranking all run inside `advanced_rag.py`.
+`KnowledgeRetriever` uses `advanced_rag.py` to retrieve supporting training examples when the router requests retrieval, then uses the OpenAI generator to synthesize the final medical context. The retrieval logic inside `advanced_rag.py` is local and LLM-free: embeddings, FAISS, BM25, and cross-encoder reranking all run on-device.
 
 #### Pipeline Overview
 
@@ -226,7 +226,7 @@ The confidence gate acts as a quality filter before evidence reaches the prompt:
 - **Medium confidence** (1 weak signal): Retrieve and log a warning
 - **Low confidence** (2+ weak signals): Return empty — no RAG context injected
 
-This prevents low-relevance training cases from contaminating the reasoning process.
+This prevents low-relevance training cases from contaminating the retrieval context that is later summarized by the LLM.
 
 #### Metadata Filtering
 
@@ -236,7 +236,7 @@ This prevents low-relevance training cases from contaminating the reasoning proc
 - `finding_category`: pneumonia, fracture, mass, hemorrhage, etc.
 - `laterality`: left, right, bilateral
 
-**At Query Time**: The pipeline receives metadata from `ImageInterpreter` (vision model output for `modality`, `body_region`) and image-grounded `notable_findings` for `finding_category`. The smart intersection logic is:
+**At Query Time**: The pipeline receives metadata from `ImageInterpreter` (vision model output for `modality`, `body_region`) and image-grounded `notable_findings` for `finding_category`. The smart intersection logic inside `advanced_rag.py` is:
 1. Start with `modality` when available.
 2. Intersect `body_region` when available.
 3. Try `finding_category` last.
