@@ -70,6 +70,73 @@ def _derive_presence_answer(question: str, target_entity: str, evidence_text: st
     return ("No", "low") if image_status == "success" else ("Unable to determine", "low")
 
 
+def _extract_threshold_request(question: str) -> dict | None:
+    """Detect comparative counting questions such as 'more than 12'."""
+    normalized = _normalize_text(question)
+    patterns = [
+        (r"\b(?:more than|greater than|over|above)\s+(\d+)\b", "greater_than"),
+        (r"\b(?:at least|no fewer than|not fewer than)\s+(\d+)\b", "at_least"),
+        (r"\b(?:fewer than|less than|under|below)\s+(\d+)\b", "fewer_than"),
+        (r"\b(?:at most|no more than|not more than)\s+(\d+)\b", "at_most"),
+        (r"\b>\s*(\d+)\b", "greater_than"),
+        (r"\b>=\s*(\d+)\b", "at_least"),
+        (r"\b<\s*(\d+)\b", "fewer_than"),
+        (r"\b<=\s*(\d+)\b", "at_most"),
+    ]
+
+    for pattern, comparator in patterns:
+        match = re.search(pattern, normalized)
+        if match:
+            return {
+                "comparator": comparator,
+                "threshold": int(match.group(1)),
+            }
+    return None
+
+
+def _derive_threshold_answer(
+    question: str,
+    target_entity: str,
+    evidence_text: str,
+    evidence_items: list[str],
+    matched_findings: list[str],
+    matched_structures: list[str],
+    image_status: str,
+) -> tuple[str, str, str | None]:
+    """Answer threshold-style counting questions as cautiously as possible.
+
+    The workflow baseline has no true object detector, so it only answers when it can
+    derive a rough count from structured evidence. Otherwise it falls back to an
+    explicit 'unable to determine' response instead of pretending to have counted.
+    """
+    threshold_info = _extract_threshold_request(question)
+    if not threshold_info:
+        return "Unable to determine from the current workflow.", "low", None
+
+    query_text = target_entity if target_entity not in {"unknown", "abnormality"} else question
+    matched_items = _find_matching_items(query_text, evidence_items)
+    candidate_items = matched_findings + matched_structures + matched_items
+
+    if candidate_items:
+        estimated_count = len({item.lower() for item in candidate_items})
+        threshold = threshold_info["threshold"]
+        comparator = threshold_info["comparator"]
+
+        if comparator == "greater_than":
+            answer = "Yes" if estimated_count > threshold else "No"
+        elif comparator == "at_least":
+            answer = "Yes" if estimated_count >= threshold else "No"
+        elif comparator == "fewer_than":
+            answer = "Yes" if estimated_count < threshold else "No"
+        else:  # at_most
+            answer = "Yes" if estimated_count <= threshold else "No"
+
+        confidence = "medium" if image_status == "success" else "low"
+        return answer, confidence, f"estimated count from structured evidence: {estimated_count}"
+
+    return "Unable to determine from the current workflow.", "low", "threshold question detected but no reliable countable evidence was available"
+
+
 def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/png",
                     precomputed_image_result: dict | None = None) -> dict:
     """Run the hand-designed non-agentic workflow baseline.
@@ -150,6 +217,17 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
         _log.debug("Branch taken: anatomy_identification")
         answer = body_region
         confidence = "high" if body_region != "unknown" else "low"
+    elif _extract_threshold_request(rephrased_question):
+        _log.debug("Branch taken: threshold comparison")
+        answer, confidence, threshold_note = _derive_threshold_answer(
+            question=rephrased_question,
+            target_entity=target_entity,
+            evidence_text=evidence_text,
+            evidence_items=evidence_items,
+            matched_findings=matched_findings,
+            matched_structures=matched_structures,
+            image_status=image_status,
+        )
     elif question_type in {"yes_no", "presence_absence"}:
         _log.debug("Branch taken: yes_no/presence_absence")
         answer, confidence = _derive_presence_answer(
@@ -234,6 +312,17 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
     ]
     if question_clarity != "clear":
         explanation_parts.append(f"question clarity: {question_clarity}")
+    threshold_info = _extract_threshold_request(rephrased_question)
+    if threshold_info:
+        comparator_text = {
+            "greater_than": "greater than",
+            "at_least": "at least",
+            "fewer_than": "fewer than",
+            "at_most": "at most",
+        }.get(threshold_info["comparator"], threshold_info["comparator"])
+        explanation_parts.append(f"threshold request: {comparator_text} {threshold_info['threshold']}")
+        if 'threshold_note' in locals() and threshold_note:
+            explanation_parts.append(threshold_note)
     if matched_findings:
         explanation_parts.append(f"matched findings: {'; '.join(matched_findings[:2])}")
     elif notable_findings:

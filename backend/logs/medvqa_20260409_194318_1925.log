@@ -1,0 +1,65 @@
+2026-04-09T19:46:05  INFO      medvqa.routes.dataset  Cache MISS for sample 1925  question='what organ system is being imaged?'  refresh=True  running all 3 pipelines in parallel
+2026-04-09T19:46:05  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=99775 bytes  question='what organ system is being imaged?'
+2026-04-09T19:46:05  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what organ system is being imaged?'  mime_type=image/png  size=99775 bytes ===
+2026-04-09T19:46:05  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T19:46:05  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=99775 bytes)
+2026-04-09T19:46:06  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T19:46:06  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=99775 bytes)
+2026-04-09T19:46:06  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Brain (central nervous system)",
+  "explanation": "This is an axial radiology image of the head showing brain structures within the skull. The anatomy visible corresponds to the central nervous system.",
+  "confidence": "high"
+}
+2026-04-09T19:46:06  INFO      medvqa.agents.baseline  Baseline done  answer='Brain (central nervous system)'  confidence=high  duration=1479ms
+2026-04-09T19:46:07  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=head  quality=fair  findings=3  duration=2018ms
+2026-04-09T19:46:07  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial CT image of the head. The intracranial contents are shown in cross-section with the brain parenchyma and surrounding skull visible. There is a marked asymmetry of the intracranial soft tissue appearance on one side.
+2026-04-09T19:46:07  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Asymmetric intracranial soft tissue density/volume on one side', 'No obvious acute skull fracture visible on this single image', 'Limited by being a single axial slice']
+2026-04-09T19:46:07  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what organ system is being imaged?'
+2026-04-09T19:46:07  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T19:46:08  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1257ms
+2026-04-09T19:46:08  DEBUG     medvqa.agents.question_analyzer  Target entity: organ system  Expected format: short_phrase  Rephrased: What organ system is being imaged?
+2026-04-09T19:46:08  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what organ system is being imaged?'  modality=CT  body_region=head  question_type=anatomy_identification
+2026-04-09T19:46:08  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T19:46:08  DEBUG     medvqa.agents.workflow_baseline  Branch taken: anatomy_identification
+2026-04-09T19:46:08  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='head'  confidence=high  question_type=anatomy_identification  duration=3334ms
+2026-04-09T19:46:09  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=head/brain  quality=fair  findings=3  duration=2795ms
+2026-04-09T19:46:09  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial CT image through the head showing the bilateral cerebral hemispheres and surrounding skull. The image appears to be at a superior level, with no obvious acute gross abnormality visible on this single slice.
+2026-04-09T19:46:09  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Single axial head CT slice', 'Mild asymmetry in intracranial soft tissues on the left side of the image', 'No obvious midline shift or large mass effect on this image alone']
+2026-04-09T19:46:09  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=head/brain  duration=2824ms
+2026-04-09T19:46:09  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what organ system is being imaged?'
+2026-04-09T19:46:09  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what organ system is being imaged?'
+2026-04-09T19:46:09  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T19:46:11  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1232ms
+2026-04-09T19:46:11  DEBUG     medvqa.agents.question_analyzer  Target entity: organ system  Expected format: short_phrase  Rephrased: What organ system is shown in this image?
+2026-04-09T19:46:11  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=anatomy_identification  duration=1278ms
+2026-04-09T19:46:12  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T19:46:12  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=head/brain
+2026-04-09T19:46:13  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1694ms
+2026-04-09T19:46:13  DEBUG     medvqa.agents.difficulty_router  Routing rationale: The image is clean and anatomically uncomplicated, and the task is a simple identification question with no subtle pathology to adjudicate.
+2026-04-09T19:46:13  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1724ms
+2026-04-09T19:46:14  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T19:46:14  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what organ system is being imaged?'  is_retry=False  question_type=anatomy_identification  yes_no=False
+2026-04-09T19:46:14  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T19:46:17  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Nervous system'  confidence=high  duration=2228ms
+2026-04-09T19:46:17  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the modality as CT and the body region as the head/brain.', 'Observed cerebral hemispheres and midline brain structures on the axial slice.', 'Mapped the visible anatomy to the nervous system, specifically the brain.']
+2026-04-09T19:46:17  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial CT image through the head', 'Visible cerebral hemispheres', 'Visible midline brain structures', 'Surrounding skull confirming intracranial level']
+2026-04-09T19:46:17  DEBUG     medvqa.agents.reasoning_agent  Limitations: Only a single CT slice is provided, so subtle abnormalities cannot be assessed; however, the organ system is clearly identifiable.
+2026-04-09T19:46:17  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Nervous system'  confidence=high  duration=2258ms
+2026-04-09T19:46:18  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T19:46:18  INFO      medvqa.agents.verification_agent  Verifying answer='Nervous system'  question='what organ system is being imaged?'  question_type=anatomy_identification
+2026-04-09T19:46:19  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1644ms
+2026-04-09T19:46:19  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-09T19:46:19  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer correctly identifies the organ system as the nervous system based on an axial CT of the head/brain. The explanation is supported by the described visible structures (cerebral hemispheres, midline brain structures, skull), and the concise phrase format fits the question.
+2026-04-09T19:46:19  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1672ms
+2026-04-09T19:46:19  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed']
+2026-04-09T19:46:19  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-09T19:46:19  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-09T19:46:19  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T19:46:19  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Nervous system'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=14449ms
+2026-04-09T19:46:19  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Nervous system'  verification=verified  confidence=High  flag_review=False
+2026-04-09T19:46:19  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T19:46:19  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T19:46:19  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Nervous system'  retries=0  total_duration=14453ms ===
+2026-04-09T19:46:19  INFO      medvqa.routes.dataset  Sample 1925 analysis complete  baseline=1483ms  workflow=3336ms  agentic=14456ms  total=14456ms
+2026-04-09T19:46:19  INFO      medvqa.routes.dataset  Sample 1925 answers  baseline='Brain (central nervous system)'  workflow='head'  agentic='Nervous system'  ground_truth='brain'

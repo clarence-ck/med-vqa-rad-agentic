@@ -1,0 +1,56 @@
+2026-04-09T19:30:19  INFO      medvqa  Session started  file=medvqa_20260409_193019_aa071593.log  session_id=aa071593
+2026-04-09T19:30:31  INFO      medvqa.agents.knowledge_retriever  Advanced RAG module loaded successfully
+2026-04-09T19:30:31  INFO      medvqa.server  ============================================================
+2026-04-09T19:30:31  INFO      medvqa.server  MedVisionQuery API  v1.0.0  starting up
+2026-04-09T19:30:31  INFO      medvqa.server  CORS origins: ['http://localhost:5173']
+2026-04-09T19:30:31  INFO      medvqa.server  ============================================================
+2026-04-09T19:30:44  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-09T19:30:44  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-09T19:30:44  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=40ms
+2026-04-09T19:30:44  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-09T19:30:44  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-09T19:30:44  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=42ms
+2026-04-09T19:30:48  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-09T19:30:48  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-09T19:30:48  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=69ms
+2026-04-09T19:30:48  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-09T19:30:48  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-09T19:30:48  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=39ms
+2026-04-09T19:31:18  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-09T19:31:18  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=1
+2026-04-09T19:31:18  WARNING   medvqa.routes.dataset  GPU compute capability 6.1 is below recommended threshold; using CPU for NeuML/pubmedbert-base-embeddings
+2026-04-09T19:31:18  INFO      medvqa.routes.dataset  Loading NeuML/pubmedbert-base-embeddings on device: cpu
+2026-04-09T19:31:23  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=1  skipped=0
+2026-04-09T19:31:23  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-09T19:31:23  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=5128ms
+2026-04-09T19:31:36  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-09T19:31:36  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=2
+2026-04-09T19:31:36  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=2  skipped=0
+2026-04-09T19:31:36  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-09T19:31:36  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=367ms
+2026-04-09T19:31:58  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-09T19:31:58  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=3
+2026-04-09T19:31:58  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=3  skipped=0
+2026-04-09T19:31:58  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-09T19:31:58  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=455ms
+2026-04-09T19:32:53  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-09T19:32:53  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-09T19:32:55  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0
+2026-04-09T19:32:55  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-09T19:32:55  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2207ms
+2026-04-09T19:33:15  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-09T19:33:15  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=7
+2026-04-09T19:33:18  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=7  skipped=0
+2026-04-09T19:33:18  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-09T19:33:18  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2691ms
+2026-04-09T19:35:11  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-09T19:35:11  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=9
+2026-04-09T19:35:14  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=9  skipped=0
+2026-04-09T19:35:14  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-09T19:35:14  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2460ms
+2026-04-09T19:37:45  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-09T19:37:45  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=9
+2026-04-09T19:37:48  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=9  skipped=0
+2026-04-09T19:37:48  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-09T19:37:48  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2192ms
+2026-04-09T19:41:21  INFO      medvqa.server  MedVisionQuery API shutting down

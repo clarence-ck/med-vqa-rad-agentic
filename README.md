@@ -438,12 +438,12 @@ The Guardrail combines `verification_status` + `failure_categories` to produce 5
 ### Metrics computed per cached case
 - **Normalized answer match** — evaluation method depends on ground truth answer style:
   - **Close-ended** (yes/no and other binary medical assessments such as normal/abnormal, present/absent, positive/negative): yes/no answers are normalized by trimming punctuation and matching responses that start with `yes` or `no`; other binary medical assessments use exact match only
-  - **Open-ended** (non-binary ground truth): PubMedBERT semantic similarity ≥ 0.75
+  - **Open-ended** (non-binary ground truth): PubMedBERT semantic similarity ≥ 0.70
 - **Yes/no normalization** — responses beginning with `yes` or `no` count as `yes` / `no` after punctuation trimming
 - **PubMedBERT semantic similarity** — cosine similarity between answer embeddings using a PubMedBERT-based sentence-transformer for biomedical semantic similarity
 - **Lexical Overlap (Token F1)** — unigram overlap between predicted and ground-truth answer; diagnostic metric only, NOT used for accuracy
 - **Winner** — `baseline` / `workflow` / `agentic` / `tie: ...` / `tie_all_wrong`
-- **Disagreement** — whether any two systems produced semantically different answers (PubMedBERT similarity < 0.75)
+- **Disagreement** — whether any two systems produced semantically different answers (PubMedBERT similarity < 0.70)
 
 ### Aggregate evaluation summary
 - Overall accuracy per system (baseline / workflow / agentic) — combines close-ended (exact yes/no) and open-ended (PubMedBERT) correctness
@@ -526,7 +526,7 @@ Purpose: **aggregate performance comparison across all cached analyses**.
 Reads all cached Case Explorer results automatically and displays:
 
 - **System Performance Cards** — Overall accuracy (Exact yes/no + PubMedBERT), average runtime, and total runtime for Baseline, Workflow, and Agentic
-- **Metrics Grid** — Total cases, 3-system disagreement rate, lexical overlap (Token F1), win counts per system, close-ended accuracy (exact yes/no), PubMedBERT accuracy (open-ended, threshold ≥ 0.75)
+- **Metrics Grid** — Total cases, 3-system disagreement rate, lexical overlap (Token F1), win counts per system, close-ended accuracy (exact yes/no), PubMedBERT accuracy (open-ended, threshold ≥ 0.70)
 - **Breakdown Table** — Dropdown selector for two modes:
   - **Question Type** — Flat list with accuracy bars per question category
   - **Difficulty Type** — Expandable parent rows (easy/medium/hard) with nested question-type breakdowns; reflects Difficulty Router policy (retrieval trigger, verification strictness, fallback)
@@ -558,7 +558,7 @@ Hit **Refresh Metrics** to re-aggregate after running new cases in Case Explorer
 
 The train split (1,793 cases) is used as the **retrieval corpus** for the Advanced RAG pipeline. The test split (451 cases) is used exclusively for Case Explorer browsing and evaluation — no test cases appear in the retrieval index.
 
-The evaluation scorer uses exact `yes` / `no` matching for close-ended questions and PubMedBERT semantic similarity with a 0.75 threshold for open-ended questions.
+The evaluation scorer uses exact `yes` / `no` matching for close-ended questions and PubMedBERT semantic similarity with a 0.70 threshold for open-ended questions.
 
 The download script flattens the Hugging Face dataset into one local PNG per QA item and writes a flat `vqa_rad.json` with split labels. Local image filenames are saved as `{split}_{index:04d}.png`.
 

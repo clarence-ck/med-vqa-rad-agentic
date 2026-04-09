@@ -1,0 +1,109 @@
+2026-04-09T19:33:43  INFO      medvqa.routes.dataset  Cache MISS for sample 2022  question='are gallstones identifiable?'  refresh=False  running all 3 pipelines in parallel
+2026-04-09T19:33:43  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=269293 bytes  question='are gallstones identifiable?'
+2026-04-09T19:33:43  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are gallstones identifiable?'  mime_type=image/png  size=269293 bytes ===
+2026-04-09T19:33:43  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T19:33:43  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=269293 bytes)
+2026-04-09T19:33:44  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T19:33:44  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=269293 bytes)
+2026-04-09T19:33:45  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Yes, gallstones are identifiable.",
+  "explanation": "This is an abdominal CT image showing a calcified focus within the gallbladder region consistent with gallstones.",
+  "confidence": "high"
+}
+2026-04-09T19:33:45  INFO      medvqa.agents.baseline  Baseline done  answer='Yes, gallstones are identifiable.'  confidence=high  duration=1557ms
+2026-04-09T19:33:45  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=upper abdomen  quality=good  findings=3  duration=2269ms
+2026-04-09T19:33:45  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver, stomach, spleen, kidneys, and adjacent vascular and soft tissue structures are visible on a single slice.
+2026-04-09T19:33:45  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large fluid-filled structure in the left upper abdomen/stomach region', 'Small hyperdense focus/calcification within a lesion-like area in the upper abdomen', 'No obvious gross free air or acute bony abnormality visible on this slice']
+2026-04-09T19:33:45  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are gallstones identifiable?'
+2026-04-09T19:33:45  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T19:33:47  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1345ms
+2026-04-09T19:33:47  DEBUG     medvqa.agents.question_analyzer  Target entity: gallstones  Expected format: yes_no  Rephrased: Are gallstones visible on the image?
+2026-04-09T19:33:47  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are gallstones identifiable?'  modality=CT  body_region=upper abdomen  question_type=presence_absence
+2026-04-09T19:33:47  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T19:33:47  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-09T19:33:47  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='No'  confidence=low  question_type=presence_absence  duration=3675ms
+2026-04-09T19:33:47  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2894ms
+2026-04-09T19:33:47  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver, stomach, spleen, kidneys, and adjacent soft tissues are visible in a single transverse slice.
+2026-04-09T19:33:47  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large fluid- or contrast-filled structure adjacent to the stomach in the upper abdomen', 'Small calcified focus within the gallbladder region', 'No obvious gross acute abnormality is identifiable on this single slice']
+2026-04-09T19:33:47  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2924ms
+2026-04-09T19:33:48  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are gallstones identifiable?'
+2026-04-09T19:33:48  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are gallstones identifiable?'
+2026-04-09T19:33:48  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T19:33:49  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1344ms
+2026-04-09T19:33:49  DEBUG     medvqa.agents.question_analyzer  Target entity: gallstones  Expected format: yes_no  Rephrased: Are gallstones visible in the image?
+2026-04-09T19:33:49  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=presence_absence  duration=1378ms
+2026-04-09T19:33:50  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T19:33:50  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=presence_absence  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=abdomen
+2026-04-09T19:33:52  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1698ms
+2026-04-09T19:33:52  DEBUG     medvqa.agents.difficulty_router  Routing rationale: The anatomy is uncomplicated and the pathology, if present, is expected to be visually conspicuous on a clean study, making this an easy radiology-style perception task.
+2026-04-09T19:33:52  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1725ms
+2026-04-09T19:33:53  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T19:33:53  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are gallstones identifiable?'  is_retry=False  question_type=presence_absence  yes_no=True
+2026-04-09T19:33:53  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T19:33:53  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=presence_absence
+2026-04-09T19:33:55  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='yes'  confidence=medium  duration=2264ms
+2026-04-09T19:33:55  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: 1) Reviewed the CT image analysis for the gallbladder region. 2) Noted the reported small calcified focus within the gallbladder region. 3) Interpreted this calcification as evidence of a visible gallstone.
+2026-04-09T19:33:55  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Small calcified focus within the gallbladder region', 'Gallbladder visible on axial upper abdominal CT', 'No other dominant acute finding obscuring the gallbladder region']
+2026-04-09T19:33:55  DEBUG     medvqa.agents.reasoning_agent  Limitations: This is based on a single axial CT slice and the calcified focus is small, so characterization is limited. Non-gallstone calcification or partial volume effects cannot be fully excluded from the provided information.
+2026-04-09T19:33:55  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='yes'  confidence=medium  duration=2297ms
+2026-04-09T19:33:56  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T19:33:56  INFO      medvqa.agents.verification_agent  Verifying answer='yes'  question='are gallstones identifiable?'  question_type=presence_absence
+2026-04-09T19:33:58  INFO      medvqa.agents.verification_agent  Verification done  status=low_confidence  confidence=Low  checks=3/5  duration=2235ms
+2026-04-09T19:33:58  WARNING   medvqa.agents.verification_agent  Verification issues: ['The explanation claims a small calcified focus is visible in the gallbladder region, but the provided visual analysis does not explicitly confirm a gallstone or calcification.', "The answer 'yes' may be too strong given that a single CT slice and the summary do not provide sufficient definitive evidence."]
+2026-04-09T19:33:58  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T19:33:58  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct yes/no format and does not directly contradict the image summary, but the explanation overstates certainty beyond what is established in the available visual analysis. The finding may be plausible, but it is not firmly grounded enough to verify confidently.
+2026-04-09T19:33:58  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=low_confidence  confidence=Low  duration=2267ms
+2026-04-09T19:33:58  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'low_confidence']
+2026-04-09T19:33:58  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=True  fallback=add_disclaimer  disclaimer=True
+2026-04-09T19:33:58  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-09T19:33:58  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-09T19:33:58  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='yes'  verification=low_confidence  guardrail_flag=True  consistency=low  cross_modal=low  duration=15398ms
+2026-04-09T19:33:58  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='yes'  verification=low_confidence  confidence=Low  flag_review=True
+2026-04-09T19:33:58  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=low_confidence  flag_review=True  high_severity=True  -> retry=True
+2026-04-09T19:33:58  INFO      medvqa.agents.orchestrator  Pipeline RETRY triggered  reason: verification_status=low_confidence; fallback=add_disclaimer; flag_for_review=True
+2026-04-09T19:33:58  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=True)
+2026-04-09T19:34:01  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T19:34:01  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=269293 bytes)
+2026-04-09T19:34:03  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=upper abdomen  quality=good  findings=3  duration=2292ms
+2026-04-09T19:34:03  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver, spleen, stomach, kidneys, and central retroperitoneal structures are visible on a single slice.
+2026-04-09T19:34:03  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large well-circumscribed fluid-density structure adjacent to the stomach/spleen region', 'Small hyperdense material or calcific focus within the gallbladder region', 'No obvious free intraperitoneal air on this slice']
+2026-04-09T19:34:03  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=upper abdomen  duration=2323ms
+2026-04-09T19:34:04  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are gallstones identifiable?'
+2026-04-09T19:34:04  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are gallstones identifiable?'
+2026-04-09T19:34:04  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T19:34:05  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1278ms
+2026-04-09T19:34:05  DEBUG     medvqa.agents.question_analyzer  Target entity: gallstones  Expected format: yes_no  Rephrased: Are gallstones visible in the image?
+2026-04-09T19:34:05  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=presence_absence  duration=1309ms
+2026-04-09T19:34:06  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T19:34:06  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=presence_absence  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=upper abdomen
+2026-04-09T19:34:08  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1660ms
+2026-04-09T19:34:08  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clear yes/no CT presence-absence case with uncomplicated anatomy and no major obscuration, so it fits an easy radiology routing profile.
+2026-04-09T19:34:08  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1688ms
+2026-04-09T19:34:10  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=True
+2026-04-09T19:34:10  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are gallstones identifiable?'  is_retry=True  question_type=presence_absence  yes_no=True
+2026-04-09T19:34:10  INFO      medvqa.agents.reasoning_agent  Retry context  prev_status=low_confidence  prev_confidence=Low  fallback=add_disclaimer
+2026-04-09T19:34:10  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T19:34:10  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=presence_absence
+2026-04-09T19:34:12  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='yes'  confidence=low  duration=1970ms
+2026-04-09T19:34:12  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the image analysis for findings in the gallbladder region.', 'Identified a small hyperdense/calcific focus adjacent to the gallbladder location.', 'Interpreted this calcific focus as consistent with a gallstone.']
+2026-04-09T19:34:12  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Small hyperdense material or calcific focus within the gallbladder region', 'Axial contrast-enhanced CT of the upper abdomen showing the gallbladder region']
+2026-04-09T19:34:12  DEBUG     medvqa.agents.reasoning_agent  Limitations: The finding is subtle and the description is based on a single CT slice; gallbladder anatomy and the calcific focus are not fully characterized.
+2026-04-09T19:34:12  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='yes'  confidence=low  duration=2003ms
+2026-04-09T19:34:13  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T19:34:13  INFO      medvqa.agents.verification_agent  Verifying answer='yes'  question='are gallstones identifiable?'  question_type=presence_absence
+2026-04-09T19:34:15  INFO      medvqa.agents.verification_agent  Verification done  status=low_confidence  confidence=Low  checks=3/5  duration=1997ms
+2026-04-09T19:34:15  WARNING   medvqa.agents.verification_agent  Verification issues: ['The explanation claims a hyperdense/calcific focus compatible with gallstone, but the provided visual analysis does not mention a visible gallstone or gallbladder-specific finding.', 'The answer is based on an unverified image interpretation and may be too strong for the available evidence.']
+2026-04-09T19:34:15  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T19:34:15  DEBUG     medvqa.agents.verification_agent  Verification notes: The yes/no format fits the question, and there is no direct contradiction with the visual summary. However, the explanation is not grounded in the provided image analysis, which does not document a gallstone. The response should be treated as uncertain and qualified.
+2026-04-09T19:34:15  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=low_confidence  confidence=Low  duration=2029ms
+2026-04-09T19:34:15  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'low_confidence']
+2026-04-09T19:34:15  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=True  fallback=add_disclaimer  disclaimer=True
+2026-04-09T19:34:15  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-09T19:34:15  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-09T19:34:15  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='yes'  verification=low_confidence  guardrail_flag=True  consistency=low  cross_modal=low  duration=32109ms
+2026-04-09T19:34:15  INFO      medvqa.agents.orchestrator  Pipeline attempt 2 result  answer='yes'  verification=low_confidence  confidence=Low
+2026-04-09T19:34:15  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=2  confidence_rank=1  high_failures=1  review=1
+2026-04-09T19:34:15  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=2  confidence_rank=1  high_failures=1  review=1
+2026-04-09T19:34:15  INFO      medvqa.agents.orchestrator  Pipeline RETRY winner: attempt 1 (kept original)
+2026-04-09T19:34:15  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='yes'  retries=1  total_duration=32114ms ===

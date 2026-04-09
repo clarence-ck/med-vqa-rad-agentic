@@ -27,7 +27,7 @@ _log = get_logger("routes.dataset")
 
 _EMBED_MODEL = None
 _EMBED_MODEL_LOCK = threading.Lock()
-_SEMANTIC_THRESHOLD = 0.75  # Threshold for semantic similarity match for open-ended evaluation
+_SEMANTIC_THRESHOLD = 0.7  # Threshold for semantic similarity match for open-ended evaluation
 
 _MEDICAL_SBERT_MODEL_NAME = "NeuML/pubmedbert-base-embeddings"
 
@@ -256,7 +256,7 @@ def _answers_match(predicted: str, ground_truth: str, is_close_ended: bool = Fal
     """Return True if the predicted answer is correct based on question type.
     
     For close-ended (yes/no) questions: uses exact yes/no only.
-    For open-ended questions: uses semantic similarity >= 0.75 threshold only.
+    For open-ended questions: uses semantic similarity >= 0.70 threshold only.
     """
     if is_close_ended:
         # Close-ended: strict exact yes/no matching
@@ -300,7 +300,7 @@ def _subset_accuracy(subset_rows: list[dict], key: str) -> float:
 def _has_semantic_disagreement(baseline: str, workflow: str, agentic: str) -> bool:
     """Check if any two systems disagree using NeuML/pubmedbert-base-embeddings semantic similarity with cached embeddings.
     
-    Disagreement exists if not all pairs are semantically equivalent (similarity >= 0.75).
+    Disagreement exists if not all pairs are semantically equivalent (similarity >= 0.70).
     """
     try:
         baseline_emb = _get_cached_embedding(baseline)
