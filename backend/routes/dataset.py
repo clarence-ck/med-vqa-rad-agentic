@@ -220,8 +220,17 @@ def _normalize_answer(text: str) -> str:
 
 
 def _normalize_yes_no(text: str) -> str:
-    """Normalize answer text for exact yes/no comparison only."""
-    return _normalize_answer(text)
+    """Normalize answer text for yes/no comparison.
+    
+    Returns the yes/no prefix if the answer starts with yes/no,
+    otherwise returns the full normalized text for fallback matching.
+    """
+    normalized = _normalize_answer(text)
+    if normalized.startswith("yes"):
+        return "yes"
+    if normalized.startswith("no"):
+        return "no"
+    return normalized
 
 
 def _token_f1(prediction: str, ground_truth: str) -> float:

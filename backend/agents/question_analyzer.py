@@ -51,6 +51,10 @@ Return a JSON object with:
   "rephrased_question": "A clearer version of the question if ambiguous, otherwise repeat the original"
 }}
 
+IMPORTANT CLASSIFICATION RULES:
+- If the question asks "is X A or B?" (e.g., "normal or abnormal", "benign or malignant", "left or right"), classify as: question_type="abnormality_description" or appropriate category, expected_answer_format="single_word" or "short_phrase". Do NOT use yes_no.
+- Only use question_type="yes_no" and expected_answer_format="yes_no" for true binary questions that can be answered with just "yes" or "no" (e.g., "is there pneumonia?", "can you see the lesion?").
+
 Return ONLY the JSON object, no additional text."""
 
         try:

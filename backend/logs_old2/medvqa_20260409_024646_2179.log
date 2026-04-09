@@ -1,0 +1,66 @@
+2026-04-09T03:17:04  INFO      medvqa.routes.dataset  Cache MISS for sample 2179  question='where is obstruction present, if any?'  refresh=False  running all 3 pipelines in parallel
+2026-04-09T03:17:04  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=175045 bytes  question='where is obstruction present, if any?'
+2026-04-09T03:17:04  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='where is obstruction present, if any?'  mime_type=image/png  size=175045 bytes ===
+2026-04-09T03:17:04  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T03:17:04  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=175045 bytes)
+2026-04-09T03:17:05  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T03:17:05  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=175045 bytes)
+2026-04-09T03:17:05  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "There is obstruction in the distal small bowel, near the right lower abdomen/pelvic region.",
+  "explanation": "The CT shows dilated, contrast-filled small bowel loops with a likely transition point in the right lower abdomen, while more distal bowel is decompressed. This pattern is consistent with small bowel obstruction.",
+  "confidence": "medium"
+}
+2026-04-09T03:17:05  INFO      medvqa.agents.baseline  Baseline done  answer='There is obstruction in the distal small bowel, near the right lower abdomen/pel'  confidence=medium  duration=1480ms
+2026-04-09T03:17:06  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen and pelvis  quality=good  findings=3  duration=2486ms
+2026-04-09T03:17:06  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the abdomen/pelvis showing pelvic anatomy with bowel loops and surrounding soft tissues. The bony pelvis and lower spine are clearly visible, along with contrast-opacified bowel segments in the central abdomen.
+2026-04-09T03:17:06  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Intraperitoneal bowel loops are visible with mixed gas and contrast material', 'No obvious large free air or major distortion of the pelvic bony structures on this single slice', 'Mild image noise and streaking are present but overall detail is adequate']
+2026-04-09T03:17:06  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where is obstruction present, if any?'
+2026-04-09T03:17:06  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:17:07  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=True  clarity=clear  duration=1001ms
+2026-04-09T03:17:07  DEBUG     medvqa.agents.question_analyzer  Target entity: site of obstruction  Expected format: short_phrase  Rephrased: Where is the obstruction located, if present?
+2026-04-09T03:17:07  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='where is obstruction present, if any?'  modality=CT  body_region=abdomen and pelvis  question_type=location
+2026-04-09T03:17:07  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T03:17:07  DEBUG     medvqa.agents.workflow_baseline  Branch taken: location
+2026-04-09T03:17:07  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='abdomen and pelvis'  confidence=medium  question_type=location  duration=3567ms
+2026-04-09T03:17:08  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen and pelvis  quality=good  findings=3  duration=2819ms
+2026-04-09T03:17:08  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the abdomen and pelvis showing multiple contrast-opacified bowel loops and surrounding soft tissues. The pelvic bony structures and lower lumbar spine are visible on this slice, with no gross abnormalities obvious on this single image.
+2026-04-09T03:17:08  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Contrast within bowel loops', 'No obvious free air or large fluid collection on this slice', 'Pelvic bones and spine appear intact on this image']
+2026-04-09T03:17:08  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen and pelvis  duration=2857ms
+2026-04-09T03:17:08  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='where is obstruction present, if any?'
+2026-04-09T03:17:08  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where is obstruction present, if any?'
+2026-04-09T03:17:08  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:17:09  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=True  clarity=clear  duration=953ms
+2026-04-09T03:17:09  DEBUG     medvqa.agents.question_analyzer  Target entity: obstruction  Expected format: short_phrase  Rephrased: Where is the obstruction present, if any?
+2026-04-09T03:17:09  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=992ms
+2026-04-09T03:17:10  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T03:17:10  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=True  modality=CT  region=abdomen and pelvis
+2026-04-09T03:17:12  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1593ms
+2026-04-09T03:17:12  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clear abdominal-pelvic CT with straightforward anatomy and no obvious obscuring artifact or subtle lesion, so the case is low complexity and does not require retrieval.
+2026-04-09T03:17:12  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1621ms
+2026-04-09T03:17:13  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T03:17:13  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='where is obstruction present, if any?'  is_retry=False  question_type=location  yes_no=False
+2026-04-09T03:17:13  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T03:17:16  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='No obvious obstruction is visible on this slice.'  confidence=medium  duration=2955ms
+2026-04-09T03:17:16  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the CT slice for bowel caliber changes and a transition point.', 'Noted that bowel loops contain contrast and do not appear grossly dilated on this image.', 'Checked for indirect signs such as free air or large fluid collection, which were not present.', 'Concluded that no definite obstruction is evident on this single slice.']
+2026-04-09T03:17:16  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Multiple contrast-opacified bowel loops', 'No obvious free air', 'No large fluid collection', 'No gross abnormalities obvious on this single image']
+2026-04-09T03:17:16  DEBUG     medvqa.agents.reasoning_agent  Limitations: This is a single axial CT slice, so an obstruction elsewhere in the abdomen or pelvis could be missed without the full study and additional planes.
+2026-04-09T03:17:16  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='No obvious obstruction is visible on this slice.'  confidence=medium  duration=2987ms
+2026-04-09T03:17:16  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T03:17:17  INFO      medvqa.agents.verification_agent  Verifying answer='No obvious obstruction is visible on this slice.'  question='where is obstruction present, if any?'  question_type=location
+2026-04-09T03:17:19  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=5/5  duration=2144ms
+2026-04-09T03:17:19  WARNING   medvqa.agents.verification_agent  Verification issues: ['The question asks where obstruction is present, if any, but the answer states none is visible on this single slice; this is appropriately cautious but does not localize an obstruction because none is identified.', 'Assessment is limited to a single CT slice, so absence of obstruction cannot be definitively established from the provided evidence.']
+2026-04-09T03:17:19  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T03:17:19  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is consistent with the visual summary and uses appropriately cautious language. However, it is limited by the fact that only one slice is shown, so the conclusion should be treated as non-definitive.
+2026-04-09T03:17:19  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2180ms
+2026-04-09T03:17:19  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-09T03:17:19  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T03:17:19  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=5/5
+2026-04-09T03:17:19  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T03:17:19  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='No obvious obstruction is visible on this slice.'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=14885ms
+2026-04-09T03:17:19  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='No obvious obstruction is visible on this slice.'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-09T03:17:19  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T03:17:19  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T03:17:19  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='No obvious obstruction is visible on this slice.'  retries=0  total_duration=14891ms ===
+2026-04-09T03:17:19  INFO      medvqa.routes.dataset  Sample 2179 analysis complete  baseline=1485ms  workflow=3570ms  agentic=14895ms  total=14895ms
+2026-04-09T03:17:19  INFO      medvqa.routes.dataset  Sample 2179 answers  baseline='There is obstruction in the distal small bowel, near the rig'  workflow='abdomen and pelvis'  agentic='No obvious obstruction is visible on this slice.'  ground_truth='proximal aspect of the appendix'

@@ -1,0 +1,23 @@
+2026-04-09T03:33:15  INFO      medvqa.routes.dataset  Cache MISS for sample 1945  question='the condition in which a patient has enlarged ventricles as seen in this image?'  refresh=False  running all 3 pipelines in parallel
+2026-04-09T03:33:15  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=99775 bytes  question='the condition in which a patient has enlarged ventricles as seen in this image?'
+2026-04-09T03:33:15  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='the condition in which a patient has enlarged ventricles as seen in this image?'  mime_type=image/png  size=99775 bytes ===
+2026-04-09T03:33:15  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T03:33:15  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=99775 bytes)
+2026-04-09T03:33:17  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Hydrocephalus",
+  "explanation": "This brain imaging shows enlarged cerebral ventricles, which is characteristic of hydrocephalus. Hydrocephalus refers to abnormal accumulation of cerebrospinal fluid causing ventricular enlargement.",
+  "confidence": "high"
+}
+2026-04-09T03:33:17  INFO      medvqa.agents.baseline  Baseline done  answer='Hydrocephalus'  confidence=high  duration=1643ms
+2026-04-09T03:33:17  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen/pelvis  quality=good  findings=3  duration=2159ms
+2026-04-09T03:33:17  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the lower abdomen/pelvis showing two large fluid-attenuation bowel-containing structures occupying most of the field of view. The image is centered on the midline with surrounding soft tissues and body wall visible.
+2026-04-09T03:33:17  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Marked distention of bowel loops visible on this slice', 'Bowel contents/air-fluid level-like internal heterogeneity within the left-sided loop', 'No obvious free air visible on this single image']
+2026-04-09T03:33:17  INFO      medvqa.agents.question_analyzer  Analyzing question: 'the condition in which a patient has enlarged ventricles as seen in this image?'
+2026-04-09T03:33:17  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:33:19  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=medical_knowledge  med_knowledge=True  clarity=clear  duration=1112ms
+2026-04-09T03:33:19  DEBUG     medvqa.agents.question_analyzer  Target entity: enlarged ventricles  Expected format: short_phrase  Rephrased: What condition is characterized by enlarged ventricles as seen in this image?
+2026-04-09T03:33:19  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='the condition in which a patient has enlarged ventricles as seen in this image?'  modality=CT  body_region=abdomen/pelvis  question_type=abnormality_description
+2026-04-09T03:33:19  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T03:33:19  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-09T03:33:19  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Marked distention of bowel loops visible on this slice; Bowel contents/air-fluid'  confidence=medium  question_type=abnormality_description  duration=3339ms

@@ -467,7 +467,7 @@ Three-panel layout:
 - **Case Analysis (right)** — Same component set as Dashboard (`AnswerCard`, `ExplanationCard`, `AgentTrace`, `VerificationPanel`, `FailureModeDrawer`) with agentic details, or simplified cards for baseline/workflow views
 
 Features:
-- Browse **test-split only** samples (default 30) grouped by question type with deterministic ordering
+- Browse **test-split only** samples (default 200, balanced across question types) grouped by question type with deterministic ordering
 - Comparison toggle with per-system timing badges (agentic/workflow/baseline durations)
 - Sample IDs visible in dropdown options for easy reference
 - Cache-aware analysis with Refresh button to force re-run

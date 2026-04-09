@@ -1,0 +1,115 @@
+2026-04-09T03:22:51  INFO      medvqa.routes.dataset  Cache MISS for sample 2190  question='why is the pancreas abnormal?'  refresh=False  running all 3 pipelines in parallel
+2026-04-09T03:22:51  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=144624 bytes  question='why is the pancreas abnormal?'
+2026-04-09T03:22:51  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='why is the pancreas abnormal?'  mime_type=image/png  size=144624 bytes ===
+2026-04-09T03:22:51  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T03:22:51  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=144624 bytes)
+2026-04-09T03:22:52  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T03:22:52  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=144624 bytes)
+2026-04-09T03:22:52  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "The pancreas is abnormal because it is surrounded by inflammatory change, most consistent with acute pancreatitis.",
+  "explanation": "This is an axial CT scan of the abdomen. The pancreas appears enlarged/ill-defined with adjacent fat stranding and fluid, which are typical signs of inflammation.",
+  "confidence": "medium"
+}
+2026-04-09T03:22:52  INFO      medvqa.agents.baseline  Baseline done  answer='The pancreas is abnormal because it is surrounded by inflammatory change, most c'  confidence=medium  duration=1436ms
+2026-04-09T03:22:54  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=upper abdomen  quality=good  findings=3  duration=2063ms
+2026-04-09T03:22:54  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the upper abdomen showing solid abdominal organs and adjacent bowel loops. There is a large gas-filled gastric/bowel structure and visible postoperative/surgical material in the left upper abdomen.
+2026-04-09T03:22:54  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large intraluminal gas collection in the upper abdomen', 'Postoperative-appearing clip or foreign material near the left upper abdomen', 'No obvious motion artifact on this single image']
+2026-04-09T03:22:54  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=upper abdomen  duration=2094ms
+2026-04-09T03:22:55  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='why is the pancreas abnormal?'
+2026-04-09T03:22:55  INFO      medvqa.agents.question_analyzer  Analyzing question: 'why is the pancreas abnormal?'
+2026-04-09T03:22:55  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:22:56  INFO      medvqa.agents.question_analyzer  Question analysis done  type=explanation_request  reasoning=medical_knowledge  med_knowledge=True  clarity=ambiguous  duration=1098ms
+2026-04-09T03:22:56  DEBUG     medvqa.agents.question_analyzer  Target entity: pancreas abnormality  Expected format: sentence  Rephrased: Why does the pancreas appear abnormal on this CT image?
+2026-04-09T03:22:56  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=explanation_request  duration=1133ms
+2026-04-09T03:22:56  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T03:22:56  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=explanation_request  reasoning=medical_knowledge  med_knowledge=True  modality=CT  region=upper abdomen
+2026-04-09T03:22:58  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=hard  needs_retrieval=True  verification=strict  fallback=flag_for_review  duration=1556ms
+2026-04-09T03:22:58  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a difficult perception-and-interpretation case because the anatomy is cluttered by postoperative change and gas overlap, so a careful retrieval-supported, strictly verified pipeline is warranted.
+2026-04-09T03:22:58  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=hard  needs_retrieval=True  duration=1590ms
+2026-04-09T03:22:59  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T03:22:59  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-09T03:22:59  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='why is the pancreas abnormal?'  modality=CT  body_region=upper abdomen  question_type=explanation_request  target_entity=pancreas abnormality  advanced_rag=True
+2026-04-09T03:22:59  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=why is the pancreas abnormal? | modality=CT | body_region=upper abdomen | finding=normal | rewrite=True rerank=True reflection=True
+2026-04-09T03:23:00  INFO      medvqa.agents.advanced_rag  Query rewrite | original='why is the pancreas abnormal?'
+2026-04-09T03:23:00  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='CT upper abdomen pancreas abnormality cause'  changed=True
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='upper abdomen': 209 matches
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 170 matches
+2026-04-09T03:23:00  WARNING   medvqa.agents.advanced_rag  Metadata filter found no intersection; falling back to full corpus
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag  Metadata filter: none applied (full corpus search)
+2026-04-09T03:23:00  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag  Dense retrieval searching full FAISS index with 1792 vectors
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/20
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag    1. id=723 score=0.6157 | Q: which organ has the abnormality? | A: pancreas
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag    2. id=111 score=0.5794 | Q: what is wrong with the pancreas? | A: fatty infiltration
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag    3. id=735 score=0.5788 | Q: is there a pseudocyst in the pancreas? | A: no
+2026-04-09T03:23:00  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval searching full corpus of 1792 documents
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/20
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag    1. id=723 score=9.6027 | Q: which organ has the abnormality? | A: pancreas
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag    2. id=745 score=9.0484 | Q: where is the abnormality? | A: right upper lobe
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag    3. id=1101 score=6.2896 | Q: is the abdomen distended? | A: no
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=20 sparse=20
+2026-04-09T03:23:00  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 20 unique candidates
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/20
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag    1. id=723 score=0.0328 method=hybrid_rrf | Q: which organ has the abnormality? | A: pancreas
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag    2. id=712 score=0.0301 method=hybrid_rrf | Q: what organ is enlarged? | A: pancreas
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag    3. id=302 score=0.0299 method=hybrid_rrf | Q: is the pancreas edematous? | A: yes
+2026-04-09T03:23:00  INFO      medvqa.agents.advanced_rag  Reranking 20 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-09T03:23:00  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 20 candidates...
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag    1. id=723 score=-5.4315 method=reranked softmax=0.8947 | Q: which organ has the abnormality? | A: pancreas
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag    2. id=745 score=-9.5542 method=reranked softmax=0.0145 | Q: where is the abnormality? | A: right upper lobe
+2026-04-09T03:23:00  DEBUG     medvqa.agents.advanced_rag    3. id=302 score=-9.8194 method=reranked softmax=0.0111 | Q: is the pancreas edematous? | A: yes
+2026-04-09T03:23:00  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 3 retrieved candidates
+2026-04-09T03:23:00  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 3 retrieved candidates via LLM
+2026-04-09T03:23:01  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=True  confidence=medium  recommendation=augment
+2026-04-09T03:23:01  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ['Case 1 is directly relevant and consistent with the pancreas being abnormal.', 'Case 2 is less relevant because it refers to the right upper lobe, which is not in the upper abdomen and likely indicates a different anatomy/modality context.', 'Case 3 is relevant and medically plausible, but it answers a specific feature (edema) rather than the cause of abnormality.']
+2026-04-09T03:23:01  INFO      medvqa.agents.advanced_rag  Self-reflection accepted retrieved candidates
+2026-04-09T03:23:01  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-09T03:23:01  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-09T03:23:01  DEBUG     medvqa.agents.advanced_rag    1. id=723 score=-5.4315 method=reranked softmax=0.8947 | Q: which organ has the abnormality? | A: pancreas
+2026-04-09T03:23:01  DEBUG     medvqa.agents.advanced_rag    2. id=745 score=-9.5542 method=reranked softmax=0.0145 | Q: where is the abnormality? | A: right upper lobe
+2026-04-09T03:23:01  DEBUG     medvqa.agents.advanced_rag    3. id=302 score=-9.8194 method=reranked softmax=0.0111 | Q: is the pancreas edematous? | A: yes
+2026-04-09T03:23:01  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases  (query_rewritten=True  finding_category=normal)
+2026-04-09T03:23:05  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=3  duration=6223ms
+2026-04-09T03:23:05  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The pancreas lies in the upper abdomen, crossing behind the stomach and in front of the major vessels and spine.', 'Normal pancreatic tissue is fairly uniform in density and enhances after IV contrast on CT.', 'Peripancreatic fat stranding, fluid, or loss of normal tissue definition often indicates inflammation or other pathology.', 'Focal masses, ductal dilation, calcifications, or atrophy are important abnormal CT findings involving the pancreas.', 'CT assessment often compares the pancreas with adjacent liver, spleen, bowel, and vascular structures for size, contour, and enhancement.']
+2026-04-09T03:23:05  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On upper abdominal CT, the pancreas is normally a thin, well-defined retroperitoneal organ that enhances more uniformly than the surrounding fat. The limited retrieved evidence only loosely points bac
+2026-04-09T03:23:05  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=3  duration=6258ms
+2026-04-09T03:23:06  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T03:23:06  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='why is the pancreas abnormal?'  is_retry=False  question_type=explanation_request  yes_no=False
+2026-04-09T03:23:06  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=3
+2026-04-09T03:23:07  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=16057ms
+2026-04-09T03:23:07  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the upper abdomen showing solid abdominal organs and adjacent bowel. There is a large gas-filled gastric structure and visible bowel contents, with the spine and posterior abdominal vessels centrally/posteriorly located.
+2026-04-09T03:23:07  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large air-filled gastric lumen', 'Gas and fecal material within adjacent bowel on the left side of the image', 'Small linear radiopaque object near the mid-upper abdomen']
+2026-04-09T03:23:07  INFO      medvqa.agents.question_analyzer  Analyzing question: 'why is the pancreas abnormal?'
+2026-04-09T03:23:07  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:23:08  INFO      medvqa.agents.question_analyzer  Question analysis done  type=explanation_request  reasoning=medical_knowledge  med_knowledge=True  clarity=clear  duration=959ms
+2026-04-09T03:23:08  DEBUG     medvqa.agents.question_analyzer  Target entity: pancreas abnormality  Expected format: sentence  Rephrased: Why does the pancreas appear abnormal on this image?
+2026-04-09T03:23:08  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='why is the pancreas abnormal?'  modality=CT  body_region=abdomen  question_type=explanation_request
+2026-04-09T03:23:08  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T03:23:08  DEBUG     medvqa.agents.workflow_baseline  Branch taken: fallback/other
+2026-04-09T03:23:08  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Axial CT image of the upper abdomen showing solid abdominal organs and adjacent '  confidence=low  question_type=explanation_request  duration=17095ms
+2026-04-09T03:23:09  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='The pancreas appears abnormal because the upper abdomen shows postoperative chan'  confidence=low  duration=2992ms
+2026-04-09T03:23:09  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the study as an upper abdominal CT.', 'Checked whether the pancreas had a normal smooth contour and clear visibility.', 'Noted adjacent large gas-filled bowel/stomach and postoperative material near the left upper abdomen.', 'Concluded the pancreas appears abnormal mainly because it is obscured/distorted by postoperative and adjacent bowel changes, rather than a definite intrinsic pancreatic lesion.']
+2026-04-09T03:23:09  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Large gas-filled gastric/bowel structure in the upper abdomen', 'Postoperative-appearing clip or foreign material near the left upper abdomen', 'Pancreas not clearly delineated as a normal uniform retroperitoneal organ on this single image', 'Knowledge that postoperative changes and adjacent bowel gas can obscure pancreatic anatomy on CT']
+2026-04-09T03:23:09  DEBUG     medvqa.agents.reasoning_agent  Limitations: This is based on a single axial CT image with limited visualization of the pancreas. No definite intrinsic pancreatic abnormality can be confirmed, so the answer is necessarily cautious.
+2026-04-09T03:23:09  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='The pancreas appears abnormal because the upper abdomen show'  confidence=low  duration=3026ms
+2026-04-09T03:23:10  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T03:23:10  INFO      medvqa.agents.verification_agent  Verifying answer='The pancreas appears abnormal because the upper abdomen shows postoperative chan'  question='why is the pancreas abnormal?'  question_type=explanation_request
+2026-04-09T03:23:11  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Low  checks=5/5  duration=1865ms
+2026-04-09T03:23:11  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T03:23:11  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer is consistent with the image analysis and appropriately cautious. It explains apparent pancreatic abnormality as likely due to postoperative changes and surrounding gas-filled bowel/stomach obscuring the view, which is grounded in the visible findings. However, the conclusion is limited by a single CT slice and low confidence, so it should remain tentative.
+2026-04-09T03:23:11  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Low  duration=1900ms
+2026-04-09T03:23:11  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-09T03:23:11  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T03:23:11  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=5/5
+2026-04-09T03:23:11  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T03:23:11  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='The pancreas appears abnormal because the upper abdomen show'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=20653ms
+2026-04-09T03:23:11  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='The pancreas appears abnormal because the upper abdomen show'  verification=partially_verified  confidence=Low  flag_review=False
+2026-04-09T03:23:11  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T03:23:11  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T03:23:12  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='The pancreas appears abnormal because the upper abdomen show'  retries=0  total_duration=20661ms ===
+2026-04-09T03:23:12  INFO      medvqa.routes.dataset  Sample 2190 analysis complete  baseline=1443ms  workflow=17097ms  agentic=20663ms  total=20665ms
+2026-04-09T03:23:12  INFO      medvqa.routes.dataset  Sample 2190 answers  baseline='The pancreas is abnormal because it is surrounded by inflamm'  workflow='Axial CT image of the upper abdomen showing solid abdominal '  agentic='The pancreas appears abnormal because the upper abdomen show'  ground_truth='enlarged'

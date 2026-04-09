@@ -1,7 +1,7 @@
 """
 Advanced RAG Retriever for Medical VQA
-Implements: query rewriting, hybrid search (dense + BM25),
-metadata filtering, cross-encoder reranking, self-reflection validation
+Implements: hybrid search (dense + BM25), metadata filtering,
+cross-encoder reranking, confidence-based validation, and HyDE fallback.
 Uses FAISS for efficient vector similarity search.
 """
 
@@ -230,7 +230,8 @@ class AdvancedRAGRetriever:
                 'finding_category': finding_category,
                 'answer_style': answer_style,
                 'laterality': laterality,
-                'combined_text': f"{question} {answer}"
+                'combined_text': f"{question} {answer}",
+                'embedding_text': question  # Dense index uses question-only for symmetric matching
             }
             
             self._train_examples.append(example)
@@ -364,11 +365,11 @@ class AdvancedRAGRetriever:
 
         _log.info("Building indices for %d examples...", len(self._train_examples))
 
-        # 1. Dense embeddings with FAISS
-        _log.info("Computing dense embeddings (model=%s)...", self.embedding_model_name)
-        texts = [ex['combined_text'] for ex in self._train_examples]
+        # 1. Dense embeddings with FAISS (question-only for symmetric query-document matching)
+        _log.info("Computing dense embeddings (model=%s) on question-only text...", self.embedding_model_name)
+        embedding_texts = [ex['embedding_text'] for ex in self._train_examples]
         model = self._get_embedding_model()
-        self._embeddings = model.encode(texts, show_progress_bar=True, convert_to_numpy=True)
+        self._embeddings = model.encode(embedding_texts, show_progress_bar=True, convert_to_numpy=True)
 
         # Get actual embedding dimension
         self._embedding_dim = self._embeddings.shape[1]
@@ -383,10 +384,11 @@ class AdvancedRAGRetriever:
 
         _log.info("FAISS index built with %d vectors", self._faiss_index.ntotal)
 
-        # 2. Sparse BM25 index
+        # 2. Sparse BM25 index (uses question+answer for keyword coverage)
         _log.info("Building BM25 sparse index...")
+        bm25_texts = [ex['combined_text'] for ex in self._train_examples]
         self._tokenized_corpus = [
-            self._tokenize(text) for text in texts
+            self._tokenize(text) for text in bm25_texts
         ]
         self._bm25 = BM25Okapi(self._tokenized_corpus)
 
@@ -431,7 +433,7 @@ Original question: {question}
 Return ONLY the rewritten query as a single short sentence, no explanations."""
             
             response = client.chat.completions.create(
-                model=OPENAI_MODEL or "gpt-4",
+                model=OPENAI_MODEL,
                 messages=[{"role": "user", "content": prompt}],
                 max_completion_tokens=150,
                 temperature=0.3
@@ -454,18 +456,72 @@ Return ONLY the rewritten query as a single short sentence, no explanations."""
             _log.warning("Query rewriting failed: %s", e)
             return question
     
+    def generate_hypothetical_answer(
+        self,
+        question: str,
+        modality: str = None,
+        body_region: str = None
+    ) -> str:
+        """
+        HyDE (Hypothetical Document Embeddings): Generate a hypothetical ideal answer.
+        This bridges the gap between query space and document space for better retrieval.
+        """
+        try:
+            client = self._get_openai_client()
+            
+            context_parts = []
+            if modality and modality != 'unknown':
+                context_parts.append(f"Imaging modality: {modality}")
+            if body_region and body_region != 'unknown':
+                context_parts.append(f"Body region: {body_region}")
+            
+            context = "\n".join(context_parts) if context_parts else "No specific context provided."
+            
+            prompt = f"""You are generating a hypothetical ideal answer for retrieval purposes.
+Given a medical imaging question, write a short, factual answer as if you had seen the image.
+This will be used to find similar real cases from a database.
+
+Question: {question}
+{context}
+
+Generate a hypothetical answer (1-2 sentences) that would be typical for this type of question.
+Be specific and medical but do not make up findings. Return ONLY the answer text, no preamble."""
+            
+            response = client.chat.completions.create(
+                model=OPENAI_MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                max_completion_tokens=150,
+                temperature=0.2
+            )
+            
+            hypothetical = response.choices[0].message.content.strip()
+            if not hypothetical:
+                return question
+            
+            return hypothetical
+
+        except Exception as e:
+            _log.warning("HyDE generation failed: %s", e)
+            return question
+    
+    # Retrieval confidence thresholds
+    _TOP1_SOFTMAX_THRESHOLD = 0.55
+    _SOFTMAX_MARGIN_THRESHOLD = 0.15
+    _DENSE_TOP1_THRESHOLD = 0.35
+    _AGREEMENT_TOPK = 5
+
     def retrieve(
         self,
         question: str,
         modality: str = None,
         body_region: str = None,
         finding_category: str = None,
-        use_query_rewrite: bool = True,
-        use_reranking: bool = True,
-        use_self_reflection: bool = True
     ) -> List[RetrievalResult]:
         """
-        Full advanced RAG retrieval pipeline
+        Full advanced RAG retrieval pipeline.
+        No LLM calls during retrieval — uses a multi-signal confidence gate instead of
+        self-reflection, and skips query rewriting. HyDE is used as a fallback when
+        the initial retrieval confidence is low.
         """
         if not self._is_indexed:
             if not self.build_index():
@@ -473,26 +529,17 @@ Return ONLY the rewritten query as a single short sentence, no explanations."""
 
         _log.info(
             "Retrieval pipeline started | question=%s | modality=%s | body_region=%s | "
-            "finding=%s | rewrite=%s rerank=%s reflection=%s",
+            "finding=%s | rerank=mandatory",
             self._shorten_text(question, 140),
             modality or "unknown",
             body_region or "unknown",
             finding_category or "unknown",
-            use_query_rewrite,
-            use_reranking,
-            use_self_reflection,
         )
 
-        # 1. Query Rewriting
-        if use_query_rewrite:
-            query = self.rewrite_query(question, modality, body_region)
-            self._last_query_rewritten = query.strip() != question.strip()
-            _log.info("Query rewrite | original=%r", question)
-            _log.info("Query rewrite | rewritten=%r  changed=%s", query, self._last_query_rewritten)
-        else:
-            query = question
-            self._last_query_rewritten = False
-            _log.debug("Query rewrite disabled; using original question")
+        # 1. Use original question directly (no LLM rewrite)
+        query = question
+        self._last_query_rewritten = False
+        _log.debug("Using original question as query (no LLM rewrite)")
 
         # 2. Metadata Filtering
         candidate_indices = self._apply_metadata_filter(modality, body_region, finding_category)
@@ -515,32 +562,66 @@ Return ONLY the rewritten query as a single short sentence, no explanations."""
         _log.info("Hybrid RRF merge produced %d unique candidates", len(merged))
         self._log_top_hits("Merged candidates", merged)
 
-        # 4. Reranking (if enabled)
-        if use_reranking and len(merged) > self.top_k_final:
-            _log.info(
-                "Reranking %d candidates down to top_k_final=%d (cross-encoder=%s)",
-                len(merged),
-                self.top_k_final,
-                self.cross_encoder_name,
-            )
-            reranked = self._rerank(query, merged)
-        else:
-            reranked = merged[:self.top_k_final]
-            _log.debug("Reranking skipped; using first %d merged candidates", len(reranked))
+        # 4. Reranking (mandatory)
+        _log.info(
+            "Reranking %d candidates down to top_k_final=%d (cross-encoder=%s)",
+            len(merged),
+            self.top_k_final,
+            self.cross_encoder_name,
+        )
+        reranked = self._rerank(query, merged)
         self._log_top_hits("Reranked candidates", reranked)
 
-        # 5. Self-Reflection Validation (if enabled)
-        if use_self_reflection:
-            _log.info("Self-reflection: validating %d retrieved candidates", len(reranked))
-            validated = self._self_reflect(question, reranked, modality, body_region)
-            if validated is None:  # Reflection indicated poor quality
-                _log.warning("Self-reflection flagged low quality; returning no retrieved candidates")
-                return []
+        # 5. Confidence-based validation (replaces LLM self-reflection)
+        confidence = self._compute_retrieval_confidence(dense_results, sparse_results, reranked)
+        validated = reranked if confidence["is_confident"] else []
+
+        _log.info(
+            "Retrieval confidence | level=%s weak_signals=%d top1_softmax=%.3f margin=%.3f dense_top1=%.3f agreement=%s",
+            confidence["level"],
+            confidence["weak_signals"],
+            confidence["top1_softmax"],
+            confidence["softmax_margin"],
+            confidence["dense_top1"],
+            confidence["top_candidate_in_dense_and_sparse_top5"],
+        )
+
+        if confidence["level"] == "medium":
+            _log.warning("Retrieval confidence is medium; returning results without HyDE")
+
+        # 6. HyDE Fallback: If confidence is low, retry with HyDE on full corpus
+        if not confidence["is_confident"]:
+            _log.warning("Initial retrieval confidence is low; retrying with HyDE")
+            hyde_answer = self.generate_hypothetical_answer(question, modality, body_region)
+            _log.info("HyDE generation | original=%r", question)
+            _log.info("HyDE generation | hypothetical=%r", hyde_answer)
+            query = f"{question} {hyde_answer}"
+            self._last_query_rewritten = True
+            
+            # Retry on FULL corpus (relax metadata filter)
+            dense_results = self._dense_retrieval(query, None)
+            sparse_results = self._sparse_retrieval(query, None)
+            merged = self._merge_results(dense_results, sparse_results)
+            
+            reranked = self._rerank(query, merged)
+            
+            confidence = self._compute_retrieval_confidence(dense_results, sparse_results, reranked)
+            validated = reranked if confidence["is_confident"] else []
+
+            _log.info(
+                "HyDE confidence | level=%s weak_signals=%d top1_softmax=%.3f margin=%.3f dense_top1=%.3f agreement=%s",
+                confidence["level"],
+                confidence["weak_signals"],
+                confidence["top1_softmax"],
+                confidence["softmax_margin"],
+                confidence["dense_top1"],
+                confidence["top_candidate_in_dense_and_sparse_top5"],
+            )
+
+            if not validated:
+                _log.warning("HyDE retry also returned low confidence results")
             else:
-                _log.info("Self-reflection accepted retrieved candidates")
-        else:
-            validated = reranked[:self.top_k_final]
-            _log.debug("Self-reflection disabled")
+                _log.info("HyDE retry complete: returning %d final candidates", len(validated))
 
         _log.info("Retrieval complete: returning %d final candidates", len(validated))
         self._log_top_hits("Final retrieved cases", validated)
@@ -737,9 +818,9 @@ Return ONLY the rewritten query as a single short sentence, no explanations."""
         candidates: List[RetrievalResult]
     ) -> List[RetrievalResult]:
         """Cross-encoder reranking"""
-        if len(candidates) <= self.top_k_final:
-            _log.debug("Reranking skipped: candidate count (%d) is already within top_k_final", len(candidates))
-            return candidates
+        if not candidates:
+            _log.debug("Reranking skipped: no candidates provided")
+            return []
 
         _log.info("Cross-encoder reranking %d candidates...", len(candidates))
         
@@ -769,90 +850,72 @@ Return ONLY the rewritten query as a single short sentence, no explanations."""
         
         reranked = sorted(candidates, key=lambda x: x.score, reverse=True)
         return reranked[:self.top_k_final]
-    
-    def _self_reflect(
+
+    def _compute_retrieval_confidence(
         self,
-        original_question: str,
-        retrieved: List[RetrievalResult],
-        modality: str = None,
-        body_region: str = None
-    ) -> Optional[List[RetrievalResult]]:
+        dense_results: List[Tuple[int, float]],
+        sparse_results: List[Tuple[int, float]],
+        reranked: List[RetrievalResult],
+    ) -> Dict[str, Any]:
+        """Compute a multi-signal retrieval confidence summary.
+
+        Confidence signals:
+        - softmax confidence of the top reranked candidate
+        - margin between the top two reranked candidates
+        - top dense score
+        - agreement of the top reranked candidate with dense/sparse top-k
         """
-        Self-reflection: validate retrieved context quality
-        Returns None if reflection suggests poor quality
-        """
-        try:
-            client = self._get_openai_client()
-            _log.info("Self-reflection: evaluating %d retrieved candidates via LLM", len(retrieved))
-            
-            # Prepare context for reflection
-            context = f"""Original question: {original_question}
-Image context: Modality={modality or 'unknown'}, Region={body_region or 'unknown'}
+        if not reranked:
+            return {
+                "level": "low",
+                "is_confident": False,
+                "weak_signals": 4,
+                "top1_softmax": 0.0,
+                "softmax_margin": 0.0,
+                "dense_top1": 0.0,
+                "top_candidate_in_dense_and_sparse_top5": False,
+            }
 
-Retrieved similar cases:
-"""
-            for i, r in enumerate(retrieved, 1):
-                context += f"\n{i}. Q: {r.question}\n   A: {r.answer}"
-            
-            prompt = f"""You are validating retrieved context for a medical VQA system.
+        top1_softmax = float(reranked[0].metadata.get("rerank_softmax", 0.0) or 0.0)
+        top2_softmax = float(reranked[1].metadata.get("rerank_softmax", 0.0) or 0.0) if len(reranked) > 1 else 0.0
+        softmax_margin = top1_softmax - top2_softmax
 
-{context}
+        dense_top1 = float(dense_results[0][1]) if dense_results else 0.0
+        top_candidate_id = reranked[0].metadata.get("id")
+        dense_top_ids = {idx for idx, _ in dense_results[: self._AGREEMENT_TOPK]}
+        sparse_top_ids = {idx for idx, _ in sparse_results[: self._AGREEMENT_TOPK]}
+        agreement = top_candidate_id in dense_top_ids and top_candidate_id in sparse_top_ids
 
-Evaluate the quality of these retrieved cases for answering the original question.
-Consider:
-1. Relevance: Do the retrieved cases relate to the same medical topic?
-2. Modality match: Do they match the imaging modality (if specified)?
-3. Consistency: Are the answers consistent with expected medical knowledge?
+        weak_signals = 0
+        if top1_softmax < self._TOP1_SOFTMAX_THRESHOLD:
+            weak_signals += 1
+        if softmax_margin < self._SOFTMAX_MARGIN_THRESHOLD:
+            weak_signals += 1
+        if dense_top1 < self._DENSE_TOP1_THRESHOLD:
+            weak_signals += 1
+        if not agreement:
+            weak_signals += 1
 
-Respond with ONLY a JSON object:
-{{
-  "is_relevant": true/false,
-  "confidence": "high/medium/low",
-  "issues": ["list any issues or empty"],
-  "recommendation": "use/augment/reject"
-}}"""
-            
-            response = client.chat.completions.create(
-                model=OPENAI_MODEL or "gpt-4",
-                messages=[{"role": "user", "content": prompt}],
-                max_completion_tokens=200,
-                temperature=0.1
-            )
-            
-            content = response.choices[0].message.content.strip()
-            # Extract JSON
-            json_match = re.search(r'\{.*\}', content, re.DOTALL)
-            if json_match:
-                result = json.loads(json_match.group())
-                
-                is_relevant = result.get('is_relevant', True)
-                recommendation = result.get('recommendation', 'use')
-                confidence = result.get('confidence', 'unknown')
-                issues = result.get('issues', [])
+        if weak_signals >= 2:
+            level = "low"
+            is_confident = False
+        elif weak_signals == 1:
+            level = "medium"
+            is_confident = True
+        else:
+            level = "high"
+            is_confident = True
 
-                _log.info(
-                    "Self-reflection result: relevant=%s  confidence=%s  recommendation=%s",
-                    is_relevant,
-                    confidence,
-                    recommendation,
-                )
-                if issues:
-                    _log.warning("Self-reflection issues: %s", issues)
-
-                if not is_relevant or recommendation == 'reject':
-                    _log.warning("Self-reflection rejected retrieved candidates (relevant=%s, recommendation=%s)", is_relevant, recommendation)
-                    return None
-
-                # Could add feedback loop here for 'augment'
-                return retrieved
-
-            return retrieved
-
-        except Exception as e:
-            _log.warning("Self-reflection failed: %s — failing open", e)
-            return retrieved  # Fail open
-
-
+        return {
+            "level": level,
+            "is_confident": is_confident,
+            "weak_signals": weak_signals,
+            "top1_softmax": top1_softmax,
+            "softmax_margin": softmax_margin,
+            "dense_top1": dense_top1,
+            "top_candidate_in_dense_and_sparse_top5": agreement,
+        }
+    
 # Global singleton instance
 _rag_retriever: Optional[AdvancedRAGRetriever] = None
 
@@ -874,8 +937,11 @@ def retrieve_knowledge_advanced(
     **kwargs
 ) -> Dict[str, Any]:
     """
-    Convenience function for advanced RAG retrieval
-    Returns formatted result for KnowledgeRetriever integration
+    Convenience function for advanced RAG retrieval.
+    
+    No LLM calls during retrieval — uses score thresholds instead of self-reflection,
+    and skips query rewriting. HyDE (Hypothetical Document Embeddings) is automatically
+    used as a fallback when initial retrieval produces no candidates above the threshold.
     """
     retriever = get_rag_retriever()
     results = retriever.retrieve(

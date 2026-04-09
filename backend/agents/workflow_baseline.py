@@ -193,6 +193,23 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
         else:
             answer = visual_summary
             confidence = "low"
+    elif question_type == "explanation_request":
+        _log.debug("Branch taken: explanation_request")
+        parts = []
+        if modality != "unknown":
+            parts.append(f"This is a {modality} image")
+        if body_region != "unknown":
+            parts.append(f"of the {body_region}")
+        if notable_findings:
+            parts.append(f"showing {'; '.join(notable_findings[:3])}")
+        elif visible_structures:
+            parts.append(f"with visible structures: {', '.join(visible_structures[:3])}")
+        if parts:
+            answer = ". ".join(parts) + "."
+            confidence = "medium"
+        else:
+            answer = visual_summary
+            confidence = "low"
     else:
         _log.debug("Branch taken: fallback/other")
         if target_entity in {"modality", "imaging modality"}:

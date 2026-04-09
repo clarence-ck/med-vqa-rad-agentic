@@ -1,0 +1,185 @@
+2026-04-09T02:48:57  INFO      medvqa.routes.dataset  Cache MISS for sample 1971  question='can a mass in the pancreatic head cause a liver injury?'  refresh=False  running all 3 pipelines in parallel
+2026-04-09T02:48:57  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=162303 bytes  question='can a mass in the pancreatic head cause a liver injury?'
+2026-04-09T02:48:57  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='can a mass in the pancreatic head cause a liver injury?'  mime_type=image/png  size=162303 bytes ===
+2026-04-09T02:48:57  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T02:48:57  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=162303 bytes)
+2026-04-09T02:48:59  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Yes. A mass in the pancreatic head can cause liver injury indirectly, most commonly by obstructing the bile duct and leading to cholestasis or biliary obstruction, which can impair liver function.",
+  "explanation": "This is an abdominal CT image showing a pancreatic head mass. Such masses can compress the common bile duct and cause jaundice and liver test abnormalities, which may be described as liver injury.",
+  "confidence": "high"
+}
+2026-04-09T02:48:59  INFO      medvqa.agents.baseline  Baseline done  answer='Yes. A mass in the pancreatic head can cause liver injury indirectly, most commo'  confidence=high  duration=1644ms
+2026-04-09T02:48:59  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T02:49:00  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=162303 bytes)
+2026-04-09T02:49:00  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2621ms
+2026-04-09T02:49:00  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The slice shows abdominal solid organs, bowel, major vessels, and the lumbar spine in cross-section.
+2026-04-09T02:49:00  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large rounded soft-tissue masslike lesion in the upper abdomen, adjacent to the stomach/pancreatic region', 'Small amount of intraluminal bowel gas and stool visible in adjacent bowel loops', 'No obvious free air on this single slice']
+2026-04-09T02:49:00  INFO      medvqa.agents.question_analyzer  Analyzing question: 'can a mass in the pancreatic head cause a liver injury?'
+2026-04-09T02:49:00  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T02:49:01  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=1801ms
+2026-04-09T02:49:01  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the abdomen at the level of the upper abdomen and kidneys. The kidneys, major vessels, bowel gas, and adjacent upper abdominal organs are visible on this slice.
+2026-04-09T02:49:01  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large rounded soft tissue mass-like structure in the upper abdomen', 'Contrast-enhanced kidneys are visible bilaterally', 'Scattered intraluminal bowel gas is present']
+2026-04-09T02:49:01  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=1832ms
+2026-04-09T02:49:02  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='can a mass in the pancreatic head cause a liver injury?'
+2026-04-09T02:49:02  INFO      medvqa.agents.question_analyzer  Analyzing question: 'can a mass in the pancreatic head cause a liver injury?'
+2026-04-09T02:49:02  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T02:49:05  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=medical_knowledge  med_knowledge=True  clarity=clear  duration=4865ms
+2026-04-09T02:49:05  DEBUG     medvqa.agents.question_analyzer  Target entity: whether a pancreatic head mass can cause liver injury  Expected format: yes_no  Rephrased: Can a mass in the pancreatic head cause liver injury?
+2026-04-09T02:49:05  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='can a mass in the pancreatic head cause a liver injury?'  modality=CT  body_region=abdomen  question_type=yes_no
+2026-04-09T02:49:05  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['liver']
+2026-04-09T02:49:05  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-09T02:49:05  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=high  question_type=yes_no  duration=7579ms
+2026-04-09T02:49:06  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=medical_knowledge  med_knowledge=True  clarity=clear  duration=3684ms
+2026-04-09T02:49:06  DEBUG     medvqa.agents.question_analyzer  Target entity: relationship between a pancreatic head mass and liver injury  Expected format: yes_no  Rephrased: Can a mass in the pancreatic head cause liver injury?
+2026-04-09T02:49:06  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=3721ms
+2026-04-09T02:49:07  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T02:49:07  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=medical_knowledge  med_knowledge=True  modality=CT  region=abdomen
+2026-04-09T02:49:08  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1595ms
+2026-04-09T02:49:08  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic review case with moderate anatomical complexity and potential subtle pathology, so retrieval is appropriate but the study is not noisy enough to require strict review.
+2026-04-09T02:49:08  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1622ms
+2026-04-09T02:49:09  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T02:49:09  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-09T02:49:09  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='can a mass in the pancreatic head cause a liver injury?'  modality=CT  body_region=abdomen  question_type=yes_no  target_entity=relationship between a pancreatic head mass and liver injury  advanced_rag=True
+2026-04-09T02:49:09  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=can a mass in the pancreatic head cause a liver injury? | modality=CT | body_region=abdomen | finding=mass | rewrite=True rerank=True reflection=True
+2026-04-09T02:49:10  INFO      medvqa.agents.advanced_rag  Query rewrite | original='can a mass in the pancreatic head cause a liver injury?'
+2026-04-09T02:49:10  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='pancreatic head mass causing liver injury on CT abdomen'  changed=True
+2026-04-09T02:49:10  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-09T02:49:10  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen': 209 matches
+2026-04-09T02:49:10  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='mass': 158 matches
+2026-04-09T02:49:10  INFO      medvqa.agents.advanced_rag  Metadata filter result: 1 candidates after intersection
+2026-04-09T02:49:10  INFO      medvqa.agents.advanced_rag  Metadata filter: 1 candidates retained
+2026-04-09T02:49:10  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T02:49:10  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 1 candidates
+2026-04-09T02:49:10  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 1/1
+2026-04-09T02:49:10  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.4243 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T02:49:10  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T02:49:10  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 1 candidates
+2026-04-09T02:49:10  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 1/1
+2026-04-09T02:49:10  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=-0.5493 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T02:49:10  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=1 sparse=1
+2026-04-09T02:49:10  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 1 unique candidates
+2026-04-09T02:49:10  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 1/1
+2026-04-09T02:49:10  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T02:49:10  DEBUG     medvqa.agents.advanced_rag  Reranking skipped; using first 1 merged candidates
+2026-04-09T02:49:10  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 1/1
+2026-04-09T02:49:10  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T02:49:10  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 1 retrieved candidates
+2026-04-09T02:49:10  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 1 retrieved candidates via LLM
+2026-04-09T02:49:11  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=False  confidence=high  recommendation=reject
+2026-04-09T02:49:11  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ['Retrieved case is about identifying the organ of origin of a renal mass, not about pancreatic head masses or liver injury.', 'Although the modality matches CT, the anatomical focus is different (kidney vs pancreas/liver).', 'The answer does not provide evidence relevant to whether a pancreatic head mass can cause liver injury.']
+2026-04-09T02:49:11  WARNING   medvqa.agents.advanced_rag  Self-reflection rejected retrieved candidates (relevant=False, recommendation=reject)
+2026-04-09T02:49:11  WARNING   medvqa.agents.advanced_rag  Self-reflection flagged low quality; returning no retrieved candidates
+2026-04-09T02:49:11  INFO      medvqa.agents.knowledge_retriever  Advanced RAG returned 0 similar cases for this question; proceeding without RAG context
+2026-04-09T02:49:15  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=0  duration=5513ms
+2026-04-09T02:49:15  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The pancreatic head lies adjacent to the distal common bile duct, so a mass there can obstruct bile flow.', 'Biliary obstruction can cause secondary liver injury patterns such as cholestatic enzyme elevation and jaundice.', 'Pancreatic cancer can metastasize to the liver, which may appear as focal liver lesions on CT.', 'A pancreatic head mass does not usually cause a primary traumatic liver injury unless there is another process involved.', 'CT may show pancreatic enlargement/mass, biliary ductal dilatation, and possible liver lesions if spread is present.']
+2026-04-09T02:49:15  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: A mass in the pancreatic head can indirectly cause liver injury, most often by obstructing the common bile duct and leading to cholestasis or obstructive jaundice, which can raise liver enzymes and bi
+2026-04-09T02:49:15  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=0  duration=5546ms
+2026-04-09T02:49:15  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T02:49:15  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='can a mass in the pancreatic head cause a liver injury?'  is_retry=False  question_type=yes_no  yes_no=True
+2026-04-09T02:49:15  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=0
+2026-04-09T02:49:15  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-09T02:49:18  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='yes'  confidence=medium  duration=2735ms
+2026-04-09T02:49:18  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the question as asking whether a pancreatic head mass can affect the liver.', 'Used supporting anatomy/knowledge that the pancreatic head lies next to the distal common bile duct.', 'Recognized that obstruction of bile flow can secondarily injure the liver.', 'Noted that the CT summary describes a large upper abdominal mass-like structure but does not prove direct liver injury.']
+2026-04-09T02:49:18  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Large rounded soft tissue mass-like structure in the upper abdomen on CT', 'Anatomical proximity of the pancreatic head to the common bile duct', 'Known mechanism of biliary obstruction causing cholestatic liver injury', 'Possibility of liver involvement from pancreatic malignancy']
+2026-04-09T02:49:18  DEBUG     medvqa.agents.reasoning_agent  Limitations: The CT description does not explicitly show biliary ductal dilatation, jaundice, or focal liver lesions, so the answer is based on an established mechanism rather than direct imaging confirmation.
+2026-04-09T02:49:18  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='yes'  confidence=medium  duration=2763ms
+2026-04-09T02:49:19  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T02:49:19  INFO      medvqa.agents.verification_agent  Verifying answer='yes'  question='can a mass in the pancreatic head cause a liver injury?'  question_type=yes_no
+2026-04-09T02:49:21  INFO      medvqa.agents.verification_agent  Verification done  status=unsupported  confidence=Low  checks=3/5  duration=2274ms
+2026-04-09T02:49:21  WARNING   medvqa.agents.verification_agent  Verification issues: ['The explanation infers biliary obstruction/cholestasis and a pancreatic head mass, but these are not actually demonstrated in the provided CT slice summary.', "The answer 'yes' is medically plausible in general, but it is stronger than what the visual evidence supports for this specific image.", "The phrase 'liver injury' is interpreted clinically, but no direct imaging evidence of liver injury, jaundice, biliary dilation, or liver lesions is provided."]
+2026-04-09T02:49:21  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T02:49:21  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is a medically reasonable general statement, but it is not grounded in the visible image findings. The CT summary does not confirm a pancreatic head mass or any liver/biliary injury, so the answer should be qualified rather than stated definitively.
+2026-04-09T02:49:21  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=unsupported  confidence=Low  duration=2308ms
+2026-04-09T02:49:21  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['unsupported_claim']
+2026-04-09T02:49:21  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=True  fallback=add_disclaimer  disclaimer=True
+2026-04-09T02:49:21  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-09T02:49:21  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-09T02:49:21  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='yes'  verification=unsupported  guardrail_flag=True  consistency=low  cross_modal=low  duration=24339ms
+2026-04-09T02:49:21  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='yes'  verification=unsupported  confidence=Low  flag_review=True
+2026-04-09T02:49:21  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=unsupported  flag_review=True  high_severity=True  -> retry=True
+2026-04-09T02:49:21  INFO      medvqa.agents.orchestrator  Pipeline RETRY triggered  reason: verification_status=unsupported; fallback=add_disclaimer; flag_for_review=True
+2026-04-09T02:49:21  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=True)
+2026-04-09T02:49:23  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T02:49:23  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=162303 bytes)
+2026-04-09T02:49:25  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=1991ms
+2026-04-09T02:49:25  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen is shown. The kidneys, major vessels, bowel loops, and central abdominal soft tissues are visible on this slice.
+2026-04-09T02:49:25  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Low-attenuation mass-like lesion in the central upper abdomen/pancreatic region', 'Mild mass effect on adjacent bowel and surrounding structures', 'Atherosclerotic calcification of the abdominal aorta']
+2026-04-09T02:49:25  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2017ms
+2026-04-09T02:49:25  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='can a mass in the pancreatic head cause a liver injury?'
+2026-04-09T02:49:25  INFO      medvqa.agents.question_analyzer  Analyzing question: 'can a mass in the pancreatic head cause a liver injury?'
+2026-04-09T02:49:25  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T02:49:27  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=medical_knowledge  med_knowledge=True  clarity=clear  duration=1209ms
+2026-04-09T02:49:27  DEBUG     medvqa.agents.question_analyzer  Target entity: mass in the pancreatic head and possible liver injury  Expected format: yes_no  Rephrased: Can a mass in the pancreatic head cause a liver injury?
+2026-04-09T02:49:27  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=1237ms
+2026-04-09T02:49:28  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T02:49:28  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=medical_knowledge  med_knowledge=True  modality=CT  region=abdomen
+2026-04-09T02:49:29  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1340ms
+2026-04-09T02:49:29  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic-search CT abdomen case with moderate anatomical complexity and potential overlap, so it is better treated as medium difficulty with retrieval enabled.
+2026-04-09T02:49:29  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1367ms
+2026-04-09T02:49:30  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T02:49:30  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-09T02:49:30  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='can a mass in the pancreatic head cause a liver injury?'  modality=CT  body_region=abdomen  question_type=yes_no  target_entity=mass in the pancreatic head and possible liver injury  advanced_rag=True
+2026-04-09T02:49:30  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=can a mass in the pancreatic head cause a liver injury? | modality=CT | body_region=abdomen | finding=mass | rewrite=True rerank=True reflection=True
+2026-04-09T02:49:31  INFO      medvqa.agents.advanced_rag  Query rewrite | original='can a mass in the pancreatic head cause a liver injury?'
+2026-04-09T02:49:31  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='pancreatic head mass causing liver injury on CT abdomen'  changed=True
+2026-04-09T02:49:31  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-09T02:49:31  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen': 209 matches
+2026-04-09T02:49:31  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='mass': 158 matches
+2026-04-09T02:49:31  INFO      medvqa.agents.advanced_rag  Metadata filter result: 1 candidates after intersection
+2026-04-09T02:49:31  INFO      medvqa.agents.advanced_rag  Metadata filter: 1 candidates retained
+2026-04-09T02:49:31  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T02:49:31  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 1 candidates
+2026-04-09T02:49:31  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 1/1
+2026-04-09T02:49:31  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.4243 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T02:49:31  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T02:49:31  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 1 candidates
+2026-04-09T02:49:31  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 1/1
+2026-04-09T02:49:31  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=-0.5493 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T02:49:31  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=1 sparse=1
+2026-04-09T02:49:31  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 1 unique candidates
+2026-04-09T02:49:31  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 1/1
+2026-04-09T02:49:31  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T02:49:31  DEBUG     medvqa.agents.advanced_rag  Reranking skipped; using first 1 merged candidates
+2026-04-09T02:49:31  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 1/1
+2026-04-09T02:49:31  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T02:49:31  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 1 retrieved candidates
+2026-04-09T02:49:31  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 1 retrieved candidates via LLM
+2026-04-09T02:49:32  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=False  confidence=low  recommendation=reject
+2026-04-09T02:49:32  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ['The retrieved case is about identifying the organ of origin of a renal mass, not about pancreatic head masses or liver injury.', 'Although the modality matches CT and the region is abdominal, the clinical topic is not sufficiently related to the original question.', "The answer 'the left kidney' is internally consistent for the retrieved case, but it does not help answer whether a pancreatic head mass can cause liver injury."]
+2026-04-09T02:49:32  WARNING   medvqa.agents.advanced_rag  Self-reflection rejected retrieved candidates (relevant=False, recommendation=reject)
+2026-04-09T02:49:32  WARNING   medvqa.agents.advanced_rag  Self-reflection flagged low quality; returning no retrieved candidates
+2026-04-09T02:49:32  INFO      medvqa.agents.knowledge_retriever  Advanced RAG returned 0 similar cases for this question; proceeding without RAG context
+2026-04-09T02:49:35  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=0  duration=5605ms
+2026-04-09T02:49:35  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The pancreatic head lies adjacent to the common bile duct, duodenum, and major vessels, so masses here can cause obstructive biliary disease.', 'Liver abnormalities related to a pancreatic head mass are more often due to obstruction or metastasis than direct trauma or parenchymal injury.', 'CT can evaluate pancreatic mass size, ductal dilation, vascular involvement, and focal liver lesions.', 'A normal liver on CT should have uniform enhancement without focal masses, lacerations, or biliary dilation.', 'If liver injury is suspected, CT findings would typically include contusion, laceration, hematoma, or active contrast extravasation, usually in a trauma context.']
+2026-04-09T02:49:35  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: A mass in the pancreatic head can indirectly affect the liver by causing biliary obstruction, jaundice, cholangitis, or liver test abnormalities, but it does not usually cause a direct liver injury by
+2026-04-09T02:49:35  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=0  duration=5638ms
+2026-04-09T02:49:37  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=True
+2026-04-09T02:49:37  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='can a mass in the pancreatic head cause a liver injury?'  is_retry=True  question_type=yes_no  yes_no=True
+2026-04-09T02:49:37  INFO      medvqa.agents.reasoning_agent  Retry context  prev_status=unsupported  prev_confidence=Low  fallback=add_disclaimer
+2026-04-09T02:49:37  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=0
+2026-04-09T02:49:37  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-09T02:49:39  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=low  duration=2125ms
+2026-04-09T02:49:39  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified a mass-like lesion in the pancreatic region on CT.', 'Checked the provided image analysis for signs of liver injury.', 'Found no reported liver laceration, contusion, hematoma, or focal liver lesion.', 'Applied supporting knowledge that pancreatic head masses may cause indirect biliary/liver abnormalities, not direct liver injury.']
+2026-04-09T02:49:39  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Low-attenuation mass-like lesion in the central upper abdomen/pancreatic region', 'No reported focal liver injury findings on CT', 'Supportive knowledge that pancreatic head masses more often cause biliary obstruction than direct liver injury']
+2026-04-09T02:49:39  DEBUG     medvqa.agents.reasoning_agent  Limitations: The provided CT description is limited to a single axial slice and does not include full liver or biliary assessment, so direct confirmation of liver involvement is not possible.
+2026-04-09T02:49:39  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=low  duration=2157ms
+2026-04-09T02:49:40  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T02:49:40  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='can a mass in the pancreatic head cause a liver injury?'  question_type=yes_no
+2026-04-09T02:49:42  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=4/5  duration=1955ms
+2026-04-09T02:49:42  WARNING   medvqa.agents.verification_agent  Verification issues: ["The explanation discusses a 'low-attenuation mass-like lesion in the pancreatic region' and liver injury mechanisms, but the provided visual analysis does not explicitly confirm these findings from the image.", "The answer 'no' is plausible for direct liver injury, but the evidence cited is indirect and not clearly grounded in the image description."]
+2026-04-09T02:49:42  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T02:49:42  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct yes/no format and is not obviously contradictory. However, the explanation relies on interpretation beyond what is explicitly described in the visual summary, so the grounding is weak. The answer is likely acceptable if framed as no clear direct liver injury is seen on this image.
+2026-04-09T02:49:42  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=1986ms
+2026-04-09T02:49:42  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-09T02:49:42  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T02:49:42  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-09T02:49:42  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-09T02:49:42  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=low  duration=44557ms
+2026-04-09T02:49:42  INFO      medvqa.agents.orchestrator  Pipeline attempt 2 result  answer='no'  verification=partially_verified  confidence=Medium
+2026-04-09T02:49:42  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=3  confidence_rank=2  high_failures=0  review=0
+2026-04-09T02:49:42  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=1  confidence_rank=1  high_failures=1  review=1
+2026-04-09T02:49:42  INFO      medvqa.agents.orchestrator  Pipeline RETRY winner: attempt 2 (higher score)
+2026-04-09T02:49:42  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  retries=1  total_duration=44562ms ===
+2026-04-09T02:49:42  INFO      medvqa.routes.dataset  Sample 1971 analysis complete  baseline=1656ms  workflow=7581ms  agentic=44565ms  total=44567ms
+2026-04-09T02:49:42  INFO      medvqa.routes.dataset  Sample 1971 answers  baseline='Yes. A mass in the pancreatic head can cause liver injury in'  workflow='Yes'  agentic='no'  ground_truth='yes'

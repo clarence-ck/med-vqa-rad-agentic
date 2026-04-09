@@ -1,3 +1,4 @@
+import base64
 import time
 from typing import Any
 from haystack.components.agents import Agent
@@ -27,10 +28,11 @@ class ImageBlockerAbort(BaseException):
     abort the pipeline without Haystack stringifying binary images into tokens."""
     pass
 
-def _tool_interpret_image(image_bytes: bytes, mime_type: str = "image/png") -> dict:
+def _tool_interpret_image(image_bytes_b64: str, mime_type: str = "image/png") -> dict:
     started = time.time()
     _log.info("[tool] interpret_image called")
     try:
+        image_bytes = base64.b64decode(image_bytes_b64)
         result = ImageInterpreter().run(image_bytes=image_bytes, mime_type=mime_type)["result"]
     except ValueError as e:
         # Trap the intentional blocker exception and escalate it as a BaseException
@@ -138,7 +140,7 @@ _INTERPRET_IMAGE_TOOL = Tool(
     ),
     parameters={"type": "object", "properties": {}, "required": []},
     function=_tool_interpret_image,
-    inputs_from_state={"image_bytes": "image_bytes", "mime_type": "mime_type"},
+    inputs_from_state={"image_bytes_b64": "image_bytes_b64", "mime_type": "mime_type"},
     outputs_to_state={
         "image_interpretation": {"source": "result"},
         "image_duration_ms": {"source": "duration_ms"},
@@ -258,7 +260,7 @@ _AGENT_SYSTEM_PROMPT = (
 )
 
 _STATE_SCHEMA = {
-    "image_bytes": {"type": Any},
+    "image_bytes_b64": {"type": str},
     "mime_type": {"type": str},
     "question": {"type": str},
     "image_interpretation": {"type": dict},
@@ -711,9 +713,10 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
         _log.info("Running agentic pipeline (is_retry=%s)", bool(retry_context))
         agent = _create_agent()
         try:
+            image_bytes_b64 = base64.b64encode(image_bytes).decode("utf-8")
             response = agent.run(
                 messages=[ChatMessage.from_user(question)],
-                image_bytes=image_bytes,
+                image_bytes_b64=image_bytes_b64,
                 mime_type=mime_type,
                 question=question,
                 retry_context=retry_context or {},

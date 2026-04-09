@@ -1,0 +1,66 @@
+2026-04-09T03:10:11  INFO      medvqa.routes.dataset  Cache MISS for sample 2189  question='what is abnormal about the pancreas?'  refresh=False  running all 3 pipelines in parallel
+2026-04-09T03:10:11  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=144624 bytes  question='what is abnormal about the pancreas?'
+2026-04-09T03:10:11  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what is abnormal about the pancreas?'  mime_type=image/png  size=144624 bytes ===
+2026-04-09T03:10:11  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T03:10:11  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=144624 bytes)
+2026-04-09T03:10:12  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T03:10:12  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=144624 bytes)
+2026-04-09T03:10:13  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "The pancreas appears atrophic, with diffuse calcifications consistent with chronic pancreatitis.",
+  "explanation": "On the axial CT image, the pancreas is small/atrophic rather than bulky, and there are visible calcific foci in the pancreatic region. These findings are typical of chronic pancreatitis.",
+  "confidence": "high"
+}
+2026-04-09T03:10:13  INFO      medvqa.agents.baseline  Baseline done  answer='The pancreas appears atrophic, with diffuse calcifications consistent with chron'  confidence=high  duration=1580ms
+2026-04-09T03:10:14  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2506ms
+2026-04-09T03:10:14  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the upper abdomen showing solid abdominal organs and bowel. There is a large air-filled gastric/bowel structure anteriorly with surrounding abdominal soft tissues and osseous structures visible.
+2026-04-09T03:10:14  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Prominent gas-filled hollow viscus in the upper abdomen', 'No gross free air is evident on this single image', 'A small linear radiopaque device/material is visible near the left upper abdominal region']
+2026-04-09T03:10:14  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what is abnormal about the pancreas?'
+2026-04-09T03:10:14  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:10:14  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=upper abdomen  quality=good  findings=3  duration=2093ms
+2026-04-09T03:10:14  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the upper abdomen showing solid abdominal organs and surrounding soft tissues. A large gas-filled hollow viscus is visible in the upper central abdomen, with adjacent bowel containing stool/gas on the left side of the image.
+2026-04-09T03:10:14  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large intraluminal gas collection in the upper abdomen', 'Stool/gas-filled bowel loops visible on the left side of the image', 'Mild streak artifact and external markers present']
+2026-04-09T03:10:14  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=upper abdomen  duration=2126ms
+2026-04-09T03:10:15  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1093ms
+2026-04-09T03:10:15  DEBUG     medvqa.agents.question_analyzer  Target entity: pancreas  Expected format: short_phrase  Rephrased: What is abnormal about the pancreas?
+2026-04-09T03:10:15  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what is abnormal about the pancreas?'  modality=CT  body_region=abdomen  question_type=abnormality_description
+2026-04-09T03:10:15  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T03:10:15  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-09T03:10:15  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Prominent gas-filled hollow viscus in the upper abdomen; No gross free air is ev'  confidence=medium  question_type=abnormality_description  duration=3680ms
+2026-04-09T03:10:15  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what is abnormal about the pancreas?'
+2026-04-09T03:10:15  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what is abnormal about the pancreas?'
+2026-04-09T03:10:15  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:10:16  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1027ms
+2026-04-09T03:10:16  DEBUG     medvqa.agents.question_analyzer  Target entity: pancreas  Expected format: short_phrase  Rephrased: what is abnormal about the pancreas?
+2026-04-09T03:10:16  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1063ms
+2026-04-09T03:10:17  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T03:10:17  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  reasoning=visual_recognition  med_knowledge=False  modality=CT  region=upper abdomen
+2026-04-09T03:10:18  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1273ms
+2026-04-09T03:10:18  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clean visual-recognition case with an obvious prominent abdominal gas-containing structure and uncomplicated anatomy, so no retrieval or escalation is needed.
+2026-04-09T03:10:18  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1303ms
+2026-04-09T03:10:19  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T03:10:19  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what is abnormal about the pancreas?'  is_retry=False  question_type=abnormality_description  yes_no=False
+2026-04-09T03:10:19  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T03:10:22  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='The pancreas is not clearly visualized / no definite abnormality is seen.'  confidence=low  duration=2738ms
+2026-04-09T03:10:22  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the image analysis for pancreas-specific findings.', 'Noted that the reported abnormal findings involve gas-filled bowel, not the pancreas.', 'Since the pancreas is not clearly visualized and no pancreatic abnormality is described, concluded that no definite abnormality can be identified.']
+2026-04-09T03:10:22  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Pancreas not specifically described as visible in the image analysis', 'Notable findings focus on a large gas-filled hollow viscus', 'Stool/gas-filled bowel loops are noted, not pancreatic pathology', 'No reported pancreatic mass, edema, calcification, or ductal dilation']
+2026-04-09T03:10:22  DEBUG     medvqa.agents.reasoning_agent  Limitations: The pancreas is not clearly visualized in the provided analysis, so a subtle or non-obvious abnormality cannot be excluded.
+2026-04-09T03:10:22  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='The pancreas is not clearly visualized / no definite abnorma'  confidence=low  duration=2773ms
+2026-04-09T03:10:22  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T03:10:22  INFO      medvqa.agents.verification_agent  Verifying answer='The pancreas is not clearly visualized / no definite abnormality is seen.'  question='what is abnormal about the pancreas?'  question_type=abnormality_description
+2026-04-09T03:10:25  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=5/5  duration=2361ms
+2026-04-09T03:10:25  WARNING   medvqa.agents.verification_agent  Verification issues: ['The answer is cautious and consistent with the limited image analysis, but it does not identify a specific pancreatic abnormality because the pancreas is not clearly visualized.', 'The response may be less informative than the question expects, since it effectively states that no definite abnormality can be confirmed rather than naming one.']
+2026-04-09T03:10:25  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T03:10:25  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer is consistent with the available evidence and appropriately low-confidence. It does not overstate findings and matches the short-phrase abnormality-description format, but the pancreas is not well visualized, so the conclusion is necessarily limited.
+2026-04-09T03:10:25  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2395ms
+2026-04-09T03:10:25  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified', 'question_answer_mismatch']
+2026-04-09T03:10:25  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T03:10:25  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=5/5
+2026-04-09T03:10:25  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T03:10:25  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='The pancreas is not clearly visualized / no definite abnorma'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=13492ms
+2026-04-09T03:10:25  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='The pancreas is not clearly visualized / no definite abnorma'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-09T03:10:25  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T03:10:25  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T03:10:25  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='The pancreas is not clearly visualized / no definite abnorma'  retries=0  total_duration=13499ms ===
+2026-04-09T03:10:25  INFO      medvqa.routes.dataset  Sample 2189 analysis complete  baseline=1585ms  workflow=3682ms  agentic=13499ms  total=13510ms
+2026-04-09T03:10:25  INFO      medvqa.routes.dataset  Sample 2189 answers  baseline='The pancreas appears atrophic, with diffuse calcifications c'  workflow='Prominent gas-filled hollow viscus in the upper abdomen; No '  agentic='The pancreas is not clearly visualized / no definite abnorma'  ground_truth='enlarged'

@@ -1,0 +1,147 @@
+2026-04-09T03:30:54  INFO      medvqa.routes.dataset  Cache MISS for sample 1870  question='where is the mass located?'  refresh=False  running all 3 pipelines in parallel
+2026-04-09T03:30:54  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=291404 bytes  question='where is the mass located?'
+2026-04-09T03:30:54  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='where is the mass located?'  mime_type=image/png  size=291404 bytes ===
+2026-04-09T03:30:54  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T03:30:54  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=291404 bytes)
+2026-04-09T03:30:55  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T03:30:56  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=291404 bytes)
+2026-04-09T03:30:56  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "The mass is located in the pancreas, most likely the pancreatic head.",
+  "explanation": "This is an axial contrast-enhanced abdominal CT image. The abnormal soft-tissue mass is centered in the upper abdomen near the pancreatic head, adjacent to the duodenum and major vessels.",
+  "confidence": "high"
+}
+2026-04-09T03:30:56  INFO      medvqa.agents.baseline  Baseline done  answer='The mass is located in the pancreas, most likely the pancreatic head.'  confidence=high  duration=1729ms
+2026-04-09T03:30:57  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=4  duration=2621ms
+2026-04-09T03:30:57  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen showing the solid organs and bowel. The kidneys, liver, spleen, and adjacent vascular structures are visible, along with a gas/fluid-filled stomach and bowel loops.
+2026-04-09T03:30:57  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Prominent gas and fluid within the stomach', 'Scattered bowel gas in the upper abdomen', 'Post-contrast enhancement of abdominal organs is visible', 'No obvious acute abnormality can be confidently identified on this single image']
+2026-04-09T03:30:57  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where is the mass located?'
+2026-04-09T03:30:57  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:30:58  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2575ms
+2026-04-09T03:30:58  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver, stomach, pancreas region, spleen, kidneys, and surrounding bowel loops are visible on a single slice, along with the central vascular structures and spine.
+2026-04-09T03:30:58  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Presence of contrast enhancement in the abdominal organs and vessels', 'A gas-filled stomach is visible in the upper central abdomen', 'No obvious acute abnormality can be determined from this single slice alone']
+2026-04-09T03:30:58  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2606ms
+2026-04-09T03:30:58  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=clear  duration=1068ms
+2026-04-09T03:30:58  DEBUG     medvqa.agents.question_analyzer  Target entity: mass  Expected format: short_phrase  Rephrased: Where is the mass located?
+2026-04-09T03:30:58  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='where is the mass located?'  modality=CT  body_region=abdomen  question_type=location
+2026-04-09T03:30:58  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T03:30:58  DEBUG     medvqa.agents.workflow_baseline  Branch taken: location
+2026-04-09T03:30:58  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='abdomen'  confidence=medium  question_type=location  duration=3750ms
+2026-04-09T03:30:59  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='where is the mass located?'
+2026-04-09T03:30:59  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where is the mass located?'
+2026-04-09T03:30:59  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:31:00  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=True  clarity=clear  duration=888ms
+2026-04-09T03:31:00  DEBUG     medvqa.agents.question_analyzer  Target entity: mass  Expected format: short_phrase  Rephrased: where is the mass located?
+2026-04-09T03:31:00  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=919ms
+2026-04-09T03:31:01  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T03:31:01  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=True  modality=CT  region=abdomen
+2026-04-09T03:31:02  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1487ms
+2026-04-09T03:31:02  DEBUG     medvqa.agents.difficulty_router  Routing rationale: The study is not highly degraded or crowded, but the abdominal cross-section contains multiple overlapping structures and the task depends on careful spatial localization rather than an obvious conspicuous lesion, making it a systematic search case.
+2026-04-09T03:31:02  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1515ms
+2026-04-09T03:31:03  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T03:31:03  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-09T03:31:03  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='where is the mass located?'  modality=CT  body_region=abdomen  question_type=location  target_entity=mass  advanced_rag=True
+2026-04-09T03:31:03  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=where is the mass located? | modality=CT | body_region=abdomen | finding=mass | rewrite=True rerank=True reflection=True
+2026-04-09T03:31:04  INFO      medvqa.agents.advanced_rag  Query rewrite | original='where is the mass located?'
+2026-04-09T03:31:04  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='CT abdomen mass location'  changed=True
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen': 209 matches
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='mass': 158 matches
+2026-04-09T03:31:04  INFO      medvqa.agents.advanced_rag  Metadata filter result: 1 candidates after intersection
+2026-04-09T03:31:04  INFO      medvqa.agents.advanced_rag  Metadata filter: 1 candidates retained
+2026-04-09T03:31:04  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 1 candidates
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 1/1
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.5939 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T03:31:04  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 1 candidates
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 1/1
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=-0.5493 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=1 sparse=1
+2026-04-09T03:31:04  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 1 unique candidates
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 1/1
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag  Reranking skipped; using first 1 merged candidates
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 1/1
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T03:31:04  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 1 retrieved candidates
+2026-04-09T03:31:04  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 1 retrieved candidates via LLM
+2026-04-09T03:31:04  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=True  confidence=medium  recommendation=use
+2026-04-09T03:31:04  INFO      medvqa.agents.advanced_rag  Self-reflection accepted retrieved candidates
+2026-04-09T03:31:04  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 1 final candidates
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 1/1
+2026-04-09T03:31:04  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T03:31:04  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 1 similar cases  (query_rewritten=True  finding_category=mass)
+2026-04-09T03:31:08  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=1  duration=5103ms
+2026-04-09T03:31:08  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Abdominal CT can localize a mass by comparing it with adjacent structures such as the liver, spleen, pancreas, kidneys, bowel, and major vessels.', 'The left kidney lies retroperitoneally in the posterior abdomen, posterior to bowel loops and near the spleen and pancreas.', 'Masses may arise from an organ itself or displace nearby structures, which helps determine the site of origin.', 'Contrast enhancement patterns and anatomic borders help distinguish renal, adrenal, pancreatic, and bowel-related lesions.']
+2026-04-09T03:31:08  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On abdominal CT, a mass is localized by its relationship to nearby organs, vessels, and the posterior abdominal wall. In this setting, the kidneys are important landmarks; a similar prior case identif
+2026-04-09T03:31:08  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=1  duration=5134ms
+2026-04-09T03:31:09  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T03:31:09  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='where is the mass located?'  is_retry=False  question_type=location  yes_no=False
+2026-04-09T03:31:09  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=1
+2026-04-09T03:31:11  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Left kidney'  confidence=low  duration=2508ms
+2026-04-09T03:31:11  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the modality and body region as an axial contrast-enhanced abdominal CT.', 'Use nearby landmarks, especially the kidneys, to localize the suspected mass.', 'Apply the provided supporting context that prior similar cases localized the mass to the left kidney.', 'Conclude the most likely location is the left kidney while noting the single-slice limitation.']
+2026-04-09T03:31:11  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial contrast-enhanced CT of the upper abdomen', 'Visible bilateral kidneys and surrounding abdominal organs', 'Supporting context indicating renal origin as likely and prior similar case in the left kidney', 'No obvious acute abnormality can be determined from this single slice alone']
+2026-04-09T03:31:11  DEBUG     medvqa.agents.reasoning_agent  Limitations: The image summary does not describe a clearly visible focal mass, and the conclusion is limited by a single CT slice without full series review.
+2026-04-09T03:31:11  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Left kidney'  confidence=low  duration=2541ms
+2026-04-09T03:31:12  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T03:31:12  INFO      medvqa.agents.verification_agent  Verifying answer='Left kidney'  question='where is the mass located?'  question_type=location
+2026-04-09T03:31:15  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Low  checks=2/5  duration=2455ms
+2026-04-09T03:31:15  WARNING   medvqa.agents.verification_agent  Verification issues: ['The answer is a location phrase and matches the question type.', "The explanation refers to a 'supporting note' and a 'renal-origin lesion,' but no such note is provided in the visual analysis.", 'The image analysis only confirms that both kidneys are visible; it does not identify a mass or establish that it is in the left kidney.', 'The answer is stronger than the available evidence and may be over-specific.', 'There is an implicit contradiction with the visual summary because no obvious mass is identified on the single slice.']
+2026-04-09T03:31:15  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T03:31:15  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct short location format, but the stated location is not adequately supported by the image summary alone. Given that the slice shows both kidneys without a clearly identified mass, 'left kidney' is speculative.
+2026-04-09T03:31:15  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Low  duration=2486ms
+2026-04-09T03:31:15  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified', 'visual_contradiction', 'question_answer_mismatch']
+2026-04-09T03:31:15  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=True  fallback=add_disclaimer  disclaimer=True
+2026-04-09T03:31:15  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=2/5
+2026-04-09T03:31:15  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=False
+2026-04-09T03:31:15  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Left kidney'  verification=partially_verified  guardrail_flag=True  consistency=low  cross_modal=low  duration=20529ms
+2026-04-09T03:31:15  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Left kidney'  verification=partially_verified  confidence=Low  flag_review=True
+2026-04-09T03:31:15  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=True  high_severity=True  -> retry=True
+2026-04-09T03:31:15  INFO      medvqa.agents.orchestrator  Pipeline RETRY triggered  reason: verification_status=partially_verified; fallback=add_disclaimer; flag_for_review=True
+2026-04-09T03:31:15  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=True)
+2026-04-09T03:31:16  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T03:31:16  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=291404 bytes)
+2026-04-09T03:31:21  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=5786ms
+2026-04-09T03:31:21  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the abdomen at the level of the upper abdomen. The liver, stomach, bowel loops, kidneys, spleen, and central retroperitoneal structures are visible.
+2026-04-09T03:31:21  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Post-contrast enhancement is present in the abdominal organs and vessels.', 'There is a small focal high-density object/clip-like density in the upper abdomen near the pancreatic region.', 'No large free air or gross fluid collection is visible on this single image.']
+2026-04-09T03:31:21  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=5818ms
+2026-04-09T03:31:23  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='where is the mass located?'
+2026-04-09T03:31:23  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where is the mass located?'
+2026-04-09T03:31:23  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:31:25  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=clear  duration=1201ms
+2026-04-09T03:31:25  DEBUG     medvqa.agents.question_analyzer  Target entity: mass  Expected format: short_phrase  Rephrased: Where is the mass located?
+2026-04-09T03:31:25  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=1231ms
+2026-04-09T03:31:25  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T03:31:25  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=False  modality=CT  region=abdomen
+2026-04-09T03:31:27  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1707ms
+2026-04-09T03:31:27  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clean axial abdominal CT with well-visualized structures, and the question asks only for a short spatial location, so the case should be handled as an easy routing decision.
+2026-04-09T03:31:27  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1742ms
+2026-04-09T03:31:28  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=True
+2026-04-09T03:31:28  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='where is the mass located?'  is_retry=True  question_type=location  yes_no=False
+2026-04-09T03:31:28  INFO      medvqa.agents.reasoning_agent  Retry context  prev_status=partially_verified  prev_confidence=Low  fallback=add_disclaimer
+2026-04-09T03:31:28  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T03:31:30  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Upper abdomen near the pancreatic region.'  confidence=low  duration=2633ms
+2026-04-09T03:31:30  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the axial contrast-enhanced CT description of the upper abdomen.', 'Identified the only focal abnormality as a small high-density/clip-like object near the pancreatic region.', 'Used the described anatomic landmarks to localize the finding conservatively to the upper abdomen near the pancreas.']
+2026-04-09T03:31:30  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial contrast-enhanced CT of the abdomen at the level of the upper abdomen', 'Small focal high-density object/clip-like density in the upper abdomen', 'Location described as near the pancreatic region', 'Visible upper abdominal structures including liver, stomach, spleen, kidneys, and central retroperitoneal structures']
+2026-04-09T03:31:30  DEBUG     medvqa.agents.reasoning_agent  Limitations: The image analysis does not clearly confirm a true mass, and the finding may represent a clip-like density rather than a mass. Localization is therefore limited to the described upper abdominal/pancreatic region on a single CT image.
+2026-04-09T03:31:30  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Upper abdomen near the pancreatic region.'  confidence=low  duration=2669ms
+2026-04-09T03:31:32  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T03:31:32  INFO      medvqa.agents.verification_agent  Verifying answer='Upper abdomen near the pancreatic region.'  question='where is the mass located?'  question_type=location
+2026-04-09T03:31:38  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Low  checks=3/5  duration=5907ms
+2026-04-09T03:31:38  WARNING   medvqa.agents.verification_agent  Verification issues: ["The explanation refers to a 'small focal high-density object/clip-like density' and implies a mass/lesion, but the provided image analysis does not independently confirm a mass or clip.", "The location statement ('near the pancreatic region') is somewhat speculative given the limited evidence and single image.", 'The answer is plausible but stronger than what can be securely supported from the available visual summary.']
+2026-04-09T03:31:38  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T03:31:38  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct short location format and is broadly consistent with the upper-abdomen CT level, but the specific attribution to a pancreatic-region mass is not firmly grounded in the described evidence. It should be phrased more cautiously.
+2026-04-09T03:31:38  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Low  duration=5943ms
+2026-04-09T03:31:38  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-09T03:31:38  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T03:31:38  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-09T03:31:38  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-09T03:31:38  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Upper abdomen near the pancreatic region.'  verification=partially_verified  guardrail_flag=False  consistency=low  cross_modal=low  duration=43163ms
+2026-04-09T03:31:38  INFO      medvqa.agents.orchestrator  Pipeline attempt 2 result  answer='Upper abdomen near the pancreatic region.'  verification=partially_verified  confidence=Low
+2026-04-09T03:31:38  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=3  confidence_rank=1  high_failures=0  review=0
+2026-04-09T03:31:38  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=3  confidence_rank=1  high_failures=1  review=1
+2026-04-09T03:31:38  INFO      medvqa.agents.orchestrator  Pipeline RETRY winner: attempt 2 (higher score)
+2026-04-09T03:31:38  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Upper abdomen near the pancreatic region.'  retries=1  total_duration=43169ms ===
+2026-04-09T03:31:38  INFO      medvqa.routes.dataset  Sample 1870 analysis complete  baseline=1732ms  workflow=3753ms  agentic=43171ms  total=43173ms
+2026-04-09T03:31:38  INFO      medvqa.routes.dataset  Sample 1870 answers  baseline='The mass is located in the pancreas, most likely the pancrea'  workflow='abdomen'  agentic='Upper abdomen near the pancreatic region.'  ground_truth='head of the pancreas'

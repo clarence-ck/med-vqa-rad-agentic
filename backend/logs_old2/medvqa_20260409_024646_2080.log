@@ -1,0 +1,108 @@
+2026-04-09T03:14:36  INFO      medvqa.routes.dataset  Cache MISS for sample 2080  question='are the kidney present?'  refresh=False  running all 3 pipelines in parallel
+2026-04-09T03:14:36  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=136234 bytes  question='are the kidney present?'
+2026-04-09T03:14:36  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are the kidney present?'  mime_type=image/png  size=136234 bytes ===
+2026-04-09T03:14:36  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T03:14:36  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=136234 bytes)
+2026-04-09T03:14:37  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T03:14:37  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=136234 bytes)
+2026-04-09T03:14:37  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Yes, both kidneys are present.",
+  "explanation": "This is an axial CT image of the abdomen, and bilateral kidneys are visible in the retroperitoneum. They appear present on both sides of the spine.",
+  "confidence": "high"
+}
+2026-04-09T03:14:37  INFO      medvqa.agents.baseline  Baseline done  answer='Yes, both kidneys are present.'  confidence=high  duration=1347ms
+2026-04-09T03:14:38  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2143ms
+2026-04-09T03:14:38  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. Solid organs and bowel loops are visible, with a cross-sectional view of the spine and major abdominal vessels in the midline.
+2026-04-09T03:14:38  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Mild to moderate bowel gas and stool burden are visible', 'No obvious acute gross abnormality is evident on this single image', 'Image demonstrates slice through the upper abdomen with contrast opacification of vascular structures']
+2026-04-09T03:14:38  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the kidney present?'
+2026-04-09T03:14:38  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:14:39  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2468ms
+2026-04-09T03:14:39  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the upper abdomen showing solid organs and bowel loops. The liver, spleen, kidneys, major vessels, and surrounding soft tissues are visible on this contrast-enhanced slice.
+2026-04-09T03:14:39  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Single axial abdominal CT slice with adequate contrast opacification', 'No obvious gross acute abnormality is apparent on this image alone', 'Bowel contains mottled gas and stool-like material']
+2026-04-09T03:14:39  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2503ms
+2026-04-09T03:14:39  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=False  clarity=ambiguous  duration=1245ms
+2026-04-09T03:14:39  DEBUG     medvqa.agents.question_analyzer  Target entity: kidneys  Expected format: yes_no  Rephrased: Are the kidneys present in the image?
+2026-04-09T03:14:39  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are the kidney present?'  modality=CT  body_region=abdomen  question_type=yes_no
+2026-04-09T03:14:39  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['kidneys']
+2026-04-09T03:14:39  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-09T03:14:39  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=high  question_type=yes_no  duration=3470ms
+2026-04-09T03:14:40  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are the kidney present?'
+2026-04-09T03:14:40  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the kidney present?'
+2026-04-09T03:14:40  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:14:41  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=False  clarity=ambiguous  duration=1142ms
+2026-04-09T03:14:41  DEBUG     medvqa.agents.question_analyzer  Target entity: kidneys  Expected format: yes_no  Rephrased: Are the kidneys present in the image?
+2026-04-09T03:14:41  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=presence_absence  duration=1174ms
+2026-04-09T03:14:42  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T03:14:42  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=presence_absence  reasoning=visual_recognition  med_knowledge=False  modality=CT  region=abdomen
+2026-04-09T03:14:44  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1396ms
+2026-04-09T03:14:44  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic search case on a moderately complex CT slice with potential overlap and ambiguity, so it fits medium difficulty and warrants retrieval with standard verification.
+2026-04-09T03:14:44  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1428ms
+2026-04-09T03:14:44  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T03:14:45  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-09T03:14:45  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='are the kidney present?'  modality=CT  body_region=abdomen  question_type=presence_absence  target_entity=kidneys  advanced_rag=True
+2026-04-09T03:14:45  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=are the kidney present? | modality=CT | body_region=abdomen | finding=other | rewrite=True rerank=True reflection=True
+2026-04-09T03:14:45  INFO      medvqa.agents.advanced_rag  Query rewrite | original='are the kidney present?'
+2026-04-09T03:14:45  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='kidneys present on abdominal CT?'  changed=True
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen': 209 matches
+2026-04-09T03:14:45  INFO      medvqa.agents.advanced_rag  Metadata filter result: 2 candidates after intersection
+2026-04-09T03:14:45  INFO      medvqa.agents.advanced_rag  Metadata filter: 2 candidates retained
+2026-04-09T03:14:45  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 2 candidates
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 2/2
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.7092 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag    2. id=146 score=0.4581 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T03:14:45  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 2 candidates
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 2/2
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=-0.0725 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag    2. id=146 score=-0.0767 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=2 sparse=2
+2026-04-09T03:14:45  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 2 unique candidates
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 2/2
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag    2. id=146 score=0.0323 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag  Reranking skipped; using first 2 merged candidates
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 2/2
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T03:14:45  DEBUG     medvqa.agents.advanced_rag    2. id=146 score=0.0323 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T03:14:45  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 2 retrieved candidates
+2026-04-09T03:14:45  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 2 retrieved candidates via LLM
+2026-04-09T03:14:47  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=True  confidence=medium  recommendation=augment
+2026-04-09T03:14:47  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ['Retrieved cases are CT abdomen cases, so modality and region match reasonably well.', 'Case 1 is related to kidney anatomy/pathology and is directly more relevant to the question.', 'Case 2 is about bowel obstruction/perforation, which is less relevant to whether the kidneys are present.']
+2026-04-09T03:14:47  INFO      medvqa.agents.advanced_rag  Self-reflection accepted retrieved candidates
+2026-04-09T03:14:47  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 2 final candidates
+2026-04-09T03:14:47  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 2/2
+2026-04-09T03:14:47  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T03:14:47  DEBUG     medvqa.agents.advanced_rag    2. id=146 score=0.0323 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T03:14:47  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 2 similar cases  (query_rewritten=True  finding_category=other)
+2026-04-09T03:14:51  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=2  duration=5984ms
+2026-04-09T03:14:51  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The kidneys are paired organs located retroperitoneally in the upper posterior abdomen.', 'On CT, normal kidneys have smooth contours and a distinct cortical-medullary appearance.', 'Both kidneys are usually visible on a standard abdominal CT unless the scan is limited or anatomy is altered.', 'Kidneys lie near major structures such as the aorta, spine, liver, spleen, and bowel loops.']
+2026-04-09T03:14:51  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On abdominal CT, the kidneys are normally visible as paired retroperitoneal organs on either side of the spine, typically below the liver and spleen. The retrieved evidence is weak but consistent with
+2026-04-09T03:14:51  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=2  duration=6019ms
+2026-04-09T03:14:51  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T03:14:51  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are the kidney present?'  is_retry=False  question_type=presence_absence  yes_no=True
+2026-04-09T03:14:51  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=2
+2026-04-09T03:14:51  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=presence_absence
+2026-04-09T03:14:54  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='yes'  confidence=high  duration=2395ms
+2026-04-09T03:14:54  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: 1) Identify the modality and region as an abdominal CT. 2) Check the listed visible structures for kidneys. 3) Since both kidneys are explicitly visible on the slice, answer yes.
+2026-04-09T03:14:54  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Image analysis states visible structures include both kidneys', 'Axial CT of the upper abdomen where kidneys are typically seen', 'Supporting anatomy knowledge that kidneys are normally visible in bilateral retroperitoneal positions on abdominal CT']
+2026-04-09T03:14:54  DEBUG     medvqa.agents.reasoning_agent  Limitations: Single axial slice only; kidney appearance is based on the provided image analysis rather than full volumetric review.
+2026-04-09T03:14:54  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='yes'  confidence=high  duration=2431ms
+2026-04-09T03:14:55  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T03:14:55  INFO      medvqa.agents.verification_agent  Verifying answer='yes'  question='are the kidney present?'  question_type=presence_absence
+2026-04-09T03:14:57  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1675ms
+2026-04-09T03:14:57  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-09T03:14:57  DEBUG     medvqa.agents.verification_agent  Verification notes: The question asks a yes/no presence query about whether the kidneys are present. The answer 'yes' directly matches this format. The explanation is consistent with the provided visual analysis, which explicitly lists both kidneys as visible structures on the abdominal CT. There are no contradictions or signs of overstatement.
+2026-04-09T03:14:57  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1708ms
+2026-04-09T03:14:57  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-09T03:14:57  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-09T03:14:57  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T03:14:57  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='yes'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=20603ms
+2026-04-09T03:14:57  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='yes'  verification=verified  confidence=High  flag_review=False
+2026-04-09T03:14:57  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T03:14:57  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T03:14:57  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='yes'  retries=0  total_duration=20610ms ===
+2026-04-09T03:14:57  INFO      medvqa.routes.dataset  Sample 2080 analysis complete  baseline=1351ms  workflow=3474ms  agentic=20614ms  total=20614ms
+2026-04-09T03:14:57  INFO      medvqa.routes.dataset  Sample 2080 answers  baseline='Yes, both kidneys are present.'  workflow='Yes'  agentic='yes'  ground_truth='yes'

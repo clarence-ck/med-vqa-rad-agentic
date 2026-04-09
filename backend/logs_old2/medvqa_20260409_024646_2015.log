@@ -1,0 +1,104 @@
+2026-04-09T03:15:25  INFO      medvqa.routes.dataset  Cache MISS for sample 2015  question='what is the pathology?'  refresh=False  running all 3 pipelines in parallel
+2026-04-09T03:15:25  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=151627 bytes  question='what is the pathology?'
+2026-04-09T03:15:25  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what is the pathology?'  mime_type=image/png  size=151627 bytes ===
+2026-04-09T03:15:25  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T03:15:25  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=151627 bytes)
+2026-04-09T03:15:26  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T03:15:26  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=151627 bytes)
+2026-04-09T03:15:26  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Acute appendicitis",
+  "explanation": "This axial contrast-enhanced CT of the abdomen shows a dilated, inflamed tubular structure in the right lower quadrant with surrounding fat stranding, consistent with appendicitis.",
+  "confidence": "medium"
+}
+2026-04-09T03:15:26  INFO      medvqa.agents.baseline  Baseline done  answer='Acute appendicitis'  confidence=medium  duration=1275ms
+2026-04-09T03:15:27  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=2457ms
+2026-04-09T03:15:27  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the abdomen showing multiple opacified bowel loops within the abdominal cavity. The vertebral body and surrounding abdominal soft tissues are visible, with no gross motion artifact and overall adequate image quality.
+2026-04-09T03:15:27  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple fluid/contrast-filled bowel loops are visible', 'A focal area of bowel wall thickening or soft tissue prominence is present in the left lower abdomen', 'No free intraperitoneal air is evident on this single image']
+2026-04-09T03:15:28  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what is the pathology?'
+2026-04-09T03:15:28  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:15:28  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=3  duration=1937ms
+2026-04-09T03:15:28  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the abdomen shows multiple contrast-filled bowel loops within the central and lower abdomen. The lumbar spine and surrounding abdominal soft tissues are also visible on this slice.
+2026-04-09T03:15:28  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple opacified bowel loops are present', 'A focal area of gas/stool is seen in the right lower abdomen/cecal region', 'No obvious free intraperitoneal air is visible on this single image']
+2026-04-09T03:15:28  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=1966ms
+2026-04-09T03:15:29  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what is the pathology?'
+2026-04-09T03:15:29  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=medical_knowledge  med_knowledge=True  clarity=ambiguous  duration=1072ms
+2026-04-09T03:15:29  DEBUG     medvqa.agents.question_analyzer  Target entity: pathology  Expected format: short_phrase  Rephrased: What abnormality or pathology is visible on the abdominal CT image?
+2026-04-09T03:15:29  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what is the pathology?'  modality=CT  body_region=abdomen  question_type=abnormality_description
+2026-04-09T03:15:29  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T03:15:29  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-09T03:15:29  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Multiple fluid/contrast-filled bowel loops are visible; A focal area of bowel wa'  confidence=medium  question_type=abnormality_description  duration=3614ms
+2026-04-09T03:15:29  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what is the pathology?'
+2026-04-09T03:15:29  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:15:30  INFO      medvqa.agents.question_analyzer  Question analysis done  type=other  reasoning=medical_knowledge  med_knowledge=True  clarity=ambiguous  duration=1045ms
+2026-04-09T03:15:30  DEBUG     medvqa.agents.question_analyzer  Target entity: pathology  Expected format: short_phrase  Rephrased: What abnormality or pathology is visible on this CT image?
+2026-04-09T03:15:30  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=other  duration=1094ms
+2026-04-09T03:15:30  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T03:15:30  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=other  reasoning=medical_knowledge  med_knowledge=True  modality=CT  region=abdomen
+2026-04-09T03:15:32  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1439ms
+2026-04-09T03:15:32  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic abdominal CT interpretation case with moderate anatomical complexity and potential overlap, but no clearly conspicuous single lesion is described, making it a medium-difficulty routing choice.
+2026-04-09T03:15:32  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1473ms
+2026-04-09T03:15:33  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T03:15:33  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-09T03:15:33  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='what is the pathology?'  modality=CT  body_region=abdomen  question_type=other  target_entity=pathology  advanced_rag=True
+2026-04-09T03:15:33  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=what is the pathology? | modality=CT | body_region=abdomen | finding=other | rewrite=True rerank=True reflection=True
+2026-04-09T03:15:33  INFO      medvqa.agents.advanced_rag  Query rewrite | original='what is the pathology?'
+2026-04-09T03:15:33  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='abdominal CT pathology'  changed=True
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen': 209 matches
+2026-04-09T03:15:33  INFO      medvqa.agents.advanced_rag  Metadata filter result: 2 candidates after intersection
+2026-04-09T03:15:33  INFO      medvqa.agents.advanced_rag  Metadata filter: 2 candidates retained
+2026-04-09T03:15:33  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 2 candidates
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 2/2
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.5461 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag    2. id=146 score=0.5194 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T03:15:33  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 2 candidates
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 2/2
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=-0.0725 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag    2. id=146 score=-0.0767 | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=2 sparse=2
+2026-04-09T03:15:33  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 2 unique candidates
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 2/2
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag    2. id=146 score=0.0323 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag  Reranking skipped; using first 2 merged candidates
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 2/2
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T03:15:33  DEBUG     medvqa.agents.advanced_rag    2. id=146 score=0.0323 method=hybrid_rrf | Q: is there evidence of a small bowel obstruction with perforated viscus on this ct? | A: yes
+2026-04-09T03:15:33  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 2 retrieved candidates
+2026-04-09T03:15:33  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 2 retrieved candidates via LLM
+2026-04-09T03:15:35  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=False  confidence=low  recommendation=reject
+2026-04-09T03:15:35  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ["The original question is too vague ('what is the pathology?') and the retrieved cases do not clearly address the same specific pathology.", 'Both retrieved cases are CT abdomen cases, so the modality matches, but the clinical topics differ: one is a renal mass and the other is bowel obstruction/perforation.', 'The answers are plausible medically, but they do not provide a consistent or directly useful pattern for identifying the pathology in the original image.']
+2026-04-09T03:15:35  WARNING   medvqa.agents.advanced_rag  Self-reflection rejected retrieved candidates (relevant=False, recommendation=reject)
+2026-04-09T03:15:35  WARNING   medvqa.agents.advanced_rag  Self-reflection flagged low quality; returning no retrieved candidates
+2026-04-09T03:15:35  INFO      medvqa.agents.knowledge_retriever  Advanced RAG returned 0 similar cases for this question; proceeding without RAG context
+2026-04-09T03:15:39  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=0  duration=6366ms
+2026-04-09T03:15:39  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Small bowel is normally relatively collapsed or mildly fluid-filled; marked dilation can suggest obstruction or ileus.', 'Colon should contain variable gas and stool; focal wall thickening or pericolonic stranding may indicate colitis, diverticulitis, or malignancy.', 'The psoas muscles and retroperitoneal vessels are important landmarks for detecting retroperitoneal inflammation, hematoma, abscess, or mass.', 'Abdominal wall defects on CT can indicate hernia, postoperative change, or soft tissue infection.', 'Free intraperitoneal air, abnormal fluid, or mesenteric stranding are common CT signs of acute abdominal pathology.']
+2026-04-09T03:15:39  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On an abdominal CT, pathology involving the small bowel, colon, abdominal wall, retroperitoneum, or psoas muscles is often assessed by looking for abnormal bowel dilation, wall thickening, free air, f
+2026-04-09T03:15:39  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=0  duration=6399ms
+2026-04-09T03:15:40  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T03:15:40  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what is the pathology?'  is_retry=False  question_type=other  yes_no=False
+2026-04-09T03:15:40  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=0
+2026-04-09T03:15:42  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='No obvious acute abdominal pathology identified'  confidence=medium  duration=2623ms
+2026-04-09T03:15:42  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the described CT findings for signs of acute abdominal abnormality.', 'Noted that the bowel loops are opacified but not described as markedly dilated or thickened.', 'Checked for common acute signs such as free air, fluid, or fat stranding; none were reported.', 'Concluded that no specific pathology is evident on this single image.']
+2026-04-09T03:15:42  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Multiple contrast-filled bowel loops are present', 'Focal gas/stool in the right lower abdomen/cecal region', 'No obvious free intraperitoneal air visible', 'No reported bowel wall thickening, obstruction, or inflammatory stranding', 'No reported abnormality of psoas muscles, abdominal wall, or retroperitoneum']
+2026-04-09T03:15:42  DEBUG     medvqa.agents.reasoning_agent  Limitations: This is based on a single axial CT slice and the provided image summary; subtle or non-visualized pathology could be missed without the full scan and clinical context.
+2026-04-09T03:15:42  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='No obvious acute abdominal pathology identified'  confidence=medium  duration=2654ms
+2026-04-09T03:15:43  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T03:15:43  INFO      medvqa.agents.verification_agent  Verifying answer='No obvious acute abdominal pathology identified'  question='what is the pathology?'  question_type=other
+2026-04-09T03:15:45  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=Medium  checks=5/5  duration=1692ms
+2026-04-09T03:15:45  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-09T03:15:45  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer is a concise radiology-style assessment and fits the short_phrase format. The explanation is consistent with the provided CT visual summary, referencing visible bowel loops and lack of obvious acute findings. It is appropriately cautious given the limited single-slice evidence.
+2026-04-09T03:15:45  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=Medium  duration=1732ms
+2026-04-09T03:15:45  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-09T03:15:45  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-09T03:15:45  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T03:15:45  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='No obvious acute abdominal pathology identified'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=19782ms
+2026-04-09T03:15:45  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='No obvious acute abdominal pathology identified'  verification=verified  confidence=Medium  flag_review=False
+2026-04-09T03:15:45  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T03:15:45  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T03:15:45  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='No obvious acute abdominal pathology identified'  retries=0  total_duration=19789ms ===
+2026-04-09T03:15:45  INFO      medvqa.routes.dataset  Sample 2015 analysis complete  baseline=1277ms  workflow=3616ms  agentic=19792ms  total=19793ms
+2026-04-09T03:15:45  INFO      medvqa.routes.dataset  Sample 2015 answers  baseline='Acute appendicitis'  workflow='Multiple fluid/contrast-filled bowel loops are visible; A fo'  agentic='No obvious acute abdominal pathology identified'  ground_truth='diverticulitis'

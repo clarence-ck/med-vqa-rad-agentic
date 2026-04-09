@@ -1,0 +1,66 @@
+2026-04-09T03:28:26  INFO      medvqa.routes.dataset  Cache MISS for sample 1881  question='in which two ventricles can calcifications be seen on this ct scan?'  refresh=False  running all 3 pipelines in parallel
+2026-04-09T03:28:26  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=122028 bytes  question='in which two ventricles can calcifications be seen on this ct scan?'
+2026-04-09T03:28:26  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='in which two ventricles can calcifications be seen on this ct scan?'  mime_type=image/png  size=122028 bytes ===
+2026-04-09T03:28:26  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T03:28:26  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=122028 bytes)
+2026-04-09T03:28:27  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T03:28:27  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=122028 bytes)
+2026-04-09T03:28:27  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Calcifications are seen in the lateral ventricles and the third ventricle.",
+  "explanation": "This is an axial noncontrast head CT showing hyperdense calcifications within the ventricular system. The visible calcifications are located in the lateral ventricles and the third ventricle.",
+  "confidence": "high"
+}
+2026-04-09T03:28:27  INFO      medvqa.agents.baseline  Baseline done  answer='Calcifications are seen in the lateral ventricles and the third ventricle.'  confidence=high  duration=1363ms
+2026-04-09T03:28:28  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=head/brain  quality=good  findings=3  duration=2200ms
+2026-04-09T03:28:28  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial non-contrast CT image of the brain showing the intracranial contents within the skull. The cerebral hemispheres and ventricular system are visible, with diffuse prominence of the ventricles and sulci in this slice.
+2026-04-09T03:28:28  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Prominent enlargement of the lateral ventricles', 'Mild diffuse widening of cortical sulci', 'Small hyperdense foci near the midline/basal ganglia region, likely physiologic or calcific in appearance']
+2026-04-09T03:28:28  INFO      medvqa.agents.question_analyzer  Analyzing question: 'in which two ventricles can calcifications be seen on this ct scan?'
+2026-04-09T03:28:28  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:28:29  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=head  quality=good  findings=3  duration=2256ms
+2026-04-09T03:28:29  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial non-contrast CT image of the head showing the brain within the skull. The lateral ventricles and midline ventricular structures are visible, along with cortical sulci and deep brain structures.
+2026-04-09T03:28:29  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Prominent symmetric enlargement of the lateral ventricles', 'Mild generalized prominence of cortical sulci', 'Small hyperdense foci near the midline/deep brain structures, possibly physiologic calcifications']
+2026-04-09T03:28:29  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=head  duration=2298ms
+2026-04-09T03:28:30  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1159ms
+2026-04-09T03:28:30  DEBUG     medvqa.agents.question_analyzer  Target entity: the two ventricles containing calcifications  Expected format: short_phrase  Rephrased: In which two ventricles can calcifications be seen on this CT scan?
+2026-04-09T03:28:30  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='in which two ventricles can calcifications be seen on this ct scan?'  modality=CT  body_region=head/brain  question_type=location
+2026-04-09T03:28:30  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T03:28:30  DEBUG     medvqa.agents.workflow_baseline  Branch taken: location
+2026-04-09T03:28:30  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='head/brain'  confidence=medium  question_type=location  duration=3439ms
+2026-04-09T03:28:30  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='in which two ventricles can calcifications be seen on this ct scan?'
+2026-04-09T03:28:30  INFO      medvqa.agents.question_analyzer  Analyzing question: 'in which two ventricles can calcifications be seen on this ct scan?'
+2026-04-09T03:28:30  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:28:31  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1152ms
+2026-04-09T03:28:31  DEBUG     medvqa.agents.question_analyzer  Target entity: ventricles with calcifications  Expected format: short_phrase  Rephrased: In which two ventricles can calcifications be seen on this CT scan?
+2026-04-09T03:28:31  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=1187ms
+2026-04-09T03:28:32  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T03:28:32  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=head
+2026-04-09T03:28:36  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=3512ms
+2026-04-09T03:28:36  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clean head CT with simple anatomy and no noted overlap or artifacts, making it an easy visual recognition case that should be answerable directly from the image.
+2026-04-09T03:28:36  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=3549ms
+2026-04-09T03:28:36  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T03:28:36  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='in which two ventricles can calcifications be seen on this ct scan?'  is_retry=False  question_type=location  yes_no=False
+2026-04-09T03:28:36  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-09T03:28:39  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='The lateral ventricles and the third ventricle.'  confidence=medium  duration=2560ms
+2026-04-09T03:28:39  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the visible ventricular structures on the axial head CT.', 'Noted the reported small hyperdense foci consistent with calcifications.', 'Matched the calcification locations to the ventricles mentioned in the image analysis.']
+2026-04-09T03:28:39  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Visible lateral ventricles and third ventricle on axial CT', 'Small hyperdense foci near the midline/deep brain structures, possibly physiologic calcifications', 'Prominent symmetric enlargement of the lateral ventricles']
+2026-04-09T03:28:39  DEBUG     medvqa.agents.reasoning_agent  Limitations: The image analysis suggests calcifications but does not specify precise anatomic labeling on the image itself, so the answer is based on the described ventricular structures and location of hyperdense foci.
+2026-04-09T03:28:39  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='The lateral ventricles and the third ventricle.'  confidence=medium  duration=2596ms
+2026-04-09T03:28:40  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T03:28:40  INFO      medvqa.agents.verification_agent  Verifying answer='The lateral ventricles and the third ventricle.'  question='in which two ventricles can calcifications be seen on this ct scan?'  question_type=location
+2026-04-09T03:28:42  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=3/5  duration=2622ms
+2026-04-09T03:28:42  WARNING   medvqa.agents.verification_agent  Verification issues: ['The explanation claims calcifications are seen near the midline and deep brain structures, but the provided visual analysis does not explicitly confirm calcifications.', 'The answer names the lateral ventricles and third ventricle as the sites of calcification, but this is somewhat strong given only a generic CT structural description.']
+2026-04-09T03:28:42  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T03:28:42  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct short phrase format and is anatomically plausible, but the explanation is not fully grounded in the provided evidence because calcifications themselves are not directly confirmed in the image analysis. The answer may be acceptable if based on the unseen image details, but from the supplied evidence it should be stated more cautiously.
+2026-04-09T03:28:42  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2660ms
+2026-04-09T03:28:42  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-09T03:28:42  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-09T03:28:42  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-09T03:28:42  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-09T03:28:42  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='The lateral ventricles and the third ventricle.'  verification=partially_verified  guardrail_flag=False  consistency=low  cross_modal=low  duration=16348ms
+2026-04-09T03:28:42  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='The lateral ventricles and the third ventricle.'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-09T03:28:42  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T03:28:42  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T03:28:42  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='The lateral ventricles and the third ventricle.'  retries=0  total_duration=16353ms ===
+2026-04-09T03:28:42  INFO      medvqa.routes.dataset  Sample 1881 analysis complete  baseline=1369ms  workflow=3443ms  agentic=16356ms  total=16356ms
+2026-04-09T03:28:42  INFO      medvqa.routes.dataset  Sample 1881 answers  baseline='Calcifications are seen in the lateral ventricles and the th'  workflow='head/brain'  agentic='The lateral ventricles and the third ventricle.'  ground_truth='the 3rd ventricle and the lateral ventricles'

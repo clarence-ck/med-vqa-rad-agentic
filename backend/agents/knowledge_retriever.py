@@ -25,13 +25,13 @@ except ImportError:
 class KnowledgeRetriever:
     """
     Agent 4: Knowledge Support Agent (Advanced RAG Version)
-    
+
     Retrieves supporting medical context using advanced RAG when the router requests retrieval:
-    - Query rewriting and expansion
     - Hybrid retrieval (dense embeddings + BM25)
-    - Metadata filtering by modality, body region, and finding category
-    - Cross-encoder reranking
-    - Self-reflection validation
+    - Image-grounded metadata filtering (modality, body region, finding category)
+    - Cross-encoder reranking (mandatory)
+    - Multi-signal confidence-based validation
+    - HyDE fallback on low-confidence retrieval
     """
     
     def __init__(self, use_advanced_rag: bool = True):
@@ -96,19 +96,22 @@ class KnowledgeRetriever:
 
         if self.use_advanced_rag and original_question:
             try:
+                # Use image-grounded notable_findings for finding_category
+                # instead of inferring from question text alone
                 finding_category = None
                 if self._rag_retriever is not None:
+                    notable_findings_str = ""
+                    if image_interpretation:
+                        ii = image_interpretation.get("result", image_interpretation)
+                        notable_findings_str = " ".join(ii.get("notable_findings", []))
                     finding_category = self._rag_retriever._infer_finding_category(
-                        original_question, ''
+                        original_question, notable_findings_str
                     )
                 rag_result = retrieve_knowledge_advanced(
                     question=original_question,
                     modality=modality,
                     body_region=body_region,
                     finding_category=finding_category,
-                    use_query_rewrite=True,
-                    use_reranking=True,
-                    use_self_reflection=True
                 )
 
                 similar_cases = rag_result.get("similar_cases", [])
@@ -237,7 +240,7 @@ class KnowledgeRetriever:
 RETRIEVED ANSWER-FOCUSED EVIDENCE (from training data):
 {rag_context}
 
-Use this evidence only as a short hint for the expected answer and relevant medical concepts. If the retrieved cases are only loosely related, ignore them. Do not copy or paraphrase any retrieved question wording.
+IMPORTANT: These retrieved answers come from DIFFERENT images and may not match the current image. Do NOT assume the retrieved answers are correct for this case. Use them only for general medical context (terminology, anatomy, what to look for). Never copy a retrieved answer as fact for the current image.
 """
         else:
             rag_section = """
@@ -266,22 +269,3 @@ Return a JSON object with:
 Keep responses focused and educational. Do NOT attempt to diagnose. Base your response on established medical knowledge and only the retrieved evidence that directly matches the current anatomy/pathology; ignore weak or loosely related cases.
 Return ONLY the JSON object, no additional text."""
 
-# Wrapper function for compatibility
-def retrieve_knowledge(
-    question_type: str = "",
-    body_region: str = "",
-    modality: str = "",
-    visual_cues: list = None,
-    target_entity: str = "",
-    original_question: str = "",
-    use_advanced_rag: bool = True
-) -> dict:
-    retriever = KnowledgeRetriever(use_advanced_rag=use_advanced_rag)
-    return retriever.run(
-        question_type=question_type,
-        body_region=body_region,
-        modality=modality,
-        visual_cues=visual_cues,
-        target_entity=target_entity,
-        original_question=original_question
-    )["result"]

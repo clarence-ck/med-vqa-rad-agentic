@@ -1,0 +1,117 @@
+2026-04-09T03:00:59  INFO      medvqa.routes.dataset  Cache MISS for sample 2159  question='the small bubbles of air seen in the lumen are normal or abnormal?'  refresh=False  running all 3 pipelines in parallel
+2026-04-09T03:00:59  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=175045 bytes  question='the small bubbles of air seen in the lumen are normal or abnormal?'
+2026-04-09T03:00:59  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='the small bubbles of air seen in the lumen are normal or abnormal?'  mime_type=image/png  size=175045 bytes ===
+2026-04-09T03:00:59  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T03:00:59  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=175045 bytes)
+2026-04-09T03:01:00  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T03:01:00  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=175045 bytes)
+2026-04-09T03:01:01  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Abnormal.",
+  "explanation": "Small bubbles of air in the bowel lumen can be normal, but in this image the visible air bubbles appear associated with abnormal bowel findings rather than simple incidental intraluminal gas. This suggests a pathologic process.",
+  "confidence": "medium"
+}
+2026-04-09T03:01:01  INFO      medvqa.agents.baseline  Baseline done  answer='Abnormal.'  confidence=medium  duration=1724ms
+2026-04-09T03:01:01  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen and pelvis  quality=good  findings=3  duration=2170ms
+2026-04-09T03:01:01  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the lower abdomen/pelvis showing bowel loops and surrounding soft tissues. The pelvic bones and lower lumbar spine are visible, along with contrast-opacified bowel contents and intra-abdominal gas.
+2026-04-09T03:01:01  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Contrast opacification of bowel loops is present', 'Scattered intraluminal gas is visible', 'No obvious acute bony abnormality is apparent on this slice']
+2026-04-09T03:01:01  INFO      medvqa.agents.question_analyzer  Analyzing question: 'the small bubbles of air seen in the lumen are normal or abnormal?'
+2026-04-09T03:01:01  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:01:02  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen and pelvis  quality=good  findings=3  duration=2417ms
+2026-04-09T03:01:02  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image through the lower abdomen/pelvis showing pelvic bones centrally and laterally with multiple bowel loops in the abdominal cavity. Soft tissue structures and bowel gas/contrast are visible, with no obvious external objects or non-anatomic content.
+2026-04-09T03:01:02  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Single axial cross-sectional slice', 'Oral contrast is present within bowel loops', 'No obvious gross acute abnormality can be confidently identified on this image alone']
+2026-04-09T03:01:02  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen and pelvis  duration=2447ms
+2026-04-09T03:01:02  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=medical_knowledge  med_knowledge=True  clarity=clear  duration=1079ms
+2026-04-09T03:01:02  DEBUG     medvqa.agents.question_analyzer  Target entity: small bubbles of air in the bowel lumen  Expected format: single_word  Rephrased: Are the small bubbles of air seen in the bowel lumen normal or abnormal?
+2026-04-09T03:01:02  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='the small bubbles of air seen in the lumen are normal or abnormal?'  modality=CT  body_region=abdomen and pelvis  question_type=yes_no
+2026-04-09T03:01:02  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['small bowel']
+2026-04-09T03:01:02  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-09T03:01:02  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=high  question_type=yes_no  duration=3312ms
+2026-04-09T03:01:03  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='the small bubbles of air seen in the lumen are normal or abnormal?'
+2026-04-09T03:01:03  INFO      medvqa.agents.question_analyzer  Analyzing question: 'the small bubbles of air seen in the lumen are normal or abnormal?'
+2026-04-09T03:01:03  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T03:01:04  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=medical_knowledge  med_knowledge=True  clarity=clear  duration=1131ms
+2026-04-09T03:01:04  DEBUG     medvqa.agents.question_analyzer  Target entity: small bubbles of air in the bowel lumen  Expected format: short_phrase  Rephrased: Are the small bubbles of air seen in the bowel lumen normal or abnormal?
+2026-04-09T03:01:04  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=1168ms
+2026-04-09T03:01:05  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T03:01:05  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=medical_knowledge  med_knowledge=True  modality=CT  region=abdomen and pelvis
+2026-04-09T03:01:07  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1831ms
+2026-04-09T03:01:07  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic search case on a fairly standard CT, but the answer may depend on subtle findings within overlapping bowel and pelvic anatomy rather than an obvious conspicuous lesion.
+2026-04-09T03:01:07  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1862ms
+2026-04-09T03:01:08  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T03:01:08  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-09T03:01:08  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='the small bubbles of air seen in the lumen are normal or abnormal?'  modality=CT  body_region=abdomen and pelvis  question_type=yes_no  target_entity=small bubbles of air in the bowel lumen  advanced_rag=True
+2026-04-09T03:01:08  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=the small bubbles of air seen in the lumen are normal or abnormal? | modality=CT | body_region=abdomen and pelvis | finding=normal | rewrite=True rerank=True reflection=True
+2026-04-09T03:01:08  INFO      medvqa.agents.advanced_rag  Query rewrite | original='the small bubbles of air seen in the lumen are normal or abnormal?'
+2026-04-09T03:01:08  INFO      medvqa.agents.advanced_rag  Query rewrite | rewritten='CT abdomen pelvis small air bubbles in the bowel lumen normal or abnormal?'  changed=True
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen and pelvis': 209 matches
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 170 matches
+2026-04-09T03:01:08  WARNING   medvqa.agents.advanced_rag  Metadata filter found no intersection; falling back to full corpus
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag  Metadata filter: none applied (full corpus search)
+2026-04-09T03:01:08  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag  Dense retrieval searching full FAISS index with 1792 vectors
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/20
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag    1. id=1038 score=0.6175 | Q: are there air fluid levels present in the small bowel? | A: yes
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag    2. id=1673 score=0.5931 | Q: what is hyperdensity under the diaphragm on the left? | A: stomach bubble
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag    3. id=1672 score=0.5922 | Q: what is the air under the left hemidiaphragm? | A: stomach bubble
+2026-04-09T03:01:08  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval searching full corpus of 1792 documents
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/20
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag    1. id=1775 score=13.7231 | Q: where is the lesion? | A: abdomen and pelvis
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag    2. id=991 score=13.6899 | Q: is the pathologic part of this image the small bowel or colon? | A: small bowel
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag    3. id=436 score=13.1012 | Q: does the appendix appear normal or abnormal? | A: normal
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=20 sparse=20
+2026-04-09T03:01:08  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 20 unique candidates
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/20
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag    1. id=1038 score=0.0320 method=hybrid_rrf | Q: are there air fluid levels present in the small bowel? | A: yes
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag    2. id=1775 score=0.0320 method=hybrid_rrf | Q: where is the lesion? | A: abdomen and pelvis
+2026-04-09T03:01:08  DEBUG     medvqa.agents.advanced_rag    3. id=436 score=0.0310 method=hybrid_rrf | Q: does the appendix appear normal or abnormal? | A: normal
+2026-04-09T03:01:08  INFO      medvqa.agents.advanced_rag  Reranking 20 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-09T03:01:08  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 20 candidates...
+2026-04-09T03:01:09  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-09T03:01:09  DEBUG     medvqa.agents.advanced_rag    1. id=1049 score=-4.8541 method=reranked softmax=0.2540 | Q: is there contrast material showing air-fluid levels in the small bowel | A: yes
+2026-04-09T03:01:09  DEBUG     medvqa.agents.advanced_rag    2. id=1038 score=-4.8783 method=reranked softmax=0.2480 | Q: are there air fluid levels present in the small bowel? | A: yes
+2026-04-09T03:01:09  DEBUG     medvqa.agents.advanced_rag    3. id=43 score=-5.7947 method=reranked softmax=0.0992 | Q: is air visible in the bowels? | A: yes
+2026-04-09T03:01:09  INFO      medvqa.agents.advanced_rag  Self-reflection: validating 3 retrieved candidates
+2026-04-09T03:01:09  INFO      medvqa.agents.advanced_rag  Self-reflection: evaluating 3 retrieved candidates via LLM
+2026-04-09T03:01:10  INFO      medvqa.agents.advanced_rag  Self-reflection result: relevant=True  confidence=medium  recommendation=augment
+2026-04-09T03:01:10  WARNING   medvqa.agents.advanced_rag  Self-reflection issues: ['Retrieved cases are related to abdominal CT findings involving bowel gas/air-fluid levels, which is broadly relevant.', 'They do not directly address whether small bubbles of air in the lumen are normal vs abnormal, so the match is only partial.', "One retrieved case mentions 'contrast material showing air-fluid levels,' which is somewhat imprecise and may not be fully consistent with the original question."]
+2026-04-09T03:01:10  INFO      medvqa.agents.advanced_rag  Self-reflection accepted retrieved candidates
+2026-04-09T03:01:10  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-09T03:01:10  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-09T03:01:10  DEBUG     medvqa.agents.advanced_rag    1. id=1049 score=-4.8541 method=reranked softmax=0.2540 | Q: is there contrast material showing air-fluid levels in the small bowel | A: yes
+2026-04-09T03:01:10  DEBUG     medvqa.agents.advanced_rag    2. id=1038 score=-4.8783 method=reranked softmax=0.2480 | Q: are there air fluid levels present in the small bowel? | A: yes
+2026-04-09T03:01:10  DEBUG     medvqa.agents.advanced_rag    3. id=43 score=-5.7947 method=reranked softmax=0.0992 | Q: is air visible in the bowels? | A: yes
+2026-04-09T03:01:10  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases  (query_rewritten=True  finding_category=normal)
+2026-04-09T03:01:14  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=3  duration=5971ms
+2026-04-09T03:01:14  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Gas in the bowel lumen is a common normal finding on abdominal CT.', 'Normal intraluminal air usually appears as small bubbles or pockets mixed with fluid or fecal material.', 'Concerning findings are suggested by bowel dilation, bowel wall thickening, transition points, or extraluminal free air.', 'The clinical significance depends on location, amount, and associated bowel or mesenteric abnormalities.']
+2026-04-09T03:01:14  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: Small gas bubbles within the bowel lumen are often a normal CT finding, especially when they are mixed with bowel contents and follow the expected course of the intestines. In similar abdominal cases 
+2026-04-09T03:01:14  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=3  duration=6008ms
+2026-04-09T03:01:14  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T03:01:14  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='the small bubbles of air seen in the lumen are normal or abnormal?'  is_retry=False  question_type=yes_no  yes_no=True
+2026-04-09T03:01:14  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=3
+2026-04-09T03:01:14  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-09T03:01:17  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='yes'  confidence=high  duration=2805ms
+2026-04-09T03:01:17  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the target finding as small bubbles of air within the bowel lumen.', 'Checked whether there were accompanying abnormal signs such as bowel dilation, wall thickening, inflammatory stranding, or free intraperitoneal air.', 'Noted that the image description reports oral contrast in bowel loops and no gross acute abnormality.', 'Concluded that intraluminal gas is a normal CT finding in this context.']
+2026-04-09T03:01:17  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial CT abdomen/pelvis shows bowel loops with oral contrast/gas in the lumen', 'No obvious bowel obstruction, bowel wall thickening, or inflammatory change described', 'No free intraperitoneal air described', 'Supporting knowledge that small intraluminal gas bubbles are commonly normal on abdominal CT']
+2026-04-09T03:01:17  DEBUG     medvqa.agents.reasoning_agent  Limitations: This is based on a single axial slice and the provided summary; subtle bowel pathology cannot be fully excluded without the full CT series.
+2026-04-09T03:01:17  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='yes'  confidence=high  duration=2840ms
+2026-04-09T03:01:18  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T03:01:18  INFO      medvqa.agents.verification_agent  Verifying answer='yes'  question='the small bubbles of air seen in the lumen are normal or abnormal?'  question_type=yes_no
+2026-04-09T03:01:20  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=3/5  duration=2291ms
+2026-04-09T03:01:20  WARNING   medvqa.agents.verification_agent  Verification issues: ["The answer 'yes' is ambiguous for the question 'normal or abnormal?' and does not directly state which one.", 'The explanation refers to specific findings such as oral contrast and no acute abnormality/free air that are not directly verified from the provided visual analysis.', 'The conclusion that the air bubbles are normal is somewhat overconfident given the limited image summary.']
+2026-04-09T03:01:20  INFO      medvqa.agents.verification_agent  Fallback recommendation: rephrase_answer
+2026-04-09T03:01:20  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is directionally consistent with the visual summary suggesting bowel gas in the lumen, but the explanation adds unsupported details and the one-word answer is not fully appropriate for a normal/abnormal question. A clearer answer should explicitly say 'normal' or 'likely normal' if intended.
+2026-04-09T03:01:20  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2325ms
+2026-04-09T03:01:20  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-09T03:01:20  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=rephrase_answer  disclaimer=False
+2026-04-09T03:01:20  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-09T03:01:20  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-09T03:01:20  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='yes'  verification=partially_verified  guardrail_flag=False  consistency=low  cross_modal=low  duration=21222ms
+2026-04-09T03:01:20  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='yes'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-09T03:01:20  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T03:01:20  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T03:01:20  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='yes'  retries=0  total_duration=21226ms ===
+2026-04-09T03:01:20  INFO      medvqa.routes.dataset  Sample 2159 analysis complete  baseline=1730ms  workflow=3318ms  agentic=21229ms  total=21229ms
+2026-04-09T03:01:20  INFO      medvqa.routes.dataset  Sample 2159 answers  baseline='Abnormal.'  workflow='Yes'  agentic='yes'  ground_truth='abnormal'
