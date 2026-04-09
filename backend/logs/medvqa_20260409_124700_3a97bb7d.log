@@ -105,3 +105,24 @@
 2026-04-09T12:52:34  INFO      medvqa.server  → GET /api/dataset/samples
 2026-04-09T12:52:34  INFO      medvqa.routes.dataset  Listing samples  returned=200
 2026-04-09T12:52:34  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=19ms
+2026-04-09T12:54:06  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-09T12:54:06  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=31
+2026-04-09T12:54:13  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=31  skipped=0
+2026-04-09T12:54:13  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-09T12:54:13  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=6450ms
+2026-04-09T12:55:20  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-09T12:55:20  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=35
+2026-04-09T12:55:28  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=35  skipped=0
+2026-04-09T12:55:28  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-09T12:55:28  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=7339ms
+2026-04-09T12:56:03  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-09T12:56:03  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-09T12:56:03  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=29ms
+2026-04-09T12:56:03  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-09T12:56:03  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-09T12:56:03  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=18ms
+2026-04-09T12:56:05  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-09T12:56:05  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=36
+2026-04-09T12:56:12  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=36  skipped=0
+2026-04-09T12:56:12  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-09T12:56:12  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=7471ms

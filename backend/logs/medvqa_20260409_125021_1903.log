@@ -79,3 +79,31 @@
 2026-04-09T12:53:47  DEBUG     medvqa.agents.advanced_rag    2. id=1674 score=3.0775 method=reranked softmax=0.2685 | Q: where is the infarct? | A: left cerebellum
 2026-04-09T12:53:47  DEBUG     medvqa.agents.advanced_rag    3. id=589 score=1.8112 method=reranked softmax=0.0757 | Q: where are the infarcts located? | A: diffuse
 2026-04-09T12:53:47  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases  (hyde_used=False  finding_category=normal)
+2026-04-09T12:53:50  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=3  duration=3796ms
+2026-04-09T12:53:50  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Acute infarcts on MRI are most sensitive on diffusion-weighted imaging (DWI) with corresponding low signal on the ADC map.', 'They often follow an arterial territory pattern, but may also be multifocal if embolic or watershed in distribution.', 'Common brain locations include cortical gray matter, deep white matter, basal ganglia, thalamus, brainstem, and cerebellum.', 'Associated findings may include mild swelling, sulcal effacement, or evolving FLAIR/T2 hyperintensity depending on timing.']
+2026-04-09T12:53:50  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On brain MRI, acute infarcts are typically sought as focal areas of restricted diffusion, often involving cortical or deep gray/white matter in a vascular distribution. In the retrieved similar cases,
+2026-04-09T12:53:50  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=3  duration=3827ms
+2026-04-09T12:53:51  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T12:53:51  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='where are the acute infarcts?'  is_retry=False  question_type=location  yes_no=False
+2026-04-09T12:53:51  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=3
+2026-04-09T12:53:54  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Bilateral periventricular and subcortical white matter'  confidence=medium  duration=2296ms
+2026-04-09T12:53:54  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the provided MRI image analysis for the location of abnormal signal.', 'Identified that the abnormalities are bilateral and predominantly in the white matter.', 'Noted the specific periventricular and subcortical distribution described as abnormal.']
+2026-04-09T12:53:54  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Multifocal bilateral white matter signal abnormalities', 'Periventricular distribution of abnormal signal', 'Subcortical extension of abnormal signal', 'Brain MRI showing abnormalities in both cerebral hemispheres']
+2026-04-09T12:53:54  DEBUG     medvqa.agents.reasoning_agent  Limitations: The answer is based on the provided image summary rather than direct review of diffusion-weighted/ADC images, so exact infarct age and full extent cannot be confirmed from this single image description.
+2026-04-09T12:53:54  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Bilateral periventricular and subcortical white matter'  confidence=medium  duration=2323ms
+2026-04-09T12:53:54  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T12:53:54  INFO      medvqa.agents.verification_agent  Verifying answer='Bilateral periventricular and subcortical white matter'  question='where are the acute infarcts?'  question_type=location
+2026-04-09T12:53:56  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=Medium  checks=5/5  duration=1220ms
+2026-04-09T12:53:56  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-09T12:53:56  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer is a concise location phrase and matches the image analysis describing bilateral periventricular and subcortical white matter abnormalities. The explanation is consistent with the visible MRI summary and does not overstate beyond the evidence provided.
+2026-04-09T12:53:56  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=Medium  duration=1250ms
+2026-04-09T12:53:56  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-09T12:53:56  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-09T12:53:56  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-09T12:53:56  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Bilateral periventricular and subcortical white matter'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=17307ms
+2026-04-09T12:53:56  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Bilateral periventricular and subcortical white matter'  verification=verified  confidence=Medium  flag_review=False
+2026-04-09T12:53:56  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  -> retry=False
+2026-04-09T12:53:56  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-09T12:53:56  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Bilateral periventricular and subcortical white matter'  retries=0  total_duration=17312ms ===
+2026-04-09T12:53:56  INFO      medvqa.routes.dataset  Sample 1903 analysis complete  baseline=1514ms  workflow=3186ms  agentic=17316ms  total=17318ms
+2026-04-09T12:53:56  INFO      medvqa.routes.dataset  Sample 1903 answers  baseline='The acute infarcts are in the bilateral frontal and parietal'  workflow='brain'  agentic='Bilateral periventricular and subcortical white matter'  ground_truth='r frontal lobe'

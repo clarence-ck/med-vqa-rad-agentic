@@ -1,0 +1,179 @@
+2026-04-09T12:55:35  INFO      medvqa.routes.dataset  Cache MISS for sample 1874  question='from what structure is the large hypodense mass emanating from?'  refresh=False  running all 3 pipelines in parallel
+2026-04-09T12:55:35  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=533824 bytes  question='from what structure is the large hypodense mass emanating from?'
+2026-04-09T12:55:35  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='from what structure is the large hypodense mass emanating from?'  mime_type=image/png  size=533824 bytes ===
+2026-04-09T12:55:35  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-09T12:55:35  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=533824 bytes)
+2026-04-09T12:55:36  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T12:55:36  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=533824 bytes)
+2026-04-09T12:55:37  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "The inferior vena cava",
+  "explanation": "This is an axial CT abdomen showing a large hypodense retroperitoneal mass in the midline/right of the aorta, consistent with a mass arising from the inferior vena cava. Its location and contour suggest an IVC-origin lesion rather than bowel or aortic pathology.",
+  "confidence": "medium"
+}
+2026-04-09T12:55:37  INFO      medvqa.agents.baseline  Baseline done  answer='The inferior vena cava'  confidence=medium  duration=1982ms
+2026-04-09T12:55:38  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen and pelvis  quality=good  findings=4  duration=3227ms
+2026-04-09T12:55:38  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image through the lower abdomen/pelvis showing bowel loops, mesenteric fat, central vessels, and the lower lumbar spine with pelvic bones. The image appears to be a contrast-enhanced abdominal CT slice with no obvious gross motion artifact.
+2026-04-09T12:55:38  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large rounded mid-abdominal soft tissue structure is visible', 'Scattered bowel gas is present', 'Mild vascular calcification is visible', 'No obvious free intraperitoneal air on this single slice']
+2026-04-09T12:55:38  INFO      medvqa.agents.question_analyzer  Analyzing question: 'from what structure is the large hypodense mass emanating from?'
+2026-04-09T12:55:38  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T12:55:39  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen and pelvis  quality=good  findings=3  duration=3535ms
+2026-04-09T12:55:39  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image through the lower abdomen/pelvis showing bowel loops, retroperitoneal structures, and pelvic bones. The image appears to be a single contrast-enhanced abdominal CT slice with moderate body habitus and surrounding soft tissues visible.
+2026-04-09T12:55:39  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large central rounded fluid-density structure in the abdomen', 'Scattered bowel gas and stool within the colon', 'Mild atherosclerotic calcification in adjacent vessels']
+2026-04-09T12:55:39  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen and pelvis  duration=3567ms
+2026-04-09T12:55:40  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  clarity=ambiguous  duration=1254ms
+2026-04-09T12:55:40  DEBUG     medvqa.agents.question_analyzer  Target entity: the structure from which the large hypodense mass is emanating  Expected format: short_phrase  Rephrased: From which anatomical structure is the large hypodense mass arising?
+2026-04-09T12:55:40  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='from what structure is the large hypodense mass emanating from?'  modality=CT  body_region=abdomen and pelvis  question_type=anatomy_identification
+2026-04-09T12:55:40  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-09T12:55:40  DEBUG     medvqa.agents.workflow_baseline  Branch taken: anatomy_identification
+2026-04-09T12:55:40  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='abdomen and pelvis'  confidence=high  question_type=anatomy_identification  duration=4543ms
+2026-04-09T12:55:40  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='from what structure is the large hypodense mass emanating from?'
+2026-04-09T12:55:40  INFO      medvqa.agents.question_analyzer  Analyzing question: 'from what structure is the large hypodense mass emanating from?'
+2026-04-09T12:55:40  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T12:55:41  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=spatial_reasoning  med_knowledge=True  clarity=ambiguous  duration=1080ms
+2026-04-09T12:55:41  DEBUG     medvqa.agents.question_analyzer  Target entity: structure of origin of the large hypodense mass  Expected format: short_phrase  Rephrased: From which anatomical structure does the large hypodense mass appear to originate?
+2026-04-09T12:55:41  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=anatomy_identification  duration=1114ms
+2026-04-09T12:55:42  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T12:55:42  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=anatomy_identification  reasoning=spatial_reasoning  med_knowledge=True  modality=CT  region=abdomen and pelvis
+2026-04-09T12:55:44  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1412ms
+2026-04-09T12:55:44  DEBUG     medvqa.agents.difficulty_router  Routing rationale: The target anatomy is not obvious on first glance due to moderate anatomic complexity and overlap, but the study is not so degraded or noisy as to require hard-case handling.
+2026-04-09T12:55:44  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1442ms
+2026-04-09T12:55:44  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T12:55:44  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-09T12:55:44  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='from what structure is the large hypodense mass emanating from?'  modality=CT  body_region=abdomen and pelvis  question_type=anatomy_identification  target_entity=structure of origin of the large hypodense mass  advanced_rag=True
+2026-04-09T12:55:44  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=from what structure is the large hypodense mass emanating from? | modality=CT | body_region=abdomen and pelvis | finding=mass | rerank=mandatory
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag  Using original question as query (no LLM rewrite)
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen and pelvis': 209 matches
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='mass': 158 matches
+2026-04-09T12:55:44  INFO      medvqa.agents.advanced_rag  Metadata filter result: 1 candidates after intersection
+2026-04-09T12:55:44  INFO      medvqa.agents.advanced_rag  Metadata filter: 1 candidates retained
+2026-04-09T12:55:44  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 1 candidates
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 1/1
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.3910 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T12:55:44  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 1 candidates
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 1/1
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=-2.0403 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=1 sparse=1
+2026-04-09T12:55:44  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 1 unique candidates
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 1/1
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T12:55:44  INFO      medvqa.agents.advanced_rag  Reranking 1 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-09T12:55:44  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 1 candidates...
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 1/1
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=-8.4952 method=reranked softmax=1.0000 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T12:55:44  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=high weak_signals=0 top1_softmax=1.000 margin=1.000 dense_top1=0.391 agreement=True
+2026-04-09T12:55:44  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 1 final candidates
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 1/1
+2026-04-09T12:55:44  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=-8.4952 method=reranked softmax=1.0000 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T12:55:45  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 1 similar cases  (hyde_used=False  finding_category=mass)
+2026-04-09T12:55:48  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=1  duration=3787ms
+2026-04-09T12:55:48  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['A mass that is continuous with an organ and shares its capsule or vascular supply is more likely to originate from that structure.', 'Retroperitoneal masses can displace bowel anteriorly and may be centered near the kidneys, psoas muscles, or iliac vessels.', 'Hypodense on CT usually indicates low attenuation, which can reflect cystic, necrotic, fatty, or fluid-containing components.', 'The kidneys are commonly assessed on axial CT by looking for preserved renal contour, collecting system involvement, and enhancement pattern.', 'Mesenteric or abdominal wall masses may be distinguished from organ-based lesions by fat-plane separation and their effect on nearby loops of bowel.']
+2026-04-09T12:55:48  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On abdominal CT, a large hypodense mass is often localized by tracing its anatomic attachments, displacement of adjacent organs, and relationship to retroperitoneal structures such as the kidneys, pso
+2026-04-09T12:55:48  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=1  duration=3815ms
+2026-04-09T12:55:49  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-09T12:55:49  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='from what structure is the large hypodense mass emanating from?'  is_retry=False  question_type=anatomy_identification  yes_no=False
+2026-04-09T12:55:49  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=1
+2026-04-09T12:55:52  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Left kidney'  confidence=medium  duration=2701ms
+2026-04-09T12:55:52  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the image as an axial CT through the abdomen/pelvis.', 'Located the large rounded hypodense lesion in the retroperitoneal region.', 'Compared its position to adjacent structures such as the psoas muscles, bowel loops, and vessels.', 'Concluded the lesion most likely originates from the left kidney based on its location and expected renal anatomy.']
+2026-04-09T12:55:52  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Large central rounded fluid-density structure on CT', 'Retroperitoneal location relative to bowel loops and psoas muscles', 'Typical renal-origin mass localization near the kidney', 'Supporting context indicating similar cases arose from the left kidney']
+2026-04-09T12:55:52  DEBUG     medvqa.agents.reasoning_agent  Limitations: Only a single axial CT slice is provided, and the renal contour is not explicitly shown in the summary, so the origin cannot be confirmed with absolute certainty.
+2026-04-09T12:55:52  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Left kidney'  confidence=medium  duration=2735ms
+2026-04-09T12:55:53  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T12:55:53  INFO      medvqa.agents.verification_agent  Verifying answer='Left kidney'  question='from what structure is the large hypodense mass emanating from?'  question_type=anatomy_identification
+2026-04-09T12:55:55  INFO      medvqa.agents.verification_agent  Verification done  status=low_confidence  confidence=Low  checks=2/5  duration=2395ms
+2026-04-09T12:55:55  WARNING   medvqa.agents.verification_agent  Verification issues: ['The explanation claims the mass is centered near the left kidney, but the provided visual analysis only describes a lower abdomen/pelvis slice with bowel loops, retroperitoneal structures, psoas muscles, and pelvic bones; no clear kidney is identified.', "The answer is overly specific ('Left kidney') given the limited evidence from a single axial lower abdominal/pelvic CT slice.", 'There is a mismatch between the asserted renal origin and the described image level, which appears too low to confidently localize the mass to the kidney.']
+2026-04-09T12:55:55  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-09T12:55:55  DEBUG     medvqa.agents.verification_agent  Verification notes: The response has the correct short-phrase format, but the claimed origin is not well supported by the visible evidence. The available context does not clearly show the kidney, so the conclusion is speculative.
+2026-04-09T12:55:55  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=low_confidence  confidence=Low  duration=2424ms
+2026-04-09T12:55:55  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['low_confidence']
+2026-04-09T12:55:55  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=True  fallback=add_disclaimer  disclaimer=True
+2026-04-09T12:55:55  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=2/5
+2026-04-09T12:55:55  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=False
+2026-04-09T12:55:55  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Left kidney'  verification=low_confidence  guardrail_flag=True  consistency=low  cross_modal=low  duration=20271ms
+2026-04-09T12:55:55  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Left kidney'  verification=low_confidence  confidence=Low  flag_review=True
+2026-04-09T12:55:55  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=low_confidence  flag_review=True  high_severity=True  -> retry=True
+2026-04-09T12:55:55  INFO      medvqa.agents.orchestrator  Pipeline RETRY triggered  reason: verification_status=low_confidence; fallback=add_disclaimer; flag_for_review=True
+2026-04-09T12:55:55  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=True)
+2026-04-09T12:55:56  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-09T12:55:56  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=533824 bytes)
+2026-04-09T12:56:00  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen and pelvis  quality=good  findings=3  duration=3664ms
+2026-04-09T12:56:00  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image through the lower abdomen/pelvis showing multiple bowel loops, central mesenteric structures, and the lower lumbar spine with pelvic bones. The image is a single cross-sectional slice with adequate soft tissue and bone detail.
+2026-04-09T12:56:00  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large rounded soft tissue structure in the central abdomen', 'Mildly prominent bowel gas within colonic loops', 'Atherosclerotic calcification is visible in adjacent vessels']
+2026-04-09T12:56:00  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen and pelvis  duration=3699ms
+2026-04-09T12:56:01  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='from what structure is the large hypodense mass emanating from?'
+2026-04-09T12:56:01  INFO      medvqa.agents.question_analyzer  Analyzing question: 'from what structure is the large hypodense mass emanating from?'
+2026-04-09T12:56:01  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-09T12:56:02  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=spatial_reasoning  med_knowledge=True  clarity=ambiguous  duration=1138ms
+2026-04-09T12:56:02  DEBUG     medvqa.agents.question_analyzer  Target entity: the structure giving rise to the large hypodense mass  Expected format: short_phrase  Rephrased: From which anatomical structure is the large hypodense mass arising?
+2026-04-09T12:56:02  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=anatomy_identification  duration=1168ms
+2026-04-09T12:56:03  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-09T12:56:03  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=anatomy_identification  reasoning=spatial_reasoning  med_knowledge=True  modality=CT  region=abdomen and pelvis
+2026-04-09T12:56:04  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1648ms
+2026-04-09T12:56:04  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a systematic anatomy-identification task on a reasonably clear CT slice with moderate complexity from bowel overlap and pelvic/mesenteric structures, so it is not a clean easy case but also not a high-noise hard case.
+2026-04-09T12:56:04  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1676ms
+2026-04-09T12:56:05  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-09T12:56:05  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retriever initialized successfully
+2026-04-09T12:56:05  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='from what structure is the large hypodense mass emanating from?'  modality=CT  body_region=abdomen and pelvis  question_type=anatomy_identification  target_entity=the structure giving rise to the large hypodense mass  advanced_rag=True
+2026-04-09T12:56:05  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=from what structure is the large hypodense mass emanating from? | modality=CT | body_region=abdomen and pelvis | finding=mass | rerank=mandatory
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag  Using original question as query (no LLM rewrite)
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='ct': 33 matches
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='abdomen and pelvis': 209 matches
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='mass': 158 matches
+2026-04-09T12:56:05  INFO      medvqa.agents.advanced_rag  Metadata filter result: 1 candidates after intersection
+2026-04-09T12:56:05  INFO      medvqa.agents.advanced_rag  Metadata filter: 1 candidates retained
+2026-04-09T12:56:05  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=20
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 1 candidates
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 1/1
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.3910 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T12:56:05  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=20
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 1 candidates
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 1/1
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=-2.0403 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=1 sparse=1
+2026-04-09T12:56:05  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 1 unique candidates
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 1/1
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=0.0328 method=hybrid_rrf | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T12:56:05  INFO      medvqa.agents.advanced_rag  Reranking 1 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-09T12:56:05  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 1 candidates...
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 1/1
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=-8.4952 method=reranked softmax=1.0000 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T12:56:05  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=high weak_signals=0 top1_softmax=1.000 margin=1.000 dense_top1=0.391 agreement=True
+2026-04-09T12:56:05  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 1 final candidates
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 1/1
+2026-04-09T12:56:05  DEBUG     medvqa.agents.advanced_rag    1. id=1402 score=-8.4952 method=reranked softmax=1.0000 | Q: there is a large enhancing mass growing from what organ in this ct scan? | A: the left kidney
+2026-04-09T12:56:05  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 1 similar cases  (hyde_used=False  finding_category=mass)
+2026-04-09T12:56:08  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=1  duration=3471ms
+2026-04-09T12:56:08  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The left kidney is a common source of large upper abdominal or retroperitoneal masses on CT.', 'Retroperitoneal masses typically displace bowel loops anteriorly or medially rather than being centered within the bowel.', 'Renal-origin masses may preserve some continuity with renal tissue or alter the renal contour.', 'Mesenteric masses are often separated from retroperitoneal vessels and may be associated with bowel displacement or encasement.']
+2026-04-09T12:56:08  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On abdominal CT, a large hypodense mass can arise from a solid organ, retroperitoneal structure, or mesentery, so its anatomic relationship to nearby organs and vessels is key. The retrieved similar c
+2026-04-09T12:56:08  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=1  duration=3511ms
+2026-04-09T12:56:09  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=True
+2026-04-09T12:56:09  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='from what structure is the large hypodense mass emanating from?'  is_retry=True  question_type=anatomy_identification  yes_no=False
+2026-04-09T12:56:09  INFO      medvqa.agents.reasoning_agent  Retry context  prev_status=low_confidence  prev_confidence=Low  fallback=add_disclaimer
+2026-04-09T12:56:09  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=1
+2026-04-09T12:56:12  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='The left kidney'  confidence=low  duration=3100ms
+2026-04-09T12:56:12  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the CT description for the mass location and nearby structures.', 'Considered common sources of large hypodense retroperitoneal masses.', 'Used the supporting knowledge that renal masses often arise from the kidney and can be identified by contour distortion/continuity.', 'Selected the left kidney as the most likely origin while acknowledging limited certainty.']
+2026-04-09T12:56:12  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial CT abdomen/pelvis showing a large central abdominal hypodense/soft tissue mass', 'Retroperitoneal vessels and bowel loops adjacent to the lesion', 'Supporting knowledge that large hypodense masses in this region commonly arise from the kidney', 'Previous similar case context indicating left renal origin']
+2026-04-09T12:56:12  DEBUG     medvqa.agents.reasoning_agent  Limitations: The provided image analysis does not explicitly describe direct continuity with the kidney or clear renal contour distortion, so the exact origin cannot be confirmed with high confidence from the available information.
+2026-04-09T12:56:12  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='The left kidney'  confidence=low  duration=3152ms
+2026-04-09T12:56:13  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-09T12:56:13  INFO      medvqa.agents.verification_agent  Verifying answer='The left kidney'  question='from what structure is the large hypodense mass emanating from?'  question_type=anatomy_identification
+2026-04-09T12:56:15  INFO      medvqa.agents.verification_agent  Verification done  status=unsupported  confidence=Low  checks=2/5  duration=2030ms
+2026-04-09T12:56:15  WARNING   medvqa.agents.verification_agent  Verification issues: ['The explanation claims a left kidney origin, but the visual analysis describes a lower abdomen/pelvis CT slice where the kidneys are not visible.', 'The answer is anatomically inconsistent with the provided image summary because the left kidney would not be expected in this slice level.', 'The reasoning references retroperitoneal/renal features that are not actually identifiable from the described image.']
+2026-04-09T12:56:15  INFO      medvqa.agents.verification_agent  Fallback recommendation: flag_for_review
+2026-04-09T12:56:15  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is a short phrase and matches the expected format, but the anatomical identification is not supported by the available image description. Because the kidneys are not visible in the provided slice, identifying the mass as arising from the left kidney is speculative and contradicted by the image level.
+2026-04-09T12:56:15  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=unsupported  confidence=Low  duration=2061ms
+2026-04-09T12:56:15  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['unsupported_claim']
+2026-04-09T12:56:15  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=True  fallback=flag_for_review  disclaimer=True
+2026-04-09T12:56:15  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=2/5
+2026-04-09T12:56:15  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=False
+2026-04-09T12:56:15  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='The left kidney'  verification=unsupported  guardrail_flag=True  consistency=low  cross_modal=low  duration=40137ms
+2026-04-09T12:56:15  INFO      medvqa.agents.orchestrator  Pipeline attempt 2 result  answer='The left kidney'  verification=unsupported  confidence=Low
+2026-04-09T12:56:15  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=1  confidence_rank=1  high_failures=1  review=1
+2026-04-09T12:56:15  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=2  confidence_rank=1  high_failures=1  review=1
+2026-04-09T12:56:15  INFO      medvqa.agents.orchestrator  Pipeline RETRY winner: attempt 1 (kept original)
+2026-04-09T12:56:15  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Left kidney'  retries=1  total_duration=40143ms ===
+2026-04-09T12:56:15  INFO      medvqa.routes.dataset  Sample 1874 analysis complete  baseline=1989ms  workflow=4549ms  agentic=40147ms  total=40147ms
+2026-04-09T12:56:15  INFO      medvqa.routes.dataset  Sample 1874 answers  baseline='The inferior vena cava'  workflow='abdomen and pelvis'  agentic='Left kidney'  ground_truth='the base of the cecum'
