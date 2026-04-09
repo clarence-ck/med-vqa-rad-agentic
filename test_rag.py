@@ -332,6 +332,7 @@ def test_sample_cases(sample_size: int = 30, skip: int = 0):
         "medium_confidence": 0,
         "low_confidence": 0,
         "zero_candidates": 0,
+        "by_modality": {},
         "by_question_type": {},
     }
 
@@ -373,6 +374,14 @@ def test_sample_cases(sample_size: int = 30, skip: int = 0):
         else:
             stats["zero_candidates"] += 1
 
+        # Track by modality
+        mod_key = modality if modality != "unknown" else "unknown"
+        if mod_key not in stats["by_modality"]:
+            stats["by_modality"][mod_key] = {"total": 0, "retrieved": 0}
+        stats["by_modality"][mod_key]["total"] += 1
+        if count > 0:
+            stats["by_modality"][mod_key]["retrieved"] += 1
+
         # Track by question type
         qt_key = question_type if question_type != "unknown" else "unknown"
         if qt_key not in stats["by_question_type"]:
@@ -384,6 +393,7 @@ def test_sample_cases(sample_size: int = 30, skip: int = 0):
         results_summary.append({
             "idx": sample_id,
             "question": question[:60],
+            "modality": mod_key,
             "q_type": qt_key,
             "count": count,
             "confidence": confidence_level,
@@ -400,7 +410,7 @@ def test_sample_cases(sample_size: int = 30, skip: int = 0):
     print("-"*60)
     for r in results_summary[:10]:
         status = "✓" if r["count"] > 0 else "✗"
-        print(f"  [id={r['idx']:4d}] {status} {r['q_type'][:12]:12} | {r['count']} cases | {r['confidence']:8} | {r['question'][:45]}...")
+        print(f"  [id={r['idx']:4d}] {status} {r['modality']:8} | {r['q_type'][:10]:10} | {r['count']} cases | {r['confidence']:8} | {r['question'][:40]}...")
 
     # Print summary
     print("\n" + "="*60)
@@ -413,6 +423,11 @@ def test_sample_cases(sample_size: int = 30, skip: int = 0):
     print(f"  - Medium confidence: {stats['medium_confidence']}")
     print(f"  - Low confidence:    {stats['low_confidence']}")
     print(f"  - Zero candidates:   {stats['zero_candidates']}")
+
+    print(f"\nBy Modality:")
+    for mod, counts in sorted(stats["by_modality"].items(), key=lambda x: -x[1]["total"]):
+        rate = (counts["retrieved"] / counts["total"] * 100) if counts["total"] > 0 else 0
+        print(f"  - {mod[:15]:15}: {counts['retrieved']:3d}/{counts['total']:3d} ({rate:5.1f}%)")
 
     print(f"\nBy Question Type:")
     for qt, counts in sorted(stats["by_question_type"].items(), key=lambda x: -x[1]["total"]):
