@@ -297,6 +297,18 @@ def test_sample_cases(sample_size: int = 30, skip: int = 0):
         print("❌ No curated samples found")
         return None
 
+    # Build lookup from full dataset (handle both dict and list formats)
+    full_data_lookup = {}
+    if isinstance(full_dataset, dict):
+        # VQA-RAD format: {"train": [...], "test": [...]}
+        for split in ["test", "train"]:
+            for idx, item in enumerate(full_dataset.get(split, [])):
+                # Use a composite key: split + original index
+                full_data_lookup[(split, idx)] = item
+    elif isinstance(full_dataset, list):
+        for idx, item in enumerate(full_dataset):
+            full_data_lookup[idx] = item
+
     # Select sample from the 200 curated cases
     total_available = len(all_samples)
     start_idx = min(skip, total_available)
@@ -307,8 +319,16 @@ def test_sample_cases(sample_size: int = 30, skip: int = 0):
     selected = []
     for curated in selected_curated:
         sample_id = curated.get("id", -1)
-        if 0 <= sample_id < len(full_dataset):
-            full_item = full_dataset[sample_id]
+
+        # Try to find the full item
+        full_item = None
+        if isinstance(full_dataset, dict):
+            # Try test split first (curated samples are from test)
+            full_item = full_dataset.get("test", [])[sample_id] if 0 <= sample_id < len(full_dataset.get("test", [])) else None
+        elif isinstance(full_dataset, list):
+            full_item = full_dataset[sample_id] if 0 <= sample_id < len(full_dataset) else None
+
+        if full_item:
             selected.append({
                 "id": sample_id,
                 "question": curated.get("question", ""),

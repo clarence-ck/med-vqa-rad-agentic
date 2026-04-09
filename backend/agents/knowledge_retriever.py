@@ -13,7 +13,7 @@ _log = get_logger("agents.knowledge_retriever")
 
 # Import advanced RAG
 try:
-    from agents.advanced_rag import get_rag_retriever, retrieve_knowledge_advanced
+    from agents.advanced_rag import retrieve_knowledge_advanced
     _ADVANCED_RAG_AVAILABLE = True
     _log.info("Advanced RAG module loaded successfully")
 except ImportError:
@@ -39,16 +39,6 @@ class KnowledgeRetriever:
             model=OPENAI_MODEL,
         )
         self.use_advanced_rag = use_advanced_rag and _ADVANCED_RAG_AVAILABLE
-        self._rag_retriever = None
-
-        # Lazy init RAG retriever on first use
-        if self.use_advanced_rag:
-            try:
-                self._rag_retriever = get_rag_retriever()
-                _log.info("Advanced RAG retriever initialized successfully")
-            except Exception as e:
-                _log.error("Advanced RAG init failed: %s — falling back to LLM-only mode", e)
-                self.use_advanced_rag = False
 
     @component.output_types(result=Dict[str, Any])
     def run(self,
@@ -98,22 +88,18 @@ class KnowledgeRetriever:
 
         if self.use_advanced_rag and original_question:
             try:
-                # Use image-grounded notable_findings for finding_category
-                # instead of inferring from question text alone
-                finding_category = None
-                if self._rag_retriever is not None:
-                    notable_findings_str = ""
-                    if image_interpretation:
-                        ii = image_interpretation.get("result", image_interpretation)
-                        notable_findings_str = " ".join(ii.get("notable_findings", []))
-                    finding_category = self._rag_retriever._infer_finding_category(
-                        original_question, notable_findings_str
-                    )
+                # Extract notable_findings from image interpretation for image-grounded retrieval
+                notable_findings = None
+                if image_interpretation:
+                    ii = image_interpretation.get("result", image_interpretation)
+                    notable_findings = ii.get("notable_findings")
+
+                # RAG retrieval with image-grounded finding inference
                 rag_result = retrieve_knowledge_advanced(
                     question=original_question,
                     modality=modality,
                     body_region=body_region,
-                    finding_category=finding_category,
+                    notable_findings=notable_findings,
                 )
 
                 similar_cases = rag_result.get("similar_cases", [])
@@ -125,9 +111,8 @@ class KnowledgeRetriever:
                 if similar_cases:
                     rag_context = self._format_similar_cases(similar_cases)
                     _log.info(
-                        "Advanced RAG retrieved %d similar cases  (finding_category=%s)",
+                        "Advanced RAG retrieved %d similar cases",
                         len(similar_cases),
-                        finding_category or "none",
                     )
                 else:
                     _log.info("Advanced RAG returned 0 similar cases for this question; proceeding without RAG context")

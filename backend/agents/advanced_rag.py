@@ -456,15 +456,29 @@ class AdvancedRAGRetriever:
         modality: str = None,
         body_region: str = None,
         finding_category: str = None,
+        notable_findings: list = None,
     ) -> List[RetrievalResult]:
         """
         Full advanced RAG retrieval pipeline.
         No LLM calls during retrieval — uses a multi-signal confidence gate instead of
         self-reflection, and skips query rewriting.
+
+        Args:
+            question: The query question
+            modality: Imaging modality (e.g., 'x-ray', 'ct')
+            body_region: Body region (e.g., 'chest', 'head')
+            finding_category: Finding category to filter by
+            notable_findings: List of findings from image interpretation (used to infer finding_category if not provided)
         """
         if not self._is_indexed:
             if not self.build_index():
                 return []
+
+        # Infer finding_category from notable_findings if not provided
+        if finding_category is None and notable_findings:
+            notable_findings_str = " ".join(notable_findings) if isinstance(notable_findings, list) else str(notable_findings)
+            finding_category = self._infer_finding_category(question, notable_findings_str)
+            _log.debug("Inferred finding_category='%s' from notable_findings", finding_category)
 
         _log.info(
             "Retrieval pipeline started | question=%s | modality=%s | body_region=%s | finding=%s | rerank=mandatory",
@@ -872,11 +886,12 @@ def retrieve_knowledge_advanced(
     modality: str = None,
     body_region: str = None,
     finding_category: str = None,
+    notable_findings: list = None,
     **kwargs
 ) -> Dict[str, Any]:
     """
     Convenience function for advanced RAG retrieval.
-    
+
     No LLM calls during retrieval — uses score thresholds instead of self-reflection,
     and skips query rewriting.
     """
@@ -886,6 +901,7 @@ def retrieve_knowledge_advanced(
         modality=modality,
         body_region=body_region,
         finding_category=finding_category,
+        notable_findings=notable_findings,
         **kwargs
     )
     
