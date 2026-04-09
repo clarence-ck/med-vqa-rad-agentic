@@ -1,2 +1,0 @@
-2026-04-09T18:32:37  INFO      medvqa  Session started  file=medvqa_20260409_183237_325e5a96.log  session_id=325e5a96
-2026-04-09T18:32:38  INFO      medvqa.agents.knowledge_retriever  Advanced RAG module loaded successfully
