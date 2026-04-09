@@ -14,3 +14,7 @@
 2026-04-09T21:23:59  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=200
 2026-04-09T21:23:59  WARNING   medvqa.routes.dataset  GPU compute capability 6.1 is below recommended threshold; using CPU for pritamdeka/S-PubMedBert-MS-MARCO
 2026-04-09T21:23:59  INFO      medvqa.routes.dataset  Loading S-PubMedBert-MS-MARCO (pritamdeka/S-PubMedBert-MS-MARCO) on device: cpu
+2026-04-09T21:25:08  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=200  skipped=0
+2026-04-09T21:25:08  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-09T21:25:08  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=68269ms
+2026-04-09T21:30:47  INFO      medvqa.server  MedVisionQuery API shutting down

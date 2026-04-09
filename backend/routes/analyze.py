@@ -13,7 +13,7 @@ _log = get_logger("routes.analyze")
 @router.post("/analyze")
 async def analyze(image: UploadFile = File(...), question: str = Form(...)):
     """
-    Run the full 5-agent agentic pipeline.
+    Run the full 6-stage agentic pipeline.
     Accepts a medical image and a question, returns structured analysis.
     """
     image_bytes = await image.read()
