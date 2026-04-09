@@ -117,16 +117,16 @@ class KnowledgeRetriever:
                 similar_cases = rag_result.get("similar_cases", [])
                 rag_metadata = {
                     "count": rag_result.get("count", 0),
-                    "query_rewritten": rag_result.get("query_rewritten", False)
+                    "hyde_used": rag_result.get("hyde_used", False)  # True if HyDE expanded the query
                 }
 
                 if similar_cases:
                     rag_context = self._format_similar_cases(similar_cases)
                     _log.info(
                         "Advanced RAG retrieved %d similar cases  "
-                        "(query_rewritten=%s  finding_category=%s)",
+                        "(hyde_used=%s  finding_category=%s)",
                         len(similar_cases),
-                        rag_metadata.get("query_rewritten", False),
+                        rag_metadata.get("hyde_used", False),
                         finding_category or "none",
                     )
                 else:

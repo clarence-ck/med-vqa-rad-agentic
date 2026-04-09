@@ -41,11 +41,11 @@ class RetrievalResult:
 class AdvancedRAGRetriever:
     """
     Advanced RAG with:
-    - Query rewriting/expansion
     - Hybrid retrieval (dense embeddings + BM25)
     - Metadata pre-filtering (modality, body_region, finding_category)
-    - Cross-encoder reranking
-    - Self-reflection validation
+    - Mandatory cross-encoder reranking
+    - Multi-signal confidence-based validation
+    - HyDE fallback on low-confidence retrieval
     """
     
     def __init__(
@@ -88,7 +88,7 @@ class AdvancedRAGRetriever:
         self._modality_index: Dict[str, List[int]] = defaultdict(list)
         self._body_region_index: Dict[str, List[int]] = defaultdict(list)
         self._finding_index: Dict[str, List[int]] = defaultdict(list)
-        self._last_query_rewritten: bool = False
+        self._hyde_used: bool = False  # True if HyDE fallback was triggered
         self._device = self._resolve_device()
         _log.info("Using device: %s", self._device)
 
@@ -183,13 +183,13 @@ class AdvancedRAGRetriever:
             _log.info("Loading cross-encoder: %s on %s", self.cross_encoder_name, self._device)
             self._cross_encoder = CrossEncoder(self.cross_encoder_name, device=self._device)
         return self._cross_encoder
-    
+
     def _get_openai_client(self) -> OpenAI:
-        """Lazy load OpenAI client for query rewriting"""
+        """Lazy load OpenAI client for HyDE generation"""
         if self._openai_client is None:
             self._openai_client = OpenAI(api_key=OPENAI_API_KEY)
         return self._openai_client
-    
+
     def load_train_data(self) -> bool:
         """Load and index VQA-RAD train split"""
         json_path = os.path.join(self.data_dir, "vqa_rad.json")
@@ -219,6 +219,16 @@ class AdvancedRAGRetriever:
             finding_category = self._infer_finding_category(question, answer)
             answer_style = self._infer_answer_style(answer)
             laterality = self._infer_laterality(question)
+
+            dense_text, sparse_text = self._build_case_retrieval_texts(
+                question=question,
+                answer=answer,
+                modality=modality,
+                body_region=body_region,
+                finding_category=finding_category,
+                answer_style=answer_style,
+                laterality=laterality,
+            )
             
             example = {
                 'id': idx,
@@ -230,8 +240,10 @@ class AdvancedRAGRetriever:
                 'finding_category': finding_category,
                 'answer_style': answer_style,
                 'laterality': laterality,
-                'combined_text': f"{question} {answer}",
-                'embedding_text': question  # Dense index uses question-only for symmetric matching
+                'combined_text': sparse_text,
+                'embedding_text': dense_text,
+                'dense_text': dense_text,
+                'sparse_text': sparse_text,
             }
             
             self._train_examples.append(example)
@@ -245,6 +257,46 @@ class AdvancedRAGRetriever:
                 self._finding_index[finding_category.lower()].append(idx)
         
         return True
+
+    def _build_case_retrieval_texts(
+        self,
+        question: str,
+        answer: str,
+        modality: str,
+        body_region: str,
+        finding_category: str,
+        answer_style: str,
+        laterality: str,
+    ) -> Tuple[str, str]:
+        """Build structured retrieval text for dense and sparse indexing.
+
+        Dense text stays concise and question-centric with minimal metadata.
+        Sparse text is more verbose and label-rich to help lexical matching.
+        """
+        dense_parts = [question]
+        if modality and modality != 'unknown':
+            dense_parts.append(modality)
+        if body_region and body_region != 'unknown':
+            dense_parts.append(body_region)
+        if finding_category and finding_category != 'other':
+            dense_parts.append(finding_category)
+
+        sparse_parts = [
+            f"Question: {question}",
+            f"Answer: {answer}",
+        ]
+        if modality and modality != 'unknown':
+            sparse_parts.append(f"Modality: {modality}")
+        if body_region and body_region != 'unknown':
+            sparse_parts.append(f"Body region: {body_region}")
+        if finding_category and finding_category != 'other':
+            sparse_parts.append(f"Finding category: {finding_category}")
+        if laterality and laterality != 'unknown':
+            sparse_parts.append(f"Laterality: {laterality}")
+        if answer_style and answer_style != 'unknown':
+            sparse_parts.append(f"Answer style: {answer_style}")
+
+        return " ".join(part for part in dense_parts if part), "\n".join(part for part in sparse_parts if part)
     
     def _infer_modality(self, question: str, answer: str = '') -> str:
         """Infer imaging modality from question and answer text"""
@@ -365,8 +417,8 @@ class AdvancedRAGRetriever:
 
         _log.info("Building indices for %d examples...", len(self._train_examples))
 
-        # 1. Dense embeddings with FAISS (question-only for symmetric query-document matching)
-        _log.info("Computing dense embeddings (model=%s) on question-only text...", self.embedding_model_name)
+        # 1. Dense embeddings with FAISS (question + metadata for richer semantic matching)
+        _log.info("Computing dense embeddings (model=%s) on structured case text...", self.embedding_model_name)
         embedding_texts = [ex['embedding_text'] for ex in self._train_examples]
         model = self._get_embedding_model()
         self._embeddings = model.encode(embedding_texts, show_progress_bar=True, convert_to_numpy=True)
@@ -384,8 +436,8 @@ class AdvancedRAGRetriever:
 
         _log.info("FAISS index built with %d vectors", self._faiss_index.ntotal)
 
-        # 2. Sparse BM25 index (uses question+answer for keyword coverage)
-        _log.info("Building BM25 sparse index...")
+        # 2. Sparse BM25 index (uses structured question+answer text for keyword coverage)
+        _log.info("Building BM25 sparse index on structured case text...")
         bm25_texts = [ex['combined_text'] for ex in self._train_examples]
         self._tokenized_corpus = [
             self._tokenize(text) for text in bm25_texts
@@ -401,61 +453,7 @@ class AdvancedRAGRetriever:
         # Lowercase, remove punctuation, split
         tokens = re.findall(r'\b[a-zA-Z]+\b', text.lower())
         return tokens
-    
-    def rewrite_query(
-        self,
-        question: str,
-        modality: str = None,
-        body_region: str = None
-    ) -> str:
-        """
-        Query rewriting/expansion using LLM.
-        Keep the rewrite short and conservative so retrieval stays close to the original medical intent.
-        """
-        try:
-            client = self._get_openai_client()
-            
-            context_parts = []
-            if modality and modality != 'unknown':
-                context_parts.append(f"Imaging modality: {modality}")
-            if body_region and body_region != 'unknown':
-                context_parts.append(f"Body region: {body_region}")
-            
-            context = "\n".join(context_parts) if context_parts else "No specific context provided."
-            
-            prompt = f"""Rewrite the following medical question into a short retrieval query.
-Preserve the original meaning, but only add minimal safe synonyms or abbreviations if they are directly relevant.
-Do NOT turn the question into a long differential diagnosis or a broad explanation.
 
-Original question: {question}
-{context}
-
-Return ONLY the rewritten query as a single short sentence, no explanations."""
-            
-            response = client.chat.completions.create(
-                model=OPENAI_MODEL,
-                messages=[{"role": "user", "content": prompt}],
-                max_completion_tokens=150,
-                temperature=0.3
-            )
-            
-            expanded = response.choices[0].message.content.strip()
-            if not expanded:
-                return question
-
-            # Keep the rewrite from drifting too far beyond the original query.
-            expanded_clean = " ".join(expanded.split())
-            question_clean = " ".join(question.split())
-            if len(expanded_clean) > max(len(question_clean) * 2, len(question_clean) + 40):
-                _log.warning("Query rewrite was too expansive; falling back to original question")
-                return question
-
-            return expanded_clean
-
-        except Exception as e:
-            _log.warning("Query rewriting failed: %s", e)
-            return question
-    
     def generate_hypothetical_answer(
         self,
         question: str,
@@ -538,7 +536,7 @@ Be specific and medical but do not make up findings. Return ONLY the answer text
 
         # 1. Use original question directly (no LLM rewrite)
         query = question
-        self._last_query_rewritten = False
+        self._hyde_used = False
         _log.debug("Using original question as query (no LLM rewrite)")
 
         # 2. Metadata Filtering
@@ -596,7 +594,7 @@ Be specific and medical but do not make up findings. Return ONLY the answer text
             _log.info("HyDE generation | original=%r", question)
             _log.info("HyDE generation | hypothetical=%r", hyde_answer)
             query = f"{question} {hyde_answer}"
-            self._last_query_rewritten = True
+            self._hyde_used = True
             
             # Retry on FULL corpus (relax metadata filter)
             dense_results = self._dense_retrieval(query, None)
@@ -963,5 +961,5 @@ def retrieve_knowledge_advanced(
             for r in results
         ],
         "count": len(results),
-        "query_rewritten": retriever._last_query_rewritten
+        "hyde_used": retriever._hyde_used  # True if HyDE expanded the query
     }
