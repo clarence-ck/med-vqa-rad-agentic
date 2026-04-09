@@ -247,16 +247,16 @@ This graceful degradation prevents over-filtering while still using metadata whe
 
 ### Model Configuration
 
-The current runtime uses OpenAI for all LLM-driven stages. The Advanced RAG retrieval stack additionally uses local SentenceTransformers, CrossEncoder, FAISS, and BM25 models. The evaluation scorer uses a PubMedBERT-based sentence-transformer (`NeuML/pubmedbert-base-embeddings`) for semantic similarity on open-ended answers.
+The current runtime uses OpenAI for all LLM-driven stages. The Advanced RAG retrieval stack additionally uses local SentenceTransformers, CrossEncoder, FAISS, and BM25 models. The evaluation scorer uses `S-PubMedBert-MS-MARCO` (`pritamdeka/S-PubMedBert-MS-MARCO`) for semantic similarity on open-ended answers.
 
 | Env vars | Used by |
 |---|---|
 | `OPENAI_API_KEY` | All agents, Haystack controller, `baseline.py` |
 | `VISION_MODEL` | `ImageInterpreter`, `baseline.py` |
 | `OPENAI_MODEL` | `QuestionAnalyzer`, `KnowledgeRetriever`, `ReasoningAgent`, `VerificationAgent`, Haystack controller |
-| `EVALUATION_DEVICE` | PubMedBERT evaluation embedding model device selection (`cpu`, `cuda`, or `auto`) |
+| `EVALUATION_DEVICE` | Semantic similarity model device selection (`cpu`, `cuda`, or `auto`) |
 
-Hugging Face is used to download the raw dataset via scripts. The retrieval stack itself is local, while the agentic generation steps use OpenAI. Evaluation uses a cached PubMedBERT-based semantic scorer on the backend, prefix-based normalization for yes/no answers, and exact matching for other binary medical assessments such as normal/abnormal and present/absent.
+Hugging Face is used to download the raw dataset via scripts. The retrieval stack itself is local, while the agentic generation steps use OpenAI. Evaluation uses a cached `S-PubMedBert-MS-MARCO` semantic scorer on the backend, prefix-based normalization for yes/no answers, and exact matching for other binary medical assessments such as normal/abnormal and present/absent.
 
 ### Other Technology Choices
 
@@ -438,15 +438,15 @@ The Guardrail combines `verification_status` + `failure_categories` to produce 5
 ### Metrics computed per cached case
 - **Normalized answer match** — evaluation method depends on ground truth answer style:
   - **Close-ended** (yes/no and other binary medical assessments such as normal/abnormal, present/absent, positive/negative): yes/no answers are normalized by trimming punctuation and matching responses that start with `yes` or `no`; other binary medical assessments use exact match only
-  - **Open-ended** (non-binary ground truth): PubMedBERT semantic similarity ≥ 0.70
+  - **Open-ended** (non-binary ground truth): `S-PubMedBert-MS-MARCO` semantic similarity ≥ 0.85
 - **Yes/no normalization** — responses beginning with `yes` or `no` count as `yes` / `no` after punctuation trimming
-- **PubMedBERT semantic similarity** — cosine similarity between answer embeddings using a PubMedBERT-based sentence-transformer for biomedical semantic similarity
+- **Semantic similarity** — cosine similarity between answer embeddings using `S-PubMedBert-MS-MARCO`
 - **Lexical Overlap (Token F1)** — unigram overlap between predicted and ground-truth answer; diagnostic metric only, NOT used for accuracy
 - **Winner** — `baseline` / `workflow` / `agentic` / `tie: ...` / `tie_all_wrong`
-- **Disagreement** — whether any two systems produced semantically different answers (PubMedBERT similarity < 0.70)
+- **Disagreement** — whether any two systems produced semantically different answers (`S-PubMedBert-MS-MARCO` similarity < 0.85)
 
 ### Aggregate evaluation summary
-- Overall accuracy per system (baseline / workflow / agentic) — combines close-ended (exact yes/no) and open-ended (PubMedBERT) correctness
+- Overall accuracy per system (baseline / workflow / agentic) — combines close-ended (exact yes/no) and open-ended (`S-PubMedBert-MS-MARCO`) correctness
 - Close-ended and open-ended accuracy per system
 - 3-System Disagreement rate — percentage of cases where systems produce semantically different answers
 - Win counts, average duration (ms), and per-question-type accuracy breakdown
@@ -525,8 +525,8 @@ Purpose: **aggregate performance comparison across all cached analyses**.
 
 Reads all cached Case Explorer results automatically and displays:
 
-- **System Performance Cards** — Overall accuracy (Exact yes/no + PubMedBERT), average runtime, and total runtime for Baseline, Workflow, and Agentic
-- **Metrics Grid** — Total cases, 3-system disagreement rate, lexical overlap (Token F1), win counts per system, close-ended accuracy (exact yes/no), PubMedBERT accuracy (open-ended, threshold ≥ 0.70)
+- **System Performance Cards** — Overall accuracy (Exact yes/no + `S-PubMedBert-MS-MARCO`), average runtime, and total runtime for Baseline, Workflow, and Agentic
+- **Metrics Grid** — Total cases, 3-system disagreement rate, lexical overlap (Token F1), win counts per system, close-ended accuracy (exact yes/no), semantic similarity accuracy (open-ended, threshold ≥ 0.85)
 - **Breakdown Table** — Dropdown selector for two modes:
   - **Question Type** — Flat list with accuracy bars per question category
   - **Difficulty Type** — Expandable parent rows (easy/medium/hard) with nested question-type breakdowns; reflects Difficulty Router policy (retrieval trigger, verification strictness, fallback)
@@ -558,7 +558,7 @@ Hit **Refresh Metrics** to re-aggregate after running new cases in Case Explorer
 
 The train split (1,793 cases) is used as the **retrieval corpus** for the Advanced RAG pipeline. The test split (451 cases) is used exclusively for Case Explorer browsing and evaluation — no test cases appear in the retrieval index.
 
-The evaluation scorer uses exact `yes` / `no` matching for close-ended questions and PubMedBERT semantic similarity with a 0.70 threshold for open-ended questions.
+The evaluation scorer uses exact `yes` / `no` matching for close-ended questions and `S-PubMedBert` semantic similarity with a 0.85 threshold for open-ended questions.
 
 The download script flattens the Hugging Face dataset into one local PNG per QA item and writes a flat `vqa_rad.json` with split labels. Local image filenames are saved as `{split}_{index:04d}.png`.
 

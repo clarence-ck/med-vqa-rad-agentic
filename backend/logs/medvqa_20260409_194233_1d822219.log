@@ -212,3 +212,7 @@
 2026-04-09T20:58:21  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=54196ms
 2026-04-09T20:58:26  INFO      medvqa.server  → GET /api/dataset/evaluation
 2026-04-09T20:58:26  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=200
+2026-04-09T20:59:22  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=200  skipped=0
+2026-04-09T20:59:22  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-09T20:59:22  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=55944ms
+2026-04-09T21:01:22  INFO      medvqa.server  MedVisionQuery API shutting down

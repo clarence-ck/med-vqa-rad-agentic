@@ -333,19 +333,33 @@ body {
 
 .evaluation-system-card {
   min-height: 168px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 .evaluation-system-stats {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: var(--space-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(2, minmax(0, 0.8fr));
+  gap: var(--space-3);
+  align-items: end;
+}
+
+.evaluation-system-stat {
+  min-width: 0;
+}
+
+.evaluation-system-stat .evaluation-list-subtitle {
+  max-width: 100%;
+  line-height: 1.35;
 }
 
 .evaluation-system-runtime {
   font-size: 22px;
   font-weight: 700;
   color: var(--color-text-primary);
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .evaluation-metric-grid {
@@ -579,6 +593,8 @@ body {
   color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  line-height: 1.35;
+  word-break: break-word;
 }
 
 .card-content {
@@ -1650,6 +1666,45 @@ body {
 
   .summary-section-grid-baseline {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .case-explorer-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .evaluation-metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .evaluation-header-strip {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .evaluation-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .panel {
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .evaluation-system-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .evaluation-system-runtime {
+    white-space: normal;
   }
 }
 
