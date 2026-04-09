@@ -4,14 +4,13 @@ This script runs the same 200 test cases shown in the Case Explorer dropdown
 and stores each analysis payload in ``backend/.case_explorer_cache`` via the
 existing ``/api/dataset/sample/{id}/analysis`` logic.
 
-Purpose of each command:
-    (no flags)            # Resume cache warming by processing only missing cases.
+Usage (run from repo root):
+    python scripts/run_case_explorer_cache.py             # Resume:  process only missing cases, picks up from interruption
+    python scripts/run_case_explorer_cache.py --refresh   # Restart: recompute all 200 cases
+    python scripts/run_case_explorer_cache.py --dry-run   # Preview: show what would run
+    python scripts/run_case_explorer_cache.py --status    # Stats: show cache coverage only
 
-    --refresh             # Recompute every case and overwrite existing cache results.
-
-    --dry-run             # Show what would run without generating cache files.
-
-    --status              # Show cache coverage and exit.
+Note: Only the base command (no flags) resumes from interruption. Already-cached cases are skipped.
 """
 from __future__ import annotations
 
