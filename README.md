@@ -566,7 +566,7 @@ The 6-stage pipeline (ImageInterpreter → QuestionAnalyzer → DifficultyRouter
 
 ### Retry Effectiveness
 
-Comprehensive log analysis of 235 execution traces found **9 retry cases (retries=1)** out of all processed samples. Retry outcomes show **mixed effectiveness (~29% improvement rate)**:
+Comprehensive log analysis of 235 execution traces found **35 retry cases (retries=1)** out of all processed samples. Retry outcomes show **mixed effectiveness (~29% improvement rate)**:
 
 | Outcome | Count | Examples |
 |---------|-------|----------|
