@@ -3,6 +3,10 @@ import os
 from config import DATA_DIR
 
 
+# Excluded sample IDs (problematic test cases)
+EXCLUDED_SAMPLE_IDS = {2070}
+
+
 QUESTION_TYPE_ORDER = [
     "anatomy_identification",
     "modality_identification",
@@ -47,6 +51,8 @@ def get_sample_cases(limit: int = 200) -> list:
 
     buckets = {}
     for i, item in enumerate(data):
+        if i in EXCLUDED_SAMPLE_IDS:
+            continue
         q_type = _classify_question(item.get("question", ""))
         image_name = item.get("image_name", item.get("image", ""))
         sample_split = _resolve_split(item, image_name)
@@ -89,6 +95,8 @@ def get_sample_cases(limit: int = 200) -> list:
 
 def get_sample_by_id(sample_id: int) -> dict | None:
     """Return a specific sample case by index."""
+    if sample_id in EXCLUDED_SAMPLE_IDS:
+        return None
     data = load_dataset()
     if not data or sample_id < 0 or sample_id >= len(data):
         return None

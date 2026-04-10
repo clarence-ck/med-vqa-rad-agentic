@@ -1,0 +1,13 @@
+2026-04-10T19:09:29  INFO      medvqa  Session started  file=medvqa_20260410_190929_c296010c.log  session_id=c296010c
+2026-04-10T19:09:38  INFO      medvqa.agents.knowledge_retriever  Advanced RAG module loaded successfully
+2026-04-10T19:09:38  INFO      medvqa.server  ============================================================
+2026-04-10T19:09:38  INFO      medvqa.server  MedVisionQuery API  v1.0.0  starting up
+2026-04-10T19:09:38  INFO      medvqa.server  CORS origins: ['http://localhost:5173']
+2026-04-10T19:09:38  INFO      medvqa.server  ============================================================
+2026-04-10T19:10:00  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-10T19:10:01  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-10T19:10:01  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=29ms
+2026-04-10T19:10:01  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-10T19:10:01  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-10T19:10:01  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=21ms
+2026-04-10T19:10:39  INFO      medvqa.server  MedVisionQuery API shutting down

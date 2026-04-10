@@ -17,7 +17,7 @@ from sentence_transformers import SentenceTransformer
 from agents.baseline import baseline_answer
 from agents.orchestrator import run_pipeline
 from agents.workflow_baseline import workflow_answer
-from utils.data_loader import get_sample_cases, get_sample_by_id, get_image_bytes
+from utils.data_loader import get_sample_cases, get_sample_by_id, get_image_bytes, EXCLUDED_SAMPLE_IDS
 from logger import get_logger, sample_id_var
 
 router = APIRouter(prefix="/api/dataset")
@@ -716,6 +716,8 @@ async def get_evaluation_summary():
             with open(cache_file, "r", encoding="utf-8") as f:
                 payload = json.load(f)
             row = _build_evaluation_row(payload)
+            if row.get("sample_id") in EXCLUDED_SAMPLE_IDS:
+                continue
             rows.append(row)
         except Exception as exc:
             _log.warning("Skipping cache file %s: %s", os.path.basename(cache_file), exc)
