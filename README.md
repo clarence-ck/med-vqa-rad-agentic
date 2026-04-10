@@ -537,6 +537,42 @@ These failure analysis signals are displayed in the "Recent Evaluated Cases" tab
 
 ---
 
+## Reflection
+
+### When agentic behavior is beneficial
+
+The agentic approach provides value in scenarios where:
+
+- **Dynamic adaptation is needed**: The DifficultyRouter enables adaptive behavior by assessing question complexity and image context. Easy cases (e.g., straightforward yes/no questions on clear images) skip retrieval and use standard verification, reducing unnecessary computation. Medium and hard cases trigger retrieval with appropriate verification strictness, providing external knowledge when needed.
+
+- **Self-correction through retry**: The automatic retry mechanism allows the system to recover from initial failures. When verification indicates low confidence, unsupported claims, or fixable issues, the ReasoningAgent receives retry context (previous status, confidence, failure categories) and can self-correct its answer generation. Logs show cases where retry improved the final result.
+
+- **Structured verification improves reliability**: The VerificationAgent's 5 structured checks (answer_matches_question_type, format_appropriate, explanation_grounded_in_evidence, answer_strength_appropriate, no_contradictions) catch inconsistencies that single-prompt approaches might miss. This is particularly valuable for medical applications where answer accuracy and grounding are critical.
+
+- **Knowledge retrieval for complex queries**: The Advanced RAG pipeline provides external medical knowledge from the SLAKE concept KB for cases requiring broader context. This is beneficial for explanation requests, ambiguous questions, or cases where the image alone is insufficient.
+
+- **Quality signals for transparency**: Self-consistency and cross-modal agreement signals provide interpretable quality indicators, allowing users to understand when answers are well-grounded versus when they should be treated with caution.
+
+### Limitations of the approach
+
+The agentic approach has several trade-offs:
+
+- **Significantly higher latency**: The agentic pipeline takes 13-31 seconds per query (logs show total_duration), compared to 1-4 seconds for the single-shot baseline and 3-5 seconds for the workflow baseline. This is due to the 6 sequential stages, each requiring an LLM call. When retry is triggered, latency can double (logs show 34-41 seconds for retried cases). Analysis of 21 samples from medvqa_20260410 logs shows agentic is 7.3-23x slower than baseline (average ~11x slower).
+
+- **Higher computational cost**: Multiple LLM API calls per query (6 stages, plus potential retry) increase cost compared to single-prompt baselines. This makes the approach more expensive to operate at scale.
+
+- **Over-engineering for simple cases**: Even "easy" cases routed by the DifficultyRouter still go through multiple stages (image interpretation, question analysis, routing, reasoning, verification). For simple visual recognition tasks, a single-prompt approach may be sufficient and more efficient.
+
+- **Dependency on routing quality**: The system's adaptive behavior depends on the DifficultyRouter's accuracy. If the router misclassifies difficulty, it may skip retrieval when needed or invoke it unnecessarily, affecting both performance and cost.
+
+- **Still prone to errors**: Despite verification and retry mechanisms, the system can still produce incorrect answers. Logs show cases where the agentic pipeline failed while baselines succeeded (e.g., sample 1857: agentic answered "no" but ground truth was "yes"). The verification checks are heuristics and may not catch all errors.
+
+- **Complexity increases debugging**: With 6 stages, multiple LLM calls, and dynamic routing, debugging failures is more complex than in single-prompt approaches. Pinpointing the source of errors requires examining the full agent trace and intermediate outputs.
+
+- **RAG corpus limitations**: The Advanced RAG pipeline depends on the quality and coverage of the SLAKE knowledge base. If the KB lacks relevant concepts for a query, retrieval may return weak or irrelevant chunks, potentially degrading answer quality. Logs show that when retrieval is triggered (medium/hard difficulty), it typically retrieves 3 similar cases with 4-5 key facts in 3.8-5 seconds. However, some retrieved cases have low or negative rerank scores, suggesting the KB may not always have highly relevant matches. Additionally, the "knowledge_retrieval_failed" failure category can be triggered even when retrieval was not expected by routing (needs_retrieval=False), indicating the failure detection logic may be overly sensitive in some cases.
+
+---
+
 ## API Reference
 
 All endpoints served at `http://localhost:8000`.
