@@ -6,6 +6,19 @@ MedVisionQuery is an **agentic multimodal system** for medical visual question a
 
 ---
 
+## Quick Links
+
+- **🚀 [Quick Start](#quick-start)** — Get up and running in 5 minutes
+- **📊 [Results Discussion](#results-discussion)** — Performance comparison
+- **🔍 [Log Analysis](#log-analysis)** — Execution traces and failure modes
+- **🏗️ [Agent Architecture](#agent-architecture)** — System design and agents
+- **🎯 [Evaluation Design](#evaluation-design)** — How evaluation works
+- **💻 [UI](#ui)** — Dashboard, Case Explorer, and Evaluation views
+- **📚 [Dataset](#dataset)** — VQA-RAD and SLAKE information
+- **🔧 [API Reference](#api-reference)** — Backend endpoints
+
+---
+
 ## Problem Definition
 
 **Task:** medical visual question answering with explanation
@@ -632,25 +645,6 @@ To recover the 5% accuracy gap while preserving the agentic benefits for complex
 
 ---
 
-## API Reference
-
-All endpoints served at `http://localhost:8000`.
-
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/` | Health check, lists all endpoints |
-| `POST` | `/api/analyze` | Run full agentic pipeline |
-| `POST` | `/api/analyze/baseline` | Run single-shot baseline |
-| `POST` | `/api/analyze/workflow` | Run workflow baseline |
-| `GET` | `/api/dataset/samples` | List **test-split only** dataset samples (balanced across question-type categories) |
-| `GET` | `/api/dataset/sample/{id}` | Get sample with base64-encoded image |
-| `GET` | `/api/dataset/sample/{id}/analysis?refresh=false` | Run all 3 systems on a sample, cache result |
-| `GET` | `/api/dataset/evaluation` | Aggregate evaluation metrics from all cached analyses |
-
-`POST /api/analyze*` endpoints accept `multipart/form-data` with fields `image` (file) and `question` (string).
-
----
-
 ## UI
 
 ### Dashboard
@@ -1019,6 +1013,25 @@ The following shapes describe the main inner `result` payload returned by each H
   "suggested_disclaimer": "..."
 }
 ```
+
+---
+
+## API Reference
+
+All endpoints served at `http://localhost:8000`.
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/` | Health check, lists all endpoints |
+| `POST` | `/api/analyze` | Run full agentic pipeline |
+| `POST` | `/api/analyze/baseline` | Run single-shot baseline |
+| `POST` | `/api/analyze/workflow` | Run workflow baseline |
+| `GET` | `/api/dataset/samples` | List **test-split only** dataset samples (balanced across question-type categories) |
+| `GET` | `/api/dataset/sample/{id}` | Get sample with base64-encoded image |
+| `GET` | `/api/dataset/sample/{id}/analysis?refresh=false` | Run all 3 systems on a sample, cache result |
+| `GET` | `/api/dataset/evaluation` | Aggregate evaluation metrics from all cached analyses |
+
+`POST /api/analyze*` endpoints accept `multipart/form-data` with fields `image` (file) and `question` (string).
 
 ---
 
