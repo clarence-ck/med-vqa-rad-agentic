@@ -8,13 +8,20 @@ MedVisionQuery is an **agentic multimodal system** for medical visual question a
 
 ## Quick Links
 
+**Getting Started**
 - **🚀 [Quick Start](#quick-start)** — Get up and running in 5 minutes
-- **📊 [Results Discussion](#results-discussion)** — Performance comparison
-- **🔍 [Log Analysis](#log-analysis)** — Execution traces and failure modes
+- **� [UI](#ui)** — Dashboard, Case Explorer, and Evaluation views
+
+**Understanding the System**
 - **🏗️ [Agent Architecture](#agent-architecture)** — System design and agents
-- **🎯 [Evaluation Design](#evaluation-design)** — How evaluation works
-- **💻 [UI](#ui)** — Dashboard, Case Explorer, and Evaluation views
 - **📚 [Dataset](#dataset)** — VQA-RAD and SLAKE information
+
+**Evaluation & Results**
+- **🎯 [Evaluation Design](#evaluation-design)** — How evaluation works
+- **� [Results Discussion](#results-discussion)** — Performance comparison
+- **� [Log Analysis](#log-analysis)** — Execution traces and failure modes
+
+**Technical Reference**
 - **🔧 [API Reference](#api-reference)** — Backend endpoints
 
 ---
