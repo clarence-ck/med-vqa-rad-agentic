@@ -469,7 +469,7 @@ The agentic approach has several trade-offs:
 
 - **Complexity increases debugging**: With 6 stages, multiple LLM calls, and dynamic routing, debugging failures is more complex than in single-prompt approaches. Pinpointing the source of errors requires examining the full agent trace and intermediate outputs.
 
-- **RAG corpus limitations**: The Advanced RAG pipeline depends on the quality and coverage of the SLAKE knowledge base. If the KB lacks relevant concepts for a query, retrieval may return weak or irrelevant chunks, potentially degrading answer quality. Logs show that when retrieval is triggered (medium/hard difficulty), it typically retrieves 3 similar cases with 4-5 key facts in 3.8-5 seconds. However, some retrieved cases have low or negative rerank scores, suggesting the KB may not always have highly relevant matches. Additionally, the "knowledge_retrieval_failed" failure category can be triggered even when retrieval was not expected by routing (needs_retrieval=False), indicating the failure detection logic may be overly sensitive in some cases.
+- **RAG corpus limitations**: The Advanced RAG pipeline depends on the quality and coverage of the SLAKE knowledge base. The KB contains 366 English-only concept chunks aggregated from 4,919 SLAKE train-split QA pairs. This small corpus size may limit coverage for diverse medical queries. Strict confidence thresholds (top1_softmax ≥ 0.30, softmax_margin ≥ 0.08, dense_top1 ≥ 0.35) can cause retrieval failures even when some relevant chunks exist. Logs show that when retrieval is triggered (medium/hard difficulty), it typically retrieves 3 similar cases with 4-5 key facts in 3.8-5 seconds, but some queries return 0 candidates due to low confidence scores. Some retrieved cases have low or negative rerank scores, suggesting the KB may not always have highly relevant matches. Additionally, the "knowledge_retrieval_failed" failure category can be triggered even when retrieval was not expected by routing (needs_retrieval=False), indicating the failure detection logic may be overly sensitive in some cases.
 
 ---
 
@@ -577,6 +577,27 @@ VQA-RAD is used for the app's Case Explorer browsing and evaluation cache. SLAKE
 The evaluation scorer uses exact `yes` / `no` matching for close-ended questions and `S-PubMedBert-MS-MARCO` semantic similarity with a 0.85 threshold for open-ended questions.
 
 The download scripts flatten the Hugging Face datasets into local manifests with split labels, and local image filenames are saved as `{split}_{index:04d}.png`.
+
+### SLAKE Data Pipeline
+
+The SLAKE dataset goes through a transformation process to create a concept-level knowledge base for RAG:
+
+1. **Download SLAKE dataset** (`scripts/download_slake_dataset.py`)
+   - Downloads from Hugging Face: `BoKelvin/SLAKE`
+   - Total: 14,028 items (9,835 train / 2,099 validation / 2,099 test)
+   - Outputs: `data/slake/slake.json` with fields: id, split, question, answer, answer_type, image_name, lang, modality
+
+2. **Build SLAKE KB** (`scripts/build_slake_kb.py --language en`)
+   - Filters to train split only: 4,919 rows
+   - Filters to English-only: 4,919 rows
+   - Extracts metadata from each row (concept type, concept label, modality, body region, finding category, laterality, visual cues, target entity)
+   - Aggregates by concept signature (concept_type, concept, modality, body_region, finding_category, laterality, answer_type, language)
+   - 4,919 rows → 366 unique concept chunks
+   - Each chunk aggregates similar QA pairs around one medical concept
+   - Includes `support_count` (how many original rows contributed) and sample questions/answers for context
+   - Outputs: `data/slake/kb/slake_kb.jsonl`, `slake_kb.json`, `slake_kb_summary.json`
+
+The aggregation is intentional — creates a concept-level knowledge base for retrieval rather than raw QA pairs. Each chunk represents a unique medical concept with aggregated evidence from multiple similar questions.
 
 ---
 
