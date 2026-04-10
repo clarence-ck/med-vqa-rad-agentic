@@ -139,7 +139,6 @@ class AdvancedRAGRetriever:
         modality: str = "",
         visual_cues: Optional[List[str]] = None,
         answer_style: str = "",
-        language: str = "",
     ) -> str:
         parts = [question]
         if question_type:
@@ -154,18 +153,9 @@ class AdvancedRAGRetriever:
             parts.append(f"modality={modality}")
         if answer_style:
             parts.append(f"answer_style={answer_style}")
-        if language:
-            parts.append(f"language={language}")
         if visual_cues:
             parts.append("visual_cues=" + ", ".join(visual_cues[:6]))
         return " | ".join(part for part in parts if part)
-
-    def _language_matches(self, query_language: str, candidate_language: str) -> bool:
-        q = (query_language or "unknown").lower()
-        c = (candidate_language or "unknown").lower()
-        if q == "unknown" or c == "unknown":
-            return True
-        return q == c
 
     def _log_top_hits(self, label: str, hits: list, limit: int = 3) -> None:
         if not hits:
@@ -297,7 +287,6 @@ class AdvancedRAGRetriever:
             concept_type = item.get('concept_type', 'case')
             concept = item.get('concept', '')
             target_entity = item.get('target_entity', '')
-            language = item.get('language') or item.get('lang') or self._detect_language(f"{question} {answer}")
             question_family = item.get('question_family', '')
             support_count = int(item.get('support_count', 1) or 1)
 
@@ -313,7 +302,6 @@ class AdvancedRAGRetriever:
                 concept_type=concept_type,
                 concept=concept,
                 target_entity=target_entity,
-                language=language,
                 question_family=question_family,
             )
             
@@ -331,7 +319,6 @@ class AdvancedRAGRetriever:
                 'concept_type': concept_type,
                 'concept': concept,
                 'target_entity': target_entity,
-                'language': language,
                 'question_family': question_family,
                 'visual_cues': item.get('visual_cues', []),
                 'support_count': support_count,
@@ -372,31 +359,25 @@ class AdvancedRAGRetriever:
         concept_type: str = "",
         concept: str = "",
         target_entity: str = "",
-        language: str = "",
         question_family: str = "",
     ) -> Tuple[str, str]:
         """Build structured retrieval text for dense and sparse indexing.
 
-        Dense text stays concise and question-centric with minimal metadata.
+        Dense text is concept-driven and compact, prioritizing concept metadata over raw question text.
         Sparse text is more verbose and label-rich to help lexical matching.
         """
-        dense_parts = [text_chunk or question]
-        if concept_type and concept_type != 'case':
-            dense_parts.append(concept_type)
-        if concept and concept != 'unknown':
-            dense_parts.append(concept)
-        if target_entity and target_entity != 'unknown':
-            dense_parts.append(target_entity)
-        if question_family and question_family != 'other':
-            dense_parts.append(question_family)
-        if language and language != 'unknown':
-            dense_parts.append(language)
-        if modality and modality != 'unknown':
-            dense_parts.append(modality)
-        if body_region and body_region != 'unknown':
-            dense_parts.append(body_region)
-        if finding_category and finding_category != 'other':
-            dense_parts.append(finding_category)
+        dense_parts = [part for part in [
+            text_chunk,
+            f"Concept type: {concept_type}" if concept_type and concept_type != 'case' else "",
+            f"Concept: {concept}" if concept and concept != 'unknown' else "",
+            f"Target entity: {target_entity}" if target_entity and target_entity != 'unknown' else "",
+            f"Question family: {question_family}" if question_family and question_family != 'other' else "",
+            f"Modality: {modality}" if modality and modality != 'unknown' else "",
+            f"Body region: {body_region}" if body_region and body_region != 'unknown' else "",
+            f"Finding category: {finding_category}" if finding_category and finding_category != 'other' else "",
+            f"Laterality: {laterality}" if laterality and laterality != 'unknown' else "",
+            f"Answer style: {answer_style}" if answer_style and answer_style != 'unknown' else "",
+        ] if part]
 
         sparse_parts = [
             f"Question: {question}",
@@ -410,10 +391,6 @@ class AdvancedRAGRetriever:
             sparse_parts.append(f"Concept: {concept}")
         if target_entity and target_entity != 'unknown':
             sparse_parts.append(f"Target entity: {target_entity}")
-        if question_family and question_family != 'other':
-            sparse_parts.append(f"Question family: {question_family}")
-        if language and language != 'unknown':
-            sparse_parts.append(f"Language: {language}")
         if modality and modality != 'unknown':
             sparse_parts.append(f"Modality: {modality}")
         if body_region and body_region != 'unknown':
@@ -633,7 +610,6 @@ class AdvancedRAGRetriever:
             modality=modality or "",
             visual_cues=visual_cues or notable_findings,
             answer_style=answer_style or "",
-            language="en",
         )
 
         _log.info(
@@ -919,7 +895,6 @@ class AdvancedRAGRetriever:
                     'concept_type': example.get('concept_type', 'case'),
                     'concept': example.get('concept', ''),
                     'target_entity': example.get('target_entity', ''),
-                    'language': example.get('language', 'unknown'),
                     'question_family': example.get('question_family', ''),
                     'visual_cues': example.get('visual_cues', []),
                     'support_count': example.get('support_count', 1),
@@ -960,7 +935,6 @@ class AdvancedRAGRetriever:
                     c.metadata.get("modality", ""),
                     c.metadata.get("body_region", ""),
                     c.metadata.get("finding_category", ""),
-                    c.metadata.get("language", ""),
                     c.question,
                     c.answer,
                 ] if part),
@@ -982,9 +956,8 @@ class AdvancedRAGRetriever:
         for i, candidate in enumerate(candidates):
             support_count = float(candidate.metadata.get("support_count", 1) or 1)
             support_bonus = min(0.25, np.log1p(support_count) / 10.0)
-            language_bonus = 0.05 if candidate.metadata.get("language", "unknown") != "unknown" else 0.0
             concept_bonus = 0.08 if candidate.metadata.get("concept_type", "case") != "case" else 0.0
-            candidate.score = float(scores[i] + support_bonus + language_bonus + concept_bonus)
+            candidate.score = float(scores[i] + support_bonus + concept_bonus)
             candidate.metadata["rerank_softmax"] = float(softmax_scores[i])
             candidate.retrieval_method = 'reranked'
         
@@ -1112,7 +1085,6 @@ def retrieve_knowledge_advanced(
                 "concept_type": r.metadata.get("concept_type", "case"),
                 "concept": r.metadata.get("concept", ""),
                 "target_entity": r.metadata.get("target_entity", ""),
-                "language": r.metadata.get("language", "unknown"),
                 "question_family": r.metadata.get("question_family", ""),
                 "answer_style": r.metadata.get("answer_style", "unknown"),
             }
