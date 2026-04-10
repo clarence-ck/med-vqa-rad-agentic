@@ -520,6 +520,18 @@ The `DifficultyRouter` classified 77.5% of questions as "easy," 21.5% as "medium
 
 The catastrophic **17% accuracy on medium yes/no questions** demonstrates that binary detection questions are fundamentally incompatible with retrieval-augmented generation. Retrieved similar cases often contain opposite binary answers, and the `ReasoningAgent` lacks mechanisms to ignore contradictory retrieved context when image evidence alone is dispositive.
 
+**Why Question-Type-Based Routing Outperforms Difficulty-Based Routing:**
+
+The failure occurs because difficulty classification conflates two independent dimensions: perceived complexity versus retrieval compatibility. The data reveals three critical patterns:
+
+1. **Binary questions are retrieval-incompatible regardless of difficulty**: Yes/no and presence/absence questions require definitive answers based solely on image evidence. Retrieved "similar" cases inevitably include examples with opposite labels (mass present vs. absent, fracture visible vs. not visible). When the ReasoningAgent receives these contradictory exemplars, it cannot resolve the conflict — the semantic similarity that identifies "similar" questions does not distinguish between affirmative and negative instances.
+
+2. **Spatial questions suffer from retrieval noise**: Location questions ("Where is the abnormality?") require precise spatial reasoning on the specific image. Retrieved cases describing different anatomical regions introduce spatial confusion. A query about lung nodule location retrieves cases discussing heart borders or rib fractures — anatomically related but spatially irrelevant.
+
+3. **Template-driven questions benefit from retrieval regardless of difficulty**: Anatomy identification and explanation questions improve with retrieved exemplars because they provide answer formatting templates rather than factual claims. These benefits occur across all difficulty levels, not just "hard" questions.
+
+The DifficultyRouter's policy of enabling retrieval for "medium" questions (21.5% of cases) triggered catastrophic failures on yes/no questions that should never retrieve. Question-type-aware routing would disable retrieval unconditionally for binary and spatial questions, enabling it only for template-driven categories (anatomy identification, explanation requests) where exemplars provide formatting value without factual conflicts.
+
 ### Baseline Comparison Anomalies
 
 The workflow baseline exhibits **critical implementation failures** independent of architectural merit:
