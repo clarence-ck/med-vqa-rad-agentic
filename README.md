@@ -439,7 +439,9 @@ These failure analysis signals are displayed in the "Recent Evaluated Cases" tab
 
 ## Results Discussion
 
-Based on comprehensive evaluation across 200 SLAKE dataset samples, this section analyzes the efficacy of our agentic retrieval-augmented pipeline against two baseline approaches: a single-prompt LLM baseline and a hand-designed workflow baseline.
+Based on comprehensive evaluation across **200 VQA-RAD test-split samples**, this section analyzes the efficacy of our agentic retrieval-augmented pipeline against two baseline approaches: a single-prompt LLM baseline and a hand-designed workflow baseline.
+
+> **Note**: The evaluation uses the VQA-RAD test split (451 total test samples, 200 evaluated). The SLAKE dataset is used only as the knowledge base corpus (train split) for the Advanced RAG retrieval pipeline.
 
 ### Overall System Performance
 
@@ -523,24 +525,28 @@ These results yield three key insights for retrieval-augmented medical VQA syste
 
 ## Log Analysis
 
-Detailed execution traces from `medvqa_20260410` logs (21 samples) reveal runtime characteristics and failure modes not visible in aggregate evaluation metrics:
+Detailed execution traces from `medvqa_20260410` logs (**235 files, ~200 samples with complete traces**) reveal runtime characteristics and failure modes not visible in aggregate evaluation metrics:
 
 ### Latency Characteristics
 
 | Metric | Baseline | Agentic (no retry) | Agentic (with retry) |
 |--------|----------|-------------------|---------------------|
-| Average | 1.8s | 13-31s | 34-41s |
-| Slowdown vs baseline | — | 7-17× | 19-23× |
+| Observed range | 1.4-2.1s | 13-31s | 28-41s |
+| Slowdown vs baseline | — | 7-20× | 17-24× |
 
 The 6-stage pipeline (ImageInterpreter → QuestionAnalyzer → DifficultyRouter → KnowledgeRetriever → ReasoningAgent → VerificationAgent) incurs sequential LLM call overhead. When retry triggers, latency approximately doubles as the ReasoningAgent receives `retry_context` with previous status, confidence, and failure categories to self-correct.
 
 ### Retry Effectiveness
 
-Log analysis shows mixed retry outcomes:
-- **Successful recovery**: Cases where initial verification indicated `low_confidence` or `unsupported` improved after retry with corrective context
-- **Failed recovery**: Some retries maintained incorrect answers despite additional reasoning passes (e.g., sample 1857: agentic answered "no" but ground truth was "yes" in both attempts)
+Comprehensive log analysis of 235 execution traces found **9 retry cases (retries=1)** out of all processed samples. Retry outcomes show **mixed effectiveness (~29% improvement rate)**:
 
-Retry triggers on: `low_confidence`, `unsupported_claim`, `should_flag_for_review`, or any high-severity failure category.
+| Outcome | Count | Examples |
+|---------|-------|----------|
+| **Improved result** | 2 (22%) | Sample 1821 (Low→Medium confidence), Sample 2141 (Low→Medium confidence) |
+| **No improvement** | 5 (56%) | Sample 1822, 2177, 2187, 1998, 1871 — kept original answer despite retry |
+| **Incomplete logs** | 2 (22%) | Sample 1899 and others with truncated traces |
+
+Retry triggers when verification indicates `low_confidence`, `unsupported_claim`, `should_flag_for_review`, or high-severity failure categories. The retry mechanism re-runs the full 6-stage pipeline with `is_retry=True`, providing `retry_context` (previous status, confidence, failure categories) to the ReasoningAgent for self-correction.
 
 ### Retrieval Pipeline Observations
 
@@ -552,10 +558,13 @@ When retrieval activates (medium/hard difficulty):
 
 ### Per-Case Failure Examples
 
-| Sample | Issue | Systems Affected |
-|--------|-------|-----------------|
-| 1857 | Agentic persisted "no" vs ground truth "yes" through retry | Agentic |
-| Various | Workflow baseline 0% presence/absence, 33% anatomy identification | Workflow |
+| Sample | Issue | Systems Affected | Retry Triggered |
+|--------|-------|-----------------|-----------------|
+| 1821 | Retry improved: Low confidence → partially verified | Agentic | ✅ Yes (34s total) |
+| 2141 | Retry improved: Low confidence → partially verified, correct answer | Agentic | ✅ Yes (35s total) |
+| 1822 | Retry did not help: Still wrong answer after 41s execution | Agentic | ✅ Yes (41s total) |
+| **1857** | **Critical**: Agentic "no" vs ground truth "yes" — **no retry triggered** because verification incorrectly passed as "verified" | Agentic | ❌ **No (retries=0)** |
+| Various | Workflow baseline generic answers: "brain", "abdomen", "chest" vs specific anatomy | Workflow | N/A |
 
 These logs confirm that verification checks are heuristics that may not catch all errors, and that debugging multi-stage failures requires examining full agent traces rather than final outputs alone.
 
