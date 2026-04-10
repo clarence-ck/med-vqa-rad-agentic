@@ -1,0 +1,123 @@
+2026-04-10T19:20:39  INFO      medvqa.routes.dataset  Cache MISS for sample 1858  question='describe the pathology'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T19:20:39  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=314713 bytes  question='describe the pathology'
+2026-04-10T19:20:39  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='describe the pathology'  mime_type=image/png  size=314713 bytes ===
+2026-04-10T19:20:39  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T19:20:40  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=314713 bytes)
+2026-04-10T19:20:40  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T19:20:40  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=314713 bytes)
+2026-04-10T19:20:41  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Marked cardiomegaly with no focal acute pulmonary infiltrate or pleural effusion evident.",
+  "explanation": "This is a chest radiograph showing an enlarged cardiac silhouette occupying a large portion of the thorax. The lungs are relatively clear without a clear acute consolidation or edema pattern.",
+  "confidence": "high"
+}
+2026-04-10T19:20:41  INFO      medvqa.agents.baseline  Baseline done  answer='Marked cardiomegaly with no focal acute pulmonary infiltrate or pleural effusion'  confidence=high  duration=1742ms
+2026-04-10T19:20:43  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=fair  findings=5  duration=3065ms
+2026-04-10T19:20:43  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing the thoracic cavity with both lungs, the cardiac silhouette, and upper mediastinal structures. The image appears mildly underpenetrated and somewhat rotated, but the major chest anatomy is still visible.
+2026-04-10T19:20:43  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Cardiac silhouette appears enlarged in transverse diameter', 'Mild low-volume or underexposed appearance of the lungs', 'No focal dense air-space opacity is clearly seen', 'No pleural line or large pleural effusion is visible', 'Surgical clips or external metallic artifacts project over the upper chest/shoulder region']
+2026-04-10T19:20:43  INFO      medvqa.agents.question_analyzer  Analyzing question: 'describe the pathology'
+2026-04-10T19:20:43  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:20:43  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=fair  findings=5  duration=2945ms
+2026-04-10T19:20:43  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing the thorax with both lungs and the cardiac silhouette. The image is somewhat underpenetrated and low in contrast, but the major chest structures are visible.
+2026-04-10T19:20:43  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Cardiac silhouette appears enlarged.', 'Mild linear opacity is present at the left lung base adjacent to the heart.', 'No focal dense airspace opacity is seen in the right lung.', 'No pleural effusion or pneumothorax is visible.', 'Postsurgical median sternotomy wires are present.']
+2026-04-10T19:20:43  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=chest  duration=2976ms
+2026-04-10T19:20:44  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=descriptive  med_knowledge=True  clarity=ambiguous  duration=1195ms
+2026-04-10T19:20:44  DEBUG     medvqa.agents.question_analyzer  Target entity: pathology  Expected format: paragraph  Rephrased: Describe any abnormal findings or pathology visible on the chest radiograph.
+2026-04-10T19:20:44  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='describe the pathology'  modality=X-ray  body_region=chest  question_type=abnormality_description
+2026-04-10T19:20:44  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-10T19:20:44  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-10T19:20:44  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Cardiac silhouette appears enlarged in transverse diameter; Mild low-volume or u'  confidence=medium  question_type=abnormality_description  duration=4342ms
+2026-04-10T19:20:44  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='describe the pathology'
+2026-04-10T19:20:44  INFO      medvqa.agents.question_analyzer  Analyzing question: 'describe the pathology'
+2026-04-10T19:20:44  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:20:45  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=descriptive  med_knowledge=True  clarity=ambiguous  duration=1162ms
+2026-04-10T19:20:45  DEBUG     medvqa.agents.question_analyzer  Target entity: pathology / abnormal findings in the chest radiograph  Expected format: short_phrase  Rephrased: Describe any abnormal pathology visible on the chest radiograph.
+2026-04-10T19:20:45  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1208ms
+2026-04-10T19:20:46  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T19:20:46  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  reasoning=descriptive  med_knowledge=True  modality=X-ray  region=chest
+2026-04-10T19:20:48  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1842ms
+2026-04-10T19:20:48  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a chest X-ray with visible major structures but reduced image quality and an ambiguous descriptive question, making it a systematic review case rather than an obvious spot diagnosis.
+2026-04-10T19:20:48  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1869ms
+2026-04-10T19:20:49  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-10T19:20:49  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='describe the pathology'  modality=X-ray  body_region=chest  question_type=abnormality_description  target_entity=pathology / abnormal findings in the chest radiograph  advanced_rag=True
+2026-04-10T19:20:49  INFO      medvqa.agents.advanced_rag  Using device: cpu
+2026-04-10T19:20:49  INFO      medvqa.agents.advanced_rag  Loading dataset from D:\Medical-VQA-Explanation-Agent\data\slake\kb\slake_kb.jsonl
+2026-04-10T19:20:49  INFO      medvqa.agents.advanced_rag  Loaded 366 training examples from dataset
+2026-04-10T19:20:49  INFO      medvqa.agents.advanced_rag  Building indices for 366 examples...
+2026-04-10T19:20:49  INFO      medvqa.agents.advanced_rag  Computing dense embeddings (model=NeuML/pubmedbert-base-embeddings) on structured case text...
+2026-04-10T19:20:49  INFO      medvqa.agents.advanced_rag  Loading embedding model: NeuML/pubmedbert-base-embeddings on cpu
+2026-04-10T19:21:22  INFO      medvqa.agents.advanced_rag  Building FAISS index (dim=768)...
+2026-04-10T19:21:22  INFO      medvqa.agents.advanced_rag  FAISS index built with 366 vectors
+2026-04-10T19:21:22  INFO      medvqa.agents.advanced_rag  Building BM25 sparse index on structured case text...
+2026-04-10T19:21:22  INFO      medvqa.agents.advanced_rag  Indexing complete — FAISS + BM25 ready
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='effusion' from notable_findings
+2026-04-10T19:21:22  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=describe the pathology | modality=X-ray | body_region=chest | finding=effusion | rerank=mandatory
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag  Using structured query profile (no LLM rewrite): describe the pathology | question_type=abnormality_description | question_family=descriptive | target_entity=pathology / abnormal findings in the chest radiograph | body_region=chest | modality=X-ray | answer_style=short_phrase | visual_cu…
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='X-ray': 79 matches
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='chest': 117 matches
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='effusion': 8 matches
+2026-04-10T19:21:22  INFO      medvqa.agents.advanced_rag  Metadata filter result: 61 candidates (modality(79) + body_region(117) + finding(8))
+2026-04-10T19:21:22  INFO      medvqa.agents.advanced_rag  Metadata filter: 61 candidates retained
+2026-04-10T19:21:22  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=10
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 61 candidates
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/10
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag    1. id=184 score=0.7581 | concept_type=anatomy concept=chest | Q: What part of the lung is the pneumonia located in? | A: Both Lung
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag    2. id=187 score=0.7257 | concept_type=anatomy concept=chest | Q: Which part of chest is abnormal in this image? | A: Heart
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag    3. id=27 score=0.7250 | concept_type=anatomy concept=chest | Q: Which organ is abnormal, heart or lung? | A: Both
+2026-04-10T19:21:22  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=10
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 61 candidates
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/10
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag    1. id=36 score=9.8356 | concept_type=laterality concept=both lungs | Q: Where is/are the abnormality located? | A: Both Lungs
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag    2. id=108 score=9.7465 | concept_type=counting concept=2 | Q: How many lungs are shown in this image? | A: 2
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag    3. id=101 score=8.4016 | concept_type=counting concept=1 | Q: How many existing heart in this image? | A: 1
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=10 sparse=10
+2026-04-10T19:21:22  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 10 unique candidates
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/10
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag    1. id=187 score=0.0315 method=hybrid_rrf | concept_type=anatomy concept=chest | Q: Which part of chest is abnormal in this image? | A: Heart
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag    2. id=27 score=0.0310 method=hybrid_rrf | concept_type=anatomy concept=chest | Q: Which organ is abnormal, heart or lung? | A: Both
+2026-04-10T19:21:22  DEBUG     medvqa.agents.advanced_rag    3. id=184 score=0.0164 method=hybrid_rrf | concept_type=anatomy concept=chest | Q: What part of the lung is the pneumonia located in? | A: Both Lung
+2026-04-10T19:21:22  INFO      medvqa.agents.advanced_rag  Reranking 10 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-10T19:21:22  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 10 candidates...
+2026-04-10T19:21:22  INFO      medvqa.agents.advanced_rag  Loading cross-encoder: cross-encoder/ms-marco-MiniLM-L-6-v2 on cpu
+2026-04-10T19:21:26  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-10T19:21:26  DEBUG     medvqa.agents.advanced_rag    1. id=103 score=2.2588 method=reranked softmax=0.9240 | concept_type=laterality concept=heart | Q: Where is the abnormality in this image? | A: Heart
+2026-04-10T19:21:26  DEBUG     medvqa.agents.advanced_rag    2. id=187 score=-0.8488 method=reranked softmax=0.0461 | concept_type=anatomy concept=chest | Q: Which part of chest is abnormal in this image? | A: Heart
+2026-04-10T19:21:26  DEBUG     medvqa.agents.advanced_rag    3. id=36 score=-1.6869 method=reranked softmax=0.0199 | concept_type=laterality concept=both lungs | Q: Where is/are the abnormality located? | A: Both Lungs
+2026-04-10T19:21:26  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=medium weak_signals=1 top1_softmax=0.924 margin=0.878 dense_top1=0.758 agreement=False
+2026-04-10T19:21:26  WARNING   medvqa.agents.advanced_rag  Retrieval confidence is medium; returning results
+2026-04-10T19:21:26  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-10T19:21:26  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-10T19:21:26  DEBUG     medvqa.agents.advanced_rag    1. id=103 score=2.2588 method=reranked softmax=0.9240 | concept_type=laterality concept=heart | Q: Where is the abnormality in this image? | A: Heart
+2026-04-10T19:21:26  DEBUG     medvqa.agents.advanced_rag    2. id=187 score=-0.8488 method=reranked softmax=0.0461 | concept_type=anatomy concept=chest | Q: Which part of chest is abnormal in this image? | A: Heart
+2026-04-10T19:21:26  DEBUG     medvqa.agents.advanced_rag    3. id=36 score=-1.6869 method=reranked softmax=0.0199 | concept_type=laterality concept=both lungs | Q: Where is/are the abnormality located? | A: Both Lungs
+2026-04-10T19:21:26  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases
+2026-04-10T19:21:30  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=3  duration=40891ms
+2026-04-10T19:21:30  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Evaluate lung fields for focal opacity, diffuse interstitial change, collapse, or pleural fluid/air.', 'Assess cardiac silhouette size and mediastinal contours for enlargement or widening.', 'Check the aortic arch, diaphragms, ribs, clavicles, and shoulders for acute or chronic bony or structural changes.', 'Compare both lungs and hemithoraces for asymmetry, consolidation, effusion, or pneumothorax.']
+2026-04-10T19:21:30  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: A chest X-ray is used to assess the lungs, pleura, heart, mediastinum, diaphragms, and bony thorax for acute or chronic abnormalities. In a normal study, the heart is not enlarged, the mediastinum is 
+2026-04-10T19:21:30  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=3  duration=40923ms
+2026-04-10T19:21:31  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T19:21:31  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='describe the pathology'  is_retry=False  question_type=abnormality_description  yes_no=False
+2026-04-10T19:21:31  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=3
+2026-04-10T19:21:34  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Mild cardiomegaly with minimal left basilar atelectatic/scarring opacity; prior '  confidence=high  duration=2579ms
+2026-04-10T19:21:34  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: 1) Reviewed the chest radiograph for major abnormalities. 2) Noted enlarged cardiac silhouette. 3) Identified a mild linear left basilar opacity near the heart. 4) Checked for other acute findings such as effusion or pneumothorax and found none. 5) Incorporated visible prior sternotomy wires as postsurgical change.
+2026-04-10T19:21:34  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Cardiac silhouette appears enlarged', 'Mild linear opacity at the left lung base adjacent to the heart', 'Postsurgical median sternotomy wires present', 'No pleural effusion', 'No pneumothorax']
+2026-04-10T19:21:34  DEBUG     medvqa.agents.reasoning_agent  Limitations: The image is somewhat underpenetrated and low in contrast, so the left basilar opacity is mild and somewhat nonspecific.
+2026-04-10T19:21:34  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Mild cardiomegaly with minimal left basilar atelectatic/scar'  confidence=high  duration=2623ms
+2026-04-10T19:21:35  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T19:21:35  INFO      medvqa.agents.verification_agent  Verifying answer='Mild cardiomegaly with minimal left basilar atelectatic/scarring opacity; prior '  question='describe the pathology'  question_type=abnormality_description
+2026-04-10T19:21:37  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=4/5  duration=2066ms
+2026-04-10T19:21:37  WARNING   medvqa.agents.verification_agent  Verification issues: ['The answer is medically plausible but slightly overconfident given the low-contrast/underpenetrated image.', "The phrase 'minimal left basilar atelectatic/scarring opacity' is somewhat interpretive and may be less certain than the stated high confidence suggests."]
+2026-04-10T19:21:37  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-10T19:21:37  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is consistent with a chest radiograph description and matches the short-phrase format expected for abnormality description. However, the image quality limits certainty, so the interpretation of left basilar atelectatic/scarring change should be presented more cautiously.
+2026-04-10T19:21:37  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2096ms
+2026-04-10T19:21:37  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-10T19:21:37  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-10T19:21:37  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-10T19:21:37  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-10T19:21:37  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Mild cardiomegaly with minimal left basilar atelectatic/scar'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=57341ms
+2026-04-10T19:21:37  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Mild cardiomegaly with minimal left basilar atelectatic/scar'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-10T19:21:37  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-10T19:21:37  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-10T19:21:37  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Mild cardiomegaly with minimal left basilar atelectatic/scar'  retries=0  total_duration=57346ms ===
+2026-04-10T19:21:37  INFO      medvqa.routes.dataset  Sample 1858 analysis complete  baseline=1749ms  workflow=4345ms  agentic=57351ms  total=57351ms
+2026-04-10T19:21:37  INFO      medvqa.routes.dataset  Sample 1858 answers  baseline='Marked cardiomegaly with no focal acute pulmonary infiltrate'  workflow='Cardiac silhouette appears enlarged in transverse diameter; '  agentic='Mild cardiomegaly with minimal left basilar atelectatic/scar'  ground_truth='cardiomegaly with pulmonary edema'

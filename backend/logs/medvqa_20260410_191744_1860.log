@@ -1,0 +1,199 @@
+2026-04-10T19:23:46  INFO      medvqa.routes.dataset  Cache MISS for sample 1860  question='what organ system is the pathology?'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T19:23:46  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=338244 bytes  question='what organ system is the pathology?'
+2026-04-10T19:23:46  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what organ system is the pathology?'  mime_type=image/png  size=338244 bytes ===
+2026-04-10T19:23:46  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T19:23:46  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=338244 bytes)
+2026-04-10T19:23:47  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T19:23:47  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=338244 bytes)
+2026-04-10T19:23:48  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Respiratory system (chest/lungs)",
+  "explanation": "This is a chest X-ray, which is a radiology image of the thorax. The pathology depicted is therefore in the respiratory system.",
+  "confidence": "high"
+}
+2026-04-10T19:23:48  INFO      medvqa.agents.baseline  Baseline done  answer='Respiratory system (chest/lungs)'  confidence=high  duration=1793ms
+2026-04-10T19:23:49  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=fair  findings=6  duration=2827ms
+2026-04-10T19:23:49  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing the thorax with both lungs, heart, and mediastinal contours visible. The image is slightly low volume with mild basilar underexposure and external monitoring leads projecting over the chest.
+2026-04-10T19:23:49  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Low lung volumes', 'Mild elevation of the diaphragms', 'Mild bibasilar linear/patchy increased opacity', 'Cardiomediastinal silhouette appears mildly enlarged', 'No visible pleural line or large pleural fluid collection', 'Multiple overlying monitoring wires/projected artifacts']
+2026-04-10T19:23:49  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what organ system is the pathology?'
+2026-04-10T19:23:49  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:23:49  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=fair  findings=5  duration=2533ms
+2026-04-10T19:23:49  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing both lungs, cardiac silhouette, and upper thorax. The image is somewhat low volume with mild underpenetration at the bases, and overlying monitoring leads are present.
+2026-04-10T19:23:49  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Low lung volumes with elevated diaphragms', 'Mild bibasilar linear/patchy opacity, greater at the left base', 'Cardiac silhouette appears mildly enlarged', 'No visible pleural effusion or pneumothorax', 'Overlying external monitoring leads project across the chest']
+2026-04-10T19:23:49  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=chest  duration=2565ms
+2026-04-10T19:23:50  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=medical_knowledge  med_knowledge=True  clarity=clear  duration=1558ms
+2026-04-10T19:23:50  DEBUG     medvqa.agents.question_analyzer  Target entity: organ system involved by the pathology  Expected format: short_phrase  Rephrased: What organ system is affected by the pathology?
+2026-04-10T19:23:50  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what organ system is the pathology?'  modality=X-ray  body_region=chest  question_type=anatomy_identification
+2026-04-10T19:23:50  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-10T19:23:50  DEBUG     medvqa.agents.workflow_baseline  Branch taken: anatomy_identification
+2026-04-10T19:23:50  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='chest'  confidence=high  question_type=anatomy_identification  duration=4444ms
+2026-04-10T19:23:52  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what organ system is the pathology?'
+2026-04-10T19:23:52  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what organ system is the pathology?'
+2026-04-10T19:23:52  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:23:53  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=medical_knowledge  med_knowledge=True  clarity=ambiguous  duration=1121ms
+2026-04-10T19:23:53  DEBUG     medvqa.agents.question_analyzer  Target entity: organ system  Expected format: short_phrase  Rephrased: What organ system is involved by the pathology shown in the image?
+2026-04-10T19:23:53  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=anatomy_identification  duration=1153ms
+2026-04-10T19:23:53  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T19:23:53  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=anatomy_identification  reasoning=medical_knowledge  med_knowledge=True  modality=X-ray  region=chest
+2026-04-10T19:23:55  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1755ms
+2026-04-10T19:23:55  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a chest anatomy identification task on a mildly limited study where the answer may be present but not fully straightforward, making it a systematic but not high-noise case.
+2026-04-10T19:23:55  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1783ms
+2026-04-10T19:23:56  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-10T19:23:56  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='what organ system is the pathology?'  modality=X-ray  body_region=chest  question_type=anatomy_identification  target_entity=organ system  advanced_rag=True
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='effusion' from notable_findings
+2026-04-10T19:23:56  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=what organ system is the pathology? | modality=X-ray | body_region=chest | finding=effusion | rerank=mandatory
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag  Using structured query profile (no LLM rewrite): what organ system is the pathology? | question_type=anatomy_identification | question_family=medical_knowledge | target_entity=organ system | body_region=chest | modality=X-ray | answer_style=short_phrase | visual_cues=lungs, heart, medias…
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='X-ray': 79 matches
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='chest': 117 matches
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='effusion': 8 matches
+2026-04-10T19:23:56  INFO      medvqa.agents.advanced_rag  Metadata filter result: 61 candidates (modality(79) + body_region(117) + finding(8))
+2026-04-10T19:23:56  INFO      medvqa.agents.advanced_rag  Metadata filter: 61 candidates retained
+2026-04-10T19:23:56  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=10
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 61 candidates
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/10
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag    1. id=97 score=0.7864 | concept_type=anatomy concept=main organ | Q: What is the main organ in the image? | A: Lung
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag    2. id=89 score=0.7848 | concept_type=anatomy concept=in this | Q: What organ system is primarily present in this image? | A: Chest
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag    3. id=110 score=0.7788 | concept_type=anatomy concept=organ located | Q: Which part of the human body is the organ located in the image? | A: Chest
+2026-04-10T19:23:56  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=10
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 61 candidates
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/10
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag    1. id=89 score=16.4978 | concept_type=anatomy concept=in this | Q: What organ system is primarily present in this image? | A: Chest
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag    2. id=97 score=10.7966 | concept_type=anatomy concept=main organ | Q: What is the main organ in the image? | A: Lung
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag    3. id=110 score=9.7227 | concept_type=anatomy concept=organ located | Q: Which part of the human body is the organ located in the image? | A: Chest
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=10 sparse=10
+2026-04-10T19:23:56  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 10 unique candidates
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/10
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag    1. id=97 score=0.0325 method=hybrid_rrf | concept_type=anatomy concept=main organ | Q: What is the main organ in the image? | A: Lung
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag    2. id=89 score=0.0325 method=hybrid_rrf | concept_type=anatomy concept=in this | Q: What organ system is primarily present in this image? | A: Chest
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag    3. id=110 score=0.0317 method=hybrid_rrf | concept_type=anatomy concept=organ located | Q: Which part of the human body is the organ located in the image? | A: Chest
+2026-04-10T19:23:56  INFO      medvqa.agents.advanced_rag  Reranking 10 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-10T19:23:56  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 10 candidates...
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag    1. id=89 score=2.8231 method=reranked softmax=0.5303 | concept_type=anatomy concept=in this | Q: What organ system is primarily present in this image? | A: Chest
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag    2. id=110 score=2.5304 method=reranked softmax=0.3998 | concept_type=anatomy concept=organ located | Q: Which part of the human body is the organ located in the image? | A: Chest
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag    3. id=20 score=-0.0382 method=reranked softmax=0.0303 | concept_type=anatomy concept=chest | Q: Which part of the body does this image belong to? | A: Chest
+2026-04-10T19:23:56  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=high weak_signals=0 top1_softmax=0.530 margin=0.131 dense_top1=0.786 agreement=True
+2026-04-10T19:23:56  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag    1. id=89 score=2.8231 method=reranked softmax=0.5303 | concept_type=anatomy concept=in this | Q: What organ system is primarily present in this image? | A: Chest
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag    2. id=110 score=2.5304 method=reranked softmax=0.3998 | concept_type=anatomy concept=organ located | Q: Which part of the human body is the organ located in the image? | A: Chest
+2026-04-10T19:23:56  DEBUG     medvqa.agents.advanced_rag    3. id=20 score=-0.0382 method=reranked softmax=0.0303 | concept_type=anatomy concept=chest | Q: Which part of the body does this image belong to? | A: Chest
+2026-04-10T19:23:56  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases
+2026-04-10T19:24:00  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=3  duration=4187ms
+2026-04-10T19:24:00  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Chest X-rays are used to assess the lungs and other thoracic organs/structures.', 'The respiratory system is the main organ system visualized, but the heart and mediastinum are also routinely seen.', 'Normal chest radiographs show clear lungs, a normal cardiomediastinal silhouette, and no pleural effusion or focal consolidation.', 'Ribs, clavicles, and diaphragm provide important anatomical landmarks on chest imaging.']
+2026-04-10T19:24:00  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: A chest X-ray primarily evaluates thoracic structures, especially the lungs, heart, mediastinum, pleura, diaphragm, ribs, and clavicles. For anatomy identification questions in this setting, the organ
+2026-04-10T19:24:00  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=3  duration=4220ms
+2026-04-10T19:24:01  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T19:24:01  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what organ system is the pathology?'  is_retry=False  question_type=anatomy_identification  yes_no=False
+2026-04-10T19:24:01  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=3
+2026-04-10T19:24:04  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='chest'  confidence=high  duration=2806ms
+2026-04-10T19:24:04  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the modality as a chest X-ray.', 'Focused on the main structures visible in the chest: lungs, heart, mediastinum, diaphragm, and ribs.', 'Noted that the abnormal findings are centered in the lungs/bases of the thorax.', 'Mapped the pathology to the primary organ system assessed on this image: the respiratory system.']
+2026-04-10T19:24:04  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Frontal chest radiograph showing both lungs, cardiac silhouette, and upper thorax', 'Low lung volumes with elevated diaphragms', 'Mild bibasilar linear/patchy opacity, greater at the left base', 'Chest X-rays primarily evaluate the respiratory system and thoracic structures']
+2026-04-10T19:24:04  DEBUG     medvqa.agents.reasoning_agent  Limitations: The image also shows the heart and mediastinum, but the described pathology is centered in the lungs; image quality is mildly limited by low lung volumes and underpenetration at the bases.
+2026-04-10T19:24:04  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='chest'  confidence=high  duration=2861ms
+2026-04-10T19:24:05  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T19:24:05  INFO      medvqa.agents.verification_agent  Verifying answer='chest'  question='what organ system is the pathology?'  question_type=anatomy_identification
+2026-04-10T19:24:07  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=3/5  duration=1817ms
+2026-04-10T19:24:07  WARNING   medvqa.agents.verification_agent  Verification issues: ["The question asks for the organ system, but the answer gives the body region ('chest') rather than an organ system.", 'The explanation is medically grounded in the chest X-ray findings, but it does not fix the answer-format mismatch.']
+2026-04-10T19:24:07  INFO      medvqa.agents.verification_agent  Fallback recommendation: rephrase_answer
+2026-04-10T19:24:07  DEBUG     medvqa.agents.verification_agent  Verification notes: The image and explanation support a thoracic/chest radiograph with respiratory involvement, but the final answer is not in the expected organ-system format. A more appropriate response would be 'respiratory system' or 'thoracic/cardiopulmonary system' depending on the intended labeling scheme.
+2026-04-10T19:24:07  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=1847ms
+2026-04-10T19:24:07  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified', 'question_answer_mismatch']
+2026-04-10T19:24:07  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=rephrase_answer  disclaimer=False
+2026-04-10T19:24:07  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-10T19:24:07  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-10T19:24:07  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='chest'  verification=partially_verified  guardrail_flag=False  consistency=low  cross_modal=high  duration=20677ms
+2026-04-10T19:24:07  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='chest'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-10T19:24:07  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  fixable=True  -> retry=True
+2026-04-10T19:24:07  INFO      medvqa.agents.orchestrator  Pipeline RETRY triggered  reason: verification_status=partially_verified; fallback=rephrase_answer; flag_for_review=False
+2026-04-10T19:24:07  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=True)
+2026-04-10T19:24:08  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T19:24:08  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=338244 bytes)
+2026-04-10T19:24:10  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=Chest  quality=fair  findings=5  duration=2528ms
+2026-04-10T19:24:10  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is a frontal chest radiograph showing the thorax with both lungs, heart, and mediastinal contours. The image includes portable-style overlying monitoring leads and a right-side marker.
+2026-04-10T19:24:10  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Low lung volume inspiration with elevated diaphragms', 'Mild bibasilar linear/patchy increased opacity, greater at the left base', 'Mild enlargement of the cardiac silhouette', 'No visible pleural line or large pleural effusion', 'No focal lobar consolidation visible']
+2026-04-10T19:24:10  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=Chest  duration=2559ms
+2026-04-10T19:24:11  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what organ system is the pathology?'
+2026-04-10T19:24:11  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what organ system is the pathology?'
+2026-04-10T19:24:11  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:24:12  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=medical_knowledge  med_knowledge=True  clarity=ambiguous  duration=1182ms
+2026-04-10T19:24:12  DEBUG     medvqa.agents.question_analyzer  Target entity: organ system affected by the pathology  Expected format: short_phrase  Rephrased: Which organ system is involved by the pathology shown in the image?
+2026-04-10T19:24:12  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=anatomy_identification  duration=1215ms
+2026-04-10T19:24:13  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T19:24:13  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=anatomy_identification  reasoning=medical_knowledge  med_knowledge=True  modality=X-ray  region=Chest
+2026-04-10T19:24:15  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1593ms
+2026-04-10T19:24:15  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a moderately complex chest study where the anatomy is familiar but the prompt is ambiguous and the image has some overlap from portable leads, so a systematic read with external context support is appropriate.
+2026-04-10T19:24:15  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1623ms
+2026-04-10T19:24:15  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-10T19:24:15  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='what organ system is the pathology?'  modality=X-ray  body_region=Chest  question_type=anatomy_identification  target_entity=organ system affected by the pathology  advanced_rag=True
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='effusion' from notable_findings
+2026-04-10T19:24:15  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=what organ system is the pathology? | modality=X-ray | body_region=Chest | finding=effusion | rerank=mandatory
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag  Using structured query profile (no LLM rewrite): what organ system is the pathology? | question_type=anatomy_identification | question_family=medical_knowledge | target_entity=organ system affected by the pathology | body_region=Chest | modality=X-ray | answer_style=short_phrase | visual…
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='X-ray': 79 matches
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='Chest': 117 matches
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='effusion': 8 matches
+2026-04-10T19:24:15  INFO      medvqa.agents.advanced_rag  Metadata filter result: 61 candidates (modality(79) + body_region(117) + finding(8))
+2026-04-10T19:24:15  INFO      medvqa.agents.advanced_rag  Metadata filter: 61 candidates retained
+2026-04-10T19:24:15  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=10
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 61 candidates
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/10
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag    1. id=89 score=0.7543 | concept_type=anatomy concept=in this | Q: What organ system is primarily present in this image? | A: Chest
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag    2. id=97 score=0.7536 | concept_type=anatomy concept=main organ | Q: What is the main organ in the image? | A: Lung
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag    3. id=187 score=0.7475 | concept_type=anatomy concept=chest | Q: Which part of chest is abnormal in this image? | A: Heart
+2026-04-10T19:24:15  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=10
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 61 candidates
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/10
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag    1. id=89 score=16.8682 | concept_type=anatomy concept=in this | Q: What organ system is primarily present in this image? | A: Chest
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag    2. id=97 score=11.4100 | concept_type=anatomy concept=main organ | Q: What is the main organ in the image? | A: Lung
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag    3. id=110 score=10.3790 | concept_type=anatomy concept=organ located | Q: Which part of the human body is the organ located in the image? | A: Chest
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=10 sparse=10
+2026-04-10T19:24:15  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 10 unique candidates
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/10
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag    1. id=89 score=0.0328 method=hybrid_rrf | concept_type=anatomy concept=in this | Q: What organ system is primarily present in this image? | A: Chest
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag    2. id=97 score=0.0323 method=hybrid_rrf | concept_type=anatomy concept=main organ | Q: What is the main organ in the image? | A: Lung
+2026-04-10T19:24:15  DEBUG     medvqa.agents.advanced_rag    3. id=110 score=0.0315 method=hybrid_rrf | concept_type=anatomy concept=organ located | Q: Which part of the human body is the organ located in the image? | A: Chest
+2026-04-10T19:24:15  INFO      medvqa.agents.advanced_rag  Reranking 10 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-10T19:24:15  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 10 candidates...
+2026-04-10T19:24:16  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-10T19:24:16  DEBUG     medvqa.agents.advanced_rag    1. id=89 score=1.6922 method=reranked softmax=0.5148 | concept_type=anatomy concept=in this | Q: What organ system is primarily present in this image? | A: Chest
+2026-04-10T19:24:16  DEBUG     medvqa.agents.advanced_rag    2. id=110 score=1.4805 method=reranked softmax=0.4208 | concept_type=anatomy concept=organ located | Q: Which part of the human body is the organ located in the image? | A: Chest
+2026-04-10T19:24:16  DEBUG     medvqa.agents.advanced_rag    3. id=187 score=-1.3966 method=reranked softmax=0.0281 | concept_type=anatomy concept=chest | Q: Which part of chest is abnormal in this image? | A: Heart
+2026-04-10T19:24:16  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=high weak_signals=0 top1_softmax=0.515 margin=0.094 dense_top1=0.754 agreement=True
+2026-04-10T19:24:16  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-10T19:24:16  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-10T19:24:16  DEBUG     medvqa.agents.advanced_rag    1. id=89 score=1.6922 method=reranked softmax=0.5148 | concept_type=anatomy concept=in this | Q: What organ system is primarily present in this image? | A: Chest
+2026-04-10T19:24:16  DEBUG     medvqa.agents.advanced_rag    2. id=110 score=1.4805 method=reranked softmax=0.4208 | concept_type=anatomy concept=organ located | Q: Which part of the human body is the organ located in the image? | A: Chest
+2026-04-10T19:24:16  DEBUG     medvqa.agents.advanced_rag    3. id=187 score=-1.3966 method=reranked softmax=0.0281 | concept_type=anatomy concept=chest | Q: Which part of chest is abnormal in this image? | A: Heart
+2026-04-10T19:24:16  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases
+2026-04-10T19:24:19  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=3  duration=4094ms
+2026-04-10T19:24:19  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Chest radiographs are used to assess the lungs, pleura, heart, mediastinum, and thoracic bones.', 'The most relevant organ systems on a chest X-ray are the respiratory and cardiovascular systems.', 'The diaphragm and ribs help define thoracic anatomy and can indicate whether a finding is intrathoracic.', 'Mediastinal abnormalities may reflect masses, lymphadenopathy, or widened mediastinum.']
+2026-04-10T19:24:19  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: A chest X-ray primarily evaluates the thoracic organ systems, especially the respiratory system (lungs and pleura) and the cardiovascular/mediastinal structures (heart and great vessels). Because the 
+2026-04-10T19:24:19  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=3  duration=4140ms
+2026-04-10T19:24:20  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=True
+2026-04-10T19:24:20  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what organ system is the pathology?'  is_retry=True  question_type=anatomy_identification  yes_no=False
+2026-04-10T19:24:20  INFO      medvqa.agents.reasoning_agent  Retry context  prev_status=partially_verified  prev_confidence=Medium  fallback=rephrase_answer
+2026-04-10T19:24:20  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=3
+2026-04-10T19:24:22  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Chest'  confidence=high  duration=2188ms
+2026-04-10T19:24:22  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the modality and region as a frontal chest radiograph.', 'Note that the visible pathology is in the lungs/bases of the thorax rather than outside the chest.', 'Match the described abnormalities (bibasilar opacities, low lung volumes) to the respiratory system.']
+2026-04-10T19:24:22  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Chest X-ray of the thorax', 'Visible lungs, heart, mediastinum, diaphragm, ribs, and clavicles', 'Mild bibasilar linear/patchy increased opacity, greater at the left base', 'Low lung volume inspiration with elevated diaphragms']
+2026-04-10T19:24:22  DEBUG     medvqa.agents.reasoning_agent  Limitations: The image also shows mild cardiac silhouette enlargement, so there may be minor cardiovascular involvement, but the primary pathology is thoracic/lung-related.
+2026-04-10T19:24:22  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Chest'  confidence=high  duration=2219ms
+2026-04-10T19:24:23  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T19:24:23  INFO      medvqa.agents.verification_agent  Verifying answer='Chest'  question='what organ system is the pathology?'  question_type=anatomy_identification
+2026-04-10T19:24:25  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=2/5  duration=2021ms
+2026-04-10T19:24:25  WARNING   medvqa.agents.verification_agent  Verification issues: ["The answer 'Chest' names a body region, not an organ system.", "The question asks for an organ system, so the more appropriate answer would be 'respiratory system' or 'thoracic/chest anatomy' depending on intent.", 'The generated answer is too generic and does not align with the expected short_phrase for organ system identification.']
+2026-04-10T19:24:25  INFO      medvqa.agents.verification_agent  Fallback recommendation: rephrase_answer
+2026-04-10T19:24:25  DEBUG     medvqa.agents.verification_agent  Verification notes: The explanation is consistent with the chest X-ray and correctly mentions lung involvement, but the final answer does not match the question type. It identifies the body region rather than the organ system, so it is only partially verified.
+2026-04-10T19:24:25  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2061ms
+2026-04-10T19:24:25  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-10T19:24:25  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=rephrase_answer  disclaimer=False
+2026-04-10T19:24:25  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=2/5
+2026-04-10T19:24:25  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-10T19:24:25  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Chest'  verification=partially_verified  guardrail_flag=False  consistency=low  cross_modal=high  duration=39354ms
+2026-04-10T19:24:25  INFO      medvqa.agents.orchestrator  Pipeline attempt 2 result  answer='Chest'  verification=partially_verified  confidence=Medium
+2026-04-10T19:24:25  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=3  confidence_rank=2  high_failures=0  review=0
+2026-04-10T19:24:25  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=3  confidence_rank=2  high_failures=0  review=0
+2026-04-10T19:24:25  INFO      medvqa.agents.orchestrator  Pipeline RETRY winner: attempt 1 (kept original)
+2026-04-10T19:24:25  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='chest'  retries=1  total_duration=39362ms ===
+2026-04-10T19:24:25  INFO      medvqa.routes.dataset  Sample 1860 analysis complete  baseline=1796ms  workflow=4447ms  agentic=39365ms  total=39371ms
+2026-04-10T19:24:25  INFO      medvqa.routes.dataset  Sample 1860 answers  baseline='Respiratory system (chest/lungs)'  workflow='chest'  agentic='chest'  ground_truth='pulmonary/lymphatic'

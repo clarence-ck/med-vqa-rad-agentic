@@ -1,0 +1,104 @@
+2026-04-10T19:27:29  INFO      medvqa.routes.dataset  Cache MISS for sample 2051  question='what organ system is visualized?'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T19:27:29  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=414952 bytes  question='what organ system is visualized?'
+2026-04-10T19:27:29  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what organ system is visualized?'  mime_type=image/png  size=414952 bytes ===
+2026-04-10T19:27:29  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T19:27:29  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=414952 bytes)
+2026-04-10T19:27:30  DEBUG     medvqa.agents.baseline  Raw baseline response: {"is_radiology_image":true,"answer":"Chest / respiratory system","explanation":"This is an X-ray radiograph showing the thorax, including the lungs, heart, ribs, and diaphragm. The primary organ system visualized is the respiratory system.","confidence":"high"}
+2026-04-10T19:27:30  INFO      medvqa.agents.baseline  Baseline done  answer='Chest / respiratory system'  confidence=high  duration=1702ms
+2026-04-10T19:27:31  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T19:27:31  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=414952 bytes)
+2026-04-10T19:27:31  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest and upper abdomen  quality=fair  findings=5  duration=2519ms
+2026-04-10T19:27:31  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is a frontal standing chest radiograph that includes the upper abdomen. The lungs, heart, and mediastinal contours are visible, along with the bony thorax and upper abdominal gas pattern.
+2026-04-10T19:27:31  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Patient is rotated slightly to the left', 'Left hemithorax shows increased opacity in the lower lung zone', 'Left hemidiaphragm and left heart border are partially obscured', 'Right lung appears relatively clear and well aerated', 'No obvious displaced rib fracture is visible']
+2026-04-10T19:27:31  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what organ system is visualized?'
+2026-04-10T19:27:31  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:27:32  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1116ms
+2026-04-10T19:27:32  DEBUG     medvqa.agents.question_analyzer  Target entity: organ system visualized  Expected format: short_phrase  Rephrased: What organ system is visualized?
+2026-04-10T19:27:32  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what organ system is visualized?'  modality=X-ray  body_region=chest and upper abdomen  question_type=anatomy_identification
+2026-04-10T19:27:32  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-10T19:27:32  DEBUG     medvqa.agents.workflow_baseline  Branch taken: anatomy_identification
+2026-04-10T19:27:32  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='chest and upper abdomen'  confidence=high  question_type=anatomy_identification  duration=3704ms
+2026-04-10T19:27:34  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=Chest and upper abdomen  quality=fair  findings=5  duration=2702ms
+2026-04-10T19:27:34  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an upright frontal chest radiograph including the lower neck and upper abdomen. The image shows both lungs, the mediastinal silhouette, and portions of the upper abdomen with the patient rotated slightly.
+2026-04-10T19:27:34  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['One side of the chest appears more opaque than the other, with reduced aeration in the lower lung region on the left side of the image', 'The heart and mediastinal silhouette are partially obscured on the left side of the image', 'The trachea appears centered', 'No visible pneumothorax', 'Mild rightward curvature of the thoracic spine is visible']
+2026-04-10T19:27:34  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=Chest and upper abdomen  duration=2735ms
+2026-04-10T19:27:35  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what organ system is visualized?'
+2026-04-10T19:27:35  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what organ system is visualized?'
+2026-04-10T19:27:35  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:27:36  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1107ms
+2026-04-10T19:27:36  DEBUG     medvqa.agents.question_analyzer  Target entity: organ system  Expected format: short_phrase  Rephrased: What organ system is visualized in the image?
+2026-04-10T19:27:36  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=anatomy_identification  duration=1145ms
+2026-04-10T19:27:36  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T19:27:36  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=anatomy_identification  reasoning=visual_recognition  med_knowledge=False  modality=X-ray  region=Chest and upper abdomen
+2026-04-10T19:27:38  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1383ms
+2026-04-10T19:27:38  DEBUG     medvqa.agents.difficulty_router  Routing rationale: The study is a straightforward frontal chest X-ray with only slight rotation and no described obscuring artifact, making this a low-complexity visual recognition task that does not require retrieval.
+2026-04-10T19:27:38  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1408ms
+2026-04-10T19:27:39  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T19:27:39  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what organ system is visualized?'  is_retry=False  question_type=anatomy_identification  yes_no=False
+2026-04-10T19:27:39  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-10T19:27:40  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Chest and upper abdomen'  confidence=high  duration=1646ms
+2026-04-10T19:27:40  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the modality as a chest X-ray.', 'Noted visible lungs, trachea, and diaphragm in the chest region.', 'Mapped the main visible anatomy to the respiratory system.']
+2026-04-10T19:27:40  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Upright frontal chest radiograph', 'Both lungs visible', 'Trachea centered', 'Diaphragm visible', 'Mediastinal and heart silhouette partially visible']
+2026-04-10T19:27:40  DEBUG     medvqa.agents.reasoning_agent  Limitations: The image also includes some upper abdominal and skeletal structures, but the dominant visualized organ system is the respiratory system.
+2026-04-10T19:27:40  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Chest and upper abdomen'  confidence=high  duration=1676ms
+2026-04-10T19:27:41  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T19:27:41  INFO      medvqa.agents.verification_agent  Verifying answer='Chest and upper abdomen'  question='what organ system is visualized?'  question_type=anatomy_identification
+2026-04-10T19:27:44  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=2/5  duration=3150ms
+2026-04-10T19:27:44  WARNING   medvqa.agents.verification_agent  Verification issues: ["The question asks 'what organ system is visualized?' but the answer gives a body region ('Chest and upper abdomen') rather than an organ system.", 'The explanation is reasonably grounded in the image, but it does not directly answer the organ system question.', 'The response is somewhat too broad and not aligned with the expected short_phrase anatomy-identification format.']
+2026-04-10T19:27:44  INFO      medvqa.agents.verification_agent  Fallback recommendation: rephrase_answer
+2026-04-10T19:27:44  DEBUG     medvqa.agents.verification_agent  Verification notes: The image does support a chest radiograph with respiratory and thoracic structures visible, but the provided answer does not name an organ system. A better answer would be 'respiratory system' or 'thoracic organs' depending on the intended label.
+2026-04-10T19:27:44  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=3181ms
+2026-04-10T19:27:44  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified', 'question_answer_mismatch']
+2026-04-10T19:27:44  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=rephrase_answer  disclaimer=False
+2026-04-10T19:27:44  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=2/5
+2026-04-10T19:27:44  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-10T19:27:44  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Chest and upper abdomen'  verification=partially_verified  guardrail_flag=False  consistency=low  cross_modal=high  duration=15726ms
+2026-04-10T19:27:44  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Chest and upper abdomen'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-10T19:27:44  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  fixable=True  -> retry=True
+2026-04-10T19:27:44  INFO      medvqa.agents.orchestrator  Pipeline RETRY triggered  reason: verification_status=partially_verified; fallback=rephrase_answer; flag_for_review=False
+2026-04-10T19:27:44  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=True)
+2026-04-10T19:27:45  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T19:27:45  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=414952 bytes)
+2026-04-10T19:27:48  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=5  duration=2637ms
+2026-04-10T19:27:48  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is a standing frontal chest radiograph that includes the lower neck, thorax, and upper abdomen. The image shows both lungs, the cardiac silhouette, and the bony thorax with the upper spine centered in the field of view.
+2026-04-10T19:27:48  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['The left side of the chest appears more opaque than the right, especially in the mid and lower lung regions.', 'The right lung is relatively more lucent than the left.', 'The trachea appears near the midline.', 'No visible external support devices or tubes are present.', 'The upper abdomen is partially included at the bottom of the image.']
+2026-04-10T19:27:48  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=chest  duration=2679ms
+2026-04-10T19:27:49  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what organ system is visualized?'
+2026-04-10T19:27:49  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what organ system is visualized?'
+2026-04-10T19:27:49  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:27:50  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1130ms
+2026-04-10T19:27:50  DEBUG     medvqa.agents.question_analyzer  Target entity: organ system  Expected format: short_phrase  Rephrased: What organ system is visualized in the image?
+2026-04-10T19:27:50  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=anatomy_identification  duration=1164ms
+2026-04-10T19:27:51  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T19:27:51  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  modality=X-ray  region=chest
+2026-04-10T19:27:53  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1957ms
+2026-04-10T19:27:53  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clean, image-grounded chest X-ray with straightforward anatomy and no described obscuring artifact or subtle pathology, so a no-retrieval easy pipeline is appropriate.
+2026-04-10T19:27:53  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1989ms
+2026-04-10T19:27:54  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=True
+2026-04-10T19:27:54  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what organ system is visualized?'  is_retry=True  question_type=anatomy_identification  yes_no=False
+2026-04-10T19:27:54  INFO      medvqa.agents.reasoning_agent  Retry context  prev_status=partially_verified  prev_confidence=Medium  fallback=rephrase_answer
+2026-04-10T19:27:54  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-10T19:27:56  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='chest'  confidence=high  duration=1963ms
+2026-04-10T19:27:56  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the modality as a chest radiograph.', 'Observed the lungs and trachea prominently in the field of view.', 'Mapped the visible thoracic structures to the organ system most directly represented.']
+2026-04-10T19:27:56  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Chest X-ray', 'Both lungs visible', 'Trachea near midline', 'Thoracic cavity and mediastinum included', 'Cardiac silhouette visible within the chest']
+2026-04-10T19:27:56  DEBUG     medvqa.agents.reasoning_agent  Limitations: The image also includes parts of the heart and bony thorax, but the dominant organ system visualized is the respiratory system.
+2026-04-10T19:27:56  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='chest'  confidence=high  duration=1993ms
+2026-04-10T19:27:56  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T19:27:56  INFO      medvqa.agents.verification_agent  Verifying answer='chest'  question='what organ system is visualized?'  question_type=anatomy_identification
+2026-04-10T19:27:59  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=3/5  duration=2243ms
+2026-04-10T19:27:59  WARNING   medvqa.agents.verification_agent  Verification issues: ["The answer 'chest' names a body region rather than an organ system, while the question asks for an organ system.", 'The explanation is anatomically grounded, but it supports a chest radiograph rather than directly naming a system.', 'The response is too generic for the expected short_phrase anatomy-identification format if the target is an organ system.']
+2026-04-10T19:27:59  INFO      medvqa.agents.verification_agent  Fallback recommendation: rephrase_answer
+2026-04-10T19:27:59  DEBUG     medvqa.agents.verification_agent  Verification notes: The image clearly shows a frontal chest X-ray with lungs, mediastinum, and heart silhouette, so the evidence is grounded. However, the answer does not precisely match the question prompt asking for an organ system; 'respiratory system' would be more appropriate than 'chest'.
+2026-04-10T19:27:59  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2279ms
+2026-04-10T19:27:59  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified', 'question_answer_mismatch']
+2026-04-10T19:27:59  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=rephrase_answer  disclaimer=False
+2026-04-10T19:27:59  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-10T19:27:59  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-10T19:27:59  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='chest'  verification=partially_verified  guardrail_flag=False  consistency=low  cross_modal=high  duration=29921ms
+2026-04-10T19:27:59  INFO      medvqa.agents.orchestrator  Pipeline attempt 2 result  answer='chest'  verification=partially_verified  confidence=Medium
+2026-04-10T19:27:59  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=3  confidence_rank=2  high_failures=0  review=0
+2026-04-10T19:27:59  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=3  confidence_rank=2  high_failures=0  review=0
+2026-04-10T19:27:59  INFO      medvqa.agents.orchestrator  Pipeline RETRY winner: attempt 1 (kept original)
+2026-04-10T19:27:59  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Chest and upper abdomen'  retries=1  total_duration=29928ms ===
+2026-04-10T19:27:59  INFO      medvqa.routes.dataset  Sample 2051 analysis complete  baseline=1706ms  workflow=3706ms  agentic=29931ms  total=29932ms
+2026-04-10T19:27:59  INFO      medvqa.routes.dataset  Sample 2051 answers  baseline='Chest / respiratory system'  workflow='chest and upper abdomen'  agentic='Chest and upper abdomen'  ground_truth='chest'

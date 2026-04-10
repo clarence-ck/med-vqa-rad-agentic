@@ -1,0 +1,195 @@
+2026-04-10T19:22:51  INFO      medvqa.routes.dataset  Cache MISS for sample 2196  question='how would you describe the abnormalities'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T19:22:51  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=176802 bytes  question='how would you describe the abnormalities'
+2026-04-10T19:22:51  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='how would you describe the abnormalities'  mime_type=image/png  size=176802 bytes ===
+2026-04-10T19:22:51  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T19:22:51  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=176802 bytes)
+2026-04-10T19:22:52  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T19:22:52  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=176802 bytes)
+2026-04-10T19:22:52  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Multifocal cortical and subcortical T2/FLAIR hyperintense lesions, some ring-like, with surrounding edema, suggesting an inflammatory/demyelinating process.",
+  "explanation": "This is an axial brain MRI showing several abnormal bright foci in the cerebral hemispheres. The lesions are multifocal and involve both cortical/subcortical regions, with edema-like signal change around them.",
+  "confidence": "medium"
+}
+2026-04-10T19:22:52  INFO      medvqa.agents.baseline  Baseline done  answer='Multifocal cortical and subcortical T2/FLAIR hyperintense lesions, some ring-lik'  confidence=medium  duration=1632ms
+2026-04-10T19:22:53  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=head/brain  quality=good  findings=4  duration=2534ms
+2026-04-10T19:22:53  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial MRI image of the brain showing both cerebral hemispheres at a high parietal level. The brain parenchyma and cortical sulci are visible, along with several bright round and patchy areas within the hemispheres on this sequence.
+2026-04-10T19:22:53  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple bright round foci are visible in the left hemisphere region on this slice', 'Additional patchy bright signal areas are present in the central and right-sided white matter regions', 'The cortical gyri and sulci are well delineated on this image', 'No significant midline shift is visible on this slice']
+2026-04-10T19:22:53  INFO      medvqa.agents.question_analyzer  Analyzing question: 'how would you describe the abnormalities'
+2026-04-10T19:22:53  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:22:55  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=descriptive  med_knowledge=True  clarity=clear  duration=1297ms
+2026-04-10T19:22:55  DEBUG     medvqa.agents.question_analyzer  Target entity: abnormalities in the brain MRI image  Expected format: sentence  Rephrased: How would you describe the abnormalities visible on this brain MRI?
+2026-04-10T19:22:55  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='how would you describe the abnormalities'  modality=MRI  body_region=head/brain  question_type=abnormality_description
+2026-04-10T19:22:55  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-10T19:22:55  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-10T19:22:55  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Multiple bright round foci are visible in the left hemisphere region on this sli'  confidence=medium  question_type=abnormality_description  duration=3897ms
+2026-04-10T19:22:55  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=5  duration=3089ms
+2026-04-10T19:22:55  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial MRI image of the brain showing both cerebral hemispheres at the level of the convexities. The image demonstrates several bright rounded foci within the brain parenchyma and areas of abnormal increased signal in the white matter.
+2026-04-10T19:22:55  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple rounded bright foci are visible in the left cerebral hemisphere', 'Additional bright signal is seen in the right frontal and parietal regions', 'Patchy areas of increased signal are present within the white matter', 'The cortical sulci and gyral pattern are preserved on this slice', 'No midline shift is evident on this image']
+2026-04-10T19:22:55  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain  duration=3116ms
+2026-04-10T19:22:56  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='how would you describe the abnormalities'
+2026-04-10T19:22:56  INFO      medvqa.agents.question_analyzer  Analyzing question: 'how would you describe the abnormalities'
+2026-04-10T19:22:56  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:22:57  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=descriptive  med_knowledge=True  clarity=clear  duration=1039ms
+2026-04-10T19:22:57  DEBUG     medvqa.agents.question_analyzer  Target entity: abnormalities  Expected format: short_phrase  Rephrased: How would you describe the abnormalities seen on the brain MRI?
+2026-04-10T19:22:57  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1068ms
+2026-04-10T19:22:57  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T19:22:58  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  reasoning=descriptive  med_knowledge=True  modality=MRI  region=brain
+2026-04-10T19:22:59  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1464ms
+2026-04-10T19:22:59  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clear brain MRI abnormality-description case with conspicuous lesions, but the exact diagnosis depends on contextual medical knowledge rather than the image alone, so a systematic, retrieval-assisted interpretation is appropriate.
+2026-04-10T19:22:59  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1490ms
+2026-04-10T19:23:00  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-10T19:23:00  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='how would you describe the abnormalities'  modality=MRI  body_region=brain  question_type=abnormality_description  target_entity=abnormalities  advanced_rag=True
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='normal' from notable_findings
+2026-04-10T19:23:00  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=how would you describe the abnormalities | modality=MRI | body_region=brain | finding=normal | rerank=mandatory
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag  Using structured query profile (no LLM rewrite): how would you describe the abnormalities | question_type=abnormality_description | question_family=descriptive | target_entity=abnormalities | body_region=brain | modality=MRI | answer_style=short_phrase | visual_cues=cerebral hemispheres,…
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='MRI': 87 matches
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 46 matches
+2026-04-10T19:23:00  INFO      medvqa.agents.advanced_rag  Metadata filter result: 87 candidates (modality(87) + finding(46))
+2026-04-10T19:23:00  INFO      medvqa.agents.advanced_rag  Metadata filter: 87 candidates retained
+2026-04-10T19:23:00  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=10
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 87 candidates
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/10
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag    1. id=275 score=0.7005 | concept_type=abnormality concept=normal | Q: What density is the abnormality? | A: Hyperdense
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag    2. id=296 score=0.6989 | concept_type=abnormality concept=normal | Q: Is the abnormality hyperdense or hypodense? | A: Hypodense
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag    3. id=297 score=0.6669 | concept_type=explanation concept=treat brain diseases promptly, keep healthy | Q: How to prevent the occurrence of the disease on the right lobe of brain in this image? | A: Treat brain diseases promptly, keep healthy
+2026-04-10T19:23:00  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=10
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 87 candidates
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/10
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag    1. id=268 score=10.1262 | concept_type=anatomy concept=head | Q: Is brain tumor white or gray relative to other tissues? | A: Gray
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag    2. id=0 score=9.5907 | concept_type=modality concept=MRI | Q: What modality is used to take this image? | A: MRI
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag    3. id=259 score=9.2178 | concept_type=modality concept=MRI | Q: Which kind of weighting is this image generated with, t1 or t2? | A: T2
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=10 sparse=10
+2026-04-10T19:23:00  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 10 unique candidates
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/10
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag    1. id=302 score=0.0288 method=hybrid_rrf | concept_type=presence_absence concept=normal | Q: Is/Are there abnormalities in the patient's right brain lobe? | A: No
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag    2. id=275 score=0.0164 method=hybrid_rrf | concept_type=abnormality concept=normal | Q: What density is the abnormality? | A: Hyperdense
+2026-04-10T19:23:00  DEBUG     medvqa.agents.advanced_rag    3. id=268 score=0.0164 method=hybrid_rrf | concept_type=anatomy concept=head | Q: Is brain tumor white or gray relative to other tissues? | A: Gray
+2026-04-10T19:23:00  INFO      medvqa.agents.advanced_rag  Reranking 10 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-10T19:23:00  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 10 candidates...
+2026-04-10T19:23:01  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-10T19:23:01  DEBUG     medvqa.agents.advanced_rag    1. id=302 score=1.1960 method=reranked softmax=0.8785 | concept_type=presence_absence concept=normal | Q: Is/Are there abnormalities in the patient's right brain lobe? | A: No
+2026-04-10T19:23:01  DEBUG     medvqa.agents.advanced_rag    2. id=275 score=-1.5540 method=reranked softmax=0.0529 | concept_type=abnormality concept=normal | Q: What density is the abnormality? | A: Hyperdense
+2026-04-10T19:23:01  DEBUG     medvqa.agents.advanced_rag    3. id=296 score=-1.6053 method=reranked softmax=0.0543 | concept_type=abnormality concept=normal | Q: Is the abnormality hyperdense or hypodense? | A: Hypodense
+2026-04-10T19:23:01  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=medium weak_signals=1 top1_softmax=0.878 margin=0.826 dense_top1=0.700 agreement=False
+2026-04-10T19:23:01  WARNING   medvqa.agents.advanced_rag  Retrieval confidence is medium; returning results
+2026-04-10T19:23:01  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-10T19:23:01  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-10T19:23:01  DEBUG     medvqa.agents.advanced_rag    1. id=302 score=1.1960 method=reranked softmax=0.8785 | concept_type=presence_absence concept=normal | Q: Is/Are there abnormalities in the patient's right brain lobe? | A: No
+2026-04-10T19:23:01  DEBUG     medvqa.agents.advanced_rag    2. id=275 score=-1.5540 method=reranked softmax=0.0529 | concept_type=abnormality concept=normal | Q: What density is the abnormality? | A: Hyperdense
+2026-04-10T19:23:01  DEBUG     medvqa.agents.advanced_rag    3. id=296 score=-1.6053 method=reranked softmax=0.0543 | concept_type=abnormality concept=normal | Q: Is the abnormality hyperdense or hypodense? | A: Hypodense
+2026-04-10T19:23:01  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases
+2026-04-10T19:23:04  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=3  duration=4548ms
+2026-04-10T19:23:04  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Cortical and subcortical lesions are often described by signal change, enhancement, edema, or mass effect.', 'Midline shift or distortion of the interhemispheric fissure suggests significant mass effect.', 'White matter abnormalities on MRI commonly appear as T2/FLAIR hyperintensities.', 'Scalp soft-tissue abnormalities are external to the brain and should be described separately from intracranial findings.']
+2026-04-10T19:23:04  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: Brain MRI abnormalities are usually described by their location, signal characteristics, mass effect, and whether they involve the cortex, subcortical white matter, or midline structures. In a normal 
+2026-04-10T19:23:04  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=3  duration=4580ms
+2026-04-10T19:23:05  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T19:23:05  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='how would you describe the abnormalities'  is_retry=False  question_type=abnormality_description  yes_no=False
+2026-04-10T19:23:05  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=3
+2026-04-10T19:23:08  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Multiple intracranial hyperintense foci with patchy white matter signal abnormal'  confidence=high  duration=2583ms
+2026-04-10T19:23:08  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the modality and location as an axial brain MRI.', 'Noted multiple bright rounded foci in the left hemisphere and additional bright areas on the right.', 'Recognized patchy increased white matter signal as abnormal hyperintensity.', 'Checked for mass effect and found no midline shift or sulcal effacement on this slice.']
+2026-04-10T19:23:08  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Multiple rounded bright foci in the left cerebral hemisphere', 'Additional bright signal in the right frontal and parietal regions', 'Patchy areas of increased signal within the white matter', 'Preserved cortical sulci and gyral pattern', 'No midline shift evident']
+2026-04-10T19:23:08  DEBUG     medvqa.agents.reasoning_agent  Limitations: Single axial slice only; the exact etiology of the hyperintense lesions cannot be determined from the provided information.
+2026-04-10T19:23:08  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Multiple intracranial hyperintense foci with patchy white ma'  confidence=high  duration=2608ms
+2026-04-10T19:23:09  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T19:23:09  INFO      medvqa.agents.verification_agent  Verifying answer='Multiple intracranial hyperintense foci with patchy white matter signal abnormal'  question='how would you describe the abnormalities'  question_type=abnormality_description
+2026-04-10T19:23:12  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=3/5  duration=3096ms
+2026-04-10T19:23:12  WARNING   medvqa.agents.verification_agent  Verification issues: ['The answer is medically plausible and aligned with the visual summary, but it is somewhat more specific than the question requires.', 'The explanation adds details (e.g., distribution by hemisphere/regions and preserved sulci/no midline shift) that are not necessary for a short-phrase abnormality description.', 'The answer format is not ideal for a short_phrase expectation because it is a full descriptive sentence rather than a concise phrase.']
+2026-04-10T19:23:12  INFO      medvqa.agents.verification_agent  Fallback recommendation: rephrase_answer
+2026-04-10T19:23:12  DEBUG     medvqa.agents.verification_agent  Verification notes: The described MRI abnormalities are consistent with the provided visual analysis, which notes multiple bright foci and patchy white matter signal abnormality. However, the response is slightly over-elaborated for the requested short-phrase format, so it is only partially verified.
+2026-04-10T19:23:12  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=3130ms
+2026-04-10T19:23:12  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified', 'question_answer_mismatch']
+2026-04-10T19:23:12  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=rephrase_answer  disclaimer=False
+2026-04-10T19:23:12  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-10T19:23:12  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-10T19:23:12  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Multiple intracranial hyperintense foci with patchy white ma'  verification=partially_verified  guardrail_flag=False  consistency=low  cross_modal=high  duration=21449ms
+2026-04-10T19:23:12  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Multiple intracranial hyperintense foci with patchy white ma'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-10T19:23:12  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  fixable=True  -> retry=True
+2026-04-10T19:23:12  INFO      medvqa.agents.orchestrator  Pipeline RETRY triggered  reason: verification_status=partially_verified; fallback=rephrase_answer; flag_for_review=False
+2026-04-10T19:23:12  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=True)
+2026-04-10T19:23:13  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T19:23:13  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=176802 bytes)
+2026-04-10T19:23:15  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=4  duration=2334ms
+2026-04-10T19:23:15  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial MRI image of the brain. The slice shows both cerebral hemispheres with visible cortical folds and central midline structures; several rounded high-signal areas are seen within the brain parenchyma.
+2026-04-10T19:23:15  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple rounded bright foci are visible in both cerebral hemispheres', 'A larger bright area is present in the right central brain region on the image', 'The cortical sulci and gyral pattern are well delineated', 'No gross midline shift is apparent on this single slice']
+2026-04-10T19:23:15  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain  duration=2361ms
+2026-04-10T19:23:16  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='how would you describe the abnormalities'
+2026-04-10T19:23:16  INFO      medvqa.agents.question_analyzer  Analyzing question: 'how would you describe the abnormalities'
+2026-04-10T19:23:16  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:23:17  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=descriptive  med_knowledge=True  clarity=ambiguous  duration=1344ms
+2026-04-10T19:23:17  DEBUG     medvqa.agents.question_analyzer  Target entity: abnormalities in the brain MRI image  Expected format: sentence  Rephrased: What abnormalities are visible on this brain MRI?
+2026-04-10T19:23:17  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1371ms
+2026-04-10T19:23:18  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T19:23:18  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  reasoning=descriptive  med_knowledge=True  modality=MRI  region=brain
+2026-04-10T19:23:20  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1425ms
+2026-04-10T19:23:20  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a descriptive abnormality case on a generally interpretable brain MRI, but the finding is not fully characterized from the current summary and therefore benefits from retrieval with standard verification.
+2026-04-10T19:23:20  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1452ms
+2026-04-10T19:23:21  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-10T19:23:21  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='how would you describe the abnormalities'  modality=MRI  body_region=brain  question_type=abnormality_description  target_entity=abnormalities in the brain MRI image  advanced_rag=True
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='normal' from notable_findings
+2026-04-10T19:23:21  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=how would you describe the abnormalities | modality=MRI | body_region=brain | finding=normal | rerank=mandatory
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag  Using structured query profile (no LLM rewrite): how would you describe the abnormalities | question_type=abnormality_description | question_family=descriptive | target_entity=abnormalities in the brain MRI image | body_region=brain | modality=MRI | answer_style=sentence | visual_cues=ce…
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='MRI': 87 matches
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 46 matches
+2026-04-10T19:23:21  INFO      medvqa.agents.advanced_rag  Metadata filter result: 87 candidates (modality(87) + finding(46))
+2026-04-10T19:23:21  INFO      medvqa.agents.advanced_rag  Metadata filter: 87 candidates retained
+2026-04-10T19:23:21  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=10
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 87 candidates
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/10
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag    1. id=275 score=0.7190 | concept_type=abnormality concept=normal | Q: What density is the abnormality? | A: Hyperdense
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag    2. id=296 score=0.7139 | concept_type=abnormality concept=normal | Q: Is the abnormality hyperdense or hypodense? | A: Hypodense
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag    3. id=303 score=0.6866 | concept_type=explanation concept=brain edema, brain non-enhancing tumor | Q: What disease is/are shown on the upper left of brain? | A: Brain Edema, Brain Non-enhancing Tumor
+2026-04-10T19:23:21  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=10
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 87 candidates
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/10
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag    1. id=300 score=11.4862 | concept_type=explanation concept=pay attention to dietary hygiene, strengthen phys… | Q: How to prevent the occurrence of the disease on the left lobe of brain in this image? | A: Pay attention to dietary hygiene, strengthen physical fitness and avoid brain trauma
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag    2. id=313 score=11.4470 | concept_type=explanation concept=white | Q: What color does the brain enhancing tumor show in the picture? | A: White
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag    3. id=304 score=11.4372 | concept_type=explanation concept=pay attention to dietary hygiene, strengthen phys… | Q: How to prevent the occurrence of the disease on the upper right lobe of brain in this image? | A: Pay attention to dietary hygiene, strengthen physical fitness and avoid brain trauma
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=10 sparse=10
+2026-04-10T19:23:21  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 10 unique candidates
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/10
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag    1. id=275 score=0.0164 method=hybrid_rrf | concept_type=abnormality concept=normal | Q: What density is the abnormality? | A: Hyperdense
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag    2. id=300 score=0.0164 method=hybrid_rrf | concept_type=explanation concept=pay attention to dietary hygiene, strengthen phys… | Q: How to prevent the occurrence of the disease on the left lobe of brain in this image? | A: Pay attention to dietary hygiene, strengthen physical fitness and avoid brain trauma
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag    3. id=296 score=0.0161 method=hybrid_rrf | concept_type=abnormality concept=normal | Q: Is the abnormality hyperdense or hypodense? | A: Hypodense
+2026-04-10T19:23:21  INFO      medvqa.agents.advanced_rag  Reranking 10 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-10T19:23:21  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 10 candidates...
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag    1. id=287 score=-0.0556 method=reranked softmax=0.3242 | concept_type=counting concept=3 | Q: How many kinds of abnormalities are there in this image? | A: 3
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag    2. id=269 score=-0.1298 method=reranked softmax=0.3103 | concept_type=counting concept=2 | Q: How many kinds of abnormalities are there in this image? | A: 2
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag    3. id=275 score=-0.6836 method=reranked softmax=0.1748 | concept_type=abnormality concept=normal | Q: What density is the abnormality? | A: Hyperdense
+2026-04-10T19:23:21  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=low weak_signals=2 top1_softmax=0.324 margin=0.014 dense_top1=0.719 agreement=False
+2026-04-10T19:23:21  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 0 final candidates
+2026-04-10T19:23:21  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: no hits
+2026-04-10T19:23:21  INFO      medvqa.agents.knowledge_retriever  Advanced RAG returned 0 similar cases for this question; proceeding without RAG context
+2026-04-10T19:23:25  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=0  duration=4616ms
+2026-04-10T19:23:25  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Normal cerebral hemispheres are symmetric in size and signal, with preserved gray-white differentiation.', 'Cortical gyri and sulci should have a typical pattern without focal swelling, effacement, or atrophy.', 'The interhemispheric fissure should remain midline unless there is mass effect or shift.', 'Subcortical white matter should not show abnormal T2/FLAIR hyperintensity or focal lesions.', 'MRI abnormalities are often described by location, signal characteristics, extent, and whether there is mass effect or midline shift.']
+2026-04-10T19:23:25  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: Brain MRI is used to assess the cerebral hemispheres, cortical gyri and sulci, subcortical white matter, and midline structures for abnormalities in anatomy, signal intensity, and mass effect. When de
+2026-04-10T19:23:25  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=0  duration=4650ms
+2026-04-10T19:23:26  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=True
+2026-04-10T19:23:26  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='how would you describe the abnormalities'  is_retry=True  question_type=abnormality_description  yes_no=False
+2026-04-10T19:23:26  INFO      medvqa.agents.reasoning_agent  Retry context  prev_status=partially_verified  prev_confidence=Medium  fallback=rephrase_answer
+2026-04-10T19:23:26  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=0
+2026-04-10T19:23:29  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='There are multiple rounded hyperintense foci in both cerebral hemispheres, inclu'  confidence=medium  duration=2689ms
+2026-04-10T19:23:29  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the modality as brain MRI and focused on parenchymal signal abnormalities.', 'Noted multiple rounded high-signal foci in both cerebral hemispheres.', 'Included the larger bright lesion in the right central brain region.', 'Checked for associated mass effect and found no gross midline shift on this slice.']
+2026-04-10T19:23:29  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Multiple rounded bright foci are visible in both cerebral hemispheres', 'A larger bright area is present in the right central brain region', 'The cortical sulci and gyral pattern are well delineated', 'No gross midline shift is apparent on this single slice']
+2026-04-10T19:23:29  DEBUG     medvqa.agents.reasoning_agent  Limitations: This description is based on a single MRI slice and the provided image analysis only; the exact etiology of the bright foci cannot be determined from this information alone.
+2026-04-10T19:23:29  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='There are multiple rounded hyperintense foci in both cerebra'  confidence=medium  duration=2725ms
+2026-04-10T19:23:30  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T19:23:30  INFO      medvqa.agents.verification_agent  Verifying answer='There are multiple rounded hyperintense foci in both cerebral hemispheres, inclu'  question='how would you describe the abnormalities'  question_type=abnormality_description
+2026-04-10T19:23:32  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=4/5  duration=2091ms
+2026-04-10T19:23:32  WARNING   medvqa.agents.verification_agent  Verification issues: ['The description is somewhat more specific than the single-slice evidence supports, especially the claim of a "larger bright lesion" and the implication of multiple bilateral lesions.', 'The answer does not clearly indicate uncertainty despite limited image context.']
+2026-04-10T19:23:32  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-10T19:23:32  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is generally consistent with the visual summary and is in sentence form as expected. However, it states lesion-like abnormalities too definitively for a single axial slice and should be tempered to reflect limited evidence.
+2026-04-10T19:23:32  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2122ms
+2026-04-10T19:23:32  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-10T19:23:32  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-10T19:23:32  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-10T19:23:32  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-10T19:23:32  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='There are multiple rounded hyperintense foci in both cerebra'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=41490ms
+2026-04-10T19:23:32  INFO      medvqa.agents.orchestrator  Pipeline attempt 2 result  answer='There are multiple rounded hyperintense foci in both cerebra'  verification=partially_verified  confidence=Medium
+2026-04-10T19:23:32  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=3  confidence_rank=2  high_failures=0  review=0
+2026-04-10T19:23:32  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=3  confidence_rank=2  high_failures=0  review=0
+2026-04-10T19:23:32  INFO      medvqa.agents.orchestrator  Pipeline RETRY winner: attempt 1 (kept original)
+2026-04-10T19:23:32  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Multiple intracranial hyperintense foci with patchy white ma'  retries=1  total_duration=41499ms ===
+2026-04-10T19:23:32  INFO      medvqa.routes.dataset  Sample 2196 analysis complete  baseline=1636ms  workflow=3900ms  agentic=41505ms  total=41512ms
+2026-04-10T19:23:32  INFO      medvqa.routes.dataset  Sample 2196 answers  baseline='Multifocal cortical and subcortical T2/FLAIR hyperintense le'  workflow='Multiple bright round foci are visible in the left hemispher'  agentic='Multiple intracranial hyperintense foci with patchy white ma'  ground_truth='ring-enhancing lesions'

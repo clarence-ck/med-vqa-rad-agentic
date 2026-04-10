@@ -280,11 +280,41 @@ def _extract_number(text: str) -> int | None:
     return None
 
 
+def _extract_direction(text: str) -> str | None:
+    """Extract directional keyword from text (left, right, bilateral, etc.)."""
+    import re
+    direction_keywords = {
+        'left': 'left',
+        'right': 'right',
+        'bilateral': 'bilateral',
+        'both': 'bilateral',
+        'unilateral': 'unilateral',
+        'midline': 'midline',
+        'central': 'central',
+        'medial': 'medial',
+        'lateral': 'lateral',
+        'superior': 'superior',
+        'inferior': 'inferior',
+        'anterior': 'anterior',
+        'posterior': 'posterior',
+        'dorsal': 'dorsal',
+        'ventral': 'ventral',
+        'proximal': 'proximal',
+        'distal': 'distal',
+    }
+    words = re.findall(r'\b[a-z]+\b', text.lower())
+    for word in words:
+        if word in direction_keywords:
+            return direction_keywords[word]
+    return None
+
+
 def _answers_match(predicted: str, ground_truth: str, is_close_ended: bool = False, question_type: str = None) -> bool:
     """Return True if the predicted answer is correct based on question type.
 
     For close-ended (yes/no) questions: uses exact yes/no only.
     For counting questions: uses numerical extraction and exact comparison.
+    For location questions: uses directional keyword extraction and exact comparison.
     For other open-ended questions: uses semantic similarity >= 0.85 threshold only.
     """
     if is_close_ended:
@@ -298,6 +328,14 @@ def _answers_match(predicted: str, ground_truth: str, is_close_ended: bool = Fal
         if pred_num is not None and gt_num is not None:
             return pred_num == gt_num
         # Fallback to semantic if number extraction fails
+        return _semantic_similarity(predicted, ground_truth) >= _SEMANTIC_THRESHOLD
+    elif question_type == "location":
+        # Location: extract directional keywords and compare exactly
+        pred_dir = _extract_direction(predicted)
+        gt_dir = _extract_direction(ground_truth)
+        if pred_dir is not None and gt_dir is not None:
+            return pred_dir == gt_dir
+        # Fallback to semantic if direction extraction fails
         return _semantic_similarity(predicted, ground_truth) >= _SEMANTIC_THRESHOLD
     else:
         # Open-ended: Semantic similarity >= threshold
@@ -463,7 +501,10 @@ def _build_evaluation_row(payload: dict) -> dict:
     agentic_normalized = _normalize_answer(agentic_answer_text)
     ground_truth_normalized = _normalize_answer(ground_truth)
     is_close_ended = _is_close_ended_answer(ground_truth_normalized)
-    question_type = sample.get("question_type", "unknown")
+    # Use agentic reclassified question type if available, otherwise use original
+    original_question_type = sample.get("question_type", "unknown")
+    agentic_question_type = agentic_result.get("question_analysis", {}).get("question_type")
+    question_type = agentic_question_type or original_question_type
     baseline_correct = _answers_match(baseline_normalized, ground_truth_normalized, is_close_ended, question_type)
     workflow_correct = _answers_match(workflow_normalized, ground_truth_normalized, is_close_ended, question_type)
     agentic_correct = _answers_match(agentic_normalized, ground_truth_normalized, is_close_ended, question_type)

@@ -1,0 +1,109 @@
+2026-04-10T19:33:28  INFO      medvqa.routes.dataset  Cache MISS for sample 1888  question='diaphragm is elevated on which side?'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T19:33:28  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=544053 bytes  question='diaphragm is elevated on which side?'
+2026-04-10T19:33:28  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='diaphragm is elevated on which side?'  mime_type=image/png  size=544053 bytes ===
+2026-04-10T19:33:28  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T19:33:28  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=544053 bytes)
+2026-04-10T19:33:29  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T19:33:29  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=544053 bytes)
+2026-04-10T19:33:31  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Right side",
+  "explanation": "The right hemidiaphragm sits higher than the left on this chest X-ray, indicating elevation on the right side.",
+  "confidence": "high"
+}
+2026-04-10T19:33:31  INFO      medvqa.agents.baseline  Baseline done  answer='Right side'  confidence=high  duration=3081ms
+2026-04-10T19:33:31  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=8  duration=3179ms
+2026-04-10T19:33:31  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing both lungs and the cardiomediastinal silhouette. Postsurgical changes are present in the midline anterior chest, and the lungs appear expanded with mild linear opacity at the bases.
+2026-04-10T19:33:31  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Midline sternal wires are visible', 'Cardiomediastinal silhouette is not enlarged', 'Mild linear opacity is seen at the left lung base', 'Mild linear opacity is seen at the right lung base', 'Small rounded metallic density projects over the left shoulder region', 'Aortic arch calcification is visible', 'No focal air-space consolidation is evident', 'No pleural effusion is visible']
+2026-04-10T19:33:31  INFO      medvqa.agents.question_analyzer  Analyzing question: 'diaphragm is elevated on which side?'
+2026-04-10T19:33:31  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:33:32  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=6  duration=2851ms
+2026-04-10T19:33:32  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing both lungs and the cardiomediastinal silhouette. Postsurgical changes are present in the midline chest, and there is a large rounded retrocardiac gas-containing structure in the lower mediastinal region.
+2026-04-10T19:33:32  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Midline sternal wires are present.', 'Lungs are mildly hyperinflated.', 'Small linear opacity is seen at the right lung base.', 'Large rounded air-filled structure is present behind the heart in the lower mediastinum.', 'No focal air-space consolidation is visible.', 'No pleural effusion or pneumothorax is seen.']
+2026-04-10T19:33:32  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=chest  duration=2882ms
+2026-04-10T19:33:33  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='diaphragm is elevated on which side?'
+2026-04-10T19:33:33  INFO      medvqa.agents.question_analyzer  Analyzing question: 'diaphragm is elevated on which side?'
+2026-04-10T19:33:33  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:33:33  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=clear  duration=1470ms
+2026-04-10T19:33:33  DEBUG     medvqa.agents.question_analyzer  Target entity: elevated diaphragm side  Expected format: short_phrase  Rephrased: On which side is the diaphragm elevated?
+2026-04-10T19:33:33  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='diaphragm is elevated on which side?'  modality=X-ray  body_region=chest  question_type=location
+2026-04-10T19:33:33  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-10T19:33:33  DEBUG     medvqa.agents.workflow_baseline  Branch taken: location
+2026-04-10T19:33:33  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='chest'  confidence=medium  question_type=location  duration=4712ms
+2026-04-10T19:33:34  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=clear  duration=1141ms
+2026-04-10T19:33:34  DEBUG     medvqa.agents.question_analyzer  Target entity: elevated diaphragm side  Expected format: single_word  Rephrased: On which side is the diaphragm elevated?
+2026-04-10T19:33:34  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=1171ms
+2026-04-10T19:33:35  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T19:33:35  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=False  modality=X-ray  region=chest
+2026-04-10T19:33:36  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1358ms
+2026-04-10T19:33:36  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clean, image-grounded location question with an obvious abnormality and limited anatomic ambiguity, so it can be answered confidently without retrieval.
+2026-04-10T19:33:36  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1385ms
+2026-04-10T19:33:37  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T19:33:37  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='diaphragm is elevated on which side?'  is_retry=False  question_type=location  yes_no=False
+2026-04-10T19:33:37  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-10T19:33:39  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='left'  confidence=medium  duration=2175ms
+2026-04-10T19:33:39  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the chest radiograph for diaphragm contour and relative height of both hemidiaphragms.', 'Compared the two sides and identified the left side as sitting higher.', 'Selected the side with the elevated diaphragm as the answer.']
+2026-04-10T19:33:39  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Frontal chest radiograph with visible diaphragm contours', 'Left diaphragmatic contour appears higher than the right', 'No pleural effusion or pneumothorax to explain apparent asymmetry']
+2026-04-10T19:33:39  DEBUG     medvqa.agents.reasoning_agent  Limitations: Diaphragm height can be affected by patient positioning and inspiratory effort; the provided summary does not explicitly state the side, so this is inferred from the visible contour asymmetry.
+2026-04-10T19:33:39  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='left'  confidence=medium  duration=2207ms
+2026-04-10T19:33:40  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T19:33:40  INFO      medvqa.agents.verification_agent  Verifying answer='left'  question='diaphragm is elevated on which side?'  question_type=location
+2026-04-10T19:33:42  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=1/5  duration=2083ms
+2026-04-10T19:33:42  WARNING   medvqa.agents.verification_agent  Verification issues: ['The image analysis notes a large rounded retrocardiac gas-containing structure, which may alter apparent diaphragmatic contour and makes a confident unilateral elevation claim less secure.', 'The explanation asserts a specific side and comparative finding without directly tying it to unambiguous visible evidence.', 'Potential contradiction: retrocardiac gas-containing structure and postsurgical changes could confound interpretation of diaphragm position.', 'location answer is too terse']
+2026-04-10T19:33:42  INFO      medvqa.agents.verification_agent  Fallback recommendation: flag_for_review
+2026-04-10T19:33:42  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer is in the expected single-word location format and is medically plausible, but the available visual summary does not strongly support a confident claim that the left hemidiaphragm is elevated. The explanation is not sufficiently grounded in the described image findings.
+2026-04-10T19:33:42  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2118ms
+2026-04-10T19:33:42  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified', 'visual_contradiction']
+2026-04-10T19:33:42  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=True  fallback=flag_for_review  disclaimer=True
+2026-04-10T19:33:42  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=1/5
+2026-04-10T19:33:42  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=False
+2026-04-10T19:33:42  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='left'  verification=partially_verified  guardrail_flag=True  consistency=low  cross_modal=low  duration=13758ms
+2026-04-10T19:33:42  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='left'  verification=partially_verified  confidence=Medium  flag_review=True
+2026-04-10T19:33:42  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=True  high_severity=True  fixable=False  -> retry=True
+2026-04-10T19:33:42  INFO      medvqa.agents.orchestrator  Pipeline RETRY triggered  reason: verification_status=partially_verified; fallback=flag_for_review; flag_for_review=True
+2026-04-10T19:33:42  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=True)
+2026-04-10T19:33:43  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T19:33:43  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=544053 bytes)
+2026-04-10T19:33:45  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=6  duration=2581ms
+2026-04-10T19:33:45  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing the lungs, heart, and mediastinum. Postsurgical changes from prior median sternotomy are visible, and the lungs appear mildly hyperinflated with no focal air-space opacity evident on this image.
+2026-04-10T19:33:45  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Median sternotomy wires are present over the midline chest', 'Cardiomediastinal silhouette is not enlarged', 'Mild hyperinflation of both lungs', 'Linear scarring or atelectatic change at the left lung base', 'No pleural effusion or pneumothorax visible', 'Aortic atherosclerotic calcification is visible']
+2026-04-10T19:33:45  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=chest  duration=2615ms
+2026-04-10T19:33:46  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='diaphragm is elevated on which side?'
+2026-04-10T19:33:46  INFO      medvqa.agents.question_analyzer  Analyzing question: 'diaphragm is elevated on which side?'
+2026-04-10T19:33:46  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:33:47  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=False  clarity=clear  duration=1081ms
+2026-04-10T19:33:47  DEBUG     medvqa.agents.question_analyzer  Target entity: elevated diaphragm side  Expected format: single_word  Rephrased: On which side is the diaphragm elevated?
+2026-04-10T19:33:47  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=1109ms
+2026-04-10T19:33:48  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T19:33:48  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=False  modality=X-ray  region=chest
+2026-04-10T19:33:50  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1252ms
+2026-04-10T19:33:50  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clean frontal chest X-ray with only mild postoperative and hyperinflation changes, so the case is straightforward and does not require retrieval.
+2026-04-10T19:33:50  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1280ms
+2026-04-10T19:33:54  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=True
+2026-04-10T19:33:54  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='diaphragm is elevated on which side?'  is_retry=True  question_type=location  yes_no=False
+2026-04-10T19:33:54  INFO      medvqa.agents.reasoning_agent  Retry context  prev_status=partially_verified  prev_confidence=Medium  fallback=flag_for_review
+2026-04-10T19:33:54  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-10T19:33:56  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='left'  confidence=medium  duration=2049ms
+2026-04-10T19:33:56  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the frontal chest X-ray for the position of both hemidiaphragms.', 'Compared the height of the right and left diaphragmatic domes.', 'Noted that the left side sits slightly higher than the right, consistent with mild elevation.']
+2026-04-10T19:33:56  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Frontal chest radiograph showing both diaphragms', 'Left lung base linear scarring or atelectatic change', 'Asymmetry of diaphragmatic domes with the left higher than the right']
+2026-04-10T19:33:56  DEBUG     medvqa.agents.reasoning_agent  Limitations: The provided image analysis does not include a direct explicit measurement of diaphragmatic height, so this is based on visual comparison and associated left basilar change.
+2026-04-10T19:33:56  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='left'  confidence=medium  duration=2094ms
+2026-04-10T19:33:57  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T19:33:57  INFO      medvqa.agents.verification_agent  Verifying answer='left'  question='diaphragm is elevated on which side?'  question_type=location
+2026-04-10T19:33:59  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=1/5  duration=2403ms
+2026-04-10T19:33:59  WARNING   medvqa.agents.verification_agent  Verification issues: ['The explanation mentions left basilar scarring/atelectatic change and mild left basilar volume loss, but the provided visual analysis does not confirm these findings.', 'The visual analysis instead notes mild hyperinflation and no focal air-space opacity, which does not strongly support a clearly elevated left hemidiaphragm.', 'The answer may be medically plausible, but the evidence provided is insufficient to verify the laterality with confidence.', 'location answer is too terse']
+2026-04-10T19:33:59  INFO      medvqa.agents.verification_agent  Fallback recommendation: flag_for_review
+2026-04-10T19:33:59  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct single-word format and answers the location question, but the explanation relies on unverified image findings and is stronger than the available evidence supports. There is no clear contradiction with the image summary, but there is not enough grounding to fully verify 'left.'
+2026-04-10T19:33:59  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2452ms
+2026-04-10T19:33:59  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-10T19:33:59  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=flag_for_review  disclaimer=True
+2026-04-10T19:33:59  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=1/5
+2026-04-10T19:33:59  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=False
+2026-04-10T19:33:59  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='left'  verification=partially_verified  guardrail_flag=False  consistency=low  cross_modal=low  duration=31267ms
+2026-04-10T19:33:59  INFO      medvqa.agents.orchestrator  Pipeline attempt 2 result  answer='left'  verification=partially_verified  confidence=Medium
+2026-04-10T19:33:59  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=3  confidence_rank=2  high_failures=0  review=0
+2026-04-10T19:33:59  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=3  confidence_rank=2  high_failures=1  review=1
+2026-04-10T19:33:59  INFO      medvqa.agents.orchestrator  Pipeline RETRY winner: attempt 2 (higher score)
+2026-04-10T19:33:59  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='left'  retries=1  total_duration=31274ms ===
+2026-04-10T19:33:59  INFO      medvqa.routes.dataset  Sample 1888 analysis complete  baseline=3085ms  workflow=4714ms  agentic=31278ms  total=31278ms
+2026-04-10T19:33:59  INFO      medvqa.routes.dataset  Sample 1888 answers  baseline='Right side'  workflow='chest'  agentic='left'  ground_truth='right'

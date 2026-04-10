@@ -1,0 +1,65 @@
+2026-04-10T19:32:05  INFO      medvqa.routes.dataset  Cache MISS for sample 1818  question='what type of image is this?'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T19:32:05  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=184853 bytes  question='what type of image is this?'
+2026-04-10T19:32:05  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what type of image is this?'  mime_type=image/png  size=184853 bytes ===
+2026-04-10T19:32:05  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T19:32:05  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=184853 bytes)
+2026-04-10T19:32:06  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T19:32:06  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=184853 bytes)
+2026-04-10T19:32:06  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Axial CT scan of the abdomen with contrast",
+  "explanation": "The image shows an axial cross-sectional view with typical CT appearance of abdominal organs and contrast-enhanced vessels, consistent with a CT abdomen. The window/level markers and grayscale density pattern also support this.",
+  "confidence": "high"
+}
+2026-04-10T19:32:06  INFO      medvqa.agents.baseline  Baseline done  answer='Axial CT scan of the abdomen with contrast'  confidence=high  duration=1478ms
+2026-04-10T19:32:07  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=4  duration=2177ms
+2026-04-10T19:32:07  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver and spleen are seen on opposite sides of the abdomen, with both kidneys, major vessels, and the vertebral body also visible.
+2026-04-10T19:32:07  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Contrast-opacified abdominal vessels are visible', 'Both kidneys are partially visualized', 'Solid upper abdominal organs are included in the slice', 'No obvious motion blur or severe artifact on this image']
+2026-04-10T19:32:07  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what type of image is this?'
+2026-04-10T19:32:07  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:32:08  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=5  duration=2261ms
+2026-04-10T19:32:08  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver and spleen are seen on opposite sides of the upper abdomen, with both kidneys and central vascular structures also visible.
+2026-04-10T19:32:08  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Axial cross-sectional view through the upper abdomen', 'Contrast-opacified blood vessels are visible in the central abdomen', 'Both kidneys are partially visualized', 'Solid organs such as the liver and spleen are clearly outlined', 'No obvious large free fluid or free air is visible on this single image']
+2026-04-10T19:32:08  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=2290ms
+2026-04-10T19:32:08  INFO      medvqa.agents.question_analyzer  Question analysis done  type=modality_identification  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1188ms
+2026-04-10T19:32:08  DEBUG     medvqa.agents.question_analyzer  Target entity: imaging modality  Expected format: short_phrase  Rephrased: What imaging modality is shown in this image?
+2026-04-10T19:32:08  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what type of image is this?'  modality=CT  body_region=abdomen  question_type=modality_identification
+2026-04-10T19:32:08  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-10T19:32:08  DEBUG     medvqa.agents.workflow_baseline  Branch taken: modality_identification
+2026-04-10T19:32:08  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='CT'  confidence=high  question_type=modality_identification  duration=3434ms
+2026-04-10T19:32:09  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what type of image is this?'
+2026-04-10T19:32:09  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what type of image is this?'
+2026-04-10T19:32:09  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:32:10  INFO      medvqa.agents.question_analyzer  Question analysis done  type=modality_identification  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1184ms
+2026-04-10T19:32:10  DEBUG     medvqa.agents.question_analyzer  Target entity: image modality  Expected format: short_phrase  Rephrased: What imaging modality is shown in this image?
+2026-04-10T19:32:10  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=modality_identification  duration=1233ms
+2026-04-10T19:32:11  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T19:32:11  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=modality_identification  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=abdomen
+2026-04-10T19:32:12  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1192ms
+2026-04-10T19:32:12  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clean, image-grounded modality-identification task with low anatomical ambiguity and no significant artifact or overlap burden, so no retrieval is needed.
+2026-04-10T19:32:12  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1231ms
+2026-04-10T19:32:14  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T19:32:14  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what type of image is this?'  is_retry=False  question_type=modality_identification  yes_no=False
+2026-04-10T19:32:14  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-10T19:32:18  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Axial contrast-enhanced CT of the abdomen'  confidence=high  duration=4220ms
+2026-04-10T19:32:18  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the imaging modality from the image analysis as CT.', 'Note the cross-sectional axial appearance and visible abdominal organs.', 'Recognize contrast enhancement from opacified vessels.', 'Conclude the image is an axial contrast-enhanced CT of the abdomen.']
+2026-04-10T19:32:18  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Modality: CT', 'Axial cross-sectional view', 'Contrast-opacified blood vessels in the central abdomen', 'Visible liver, spleen, both kidneys, and major abdominal vessels']
+2026-04-10T19:32:18  DEBUG     medvqa.agents.reasoning_agent  Limitations: Only a single image is provided, so the exact CT protocol cannot be fully confirmed beyond the visible contrast-enhanced axial abdominal appearance.
+2026-04-10T19:32:18  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Axial contrast-enhanced CT of the abdomen'  confidence=high  duration=4263ms
+2026-04-10T19:32:19  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T19:32:19  INFO      medvqa.agents.verification_agent  Verifying answer='Axial contrast-enhanced CT of the abdomen'  question='what type of image is this?'  question_type=modality_identification
+2026-04-10T19:32:21  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1487ms
+2026-04-10T19:32:21  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-10T19:32:21  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer correctly identifies the image modality and body region as an axial contrast-enhanced CT of the abdomen. The explanation is consistent with the provided visual analysis and does not overstate beyond the visible evidence.
+2026-04-10T19:32:21  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1524ms
+2026-04-10T19:32:21  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed']
+2026-04-10T19:32:21  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-10T19:32:21  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-10T19:32:21  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-10T19:32:21  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Axial contrast-enhanced CT of the abdomen'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=15829ms
+2026-04-10T19:32:21  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Axial contrast-enhanced CT of the abdomen'  verification=verified  confidence=High  flag_review=False
+2026-04-10T19:32:21  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-10T19:32:21  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-10T19:32:21  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Axial contrast-enhanced CT of the abdomen'  retries=0  total_duration=15834ms ===
+2026-04-10T19:32:21  INFO      medvqa.routes.dataset  Sample 1818 analysis complete  baseline=1483ms  workflow=3438ms  agentic=15838ms  total=15838ms
+2026-04-10T19:32:21  INFO      medvqa.routes.dataset  Sample 1818 answers  baseline='Axial CT scan of the abdomen with contrast'  workflow='CT'  agentic='Axial contrast-enhanced CT of the abdomen'  ground_truth='ct with contrast'

@@ -1,0 +1,66 @@
+2026-04-10T19:38:41  INFO      medvqa.routes.dataset  Cache MISS for sample 2106  question='where are the infarcts?'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T19:38:41  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=280426 bytes  question='where are the infarcts?'
+2026-04-10T19:38:41  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='where are the infarcts?'  mime_type=image/png  size=280426 bytes ===
+2026-04-10T19:38:41  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T19:38:41  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=280426 bytes)
+2026-04-10T19:38:42  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T19:38:42  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=280426 bytes)
+2026-04-10T19:38:43  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "The infarcts are in the bilateral cerebellar hemispheres, more prominent on the left.",
+  "explanation": "This is an axial brain MRI showing areas of abnormal signal consistent with infarction in both cerebellar hemispheres. The posterior fossa involvement is most evident on the left side.",
+  "confidence": "high"
+}
+2026-04-10T19:38:43  INFO      medvqa.agents.baseline  Baseline done  answer='The infarcts are in the bilateral cerebellar hemispheres, more prominent on the '  confidence=high  duration=1647ms
+2026-04-10T19:38:44  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=5  duration=2657ms
+2026-04-10T19:38:44  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial MRI image of the head showing the posterior fossa and adjacent brain structures. The orbits are visible anteriorly, with the cerebellum and brainstem seen centrally and inferiorly.
+2026-04-10T19:38:44  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Axial cross-sectional view through the head', 'Both globes are visible in the upper portion of the image', 'Cerebellar hemispheres are clearly seen in the posterior fossa', 'Brainstem is visible near the midline', 'Skull and surrounding soft tissues outline the head']
+2026-04-10T19:38:44  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where are the infarcts?'
+2026-04-10T19:38:44  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:38:45  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=True  clarity=clear  duration=1011ms
+2026-04-10T19:38:45  DEBUG     medvqa.agents.question_analyzer  Target entity: infarcts  Expected format: short_phrase  Rephrased: Where are the infarcts located?
+2026-04-10T19:38:45  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='where are the infarcts?'  modality=MRI  body_region=brain  question_type=location
+2026-04-10T19:38:45  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-10T19:38:45  DEBUG     medvqa.agents.workflow_baseline  Branch taken: location
+2026-04-10T19:38:45  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='brain'  confidence=medium  question_type=location  duration=3727ms
+2026-04-10T19:38:46  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=5  duration=3621ms
+2026-04-10T19:38:46  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial MRI image of the head shows the brain at the level of the orbits, skull base, and posterior fossa. The cerebellum, brainstem, and temporal lobes are visible, along with surrounding soft tissues and the orbital contents.
+2026-04-10T19:38:46  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Axial cross-sectional view through the lower brain and posterior fossa', 'Both orbits are partially visible at the top of the image', 'Cerebellar hemispheres are clearly seen in the lower portion of the slice', 'Brainstem is visible near the midline', 'Surrounding skull and scalp soft tissues are visible']
+2026-04-10T19:38:46  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain  duration=3656ms
+2026-04-10T19:38:47  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='where are the infarcts?'
+2026-04-10T19:38:47  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where are the infarcts?'
+2026-04-10T19:38:47  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:38:48  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=spatial_reasoning  med_knowledge=True  clarity=clear  duration=1100ms
+2026-04-10T19:38:48  DEBUG     medvqa.agents.question_analyzer  Target entity: infarcts  Expected format: short_phrase  Rephrased: Where are the infarcts located?
+2026-04-10T19:38:48  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=1132ms
+2026-04-10T19:38:48  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T19:38:48  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=spatial_reasoning  med_knowledge=True  modality=MRI  region=brain
+2026-04-10T19:38:50  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1371ms
+2026-04-10T19:38:50  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a direct location question on a clean, well-defined brain MRI slice, so the answer should be obtainable from the current image analysis without retrieval.
+2026-04-10T19:38:50  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1397ms
+2026-04-10T19:38:51  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T19:38:51  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='where are the infarcts?'  is_retry=False  question_type=location  yes_no=False
+2026-04-10T19:38:51  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-10T19:38:53  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='In the cerebellum'  confidence=medium  duration=2022ms
+2026-04-10T19:38:53  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the modality as brain MRI and note the slice level includes the posterior fossa.', 'Locate the cerebellar hemispheres in the lower part of the image.', 'Match the infarct location to the visible posterior fossa/cerebellar region.']
+2026-04-10T19:38:53  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial MRI of the head at the level of the orbits, skull base, and posterior fossa', 'Cerebellar hemispheres clearly seen in the lower portion of the slice', 'Brainstem visible near the midline']
+2026-04-10T19:38:53  DEBUG     medvqa.agents.reasoning_agent  Limitations: The summary does not explicitly describe the infarcts themselves, only the anatomy visible in the slice, so the exact infarct extent cannot be confirmed.
+2026-04-10T19:38:53  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='In the cerebellum'  confidence=medium  duration=2053ms
+2026-04-10T19:38:53  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T19:38:53  INFO      medvqa.agents.verification_agent  Verifying answer='In the cerebellum'  question='where are the infarcts?'  question_type=location
+2026-04-10T19:38:55  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=3/5  duration=1868ms
+2026-04-10T19:38:55  WARNING   medvqa.agents.verification_agent  Verification issues: ['The explanation claims the image analysis describes an abnormality in the cerebellum, but the provided visual summary does not specify any infarct location.', 'The answer is too assertive given that no explicit infarct is identified in the supplied evidence.']
+2026-04-10T19:38:55  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-10T19:38:55  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct short location format and 'in the cerebellum' is anatomically plausible for a posterior fossa MRI, but the available image analysis does not actually confirm infarcts there. The explanation overstates the evidence.
+2026-04-10T19:38:55  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=1899ms
+2026-04-10T19:38:55  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-10T19:38:55  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-10T19:38:55  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-10T19:38:55  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-10T19:38:55  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='In the cerebellum'  verification=partially_verified  guardrail_flag=False  consistency=low  cross_modal=low  duration=14031ms
+2026-04-10T19:38:55  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='In the cerebellum'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-10T19:38:55  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-10T19:38:55  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-10T19:38:55  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='In the cerebellum'  retries=0  total_duration=14038ms ===
+2026-04-10T19:38:55  INFO      medvqa.routes.dataset  Sample 2106 analysis complete  baseline=1650ms  workflow=3729ms  agentic=14040ms  total=14041ms
+2026-04-10T19:38:55  INFO      medvqa.routes.dataset  Sample 2106 answers  baseline='The infarcts are in the bilateral cerebellar hemispheres, mo'  workflow='brain'  agentic='In the cerebellum'  ground_truth='basal ganglia, cerebellum, cerebral cortex'
