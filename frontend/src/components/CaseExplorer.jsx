@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import AnswerCard from './AnswerCard';
 import AgentTrace from './AgentTrace';
 import ComparisonToggle from './ComparisonToggle';
@@ -214,6 +214,95 @@ export default function CaseExplorer({
     onClearSelection?.();
   };
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
+
+  const flattenedSamples = useMemo(() => {
+    return groupedSamples.flatMap((group) =>
+      group.items.map((sample) => ({
+        ...sample,
+        groupLabel: group.label,
+      })),
+    );
+  }, [groupedSamples]);
+
+  const filteredSamples = useMemo(() => {
+    if (!searchQuery.trim()) return flattenedSamples;
+    const query = searchQuery.toLowerCase();
+    return flattenedSamples.filter(
+      (sample) =>
+        String(sample.id).toLowerCase().includes(query) ||
+        sample.question.toLowerCase().includes(query),
+    );
+  }, [flattenedSamples, searchQuery]);
+
+  const filteredGroups = useMemo(() => {
+    const groups = {};
+    filteredSamples.forEach((sample) => {
+      if (!groups[sample.groupLabel]) {
+        groups[sample.groupLabel] = [];
+      }
+      groups[sample.groupLabel].push(sample);
+    });
+    return Object.entries(groups).map(([label, items]) => ({
+      label,
+      items,
+    }));
+  }, [filteredSamples]);
+
+  const selectedSampleDisplay = useMemo(() => {
+    if (!selectedSampleId) return '';
+    const sample = flattenedSamples.find((s) => String(s.id) === String(selectedSampleId));
+    return sample ? `[${sample.id}] ${sample.question.slice(0, 50)}${sample.question.length > 50 ? '...' : ''}` : '';
+  }, [flattenedSamples, selectedSampleId]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (isDropdownOpen) {
+      setHighlightedIndex(0);
+      inputRef.current?.focus();
+    }
+  }, [isDropdownOpen]);
+
+  const handleKeyDown = (e) => {
+    if (!isDropdownOpen) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedIndex((prev) => Math.min(prev + 1, filteredSamples.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIndex((prev) => Math.max(prev - 1, 0));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const sample = filteredSamples[highlightedIndex];
+      if (sample) {
+        onSelectSample?.(sample.id);
+        setIsDropdownOpen(false);
+        setSearchQuery('');
+      }
+    } else if (e.key === 'Escape') {
+      setIsDropdownOpen(false);
+    }
+  };
+
+  const handleSelect = (sampleId) => {
+    onSelectSample?.(sampleId);
+    setIsDropdownOpen(false);
+    setSearchQuery('');
+  };
+
   return (
     <main className="case-explorer-layout">
       <aside className="panel">
@@ -226,29 +315,143 @@ export default function CaseExplorer({
             <div className="split-guidance-text" style={{ marginBottom: 'var(--space-2)' }}>
               Dataset split: test only
             </div>
-            <select
-              className="form-select"
-              value={selectedSampleId ?? ''}
-              onChange={(e) => onSelectSample?.(e.target.value)}
-              disabled={sampleSelectDisabled}
-            >
-              <option value="">— Select a sample —</option>
-              {groupedSamples.map((group) => (
-                <optgroup key={group.key} label={group.label}>
-                  {group.items.map((sample) => (
-                    <option key={sample.id} value={sample.id}>
-                      [{sample.id}] {sample.question.slice(0, 62)}
-                      {sample.question.length > 70 ? '...' : ''}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-            {sampleSelectDisabled && (
-              <div className="split-guidance-text" style={{ marginTop: 'var(--space-2)' }}>
-                Clear the current case before selecting another.
-              </div>
-            )}
+            <div ref={dropdownRef} style={{ position: 'relative' }}>
+              <button
+                type="button"
+                className="form-select"
+                onClick={() => !sampleSelectDisabled && setIsDropdownOpen(!isDropdownOpen)}
+                disabled={sampleSelectDisabled}
+                style={{
+                  textAlign: 'left',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {selectedSampleDisplay || '— Select a sample —'}
+                </span>
+                <span style={{ marginLeft: '8px' }}>{isDropdownOpen ? '▲' : '▼'}</span>
+              </button>
+              {sampleSelectDisabled && (
+                <div className="split-guidance-text" style={{ marginTop: 'var(--space-2)' }}>
+                  Clear the current case before selecting another.
+                </div>
+              )}
+              {isDropdownOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    background: 'var(--color-surface, #fff)',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 'var(--radius, 4px)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    zIndex: 100,
+                    maxHeight: '320px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <div style={{ padding: '8px', borderBottom: '1px solid var(--color-border)' }}>
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setHighlightedIndex(0);
+                      }}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Search by ID or question..."
+                      style={{
+                        width: '100%',
+                        padding: '6px 10px',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: '4px',
+                        fontSize: 'var(--font-size-sm)',
+                      }}
+                    />
+                  </div>
+                  <div style={{ overflowY: 'auto', flex: 1, maxHeight: '240px' }}>
+                    {filteredGroups.length === 0 ? (
+                      <div style={{ padding: '12px', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
+                        No samples found
+                      </div>
+                    ) : (
+                      filteredGroups.map((group, groupIdx) => (
+                        <div key={group.label} style={{ marginTop: groupIdx > 0 ? '8px' : 0 }}>
+                          <div
+                            style={{
+                              padding: '8px 12px',
+                              fontSize: 'var(--font-size-xs)',
+                              fontWeight: 700,
+                              color: 'var(--color-accent, #0066cc)',
+                              background: 'linear-gradient(to right, rgba(0,102,204,0.08), rgba(0,102,204,0.02))',
+                              borderLeft: '3px solid var(--color-accent, #0066cc)',
+                              borderBottom: '1px solid var(--color-border)',
+                              textTransform: 'uppercase',
+                              letterSpacing: '1px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                            }}
+                          >
+                            <span style={{ fontSize: '10px' }}>▸</span>
+                            {group.label}
+                            <span style={{ marginLeft: 'auto', fontSize: '10px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>
+                              {group.items.length}
+                            </span>
+                          </div>
+                          {group.items.map((sample, idx) => {
+                            const globalIndex = filteredSamples.findIndex((s) => s.id === sample.id);
+                            const isHighlighted = globalIndex === highlightedIndex;
+                            const isSelected = String(sample.id) === String(selectedSampleId);
+                            return (
+                              <div
+                                key={sample.id}
+                                onClick={() => handleSelect(sample.id)}
+                                onMouseEnter={() => setHighlightedIndex(globalIndex)}
+                                style={{
+                                  padding: '8px 10px',
+                                  cursor: 'pointer',
+                                  fontSize: 'var(--font-size-sm)',
+                                  background: isHighlighted
+                                    ? 'var(--color-accent, #0066cc)'
+                                    : isSelected
+                                      ? 'var(--color-surface-secondary, #f0f0f0)'
+                                      : 'transparent',
+                                  color: isHighlighted ? '#fff' : 'inherit',
+                                  borderLeft: isSelected ? '3px solid var(--color-accent)' : '3px solid transparent',
+                                }}
+                              >
+                                <div style={{ fontWeight: 500 }}>[{sample.id}]</div>
+                                <div style={{ opacity: 0.9, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {sample.question.slice(0, 70)}{sample.question.length > 70 ? '...' : ''}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <div
+                    style={{
+                      padding: '6px 10px',
+                      fontSize: 'var(--font-size-xs)',
+                      color: 'var(--color-text-secondary)',
+                      borderTop: '1px solid var(--color-border)',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {filteredSamples.length} of {flattenedSamples.length} samples
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {selectedSample && (
