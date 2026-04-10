@@ -578,15 +578,15 @@ The 6-stage pipeline (ImageInterpreter → QuestionAnalyzer → DifficultyRouter
 
 ### Retry Effectiveness
 
-Comprehensive log analysis of 235 execution traces found **35 retry cases (retries=1)** out of all processed samples. Retry outcomes show **mixed effectiveness (~29% improvement rate)**:
+Comprehensive log analysis of 235 execution traces found **37 retry cases (retries=1)** out of all processed samples (15.7% retry rate). Retry outcomes show **mixed effectiveness (32.4% improvement rate)**:
 
-| Outcome | Count | Examples |
-|---------|-------|----------|
-| **Improved result** | 2 (22%) | Sample 1821 (Low→Medium confidence), Sample 2141 (Low→Medium confidence) |
-| **No improvement** | 5 (56%) | Sample 1822, 2177, 2187, 1998, 1871 — kept original answer despite retry |
-| **Incomplete logs** | 2 (22%) | Sample 1899 and others with truncated traces |
+| Outcome | Count | Percentage | Examples |
+|---------|-------|------------|----------|
+| **Improved result** | 12 | 32.4% | Sample 1821, 2141, 1822, 2088, 2163, 2015, and others — attempt 2 achieved higher payload score |
+| **No improvement** | 25 | 67.6% | Sample 2177, 2187, 1998, 1871, 1899, and others — kept original answer despite retry |
+| **Incomplete logs** | 0 | 0% | No incomplete logs found in retry cases |
 
-Retry triggers when verification indicates `low_confidence`, `unsupported_claim`, `should_flag_for_review`, or high-severity failure categories. The retry mechanism re-runs the full 6-stage pipeline with `is_retry=True`, providing `retry_context` (previous status, confidence, failure categories) to the ReasoningAgent for self-correction.
+Retry triggers when verification indicates `low_confidence`, `unsupported`, or `partially_verified` with fixable issues, or any high-severity failure category. The retry mechanism re-runs the full 6-stage pipeline with `is_retry=True`, providing `retry_context` (previous status, confidence, failure categories) to the ReasoningAgent for self-correction. The best result is selected by `_payload_score()` comparing verification rank, confidence rank, high-severity failure count, and review flag.
 
 ### Retrieval Pipeline Observations
 
