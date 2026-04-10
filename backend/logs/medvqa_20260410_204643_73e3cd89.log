@@ -38,3 +38,6 @@
 2026-04-10T21:26:42  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=43413ms
 2026-04-10T21:34:13  INFO      medvqa.server  → GET /api/dataset/evaluation
 2026-04-10T21:34:13  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=200
+2026-04-10T21:35:00  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=200  skipped=0
+2026-04-10T21:35:00  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-10T21:35:00  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=47426ms

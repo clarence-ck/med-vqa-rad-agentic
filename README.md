@@ -437,39 +437,189 @@ These failure analysis signals are displayed in the "Recent Evaluated Cases" tab
 
 ---
 
-## Reflection
+## Results Discussion
 
-### When agentic behavior is beneficial
+Based on comprehensive evaluation across 200 SLAKE dataset samples, this section analyzes the efficacy of our agentic retrieval-augmented pipeline against two baseline approaches: a single-prompt LLM baseline and a hand-designed workflow baseline.
 
-The agentic approach provides value in scenarios where:
+### Overall System Performance
 
-- **Dynamic adaptation is needed**: The DifficultyRouter enables adaptive behavior by assessing question complexity and image context. Easy cases (e.g., straightforward yes/no questions on clear images) skip retrieval and use standard verification, reducing unnecessary computation. Medium and hard cases trigger retrieval with appropriate verification strictness, providing external knowledge when needed.
+The evaluation reveals a **performance-cost tradeoff unfavorable to the agentic approach**. While the agentic pipeline achieves 75% overall accuracy, it trails the simple baseline by 5 percentage points (80%) despite requiring **11× longer inference time** (20.1s vs. 1.8s average latency, 67m vs. 6m total runtime). The workflow baseline exhibits severe degradation at 65% accuracy, indicating implementation defects rather than architectural limitations.
 
-- **Self-correction through retry**: The automatic retry mechanism allows the system to recover from initial failures. When verification indicates low confidence, unsupported claims, or fixable issues, the ReasoningAgent receives retry context (previous status, confidence, failure categories) and can self-correct its answer generation. Logs show cases where retry improved the final result.
+| System | Overall Accuracy | Avg. Runtime | Total Runtime | Close-Ended (n=71) | Open-Ended (n=129) |
+|--------|------------------|--------------|---------------|-------------------|-------------------|
+| Baseline | **80%** | 1.8s | 6m | **65%** | **88%** |
+| Workflow | 65% | 4.3s | 14m | 42% | 78% |
+| Agentic | 75% | 20.1s | 67m | 63% | 81% |
 
-- **Structured verification improves reliability**: The VerificationAgent's 5 structured checks (answer_matches_question_type, format_appropriate, explanation_grounded_in_evidence, answer_strength_appropriate, no_contradictions) catch inconsistencies that single-prompt approaches might miss. This is particularly valuable for medical applications where answer accuracy and grounding are critical.
+The **43% three-system disagreement rate** indicates qualitatively different error patterns. Win analysis shows the baseline wins on 15 cases (7.5%), agentic on 13 (6.5%), and workflow on 8 (4%), with 164 ties (82%). This suggests the agentic pipeline often overcomplicates questions where direct visual reasoning suffices.
 
-- **Knowledge retrieval for complex queries**: The Advanced RAG pipeline provides external medical knowledge from the SLAKE concept KB for cases requiring broader context. This is beneficial for explanation requests, ambiguous questions, or cases where the image alone is insufficient.
+### Question-Type-Specific Analysis
 
-- **Quality signals for transparency**: Self-consistency and cross-modal agreement signals provide interpretable quality indicators, allowing users to understand when answers are well-grounded versus when they should be treated with caution.
+Performance varies dramatically by question category. The agentic pipeline excels on **anatomy identification** (+4% over baseline, 88% vs. 84%) and **"other" complex questions** (+9%, 91% vs. 82%), where retrieved exemplars provide useful answer templates. However, it **severely underperforms on spatial and binary reasoning tasks**:
 
-### Limitations of the approach
+| Question Type | Cases | Baseline | Agentic | Δ | Primary Issue |
+|--------------|-------|----------|---------|---|---------------|
+| anatomy identification | 25 | 84% | **88%** | **+4%** ✅ | Retrieval helps |
+| other | 11 | 82% | **91%** | **+9%** ✅ | Complex reasoning |
+| explanation request | 8 | 75% | **88%** | **+13%** ✅ | Template benefit |
+| location | 47 | **87%** | 74% | **-13%** ❌ | Retrieval noise |
+| presence absence | 10 | **80%** | 50% | **-30%** ❌ | Binary confusion |
+| abnormality description | 29 | **79%** | 69% | **-10%** ❌ | Context dilution |
 
-The agentic approach has several trade-offs:
+**Location questions** (47 cases, 23.5% of dataset) show a 13% accuracy drop when retrieval is enabled. Retrieved "similar" cases often describe different anatomical regions, confusing spatial reasoning that should rely solely on image features. **Presence/absence detection** (10 cases) drops from 80% to 50%, indicating retrieved exemplars with opposite binary labels create contradictory context that the `VerificationAgent` cannot resolve.
 
-- **Significantly higher latency**: The agentic pipeline takes 13-31 seconds per query (logs show total_duration), compared to 1-4 seconds for the single-shot baseline and 3-5 seconds for the workflow baseline. This is due to the 6 sequential stages, each requiring an LLM call. When retry is triggered, latency can double (logs show 34-41 seconds for retried cases). Analysis of 21 samples from medvqa_20260410 logs shows agentic is 7.3-23x slower than baseline (average ~11x slower).
+### Difficulty-Based Routing Analysis
 
-- **Higher computational cost**: Multiple LLM API calls per query (6 stages, plus potential retry) increase cost compared to single-prompt baselines. This makes the approach more expensive to operate at scale.
+The `DifficultyRouter` classified 77.5% of questions as "easy," 21.5% as "medium," and only 1% as "hard," suggesting **overly conservative difficulty thresholding**. Performance by difficulty tier reveals a critical pattern: **retrieval harms "easy" questions that should bypass the knowledge base**.
 
-- **Over-engineering for simple cases**: Even "easy" cases routed by the DifficultyRouter still go through multiple stages (image interpretation, question analysis, routing, reasoning, verification). For simple visual recognition tasks, a single-prompt approach may be sufficient and more efficient.
+**Easy Questions (n=155):**
+- Overall: Agentic 78% vs. Baseline 81% (-3%)
+- Anatomy identification: 95% (+11% with retrieval) ✅
+- Location: 78% vs. 94% **(-16%)** ❌
+- Presence/absence: 56% vs. 78% **(-22%)** ❌
+- Yes/no: 72% vs. 70% (neutral)
 
-- **Dependency on routing quality**: The system's adaptive behavior depends on the DifficultyRouter's accuracy. If the router misclassifies difficulty, it may skip retrieval when needed or invoke it unnecessarily, affecting both performance and cost.
+**Medium Questions (n=43):**
+- Overall: Agentic 65% vs. Baseline 77% (-12%)
+- Yes/no: **17%** vs. 50% **(-33%)** — catastrophic failure when retrieval is activated for binary questions
+- Anatomy identification: 67% vs. 83% (-16%)
+- Abnormality description: 70% vs. 80% (-10%)
 
-- **Still prone to errors**: Despite verification and retry mechanisms, the system can still produce incorrect answers. Logs show cases where the agentic pipeline failed while baselines succeeded (e.g., sample 1857: agentic answered "no" but ground truth was "yes"). The verification checks are heuristics and may not catch all errors.
+**Hard Questions (n=2):**
+- Insufficient sample size (tied at 50%, 0%, and 100% across categories)
 
-- **Complexity increases debugging**: With 6 stages, multiple LLM calls, and dynamic routing, debugging failures is more complex than in single-prompt approaches. Pinpointing the source of errors requires examining the full agent trace and intermediate outputs.
+The catastrophic **17% accuracy on medium yes/no questions** demonstrates that binary detection questions are fundamentally incompatible with retrieval-augmented generation. Retrieved similar cases often contain opposite binary answers, and the `ReasoningAgent` lacks mechanisms to ignore contradictory retrieved context when image evidence alone is dispositive.
 
-- **RAG corpus limitations**: The Advanced RAG pipeline depends on the quality and coverage of the SLAKE knowledge base. The KB contains 366 English-only concept chunks aggregated from 4,919 SLAKE train-split QA pairs. This small corpus size may limit coverage for diverse medical queries. Strict confidence thresholds (top1_softmax ≥ 0.30, softmax_margin ≥ 0.08, dense_top1 ≥ 0.35) can cause retrieval failures even when some relevant chunks exist. Logs show that when retrieval is triggered (medium/hard difficulty), it typically retrieves 3 similar cases with 4-5 key facts in 3.8-5 seconds, but some queries return 0 candidates due to low confidence scores. Some retrieved cases have low or negative rerank scores, suggesting the KB may not always have highly relevant matches. Additionally, the "knowledge_retrieval_failed" failure category can be triggered even when retrieval was not expected by routing (needs_retrieval=False), indicating the failure detection logic may be overly sensitive in some cases.
+### Baseline Comparison Anomalies
+
+The workflow baseline exhibits **critical implementation failures** independent of architectural merit:
+
+| Question Type | Baseline | Workflow | Defect Pattern |
+|--------------|----------|----------|----------------|
+| medium presence/absence | 100% | **0%** | Complete failure |
+| medium anatomy identification | 83% | **33%** | -50% gap |
+| easy counting | 67% | **33%** | Halved performance |
+| easy abnormality description | 78% | **44%** | -34% gap |
+
+These patterns indicate logical errors in `backend/agents/workflow_baseline.py` rather than inherent workflow baseline limitations. The 0% score on presence/absence questions suggests broken conditional logic in the hand-designed pipeline, underscoring the brittleness of non-agentic approaches that lack dynamic error recovery.
+
+### Failure Mode Analysis
+
+**Lexical overlap metrics** reveal the agentic system produces more semantically diverse outputs (37% lexical overlap vs. 20% for baselines), but this diversity does not correlate with accuracy. The `VerificationAgent`'s semantic similarity threshold (0.85 using PubMedBERT) appears miscalibrated for retrieved-content answers—retrieved chunks with high semantic similarity to the ground truth may nonetheless mislead the reasoning process.
+
+The discrepancy between **close-ended accuracy** (baseline 65% vs. agentic 63%) and **open-ended semantic similarity** (baseline 88% vs. agentic 81%) suggests the agentic pipeline struggles more with answer formatting than content correctness, potentially due to retrieval-induced answer style drift.
+
+### Implications for Agentic System Design
+
+These results yield three key insights for retrieval-augmented medical VQA systems:
+
+1. **Question-type-aware routing is essential**: The `DifficultyRouter` must disable retrieval for binary detection (yes/no, presence/absence) and unambiguous spatial localization questions. Difficulty classification alone is insufficient—question semantics determine retrieval utility.
+
+2. **Retrieval confidence gating**: The system should bypass retrieval when top-k similarity scores fall below a calibrated threshold, falling back to direct visual reasoning rather than injecting low-relevance noise.
+
+3. **Workflow baseline debugging**: The 65% workflow accuracy results from implementation defects, not architectural inferiority. Proper workflow baselines remain essential for isolating the value of agentic components from simple pipeline composition.
+
+---
+
+## Log Analysis
+
+Detailed execution traces from `medvqa_20260410` logs (21 samples) reveal runtime characteristics and failure modes not visible in aggregate evaluation metrics:
+
+### Latency Characteristics
+
+| Metric | Baseline | Agentic (no retry) | Agentic (with retry) |
+|--------|----------|-------------------|---------------------|
+| Average | 1.8s | 13-31s | 34-41s |
+| Slowdown vs baseline | — | 7-17× | 19-23× |
+
+The 6-stage pipeline (ImageInterpreter → QuestionAnalyzer → DifficultyRouter → KnowledgeRetriever → ReasoningAgent → VerificationAgent) incurs sequential LLM call overhead. When retry triggers, latency approximately doubles as the ReasoningAgent receives `retry_context` with previous status, confidence, and failure categories to self-correct.
+
+### Retry Effectiveness
+
+Log analysis shows mixed retry outcomes:
+- **Successful recovery**: Cases where initial verification indicated `low_confidence` or `unsupported` improved after retry with corrective context
+- **Failed recovery**: Some retries maintained incorrect answers despite additional reasoning passes (e.g., sample 1857: agentic answered "no" but ground truth was "yes" in both attempts)
+
+Retry triggers on: `low_confidence`, `unsupported_claim`, `should_flag_for_review`, or any high-severity failure category.
+
+### Retrieval Pipeline Observations
+
+When retrieval activates (medium/hard difficulty):
+- **Typical retrieval**: 3 similar cases with 4-5 key facts in 3.8-5 seconds
+- **Retrieval failures**: Some queries return 0 candidates due to strict confidence thresholds (top1_softmax ≥ 0.30, softmax_margin ≥ 0.08, dense_top1 ≥ 0.35)
+- **Quality issues**: Some retrieved cases show low or negative rerank scores, indicating poor relevance that still enters the reasoning context
+- **False failure detection**: The `knowledge_retrieval_failed` failure category triggers even when routing explicitly set `needs_retrieval=False`, indicating overly sensitive failure detection logic
+
+### Per-Case Failure Examples
+
+| Sample | Issue | Systems Affected |
+|--------|-------|-----------------|
+| 1857 | Agentic persisted "no" vs ground truth "yes" through retry | Agentic |
+| Various | Workflow baseline 0% presence/absence, 33% anatomy identification | Workflow |
+
+These logs confirm that verification checks are heuristics that may not catch all errors, and that debugging multi-stage failures requires examining full agent traces rather than final outputs alone.
+
+---
+
+## Reflection and Limitations
+
+### Interpreting the Results
+
+The empirical findings reveal a fundamental tension in agentic medical VQA: **the overhead of multi-stage orchestration is only justified when retrieval genuinely augments reasoning**. The 5% overall accuracy deficit combined with 11× latency cost suggests the current implementation fails to achieve this threshold for the majority of cases.
+
+Three patterns emerge from the data:
+
+1. **Retrieval helps template-driven answers**: Anatomy identification (+4%) and explanation requests (+13%) benefit from retrieved exemplars that provide answer frameworks without introducing factual conflicts.
+
+2. **Retrieval harms deterministic decisions**: Binary questions (yes/no, presence/absence) and spatial localization suffer when retrieved cases contain contradictory labels or describe different anatomical regions. The catastrophic 17% yes/no accuracy demonstrates that **semantic similarity-based retrieval is poorly suited for binary detection tasks**.
+
+3. **The workflow baseline implementation is defective**: Its 65% accuracy reflects implementation bugs (0% on presence/absence) rather than inherent workflow limitations, contaminating the baseline comparison.
+
+### When Agentic Behavior is Beneficial
+
+The agentic approach provides value when:
+
+- **Complex reasoning requires external context**: Explanation requests and ambiguous questions benefit from the SLAKE knowledge base when image evidence alone is insufficient.
+
+- **Answer templates improve consistency**: Anatomy identification and "other" complex questions show gains from retrieved exemplars that provide structured answer formats.
+
+- **Self-correction recovers from initial failures**: The retry mechanism addresses cases where initial reasoning produces low-confidence or unsupported claims.
+
+- **Quality transparency is required**: Self-consistency and cross-modal agreement signals provide interpretable confidence indicators for clinical decision support.
+
+However, the data suggests these benefits are **question-type-specific**, not difficulty-based. The DifficultyRouter's policy of enabling retrieval for "medium" questions triggers the worst failures (17% yes/no accuracy), indicating that **question semantics—not perceived difficulty—should govern routing decisions**.
+
+### System Limitations
+
+The current implementation faces several structural constraints:
+
+**Evaluation and Dataset Constraints**
+- The SLAKE distribution contains few genuinely "hard" questions (1%), limiting assessment of the agentic pipeline's intended sweet spot
+- The 200-sample evaluation provides statistical power for overall comparisons but sparse data for rare question categories
+- The knowledge base's chunking strategy prioritizes question-text similarity over image-grounded metadata, limiting spatial reasoning support
+
+**Architectural Trade-offs**
+- **Latency overhead**: 13-31 seconds per query (up to 41 seconds with retry) vs. 1.8s baseline makes real-time clinical use impractical
+- **Cost scaling**: 6+ LLM API calls per query increases operational expense without proportional accuracy gains
+- **Routing brittleness**: The system depends on accurate difficulty classification; misrouting can enable retrieval when harmful or disable it when beneficial
+
+**RAG Pipeline Constraints**
+- Small corpus size (366 chunks) limits coverage for diverse medical queries
+- Strict confidence thresholds (top1_softmax ≥ 0.30, softmax_margin ≥ 0.08) trigger unnecessary retrieval failures
+- Retrieved cases sometimes have negative rerank scores, indicating low relevance that still contaminates reasoning
+- The failure detection logic triggers "knowledge_retrieval_failed" even when routing explicitly disabled retrieval
+
+### Future Directions
+
+To recover the 5% accuracy gap while preserving the agentic benefits for complex cases:
+
+1. **Implement question-type-aware routing**: Disable retrieval unconditionally for yes/no, presence/absence, and location questions; enable only for explanation requests and complex anatomy identification
+
+2. **Add retrieval confidence gating**: Bypass retrieval when top-k similarity scores fall below a calibrated threshold, falling back to direct visual reasoning
+
+3. **Debug and repair the workflow baseline**: Its current 65% accuracy reflects implementation defects, not architectural inferiority
+
+4. **Expand the knowledge base**: Increase corpus coverage and prioritize image-grounded metadata over question-text heuristics
 
 ---
 
