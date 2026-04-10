@@ -10,7 +10,7 @@ MedVisionQuery is an **agentic multimodal system** for medical visual question a
 
 **Getting Started**
 - **🚀 [Quick Start](#quick-start)** — Get up and running in 5 minutes
-- **� [UI](#ui)** — Dashboard, Case Explorer, and Evaluation views
+- **💻 [UI](#ui)** — Dashboard, Case Explorer, and Evaluation views
 
 **Understanding the System**
 - **🏗️ [Agent Architecture](#agent-architecture)** — System design and agents
@@ -18,8 +18,8 @@ MedVisionQuery is an **agentic multimodal system** for medical visual question a
 
 **Evaluation & Results**
 - **🎯 [Evaluation Design](#evaluation-design)** — How evaluation works
-- **� [Results Discussion](#results-discussion)** — Performance comparison
-- **� [Log Analysis](#log-analysis)** — Execution traces and failure modes
+- **📊 [Results Discussion](#results-discussion)** — Performance comparison
+- **🔍 [Log Analysis](#log-analysis)** — Execution traces and failure modes
 
 **Technical Reference**
 - **🔧 [API Reference](#api-reference)** — Backend endpoints
@@ -324,6 +324,14 @@ The system detects errors and uncertainty through multiple mechanisms:
    - `explanation_grounded_in_evidence`: whether explanation references visible evidence
    - `answer_strength_appropriate`: whether answer strength is appropriate for the question
    - `no_contradictions`: whether answer contains self-contradictory statements
+
+> **Critical limitation**: Verification checks **internal consistency**, not correctness. The VerificationAgent only checks whether the answer is consistent with what the ImageInterpreter saw — it does NOT know the actual ground truth. For example:
+> - ImageInterpreter says: "No mass visible"
+> - ReasoningAgent answers: "no mass present"
+> - VerificationAgent: ✅ **verified** (answer matches image interpretation)
+> - Ground truth: **"yes, there is a mass"**
+>
+> Because the verification only checks if stages agree with each other, it will pass even when all stages are wrong together. Sample 1857 in Log Analysis shows this exact case: verification passed as "verified" but the answer was wrong. The system cannot catch errors in the original image interpretation.
 
 2. **Automatic failure categorization** — detects specific failure modes:
    - `knowledge_retrieval_failed`: RAG retrieval returned no relevant chunks
