@@ -1,0 +1,20 @@
+2026-04-10T18:53:02  INFO      medvqa  Session started  file=medvqa_20260410_185302_fee3e5ff.log  session_id=fee3e5ff
+2026-04-10T18:53:13  INFO      medvqa.agents.knowledge_retriever  Advanced RAG module loaded successfully
+2026-04-10T18:53:13  INFO      medvqa.server  ============================================================
+2026-04-10T18:53:13  INFO      medvqa.server  MedVisionQuery API  v1.0.0  starting up
+2026-04-10T18:53:13  INFO      medvqa.server  CORS origins: ['http://localhost:5173']
+2026-04-10T18:53:13  INFO      medvqa.server  ============================================================
+2026-04-10T18:53:13  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-10T18:53:13  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-10T18:53:13  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=20ms
+2026-04-10T18:53:13  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-10T18:53:13  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-10T18:53:13  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=22ms
+2026-04-10T18:53:15  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-10T18:53:15  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=11
+2026-04-10T18:53:15  WARNING   medvqa.routes.dataset  GPU compute capability 6.1 is below recommended threshold; using CPU for pritamdeka/S-PubMedBert-MS-MARCO
+2026-04-10T18:53:15  INFO      medvqa.routes.dataset  Loading S-PubMedBert-MS-MARCO (pritamdeka/S-PubMedBert-MS-MARCO) on device: cpu
+2026-04-10T18:53:23  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=11  skipped=0
+2026-04-10T18:53:23  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-10T18:53:23  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=7936ms
+2026-04-10T18:54:22  INFO      medvqa.server  MedVisionQuery API shutting down

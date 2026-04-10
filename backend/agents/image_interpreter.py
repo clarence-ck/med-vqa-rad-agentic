@@ -39,7 +39,7 @@ IMPORTANT INSTRUCTION: You MUST evaluate if the image is a radiology image (e.g.
   "visible_structures": ["List of visible anatomical structures"],
   "visual_summary": "A 2-3 sentence summary of what is visible in the image",
   "image_quality": "good / fair / poor",
-  "notable_findings": ["Any notable visual observations, without making diagnoses"]
+  "notable_findings": ["List of visual observations. Each should be a concrete, observable description without diagnostic terms. Focus on what you see, not what it means."]
 }
 
 Return ONLY the JSON object, no additional text."""

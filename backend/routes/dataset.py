@@ -253,15 +253,52 @@ def _token_f1(prediction: str, ground_truth: str) -> float:
     return 2 * precision * recall / (precision + recall)
 
 
-def _answers_match(predicted: str, ground_truth: str, is_close_ended: bool = False) -> bool:
+def _extract_number(text: str) -> int | None:
+    """Extract the first integer from text, handling word numbers like 'one', 'two', etc."""
+    import re
+    # Try to extract digit first
+    digit_match = re.search(r'\d+', text)
+    if digit_match:
+        return int(digit_match.group())
+    # Map word numbers to integers
+    word_to_num = {
+        'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+        'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+        'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
+        'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'twenty': 20,
+        'twenty-one': 21, 'twenty-two': 22, 'twenty-three': 23, 'twenty-four': 24, 'twenty-five': 25,
+        'twenty-six': 26, 'twenty-seven': 27, 'twenty-eight': 28, 'twenty-nine': 29, 'thirty': 30,
+        'thirty-one': 31, 'thirty-two': 32, 'thirty-three': 33, 'thirty-four': 34, 'thirty-five': 35,
+        'thirty-six': 36, 'thirty-seven': 37, 'thirty-eight': 38, 'thirty-nine': 39, 'forty': 40,
+        'forty-one': 41, 'forty-two': 42, 'forty-three': 43, 'forty-four': 44, 'forty-five': 45,
+        'forty-six': 46, 'forty-seven': 47, 'forty-eight': 48, 'forty-nine': 49, 'fifty': 50
+    }
+    words = re.findall(r'\b[a-z]+\b', text.lower())
+    for word in words:
+        if word in word_to_num:
+            return word_to_num[word]
+    return None
+
+
+def _answers_match(predicted: str, ground_truth: str, is_close_ended: bool = False, question_type: str = None) -> bool:
     """Return True if the predicted answer is correct based on question type.
-    
+
     For close-ended (yes/no) questions: uses exact yes/no only.
-    For open-ended questions: uses semantic similarity >= 0.85 threshold only.
+    For counting questions: uses numerical extraction and exact comparison.
+    For other open-ended questions: uses semantic similarity >= 0.85 threshold only.
     """
     if is_close_ended:
         # Close-ended: strict exact yes/no matching
         return _normalize_yes_no(predicted) == _normalize_yes_no(ground_truth)
+    elif question_type == "counting":
+        # Counting: extract numbers and compare exactly
+        import re
+        pred_num = _extract_number(predicted)
+        gt_num = _extract_number(ground_truth)
+        if pred_num is not None and gt_num is not None:
+            return pred_num == gt_num
+        # Fallback to semantic if number extraction fails
+        return _semantic_similarity(predicted, ground_truth) >= _SEMANTIC_THRESHOLD
     else:
         # Open-ended: Semantic similarity >= threshold
         return _semantic_similarity(predicted, ground_truth) >= _SEMANTIC_THRESHOLD
@@ -426,9 +463,10 @@ def _build_evaluation_row(payload: dict) -> dict:
     agentic_normalized = _normalize_answer(agentic_answer_text)
     ground_truth_normalized = _normalize_answer(ground_truth)
     is_close_ended = _is_close_ended_answer(ground_truth_normalized)
-    baseline_correct = _answers_match(baseline_normalized, ground_truth_normalized, is_close_ended)
-    workflow_correct = _answers_match(workflow_normalized, ground_truth_normalized, is_close_ended)
-    agentic_correct = _answers_match(agentic_normalized, ground_truth_normalized, is_close_ended)
+    question_type = sample.get("question_type", "unknown")
+    baseline_correct = _answers_match(baseline_normalized, ground_truth_normalized, is_close_ended, question_type)
+    workflow_correct = _answers_match(workflow_normalized, ground_truth_normalized, is_close_ended, question_type)
+    agentic_correct = _answers_match(agentic_normalized, ground_truth_normalized, is_close_ended, question_type)
     answer_style = "close_ended" if is_close_ended else "open_ended"
     candidates = {
         "baseline": baseline_correct,
