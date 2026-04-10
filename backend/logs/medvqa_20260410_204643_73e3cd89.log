@@ -20,3 +20,19 @@
 2026-04-10T20:48:58  INFO      medvqa.server  → GET /api/dataset/sample/2032/analysis
 2026-04-10T20:48:58  INFO      medvqa.routes.dataset  Cache HIT for sample 2032 (question='what organ system is shown?')
 2026-04-10T20:48:58  INFO      medvqa.server  ← GET /api/dataset/sample/2032/analysis  status=200  duration=26ms
+2026-04-10T21:25:05  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-10T21:25:05  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-10T21:25:05  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=30ms
+2026-04-10T21:25:05  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-10T21:25:05  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-10T21:25:05  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=19ms
+2026-04-10T21:25:09  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-10T21:25:09  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=200
+2026-04-10T21:25:58  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=200  skipped=0
+2026-04-10T21:25:58  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-10T21:25:58  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=49494ms
+2026-04-10T21:25:58  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-10T21:25:58  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=200
+2026-04-10T21:26:42  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=200  skipped=0
+2026-04-10T21:26:42  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-10T21:26:42  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=43413ms

@@ -292,102 +292,6 @@ The image is consumed only once (stage 1); all downstream stages operate on the 
 
 ---
 
-## Agent Outputs (Representative JSON Payloads)
-
-The following shapes describe the main inner `result` payload returned by each Haystack component. In the actual implementation, each agent returns `{"result": ...}` and may also include `status`, `error`, or extra wrapper metadata on success/failure.
-
-### ImageInterpreter
-```json
-{
-  "status": "success | error",
-  "is_radiology_image": true,
-  "modality": "X-ray",
-  "body_region": "chest",
-  "visible_structures": ["lungs", "ribs", "heart"],
-  "visual_summary": "...",
-  "image_quality": "good | fair | poor",
-  "notable_findings": ["..."]
-}
-```
-
-### QuestionAnalyzer
-```json
-{
-  "status": "success | error",
-  "question_type": "anatomy_identification | modality_identification | presence_absence | location | counting | abnormality_description | explanation_request | yes_no | other",
-  "target_entity": "...",
-  "reasoning_type": "visual_recognition | spatial_reasoning | medical_knowledge | comparison | descriptive",
-  "expected_answer_format": "single_word | short_phrase | yes_no | sentence | paragraph",
-  "requires_medical_knowledge": true,
-  "question_clarity": "clear | ambiguous | unclear",
-  "rephrased_question": "..."
-}
-```
-
-### DifficultyRouter
-```json
-{
-  "status": "success | error",
-  "difficulty": "easy | medium | hard",
-  "needs_retrieval": true,
-  "retrieval_rationale": "...",
-  "verification_policy": "standard | strict",
-  "fallback_policy": "none | add_disclaimer | flag_for_review",
-  "routing_rationale": "..."
-}
-```
-
-### KnowledgeRetriever
-```json
-{
-  "status": "success | error",
-  "contextual_notes": "...",
-  "key_facts": ["..."],
-  "expected_normal_findings": "...",
-  "common_pathologies": ["..."],
-  "terminology": {"term": "definition"},
-  "rag_retrieval": {
-    "similar_cases": ["..."],
-    "metadata": {"count": 0, "triggered": true}
-  }
-}
-```
-
-### ReasoningAgent
-```json
-{
-  "status": "success | error",
-  "answer": "...",
-  "explanation": "...",
-  "reasoning_trace": "...",
-  "evidence_used": ["..."],
-  "answer_confidence": "high | medium | low",
-  "limitations": "..."
-}
-```
-
-### VerificationAgent — 5 explicit checks
-```json
-{
-  "status": "success | error",
-  "verification_status": "verified | partially_verified | low_confidence | unsupported",
-  "confidence_label": "High | Medium | Low",
-  "checks": {
-    "answer_matches_question_type": true,
-    "explanation_grounded_in_evidence": true,
-    "answer_strength_appropriate": true,
-    "no_contradictions": true,
-    "format_appropriate": true
-  },
-  "issues_found": ["..."],
-  "fallback_recommendation": "none | rephrase_answer | add_disclaimer | flag_for_review",
-  "verification_notes": "...",
-  "suggested_disclaimer": "..."
-}
-```
-
----
-
 ## Control and Failure Handling
 
 ### Mechanisms for detecting errors or uncertainty
@@ -462,10 +366,6 @@ The Guardrail combines `verification_status` + `failure_categories` to produce 5
 | `question_answer_mismatch` | medium |
 | `parser_failure` | high |
 
-### Analysis signals
-- **Self-consistency signal** — ratio of passed verification checks (`high` / `medium` / `low`)
-- **Cross-modal agreement** — derived from `explanation_grounded_in_evidence` and `no_contradictions`
-
 ### Automatic retry
 - `run_pipeline()` evaluates the first result with `_should_retry_pipeline()`
 - Retry triggers on: `low_confidence`, `unsupported`, `should_flag_for_review`, or any high-severity failure
@@ -518,13 +418,13 @@ The system evaluates success using task-specific criteria that account for the d
 
 The system performs failure case analysis using multiple complementary methods:
 
-- **Self-consistency checks** — The VerificationAgent performs 5 structured checks (answer_matches_question_type, format_appropriate, explanation_grounded_in_evidence, answer_strength_appropriate, no_contradictions). The self-consistency signal is computed as the ratio of passed checks (high/medium/low) and is displayed in the Evaluation UI.
+- **Self-consistency checks** — The VerificationAgent performs 5 structured checks (answer_matches_question_type, format_appropriate, explanation_grounded_in_evidence, answer_strength_appropriate, no_contradictions). The self-consistency signal is computed in `orchestrator.py` (`_build_self_consistency_signal`, lines 475-497) as the ratio of passed checks (high/medium/low) and is displayed in the Evaluation UI.
 
-- **Cross-modal agreement checks** — The system evaluates agreement between the visual interpretation (image modality) and the final answer (text modality). This is derived from the verification checks `explanation_grounded_in_evidence` and `no_contradictions`, producing a cross-modal agreement level (high/medium/low) displayed in the Evaluation UI.
+- **Cross-modal agreement checks** — The system evaluates agreement between the visual interpretation (image modality) and the final answer (text modality). This is computed in `orchestrator.py` (`_build_cross_modal_agreement_signal`, lines 500-513) using VerificationAgent's `explanation_grounded_in_evidence` and `no_contradictions` checks, producing a cross-modal agreement level (high/medium/low) displayed in the Evaluation UI.
 
 - **Verifier models** — Agent 6 (VerificationAgent) serves as the dedicated verifier model, running an OpenAI-backed LLM to perform structured verification of the final answer against the image evidence. The verifier outputs a verification status (verified/partially_verified/low_confidence/unsupported) and identifies specific failure categories.
 
-- **Disagreement analysis** — The system compares outputs across all three methods (baseline, workflow, agentic) using `S-PubMedBert-MS-MARCO` semantic similarity. A 3-system disagreement rate is computed as the percentage of cases where systems produce semantically different answers (similarity < 0.85). The Evaluation UI shows a "Winner" tag (baseline/workflow/agentic/tie) and disagreement status for each case.
+- **Disagreement analysis** — The system compares outputs across all three methods (baseline, workflow, agentic) using `S-PubMedBert-MS-MARCO` semantic similarity. This is computed in `backend/routes/dataset.py` (`_has_semantic_disagreement`, lines 338-357) with a 0.85 threshold. A 3-system disagreement rate is computed as the percentage of cases where systems produce semantically different answers (similarity < 0.85). The Evaluation UI shows a "Winner" tag (baseline/workflow/agentic/tie) and disagreement status for each case.
 
 These failure analysis signals are displayed in the "Recent Evaluated Cases" table of the Evaluation UI, with columns for verification status, self-consistency level, cross-modal agreement level, and disagreement status.
 
@@ -842,6 +742,102 @@ Medical-VQA-Explanation-Agent/
         ├── slake.json               # flattened SLAKE manifest with language labels
         ├── images/                  # PNG images named {split}_{index:04d}.png
         └── kb/                      # English-only concept KB JSONL/JSON + summary files
+```
+
+---
+
+## Appendix: Agent Outputs (Representative JSON Payloads)
+
+The following shapes describe the main inner `result` payload returned by each Haystack component. In the actual implementation, each agent returns `{"result": ...}` and may also include `status`, `error`, or extra wrapper metadata on success/failure.
+
+### ImageInterpreter
+```json
+{
+  "status": "success | error",
+  "is_radiology_image": true,
+  "modality": "X-ray",
+  "body_region": "chest",
+  "visible_structures": ["lungs", "ribs", "heart"],
+  "visual_summary": "...",
+  "image_quality": "good | fair | poor",
+  "notable_findings": ["..."]
+}
+```
+
+### QuestionAnalyzer
+```json
+{
+  "status": "success | error",
+  "question_type": "anatomy_identification | modality_identification | presence_absence | location | counting | abnormality_description | explanation_request | yes_no | other",
+  "target_entity": "...",
+  "reasoning_type": "visual_recognition | spatial_reasoning | medical_knowledge | comparison | descriptive",
+  "expected_answer_format": "single_word | short_phrase | yes_no | sentence | paragraph",
+  "requires_medical_knowledge": true,
+  "question_clarity": "clear | ambiguous | unclear",
+  "rephrased_question": "..."
+}
+```
+
+### DifficultyRouter
+```json
+{
+  "status": "success | error",
+  "difficulty": "easy | medium | hard",
+  "needs_retrieval": true,
+  "retrieval_rationale": "...",
+  "verification_policy": "standard | strict",
+  "fallback_policy": "none | add_disclaimer | flag_for_review",
+  "routing_rationale": "..."
+}
+```
+
+### KnowledgeRetriever
+```json
+{
+  "status": "success | error",
+  "contextual_notes": "...",
+  "key_facts": ["..."],
+  "expected_normal_findings": "...",
+  "common_pathologies": ["..."],
+  "terminology": {"term": "definition"},
+  "rag_retrieval": {
+    "similar_cases": ["..."],
+    "metadata": {"count": 0, "triggered": true}
+  }
+}
+```
+
+### ReasoningAgent
+```json
+{
+  "status": "success | error",
+  "answer": "...",
+  "explanation": "...",
+  "reasoning_trace": "...",
+  "evidence_used": ["..."],
+  "answer_confidence": "high | medium | low",
+  "limitations": "..."
+}
+```
+
+### VerificationAgent — 5 explicit checks
+```json
+{
+  "status": "success | error",
+  "verification_status": "verified | partially_verified | low_confidence | unsupported",
+  "confidence_label": "High | Medium | Low",
+  "checks": {
+    "answer_matches_question_type": true,
+    "explanation_grounded_in_evidence": true,
+    "answer_strength_appropriate": true,
+    "no_contradictions": true,
+    "format_appropriate": true
+  },
+  "issues_found": ["..."],
+  "fallback_recommendation": "none | rephrase_answer | add_disclaimer | flag_for_review",
+  "verification_notes": "...",
+  "suggested_disclaimer": "..."
+}
 ```
 
 ---
