@@ -1,0 +1,112 @@
+2026-04-10T19:59:44  INFO      medvqa.routes.dataset  Cache MISS for sample 2235  question='where is the ascending colon?'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T19:59:44  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=227390 bytes  question='where is the ascending colon?'
+2026-04-10T19:59:44  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='where is the ascending colon?'  mime_type=image/png  size=227390 bytes ===
+2026-04-10T19:59:44  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T19:59:44  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=227390 bytes)
+2026-04-10T19:59:45  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T19:59:45  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=227390 bytes)
+2026-04-10T19:59:45  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "The ascending colon is in the right lower abdomen, along the patient’s right side.",
+  "explanation": "This is an axial CT image of the pelvis/abdomen. The ascending colon normally runs up the patient’s right side from the cecum toward the liver.",
+  "confidence": "high"
+}
+2026-04-10T19:59:45  INFO      medvqa.agents.baseline  Baseline done  answer='The ascending colon is in the right lower abdomen, along the patient’s right sid'  confidence=high  duration=1217ms
+2026-04-10T19:59:47  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=pelvis  quality=good  findings=4  duration=2578ms
+2026-04-10T19:59:47  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image through the pelvis showing the bony pelvis centrally and bilaterally, with surrounding pelvic soft tissues and bowel loops containing gas. The image is a single cross-sectional slice with standard grayscale CT appearance.
+2026-04-10T19:59:47  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Axial cross-sectional view through the lower pelvis', 'Bilateral iliac bones and sacrum are clearly visible', 'Multiple bowel gas pockets are present in the anterior pelvis', 'Soft tissue structures are symmetrically displayed on both sides of the pelvis']
+2026-04-10T19:59:47  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where is the ascending colon?'
+2026-04-10T19:59:47  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:59:47  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=pelvis  quality=good  findings=4  duration=2239ms
+2026-04-10T19:59:47  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the pelvis showing the bony pelvis centrally and bilaterally symmetric pelvic soft tissues. Several gas-filled bowel loops are visible along the anterior aspect of the pelvis.
+2026-04-10T19:59:47  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Axial cross-section through the pelvis', 'Bilateral iliac bones and sacrum are clearly visible', 'Multiple gas-filled bowel loops are seen near the anterior pelvis', 'Soft tissues of the pelvic sidewalls are symmetrically displayed']
+2026-04-10T19:59:47  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=pelvis  duration=2284ms
+2026-04-10T19:59:48  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='where is the ascending colon?'
+2026-04-10T19:59:48  INFO      medvqa.agents.question_analyzer  Analyzing question: 'where is the ascending colon?'
+2026-04-10T19:59:48  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=medical_knowledge  med_knowledge=True  clarity=clear  duration=1367ms
+2026-04-10T19:59:48  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:59:48  DEBUG     medvqa.agents.question_analyzer  Target entity: ascending colon  Expected format: short_phrase  Rephrased: Where is the ascending colon located in the body?
+2026-04-10T19:59:48  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='where is the ascending colon?'  modality=CT  body_region=pelvis  question_type=location
+2026-04-10T19:59:48  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-10T19:59:48  DEBUG     medvqa.agents.workflow_baseline  Branch taken: location
+2026-04-10T19:59:48  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='pelvis'  confidence=medium  question_type=location  duration=4045ms
+2026-04-10T19:59:51  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  reasoning=medical_knowledge  med_knowledge=True  clarity=ambiguous  duration=2285ms
+2026-04-10T19:59:51  DEBUG     medvqa.agents.question_analyzer  Target entity: ascending colon  Expected format: short_phrase  Rephrased: Where is the ascending colon located in the body?
+2026-04-10T19:59:51  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=2338ms
+2026-04-10T19:59:51  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T19:59:51  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  reasoning=medical_knowledge  med_knowledge=True  modality=CT  region=pelvis
+2026-04-10T19:59:53  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1394ms
+2026-04-10T19:59:53  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a CT pelvis location question on a relatively clear study, but the target is not specified and the answer depends on anatomical inference rather than an obvious conspicuous abnormality, making it a systematic medium-difficulty case.
+2026-04-10T19:59:53  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1446ms
+2026-04-10T19:59:54  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-10T19:59:54  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='where is the ascending colon?'  modality=CT  body_region=pelvis  question_type=location  target_entity=ascending colon  advanced_rag=True
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='other' from notable_findings
+2026-04-10T19:59:54  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=where is the ascending colon? | modality=CT | body_region=pelvis | finding=other | rerank=mandatory
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag  Using structured query profile (no LLM rewrite): where is the ascending colon? | question_type=location | question_family=medical_knowledge | target_entity=ascending colon | body_region=pelvis | modality=CT | answer_style=short_phrase | visual_cues=pelvic bones, sacrum, iliac bones, lowe…
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='CT': 200 matches
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='pelvis': 12 matches
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag  Metadata filter target_entity='ascending colon': 1 matches
+2026-04-10T19:59:54  INFO      medvqa.agents.advanced_rag  Metadata filter result: 10 candidates (modality(200) + body_region(12) + target_entity(1))
+2026-04-10T19:59:54  INFO      medvqa.agents.advanced_rag  Metadata filter: 10 candidates retained
+2026-04-10T19:59:54  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=10
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 10 candidates
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/10
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag    1. id=343 score=0.6219 | concept_type=anatomy concept=pelvis | Q: Which part of the body does this image belong to? | A: Pelvic Cavity
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag    2. id=345 score=0.6187 | concept_type=anatomy concept=in this | Q: What organ system is primarily present in this image? | A: Pelvic Cavity
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag    3. id=357 score=0.6183 | concept_type=anatomy concept=pelvis | Q: Which is smaller in this image, bladder or rectum? | A: Rectum
+2026-04-10T19:59:54  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=10
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 10 candidates
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/10
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag    1. id=347 score=2.6420 | concept_type=laterality concept=center | Q: Where is bladder in this image? | A: Center
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag    2. id=346 score=2.5600 | concept_type=laterality concept=pelvic cavity | Q: Where does the image represent in the body? | A: Pelvic Cavity
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag    3. id=353 score=0.1059 | concept_type=anatomy concept=organ located | Q: Which part of the human body is the organ located in the image? | A: Pelvic Cavity
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=10 sparse=10
+2026-04-10T19:59:54  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 10 unique candidates
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/10
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag    1. id=357 score=0.0310 method=hybrid_rrf | concept_type=anatomy concept=pelvis | Q: Which is smaller in this image, bladder or rectum? | A: Rectum
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag    2. id=353 score=0.0310 method=hybrid_rrf | concept_type=anatomy concept=organ located | Q: Which part of the human body is the organ located in the image? | A: Pelvic Cavity
+2026-04-10T19:59:54  DEBUG     medvqa.agents.advanced_rag    3. id=348 score=0.0310 method=hybrid_rrf | concept_type=anatomy concept=gray part on the center of the | Q: What organ is the gray part on the center of the image? | A: Bladder
+2026-04-10T19:59:54  INFO      medvqa.agents.advanced_rag  Reranking 10 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-10T19:59:54  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 10 candidates...
+2026-04-10T19:59:55  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-10T19:59:55  DEBUG     medvqa.agents.advanced_rag    1. id=346 score=-0.4560 method=reranked softmax=0.5013 | concept_type=laterality concept=pelvic cavity | Q: Where does the image represent in the body? | A: Pelvic Cavity
+2026-04-10T19:59:55  DEBUG     medvqa.agents.advanced_rag    2. id=347 score=-1.1411 method=reranked softmax=0.2708 | concept_type=laterality concept=center | Q: Where is bladder in this image? | A: Center
+2026-04-10T19:59:55  DEBUG     medvqa.agents.advanced_rag    3. id=353 score=-2.2522 method=reranked softmax=0.0892 | concept_type=anatomy concept=organ located | Q: Which part of the human body is the organ located in the image? | A: Pelvic Cavity
+2026-04-10T19:59:55  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=medium weak_signals=1 top1_softmax=0.501 margin=0.230 dense_top1=0.622 agreement=False
+2026-04-10T19:59:55  WARNING   medvqa.agents.advanced_rag  Retrieval confidence is medium; returning results
+2026-04-10T19:59:55  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-10T19:59:55  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-10T19:59:55  DEBUG     medvqa.agents.advanced_rag    1. id=346 score=-0.4560 method=reranked softmax=0.5013 | concept_type=laterality concept=pelvic cavity | Q: Where does the image represent in the body? | A: Pelvic Cavity
+2026-04-10T19:59:55  DEBUG     medvqa.agents.advanced_rag    2. id=347 score=-1.1411 method=reranked softmax=0.2708 | concept_type=laterality concept=center | Q: Where is bladder in this image? | A: Center
+2026-04-10T19:59:55  DEBUG     medvqa.agents.advanced_rag    3. id=353 score=-2.2522 method=reranked softmax=0.0892 | concept_type=anatomy concept=organ located | Q: Which part of the human body is the organ located in the image? | A: Pelvic Cavity
+2026-04-10T19:59:55  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases
+2026-04-10T19:59:59  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=3  duration=5404ms
+2026-04-10T19:59:59  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The ascending colon is typically located in the right abdomen, not the central pelvis.', 'It begins at the cecum and ascends to the hepatic flexure near the liver.', 'In pelvic CT slices, bowel loops seen near the pelvis are often other colonic segments or small bowel rather than the ascending colon.', 'Right-sided location is the key anatomic clue for identifying the ascending colon on CT.']
+2026-04-10T19:59:59  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On CT, the ascending colon is part of the large bowel that usually runs up the right side of the abdomen, extending from the cecum in the right lower quadrant toward the hepatic flexure. In a pelvis-f
+2026-04-10T19:59:59  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=3  duration=5458ms
+2026-04-10T20:00:00  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T20:00:00  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='where is the ascending colon?'  is_retry=False  question_type=location  yes_no=False
+2026-04-10T20:00:00  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=3
+2026-04-10T20:00:03  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='right abdomen'  confidence=high  duration=2126ms
+2026-04-10T20:00:03  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified that the image is an axial CT through the pelvis.', 'Noted that the visible bowel loops are within the pelvis rather than in the right upper/right lower abdomen.', 'Used standard anatomy that the ascending colon runs up the right side of the abdomen from the cecum toward the hepatic flexure.']
+2026-04-10T20:00:03  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Axial CT image of the pelvis', 'Visible pelvic structures: pelvic bones, sacrum, iliac bones, lower lumbar vertebra', 'Multiple gas-filled bowel loops near the anterior pelvis', 'Anatomic knowledge that the ascending colon is on the right side of the abdomen']
+2026-04-10T20:00:03  DEBUG     medvqa.agents.reasoning_agent  Limitations: The ascending colon is not directly visualized in this pelvic slice; the answer is based on normal anatomy and the scan location.
+2026-04-10T20:00:03  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='right abdomen'  confidence=high  duration=2155ms
+2026-04-10T20:00:03  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T20:00:03  INFO      medvqa.agents.verification_agent  Verifying answer='right abdomen'  question='where is the ascending colon?'  question_type=location
+2026-04-10T20:00:06  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=3/5  duration=2291ms
+2026-04-10T20:00:06  WARNING   medvqa.agents.verification_agent  Verification issues: ["The answer 'right abdomen' is anatomically plausible but not directly supported by the pelvis CT image.", 'The explanation refers to the expected anatomical location rather than evidence visible in the image.', 'The response is somewhat too strong for the available visual evidence since the ascending colon is not identified on this scan.']
+2026-04-10T20:00:06  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-10T20:00:06  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer is a reasonable anatomical location for the ascending colon and fits the short_phrase format, but the image is a pelvic CT that does not directly show the ascending colon. The explanation relies on general anatomy rather than image evidence, so this is only partially verified.
+2026-04-10T20:00:06  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2328ms
+2026-04-10T20:00:06  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-10T20:00:06  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-10T20:00:06  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-10T20:00:06  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-10T20:00:06  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='right abdomen'  verification=partially_verified  guardrail_flag=False  consistency=low  cross_modal=low  duration=21528ms
+2026-04-10T20:00:06  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='right abdomen'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-10T20:00:06  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-10T20:00:06  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-10T20:00:06  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='right abdomen'  retries=0  total_duration=21536ms ===
+2026-04-10T20:00:06  INFO      medvqa.routes.dataset  Sample 2235 analysis complete  baseline=1223ms  workflow=4047ms  agentic=21540ms  total=21541ms
+2026-04-10T20:00:06  INFO      medvqa.routes.dataset  Sample 2235 answers  baseline='The ascending colon is in the right lower abdomen, along the'  workflow='pelvis'  agentic='right abdomen'  ground_truth='posterior to the appendix'

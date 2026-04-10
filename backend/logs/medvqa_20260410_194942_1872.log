@@ -1,0 +1,66 @@
+2026-04-10T20:14:48  INFO      medvqa.routes.dataset  Cache MISS for sample 1872  question='are there hyper attenuating material along the aortic walls?'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T20:14:48  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=424987 bytes  question='are there hyper attenuating material along the aortic walls?'
+2026-04-10T20:14:48  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are there hyper attenuating material along the aortic walls?'  mime_type=image/png  size=424987 bytes ===
+2026-04-10T20:14:48  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T20:14:48  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=424987 bytes)
+2026-04-10T20:14:49  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T20:14:49  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=424987 bytes)
+2026-04-10T20:14:50  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No, there is no clear hyperattenuating material along the aortic walls.",
+  "explanation": "On this axial contrast-enhanced CT image, the abdominal aorta does not show obvious crescentic or plaque-like hyperattenuating material along its wall. The aortic contour appears smooth without a visible hyperdense mural lesion.",
+  "confidence": "medium"
+}
+2026-04-10T20:14:50  INFO      medvqa.agents.baseline  Baseline done  answer='No, there is no clear hyperattenuating material along the aortic walls.'  confidence=medium  duration=2472ms
+2026-04-10T20:14:51  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=5  duration=3233ms
+2026-04-10T20:14:51  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the abdomen showing multiple gas- and fluid-filled bowel loops throughout the central and upper abdomen. The kidneys, major vessels, and spine are visible on this slice, with diffuse soft tissue detail in the mesentery and retroperitoneum.
+2026-04-10T20:14:51  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple dilated bowel loops containing gas and fluid are visible', 'Several bowel loops are clustered centrally within the abdomen', 'Oral or luminal contrast is seen within portions of the bowel', 'Both kidneys are partially opacified', 'Major abdominal vessels are contrast-enhanced']
+2026-04-10T20:14:51  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are there hyper attenuating material along the aortic walls?'
+2026-04-10T20:14:51  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T20:14:52  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=5  duration=2967ms
+2026-04-10T20:14:52  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the abdomen. Multiple gas- and fluid-filled bowel loops are visible throughout the upper and mid abdomen, along with both kidneys and central abdominal vascular structures.
+2026-04-10T20:14:52  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple fluid-filled bowel loops are seen along the anterior abdomen', 'Several small gas pockets are present within bowel loops', 'Both kidneys are visible on either side of the spine', 'Contrast-opacified vascular structures are present in the central abdomen', 'No obvious free air is visible on this single slice']
+2026-04-10T20:14:52  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen  duration=3026ms
+2026-04-10T20:14:52  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1114ms
+2026-04-10T20:14:52  DEBUG     medvqa.agents.question_analyzer  Target entity: hyperattenuating material along the aortic walls  Expected format: yes_no  Rephrased: Is there hyperattenuating material along the walls of the aorta?
+2026-04-10T20:14:52  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are there hyper attenuating material along the aortic walls?'  modality=CT  body_region=abdomen  question_type=presence_absence
+2026-04-10T20:14:52  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-10T20:14:52  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-10T20:14:52  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='No'  confidence=low  question_type=presence_absence  duration=4491ms
+2026-04-10T20:14:53  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are there hyper attenuating material along the aortic walls?'
+2026-04-10T20:14:53  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are there hyper attenuating material along the aortic walls?'
+2026-04-10T20:14:53  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T20:14:54  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1129ms
+2026-04-10T20:14:54  DEBUG     medvqa.agents.question_analyzer  Target entity: hyperattenuating material along the aortic walls  Expected format: yes_no  Rephrased: Is there hyperattenuating material along the aortic walls?
+2026-04-10T20:14:54  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=1273ms
+2026-04-10T20:14:55  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T20:14:55  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=abdomen
+2026-04-10T20:14:56  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1339ms
+2026-04-10T20:14:56  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a straightforward CT abdomen interpretation with no stated severe obscuration or ambiguity, so the case can be handled with a standard no-retrieval pipeline.
+2026-04-10T20:14:56  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1401ms
+2026-04-10T20:14:57  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T20:14:57  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are there hyper attenuating material along the aortic walls?'  is_retry=False  question_type=yes_no  yes_no=True
+2026-04-10T20:14:57  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-10T20:14:57  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-10T20:14:59  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=medium  duration=2111ms
+2026-04-10T20:14:59  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the aorta among the central abdominal vessels on axial CT.', 'Checked the aortic walls for linear or crescentic hyperattenuating material.', 'Observed contrast opacification of vessels but no distinct hyperattenuating mural material along the aortic wall.']
+2026-04-10T20:14:59  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Contrast-opacified vascular structures in the central abdomen', 'No obvious hyperattenuating material described along the aortic walls', 'Single axial CT slice of the abdomen']
+2026-04-10T20:14:59  DEBUG     medvqa.agents.reasoning_agent  Limitations: Only one axial slice is provided, so subtle mural hyperattenuation could be missed on adjacent images or different window settings.
+2026-04-10T20:14:59  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=medium  duration=2176ms
+2026-04-10T20:15:00  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T20:15:00  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='are there hyper attenuating material along the aortic walls?'  question_type=yes_no
+2026-04-10T20:15:07  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=Medium  checks=5/5  duration=6997ms
+2026-04-10T20:15:07  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-10T20:15:07  DEBUG     medvqa.agents.verification_agent  Verification notes: The question is yes/no and the answer 'no' matches that format. The explanation refers to the abdominal CT image and states that no clear hyperattenuating material is seen along the aortic wall, which is consistent with the provided visual analysis. The conclusion is appropriately cautious because it is based on a single slice.
+2026-04-10T20:15:07  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=Medium  duration=7058ms
+2026-04-10T20:15:07  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed']
+2026-04-10T20:15:07  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-10T20:15:07  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-10T20:15:07  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-10T20:15:07  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=19270ms
+2026-04-10T20:15:07  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='no'  verification=verified  confidence=Medium  flag_review=False
+2026-04-10T20:15:07  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-10T20:15:07  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-10T20:15:07  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  retries=0  total_duration=19278ms ===
+2026-04-10T20:15:07  INFO      medvqa.routes.dataset  Sample 1872 analysis complete  baseline=2483ms  workflow=4500ms  agentic=19287ms  total=19287ms
+2026-04-10T20:15:07  INFO      medvqa.routes.dataset  Sample 1872 answers  baseline='No, there is no clear hyperattenuating material along the ao'  workflow='No'  agentic='no'  ground_truth='yes'

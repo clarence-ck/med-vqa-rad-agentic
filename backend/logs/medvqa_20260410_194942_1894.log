@@ -1,0 +1,67 @@
+2026-04-10T20:29:29  INFO      medvqa.routes.dataset  Cache MISS for sample 1894  question='does this patient have evidence of pneumoperitoneum?'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T20:29:29  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=162597 bytes  question='does this patient have evidence of pneumoperitoneum?'
+2026-04-10T20:29:29  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='does this patient have evidence of pneumoperitoneum?'  mime_type=image/png  size=162597 bytes ===
+2026-04-10T20:29:29  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T20:29:29  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=162597 bytes)
+2026-04-10T20:29:30  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T20:29:30  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=162597 bytes)
+2026-04-10T20:29:31  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No, there is no clear evidence of pneumoperitoneum on this image.",
+  "explanation": "This is an axial CT image of the abdomen/pelvis. I do not see free intraperitoneal air outlining the bowel or collecting anteriorly beneath the abdominal wall on this slice.",
+  "confidence": "medium"
+}
+2026-04-10T20:29:31  INFO      medvqa.agents.baseline  Baseline done  answer='No, there is no clear evidence of pneumoperitoneum on this image.'  confidence=medium  duration=1590ms
+2026-04-10T20:29:32  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen and pelvis  quality=good  findings=5  duration=2474ms
+2026-04-10T20:29:32  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image through the lower abdomen/pelvis shows bowel loops with intraluminal gas and adjacent soft tissues. The pelvic bones and lower spine are visible on both sides of the image, along with surrounding muscles and vessels.
+2026-04-10T20:29:32  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Axial cross-sectional view through the lower abdomen/pelvis', 'Multiple gas-filled bowel loops are visible', 'Bilateral iliac bones and the posterior vertebral body are clearly seen', 'Psoas muscles are symmetric on both sides', 'No obvious large free air or large fluid collection is visible on this single image']
+2026-04-10T20:29:32  INFO      medvqa.agents.question_analyzer  Analyzing question: 'does this patient have evidence of pneumoperitoneum?'
+2026-04-10T20:29:32  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T20:29:33  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen/pelvis  quality=good  findings=4  duration=2645ms
+2026-04-10T20:29:33  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image through the lower abdomen and pelvis showing bowel loops, pelvic bones, and adjacent soft tissues. The image includes the central vertebral body and bilateral iliac bones with surrounding fat and vascular structures.
+2026-04-10T20:29:33  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple gas-filled bowel loops are visible in the lower abdomen.', 'A focal high-density material is present within bowel on the left side of the image.', 'Symmetric iliac bones and a centered vertebral body are seen.', 'No large free fluid or free air is visible on this single slice.']
+2026-04-10T20:29:33  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=abdomen/pelvis  duration=2686ms
+2026-04-10T20:29:33  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1156ms
+2026-04-10T20:29:33  DEBUG     medvqa.agents.question_analyzer  Target entity: pneumoperitoneum  Expected format: yes_no  Rephrased: Does this patient have evidence of pneumoperitoneum?
+2026-04-10T20:29:33  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='does this patient have evidence of pneumoperitoneum?'  modality=CT  body_region=abdomen and pelvis  question_type=yes_no
+2026-04-10T20:29:33  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-10T20:29:33  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-10T20:29:33  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='No'  confidence=low  question_type=yes_no  duration=3720ms
+2026-04-10T20:29:34  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='does this patient have evidence of pneumoperitoneum?'
+2026-04-10T20:29:34  INFO      medvqa.agents.question_analyzer  Analyzing question: 'does this patient have evidence of pneumoperitoneum?'
+2026-04-10T20:29:34  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T20:29:35  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1519ms
+2026-04-10T20:29:35  DEBUG     medvqa.agents.question_analyzer  Target entity: pneumoperitoneum  Expected format: yes_no  Rephrased: Is there evidence of pneumoperitoneum on this CT image?
+2026-04-10T20:29:35  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=1564ms
+2026-04-10T20:29:36  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T20:29:36  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=abdomen/pelvis
+2026-04-10T20:29:39  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=2822ms
+2026-04-10T20:29:39  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clear, image-grounded CT abdomen/pelvis question with no indication of severe overlap, artifact, or subtle ambiguity, so a standard no-retrieval pipeline is appropriate.
+2026-04-10T20:29:39  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=2867ms
+2026-04-10T20:29:40  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T20:29:40  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='does this patient have evidence of pneumoperitoneum?'  is_retry=False  question_type=yes_no  yes_no=True
+2026-04-10T20:29:40  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-10T20:29:40  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-10T20:29:43  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=medium  duration=2432ms
+2026-04-10T20:29:43  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: 1) Reviewed the CT slice for free air outside bowel loops. 2) Identified gas within bowel loops, which is expected. 3) Looked for extra-luminal free air beneath the abdominal wall or around bowel margins and did not see it. 4) Concluded there is no visible pneumoperitoneum on the provided image.
+2026-04-10T20:29:43  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Multiple gas-filled bowel loops are visible in the lower abdomen', 'No large free air is visible on this single slice', 'Gas appears confined to bowel loops rather than outside the bowel']
+2026-04-10T20:29:43  DEBUG     medvqa.agents.reasoning_agent  Limitations: Assessment is based on a single axial CT slice, so small or non-obvious free air elsewhere in the scan cannot be fully excluded.
+2026-04-10T20:29:43  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=medium  duration=2484ms
+2026-04-10T20:29:43  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T20:29:43  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='does this patient have evidence of pneumoperitoneum?'  question_type=yes_no
+2026-04-10T20:29:45  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=4/5  duration=1904ms
+2026-04-10T20:29:45  WARNING   medvqa.agents.verification_agent  Verification issues: ['The explanation is somewhat overconfident for a single axial slice and does not fully account for the possibility that pneumoperitoneum could be present elsewhere in the study.', "The conclusion of 'no' may be acceptable, but it is only supported by the provided slice and should be framed more cautiously."]
+2026-04-10T20:29:45  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-10T20:29:45  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct yes/no format and is consistent with the visual summary, which does not describe free intraperitoneal air. However, the explanation relies on a single slice and makes a stronger negative claim than the available evidence fully supports.
+2026-04-10T20:29:45  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=1956ms
+2026-04-10T20:29:45  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-10T20:29:45  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-10T20:29:45  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-10T20:29:45  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-10T20:29:45  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=16300ms
+2026-04-10T20:29:45  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='no'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-10T20:29:45  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-10T20:29:45  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-10T20:29:45  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  retries=0  total_duration=16310ms ===
+2026-04-10T20:29:45  INFO      medvqa.routes.dataset  Sample 1894 analysis complete  baseline=1597ms  workflow=3723ms  agentic=16316ms  total=16316ms
+2026-04-10T20:29:45  INFO      medvqa.routes.dataset  Sample 1894 answers  baseline='No, there is no clear evidence of pneumoperitoneum on this i'  workflow='No'  agentic='no'  ground_truth='no'

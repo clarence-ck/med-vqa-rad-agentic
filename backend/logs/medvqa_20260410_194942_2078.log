@@ -1,0 +1,108 @@
+2026-04-10T20:20:29  INFO      medvqa.routes.dataset  Cache MISS for sample 2078  question='were both sides affected?'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T20:20:29  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=221002 bytes  question='were both sides affected?'
+2026-04-10T20:20:29  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='were both sides affected?'  mime_type=image/png  size=221002 bytes ===
+2026-04-10T20:20:29  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T20:20:29  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=221002 bytes)
+2026-04-10T20:20:30  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T20:20:30  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=221002 bytes)
+2026-04-10T20:20:31  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No, the abnormality appears to be more pronounced on one side rather than both sides equally.",
+  "explanation": "This is an MRI brain image. The visible lesion/signal abnormality is asymmetric, with greater involvement on the right side of the image compared with the opposite side.",
+  "confidence": "medium"
+}
+2026-04-10T20:20:31  INFO      medvqa.agents.baseline  Baseline done  answer='No, the abnormality appears to be more pronounced on one side rather than both s'  confidence=medium  duration=1595ms
+2026-04-10T20:20:33  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=head/brain  quality=fair  findings=5  duration=3321ms
+2026-04-10T20:20:33  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial MRI image of the brain. The intracranial structures are shown in cross-section with the lateral ventricles and surrounding brain tissue visible, along with the skull outline. There is a focal area of altered signal near the right periventricular/deep white matter region on this slice.
+2026-04-10T20:20:33  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Axial cross-sectional view of the brain', 'Lateral ventricles are visible and appear mildly asymmetric in shape on this slice', 'A small round area of different signal intensity is present near the right periventricular region', 'Cortical sulci and gyral pattern are visible across both hemispheres', 'Image has slight graininess and limited resolution']
+2026-04-10T20:20:33  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=head/brain  duration=3350ms
+2026-04-10T20:20:33  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=fair  findings=4  duration=4438ms
+2026-04-10T20:20:33  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial MRI image of the brain showing the cerebral hemispheres and ventricular system. The image demonstrates a focal area of abnormal signal in the right deep cerebral region near the lateral ventricle, with surrounding asymmetric signal change in the adjacent brain tissue.
+2026-04-10T20:20:33  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Rounded focal area of altered signal in the right deep brain near the lateral ventricle', 'Adjacent surrounding region of increased signal intensity in the right hemisphere', 'Mild asymmetric effacement of the nearby right lateral ventricle compared with the opposite side', 'No significant motion artifact visible on this single image']
+2026-04-10T20:20:33  INFO      medvqa.agents.question_analyzer  Analyzing question: 'were both sides affected?'
+2026-04-10T20:20:33  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T20:20:34  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='were both sides affected?'
+2026-04-10T20:20:34  INFO      medvqa.agents.question_analyzer  Analyzing question: 'were both sides affected?'
+2026-04-10T20:20:34  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T20:20:35  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=comparison  med_knowledge=False  clarity=clear  duration=1191ms
+2026-04-10T20:20:35  DEBUG     medvqa.agents.question_analyzer  Target entity: whether the abnormality affects both sides of the brain  Expected format: yes_no  Rephrased: Are both sides of the brain affected?
+2026-04-10T20:20:35  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='were both sides affected?'  modality=MRI  body_region=brain  question_type=yes_no
+2026-04-10T20:20:35  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-10T20:20:35  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-10T20:20:35  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=high  question_type=yes_no  duration=5685ms
+2026-04-10T20:20:35  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=spatial_reasoning  med_knowledge=False  clarity=clear  duration=1155ms
+2026-04-10T20:20:35  DEBUG     medvqa.agents.question_analyzer  Target entity: whether the abnormality affects both sides of the brain  Expected format: yes_no  Rephrased: Is the abnormality present on both sides of the brain?
+2026-04-10T20:20:35  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=1185ms
+2026-04-10T20:20:36  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T20:20:36  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=spatial_reasoning  med_knowledge=False  modality=MRI  region=head/brain
+2026-04-10T20:20:38  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1503ms
+2026-04-10T20:20:38  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clear yes/no brain MRI question with a subtle focal finding in a complex anatomic region, making it a systematic search case rather than an obvious spot diagnosis.
+2026-04-10T20:20:38  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1530ms
+2026-04-10T20:20:39  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-10T20:20:39  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='were both sides affected?'  modality=MRI  body_region=head/brain  question_type=yes_no  target_entity=whether the abnormality affects both sides of the brain  advanced_rag=True
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='other' from notable_findings
+2026-04-10T20:20:39  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=were both sides affected? | modality=MRI | body_region=head/brain | finding=other | rerank=mandatory
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag  Using structured query profile (no LLM rewrite): were both sides affected? | question_type=yes_no | question_family=spatial_reasoning | target_entity=whether the abnormality affects both sides of the brain | body_region=head/brain | modality=MRI | answer_style=yes_no | visual_cues=cerebr…
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='MRI': 87 matches
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='head/brain': 57 matches
+2026-04-10T20:20:39  INFO      medvqa.agents.advanced_rag  Metadata filter result: 42 candidates (modality(87) + body_region(57))
+2026-04-10T20:20:39  INFO      medvqa.agents.advanced_rag  Metadata filter: 42 candidates retained
+2026-04-10T20:20:39  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=10
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 42 candidates
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/10
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag    1. id=297 score=0.7361 | concept_type=explanation concept=treat brain diseases promptly, keep healthy | Q: How to prevent the occurrence of the disease on the right lobe of brain in this image? | A: Treat brain diseases promptly, keep healthy
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag    2. id=306 score=0.6846 | concept_type=explanation concept=brain edema, brain enhancing tumor, brain non-enh… | Q: What disease is/are shown on the left of brain? | A: Brain Edema, Brain Enhancing Tumor, Brain Non-enhancing Tumor
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag    3. id=307 score=0.6823 | concept_type=explanation concept=brain edema, brain enhancing tumor, brain non-enh… | Q: What disease is/are shown on the right of brain? | A: Brain Edema, Brain Enhancing Tumor, Brain Non-enhancing Tumor
+2026-04-10T20:20:39  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=10
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 42 candidates
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/10
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag    1. id=313 score=9.1215 | concept_type=explanation concept=white | Q: What color does the brain enhancing tumor show in the picture? | A: White
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag    2. id=315 score=6.9892 | concept_type=laterality concept=left | Q: What is the main cause of the disease on the left lobe of brain in this picture? | A: Craniocerebral injury, intracranial space-occupying lesions, intracranial inflammation, c…
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag    3. id=237 score=6.8574 | concept_type=presence_absence concept=normal | Q: Does the brain look abnormal? | A: Yes
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=10 sparse=10
+2026-04-10T20:20:39  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 10 unique candidates
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/10
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag    1. id=315 score=0.0311 method=hybrid_rrf | concept_type=laterality concept=left | Q: What is the main cause of the disease on the left lobe of brain in this picture? | A: Craniocerebral injury, intracranial space-occupying lesions, intracranial inflammation, c…
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag    2. id=297 score=0.0307 method=hybrid_rrf | concept_type=explanation concept=treat brain diseases promptly, keep healthy | Q: How to prevent the occurrence of the disease on the right lobe of brain in this image? | A: Treat brain diseases promptly, keep healthy
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag    3. id=302 score=0.0299 method=hybrid_rrf | concept_type=presence_absence concept=normal | Q: Is/Are there abnormalities in the patient's right brain lobe? | A: No
+2026-04-10T20:20:39  INFO      medvqa.agents.advanced_rag  Reranking 10 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-10T20:20:39  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 10 candidates...
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag    1. id=311 score=-0.7797 method=reranked softmax=0.3906 | concept_type=presence_absence concept=normal | Q: Is/Are there abnormalities in the patient's left brain lobe? | A: Yes
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag    2. id=302 score=-0.8917 method=reranked softmax=0.3258 | concept_type=presence_absence concept=normal | Q: Is/Are there abnormalities in the patient's right brain lobe? | A: No
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag    3. id=237 score=-1.7204 method=reranked softmax=0.1325 | concept_type=presence_absence concept=normal | Q: Does the brain look abnormal? | A: Yes
+2026-04-10T20:20:39  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=low weak_signals=2 top1_softmax=0.391 margin=0.065 dense_top1=0.736 agreement=False
+2026-04-10T20:20:39  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 0 final candidates
+2026-04-10T20:20:39  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: no hits
+2026-04-10T20:20:39  INFO      medvqa.agents.knowledge_retriever  Advanced RAG returned 0 similar cases for this question; proceeding without RAG context
+2026-04-10T20:20:43  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=5  rag_cases=0  duration=4119ms
+2026-04-10T20:20:43  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Bilateral involvement means abnormalities are present in both the left and right cerebral hemispheres.', 'Symmetric changes on MRI often suggest diffuse, systemic, inflammatory, metabolic, or degenerative processes.', 'Unilateral or asymmetric findings are more typical of focal lesions such as infarct, mass, hemorrhage, or localized infection.', 'Comparison of both hemispheres, ventricles, and cortical sulci helps assess symmetry and mass effect.', 'Deep white matter abnormalities may be bilateral even when cortical findings are subtle.']
+2026-04-10T20:20:43  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On brain MRI, determining whether an abnormality is bilateral means checking if both cerebral hemispheres show similar involvement. Many diffuse or metabolic processes can affect both sides, while foc
+2026-04-10T20:20:43  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=5  rag_cases=0  duration=4148ms
+2026-04-10T20:20:44  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T20:20:44  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='were both sides affected?'  is_retry=False  question_type=yes_no  yes_no=True
+2026-04-10T20:20:44  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=0
+2026-04-10T20:20:44  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-10T20:20:46  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=high  duration=2072ms
+2026-04-10T20:20:46  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the abnormality as a focal signal change near the right periventricular/deep white matter.', 'Checked whether a matching lesion was described on the left side.', 'Found no evidence of similar abnormality in the left hemisphere, so the finding is not bilateral.']
+2026-04-10T20:20:46  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Focal area of altered signal near the right periventricular/deep white matter region', 'No described abnormal signal on the left hemisphere', 'Mildly asymmetric lateral ventricles on this slice']
+2026-04-10T20:20:46  DEBUG     medvqa.agents.reasoning_agent  Limitations: Single axial slice with slight graininess and limited resolution; subtle contralateral abnormalities could be missed.
+2026-04-10T20:20:46  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=high  duration=2105ms
+2026-04-10T20:20:46  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T20:20:46  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='were both sides affected?'  question_type=yes_no
+2026-04-10T20:20:49  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=4/5  duration=2365ms
+2026-04-10T20:20:49  WARNING   medvqa.agents.verification_agent  Verification issues: ["The answer 'no' is plausible from the provided visual analysis, but it is somewhat too definitive given that the assessment is based on a single slice.", 'The explanation relies on a focal right-sided abnormality and absence of a left-sided lesion on this slice, which is grounded in the image summary, but does not establish whole-study bilateral involvement.']
+2026-04-10T20:20:49  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-10T20:20:49  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is consistent with the image summary and correctly answers the yes/no question in a proper format. However, the conclusion that both sides were not affected is stronger than what can be confirmed from one axial slice alone, so confidence should be moderated.
+2026-04-10T20:20:49  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2395ms
+2026-04-10T20:20:49  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-10T20:20:49  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-10T20:20:49  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-10T20:20:49  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-10T20:20:49  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=19900ms
+2026-04-10T20:20:49  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='no'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-10T20:20:49  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-10T20:20:49  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-10T20:20:49  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  retries=0  total_duration=19906ms ===
+2026-04-10T20:20:49  INFO      medvqa.routes.dataset  Sample 2078 analysis complete  baseline=1599ms  workflow=5689ms  agentic=19909ms  total=19909ms
+2026-04-10T20:20:49  INFO      medvqa.routes.dataset  Sample 2078 answers  baseline='No, the abnormality appears to be more pronounced on one sid'  workflow='Yes'  agentic='no'  ground_truth='yes'

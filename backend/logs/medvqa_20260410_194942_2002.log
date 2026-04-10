@@ -1,0 +1,66 @@
+2026-04-10T20:06:51  INFO      medvqa.routes.dataset  Cache MISS for sample 2002  question='name one organ that is captured by this image.'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T20:06:51  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=331319 bytes  question='name one organ that is captured by this image.'
+2026-04-10T20:06:51  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='name one organ that is captured by this image.'  mime_type=image/png  size=331319 bytes ===
+2026-04-10T20:06:51  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T20:06:51  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=331319 bytes)
+2026-04-10T20:06:52  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T20:06:52  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=331319 bytes)
+2026-04-10T20:06:53  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Pelvis",
+  "explanation": "This is an axial CT scan of the lower abdomen/pelvis. The pelvic bones and surrounding pelvic soft tissues are visible.",
+  "confidence": "high"
+}
+2026-04-10T20:06:53  INFO      medvqa.agents.baseline  Baseline done  answer='Pelvis'  confidence=high  duration=1665ms
+2026-04-10T20:06:54  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen/pelvis  quality=good  findings=4  duration=2628ms
+2026-04-10T20:06:54  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image through the lower abdomen and pelvis. The pelvic bones and sacrum are well visualized, along with multiple gas-containing bowel loops and surrounding soft tissues.
+2026-04-10T20:06:54  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple gas-filled bowel loops are visible in the lower abdomen/pelvis', 'Bilateral pelvic bones are intact and prominently outlined', 'Soft tissue density is seen within the lower abdominal and pelvic cavity', 'No obvious free air is visible on this slice']
+2026-04-10T20:06:54  INFO      medvqa.agents.question_analyzer  Analyzing question: 'name one organ that is captured by this image.'
+2026-04-10T20:06:54  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T20:06:55  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1125ms
+2026-04-10T20:06:55  DEBUG     medvqa.agents.question_analyzer  Target entity: organ  Expected format: single_word  Rephrased: Name one organ visible in this image.
+2026-04-10T20:06:55  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='name one organ that is captured by this image.'  modality=CT  body_region=abdomen/pelvis  question_type=anatomy_identification
+2026-04-10T20:06:55  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-10T20:06:55  DEBUG     medvqa.agents.workflow_baseline  Branch taken: anatomy_identification
+2026-04-10T20:06:55  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='abdomen/pelvis'  confidence=high  question_type=anatomy_identification  duration=3812ms
+2026-04-10T20:06:55  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=pelvis  quality=good  findings=5  duration=3146ms
+2026-04-10T20:06:55  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the pelvis showing the bony pelvis and surrounding soft tissues. Multiple gas-filled bowel loops are seen within the lower abdomen/pelvis, with no obvious large focal soft tissue mass on this single slice.
+2026-04-10T20:06:55  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Axial cross-sectional view through the pelvic ring', 'Bilateral iliac bones and sacrum are clearly visible', 'Several gas-containing bowel loops are present in the central and anterior pelvis', 'No large fluid collection is evident on this image', 'Mild streak artifact from dense bony structures is present']
+2026-04-10T20:06:55  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=pelvis  duration=3180ms
+2026-04-10T20:06:56  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='name one organ that is captured by this image.'
+2026-04-10T20:06:56  INFO      medvqa.agents.question_analyzer  Analyzing question: 'name one organ that is captured by this image.'
+2026-04-10T20:06:56  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T20:06:59  INFO      medvqa.agents.question_analyzer  Question analysis done  type=anatomy_identification  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=2633ms
+2026-04-10T20:06:59  DEBUG     medvqa.agents.question_analyzer  Target entity: organ  Expected format: single_word  Rephrased: Name one organ visible in this CT image.
+2026-04-10T20:06:59  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=anatomy_identification  duration=2669ms
+2026-04-10T20:07:00  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T20:07:00  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=anatomy_identification  reasoning=visual_recognition  med_knowledge=False  modality=CT  region=pelvis
+2026-04-10T20:07:01  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1360ms
+2026-04-10T20:07:01  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a straightforward image-grounded anatomy question with no conspicuous pathology or major interpretive ambiguity, so a no-retrieval easy pipeline is appropriate.
+2026-04-10T20:07:01  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1419ms
+2026-04-10T20:07:02  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T20:07:02  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='name one organ that is captured by this image.'  is_retry=False  question_type=anatomy_identification  yes_no=False
+2026-04-10T20:07:02  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-10T20:07:04  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='bowel'  confidence=high  duration=2261ms
+2026-04-10T20:07:04  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the modality as axial CT of the pelvis.', 'Reviewed the described visible structures and noted gas-filled bowel loops.', 'Selected one organ clearly visible in the image: bowel.']
+2026-04-10T20:07:04  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Multiple gas-filled bowel loops are seen within the lower abdomen/pelvis', 'Axial CT image of the pelvis', 'Visible soft tissues of the lower abdomen and pelvis']
+2026-04-10T20:07:04  DEBUG     medvqa.agents.reasoning_agent  Limitations: The image slice is limited to the pelvis, so only partially visualized bowel loops are seen rather than a full organ outline.
+2026-04-10T20:07:04  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='bowel'  confidence=high  duration=2306ms
+2026-04-10T20:07:06  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T20:07:06  INFO      medvqa.agents.verification_agent  Verifying answer='bowel'  question='name one organ that is captured by this image.'  question_type=anatomy_identification
+2026-04-10T20:07:09  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=5/5  duration=3113ms
+2026-04-10T20:07:09  WARNING   medvqa.agents.verification_agent  Verification issues: ["The answer 'bowel' is anatomically plausible and supported by the visual analysis, but it is somewhat generic for a single-organ identification task.", 'The stated confidence is high, while the evidence only supports visible bowel loops on one CT slice, so certainty should be moderated.']
+2026-04-10T20:07:09  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-10T20:07:09  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is consistent with the image analysis: bowel loops are visible in the pelvis CT, and 'bowel' is an acceptable single-word organ label. However, because only one slice is provided and the structure is somewhat generic, the answer should not be treated as fully certain.
+2026-04-10T20:07:09  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=3143ms
+2026-04-10T20:07:09  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-10T20:07:09  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-10T20:07:09  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=5/5
+2026-04-10T20:07:09  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-10T20:07:09  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='bowel'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=17621ms
+2026-04-10T20:07:09  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='bowel'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-10T20:07:09  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-10T20:07:09  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-10T20:07:09  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='bowel'  retries=0  total_duration=17626ms ===
+2026-04-10T20:07:09  INFO      medvqa.routes.dataset  Sample 2002 analysis complete  baseline=1669ms  workflow=3815ms  agentic=17630ms  total=17631ms
+2026-04-10T20:07:09  INFO      medvqa.routes.dataset  Sample 2002 answers  baseline='Pelvis'  workflow='abdomen/pelvis'  agentic='bowel'  ground_truth='intestines'

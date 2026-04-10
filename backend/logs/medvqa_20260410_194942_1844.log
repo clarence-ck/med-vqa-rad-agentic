@@ -1,0 +1,112 @@
+2026-04-10T20:22:57  INFO      medvqa.routes.dataset  Cache MISS for sample 1844  question='do you see hylar lymphadenopathy in this image?'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T20:22:57  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=338244 bytes  question='do you see hylar lymphadenopathy in this image?'
+2026-04-10T20:22:57  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='do you see hylar lymphadenopathy in this image?'  mime_type=image/png  size=338244 bytes ===
+2026-04-10T20:22:57  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T20:22:57  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=338244 bytes)
+2026-04-10T20:22:58  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T20:22:58  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=338244 bytes)
+2026-04-10T20:23:00  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=fair  findings=5  duration=2620ms
+2026-04-10T20:23:00  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing the thorax with both lungs, heart, and mediastinal contours visible. The image is mildly limited by low inspiratory volume and overlying monitoring leads/artifacts.
+2026-04-10T20:23:00  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Low lung volume with elevated diaphragms', 'Mildly enlarged cardiac silhouette', 'Mild streaky opacity at the right lung base', 'No visible pleural effusion', 'No visible pneumothorax']
+2026-04-10T20:23:00  INFO      medvqa.agents.question_analyzer  Analyzing question: 'do you see hylar lymphadenopathy in this image?'
+2026-04-10T20:23:00  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T20:23:00  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No, I do not see definite hilar lymphadenopathy.",
+  "explanation": "This is a chest radiograph. The hilar regions do not appear enlarged or have the classic bilateral hilar fullness expected with lymphadenopathy.",
+  "confidence": "medium"
+}
+2026-04-10T20:23:00  INFO      medvqa.agents.baseline  Baseline done  answer='No, I do not see definite hilar lymphadenopathy.'  confidence=medium  duration=3450ms
+2026-04-10T20:23:01  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=fair  findings=5  duration=2727ms
+2026-04-10T20:23:01  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph shows the thoracic cavity with both lungs, heart, and mediastinal contours. The image includes overlying monitoring leads and is slightly low in volume with elevated diaphragms. Mild bibasilar hazy opacities are visible, greater at the left base.
+2026-04-10T20:23:01  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Low lung volumes with elevated diaphragms', 'Mild hazy opacity at the left lung base', 'Mild hazy opacity at the right lung base', 'Cardiomediastinal silhouette appears mildly enlarged', 'Overlying ECG leads project across the chest']
+2026-04-10T20:23:01  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=chest  duration=2756ms
+2026-04-10T20:23:01  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1585ms
+2026-04-10T20:23:01  DEBUG     medvqa.agents.question_analyzer  Target entity: hilar lymphadenopathy  Expected format: yes_no  Rephrased: Do you see hilar lymphadenopathy in this chest radiograph?
+2026-04-10T20:23:01  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='do you see hylar lymphadenopathy in this image?'  modality=X-ray  body_region=chest  question_type=yes_no
+2026-04-10T20:23:01  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-10T20:23:01  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-10T20:23:01  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='No'  confidence=low  question_type=yes_no  duration=4270ms
+2026-04-10T20:23:02  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='do you see hylar lymphadenopathy in this image?'
+2026-04-10T20:23:02  INFO      medvqa.agents.question_analyzer  Analyzing question: 'do you see hylar lymphadenopathy in this image?'
+2026-04-10T20:23:02  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T20:23:03  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1192ms
+2026-04-10T20:23:03  DEBUG     medvqa.agents.question_analyzer  Target entity: hilar lymphadenopathy  Expected format: yes_no  Rephrased: Do you see hilar lymphadenopathy in this chest radiograph?
+2026-04-10T20:23:03  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=1218ms
+2026-04-10T20:23:04  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T20:23:04  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=visual_recognition  med_knowledge=True  modality=X-ray  region=chest
+2026-04-10T20:23:05  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1663ms
+2026-04-10T20:23:05  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a subtle chest radiograph with mild, potentially overlapping basilar opacities rather than an obvious clean-cut finding, so it fits a systematic-search case requiring retrieval support.
+2026-04-10T20:23:05  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1689ms
+2026-04-10T20:23:06  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-10T20:23:06  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='do you see hylar lymphadenopathy in this image?'  modality=X-ray  body_region=chest  question_type=yes_no  target_entity=hilar lymphadenopathy  advanced_rag=True
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='pneumonia' from notable_findings
+2026-04-10T20:23:06  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=do you see hylar lymphadenopathy in this image? | modality=X-ray | body_region=chest | finding=pneumonia | rerank=mandatory
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag  Using structured query profile (no LLM rewrite): do you see hylar lymphadenopathy in this image? | question_type=yes_no | question_family=visual_recognition | target_entity=hilar lymphadenopathy | body_region=chest | modality=X-ray | answer_style=yes_no | visual_cues=lungs, heart, medias…
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='X-ray': 79 matches
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='chest': 117 matches
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='pneumonia': 9 matches
+2026-04-10T20:23:06  INFO      medvqa.agents.advanced_rag  Metadata filter result: 61 candidates (modality(79) + body_region(117) + finding(9))
+2026-04-10T20:23:06  INFO      medvqa.agents.advanced_rag  Metadata filter: 61 candidates retained
+2026-04-10T20:23:06  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=10
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 61 candidates
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/10
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag    1. id=187 score=0.6526 | concept_type=anatomy concept=chest | Q: Which part of chest is abnormal in this image? | A: Heart
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag    2. id=27 score=0.6491 | concept_type=anatomy concept=chest | Q: Which organ is abnormal, heart or lung? | A: Both
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag    3. id=184 score=0.6334 | concept_type=anatomy concept=chest | Q: What part of the lung is the pneumonia located in? | A: Both Lung
+2026-04-10T20:23:06  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=10
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 61 candidates
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/10
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag    1. id=36 score=7.3886 | concept_type=laterality concept=both lungs | Q: Where is/are the abnormality located? | A: Both Lungs
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag    2. id=166 score=6.4623 | concept_type=laterality concept=center | Q: Where is the heart in this image? | A: Center
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag    3. id=108 score=6.2844 | concept_type=counting concept=2 | Q: How many lungs are shown in this image? | A: 2
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=10 sparse=10
+2026-04-10T20:23:06  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 10 unique candidates
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/10
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag    1. id=187 score=0.0313 method=hybrid_rrf | concept_type=anatomy concept=chest | Q: Which part of chest is abnormal in this image? | A: Heart
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag    2. id=27 score=0.0304 method=hybrid_rrf | concept_type=anatomy concept=chest | Q: Which organ is abnormal, heart or lung? | A: Both
+2026-04-10T20:23:06  DEBUG     medvqa.agents.advanced_rag    3. id=36 score=0.0164 method=hybrid_rrf | concept_type=laterality concept=both lungs | Q: Where is/are the abnormality located? | A: Both Lungs
+2026-04-10T20:23:06  INFO      medvqa.agents.advanced_rag  Reranking 10 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-10T20:23:06  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 10 candidates...
+2026-04-10T20:23:07  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-10T20:23:07  DEBUG     medvqa.agents.advanced_rag    1. id=103 score=-2.7738 method=reranked softmax=0.3482 | concept_type=laterality concept=heart | Q: Where is the abnormality in this image? | A: Heart
+2026-04-10T20:23:07  DEBUG     medvqa.agents.advanced_rag    2. id=166 score=-3.1265 method=reranked softmax=0.2447 | concept_type=laterality concept=center | Q: Where is the heart in this image? | A: Center
+2026-04-10T20:23:07  DEBUG     medvqa.agents.advanced_rag    3. id=108 score=-3.6740 method=reranked softmax=0.1319 | concept_type=counting concept=2 | Q: How many lungs are shown in this image? | A: 2
+2026-04-10T20:23:07  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=medium weak_signals=1 top1_softmax=0.348 margin=0.103 dense_top1=0.653 agreement=False
+2026-04-10T20:23:07  WARNING   medvqa.agents.advanced_rag  Retrieval confidence is medium; returning results
+2026-04-10T20:23:07  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-10T20:23:07  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-10T20:23:07  DEBUG     medvqa.agents.advanced_rag    1. id=103 score=-2.7738 method=reranked softmax=0.3482 | concept_type=laterality concept=heart | Q: Where is the abnormality in this image? | A: Heart
+2026-04-10T20:23:07  DEBUG     medvqa.agents.advanced_rag    2. id=166 score=-3.1265 method=reranked softmax=0.2447 | concept_type=laterality concept=center | Q: Where is the heart in this image? | A: Center
+2026-04-10T20:23:07  DEBUG     medvqa.agents.advanced_rag    3. id=108 score=-3.6740 method=reranked softmax=0.1319 | concept_type=counting concept=2 | Q: How many lungs are shown in this image? | A: 2
+2026-04-10T20:23:07  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases
+2026-04-10T20:23:11  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=3  duration=5262ms
+2026-04-10T20:23:11  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The hila are located at the medial lung roots near the mediastinum on chest radiographs.', 'Normal hilar contours are usually symmetric and are formed largely by pulmonary vessels.', 'Hilar lymphadenopathy can cause enlargement or increased density at one or both hila.', 'Chest X-ray can suggest hilar adenopathy, but CT is often better for confirming lymph node enlargement.']
+2026-04-10T20:23:11  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On a frontal chest X-ray, the hila are the central regions where the main pulmonary arteries and bronchi enter the lungs; they are normally symmetric or only mildly asymmetric in prominence. Hilar lym
+2026-04-10T20:23:11  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=3  duration=5290ms
+2026-04-10T20:23:12  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T20:23:12  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='do you see hylar lymphadenopathy in this image?'  is_retry=False  question_type=yes_no  yes_no=True
+2026-04-10T20:23:12  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=3
+2026-04-10T20:23:12  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-10T20:23:14  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=medium  duration=2127ms
+2026-04-10T20:23:14  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the reported chest X-ray findings.', 'Looked for signs of hilar enlargement or mass-like hilar fullness.', 'Noted that the analysis describes bibasilar opacities and mild cardiomegaly, but no hilar abnormality.']
+2026-04-10T20:23:14  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Frontal chest radiograph with visible hila/mediastinum', 'No reported lobulated hilar fullness or enlarged hilar contours', 'Findings limited to low lung volumes, mild bibasilar hazy opacities, and mildly enlarged cardiomediastinal silhouette']
+2026-04-10T20:23:14  DEBUG     medvqa.agents.reasoning_agent  Limitations: The image analysis is a summary rather than direct pixel-level review, so subtle hilar enlargement could be missed.
+2026-04-10T20:23:14  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=medium  duration=2156ms
+2026-04-10T20:23:15  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T20:23:15  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='do you see hylar lymphadenopathy in this image?'  question_type=yes_no
+2026-04-10T20:23:17  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=5/5  duration=1603ms
+2026-04-10T20:23:17  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-10T20:23:17  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer 'no' matches the yes/no question and is consistent with the provided visual summary, which does not describe hilar enlargement or lymphadenopathy. The explanation is grounded in the reported findings, though it relies on the summary rather than directly naming visible hilar assessment. Overall, it is medically plausible and appropriately formatted.
+2026-04-10T20:23:17  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=1631ms
+2026-04-10T20:23:17  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-10T20:23:17  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-10T20:23:17  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=5/5
+2026-04-10T20:23:17  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-10T20:23:17  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=19982ms
+2026-04-10T20:23:17  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='no'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-10T20:23:17  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-10T20:23:17  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-10T20:23:17  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  retries=0  total_duration=19989ms ===
+2026-04-10T20:23:17  INFO      medvqa.routes.dataset  Sample 1844 analysis complete  baseline=3457ms  workflow=4275ms  agentic=19994ms  total=19994ms
+2026-04-10T20:23:17  INFO      medvqa.routes.dataset  Sample 1844 answers  baseline='No, I do not see definite hilar lymphadenopathy.'  workflow='No'  agentic='no'  ground_truth='yes'

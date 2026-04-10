@@ -1,0 +1,66 @@
+2026-04-10T20:21:41  INFO      medvqa.routes.dataset  Cache MISS for sample 2021  question='what are the bright specks in the gallbladder'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T20:21:41  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=269293 bytes  question='what are the bright specks in the gallbladder'
+2026-04-10T20:21:41  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what are the bright specks in the gallbladder'  mime_type=image/png  size=269293 bytes ===
+2026-04-10T20:21:41  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T20:21:41  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=269293 bytes)
+2026-04-10T20:21:42  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T20:21:42  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=269293 bytes)
+2026-04-10T20:21:42  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Gallstones (calcified stones) in the gallbladder.",
+  "explanation": "This is an abdominal CT scan showing bright hyperdense material within the gallbladder, which is typical of calcified gallstones.",
+  "confidence": "high"
+}
+2026-04-10T20:21:42  INFO      medvqa.agents.baseline  Baseline done  answer='Gallstones (calcified stones) in the gallbladder.'  confidence=high  duration=1634ms
+2026-04-10T20:21:43  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=upper abdomen  quality=good  findings=4  duration=2519ms
+2026-04-10T20:21:43  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver, spleen, kidneys, and adjacent upper abdominal structures are visible on a single slice, with a large contrast-filled stomach/upper GI structure occupying the left upper abdomen of the image.
+2026-04-10T20:21:43  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large round contrast-filled structure in the left upper abdomen', 'Small cluster of high-density material within a rounded low-density structure in the right upper abdomen', 'Visible enhancement of the liver and both kidneys', 'No free air or large fluid collection visible on this slice']
+2026-04-10T20:21:43  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what are the bright specks in the gallbladder'
+2026-04-10T20:21:43  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T20:21:45  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=True  clarity=ambiguous  duration=1199ms
+2026-04-10T20:21:45  DEBUG     medvqa.agents.question_analyzer  Target entity: bright specks in the gallbladder  Expected format: short_phrase  Rephrased: What are the bright specks seen in the gallbladder on the CT image?
+2026-04-10T20:21:45  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what are the bright specks in the gallbladder'  modality=CT  body_region=upper abdomen  question_type=abnormality_description
+2026-04-10T20:21:45  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['gallbladder']
+2026-04-10T20:21:45  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-10T20:21:45  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Large round contrast-filled structure in the left upper abdomen; Small cluster o'  confidence=medium  question_type=abnormality_description  duration=3848ms
+2026-04-10T20:21:45  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=upper abdomen  quality=good  findings=5  duration=3035ms
+2026-04-10T20:21:45  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial CT image of the upper abdomen showing the liver on the right side of the image, the stomach and spleen on the left, and both kidneys posteriorly. The contrast-enhanced abdominal organs and major vessels are visible on a single cross-sectional slice.
+2026-04-10T20:21:45  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Large fluid-filled rounded structure occupies much of the left upper abdomen', 'Small bright calcified focus is seen within the gallbladder area', 'Liver shows a few tiny bright punctate foci', 'Both kidneys are partially visualized and enhance symmetrically', 'No free air is visible on this slice']
+2026-04-10T20:21:45  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=upper abdomen  duration=3068ms
+2026-04-10T20:21:46  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what are the bright specks in the gallbladder'
+2026-04-10T20:21:46  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what are the bright specks in the gallbladder'
+2026-04-10T20:21:46  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T20:21:47  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  reasoning=visual_recognition  med_knowledge=True  clarity=ambiguous  duration=1238ms
+2026-04-10T20:21:47  DEBUG     medvqa.agents.question_analyzer  Target entity: bright specks within the gallbladder  Expected format: short_phrase  Rephrased: What are the bright specks seen in the gallbladder on this CT image?
+2026-04-10T20:21:47  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1288ms
+2026-04-10T20:21:48  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T20:21:48  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  reasoning=visual_recognition  med_knowledge=True  modality=CT  region=upper abdomen
+2026-04-10T20:21:51  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=3193ms
+2026-04-10T20:21:51  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clean single-slice CT with clear organ anatomy and no described confounders or subtle pathology, so it fits an easy, direct visual-recognition case.
+2026-04-10T20:21:51  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=3236ms
+2026-04-10T20:21:53  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T20:21:53  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what are the bright specks in the gallbladder'  is_retry=False  question_type=abnormality_description  yes_no=False
+2026-04-10T20:21:53  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-10T20:21:55  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Gallstone'  confidence=high  duration=2157ms
+2026-04-10T20:21:55  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the target as the bright speck within the gallbladder.', 'Matched the described finding to a small bright calcified focus in the gallbladder area on CT.', 'Interpreted the hyperdense calcified focus as a gallstone.']
+2026-04-10T20:21:55  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Small bright calcified focus is seen within the gallbladder area', 'CT modality showing hyperdense calcification clearly', 'Target entity is the gallbladder']
+2026-04-10T20:21:55  DEBUG     medvqa.agents.reasoning_agent  Limitations: Single-slice CT description; no additional views provided to assess mobility or confirm on multiple planes.
+2026-04-10T20:21:55  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Gallstone'  confidence=high  duration=2208ms
+2026-04-10T20:21:56  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T20:21:56  INFO      medvqa.agents.verification_agent  Verifying answer='Gallstone'  question='what are the bright specks in the gallbladder'  question_type=abnormality_description
+2026-04-10T20:21:59  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=3/5  duration=2798ms
+2026-04-10T20:21:59  WARNING   medvqa.agents.verification_agent  Verification issues: ['The answer is plausible for a bright focus in the gallbladder, but the provided image analysis does not explicitly confirm a gallstone or calcification.', "The explanation references a specific CT finding ('small bright calcified focus within the gallbladder area') that is not directly verified by the image analysis summary.", 'The confidence is stated as high despite limited evidence in the supplied image interpretation.']
+2026-04-10T20:21:59  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-10T20:21:59  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct short-phrase format and is medically plausible, but the explanation overstates certainty beyond what is supported by the provided visual summary. A cautious phrasing would be more appropriate.
+2026-04-10T20:21:59  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2855ms
+2026-04-10T20:21:59  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed', 'partially_verified']
+2026-04-10T20:21:59  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-10T20:21:59  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-10T20:21:59  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-10T20:21:59  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Gallstone'  verification=partially_verified  guardrail_flag=False  consistency=low  cross_modal=low  duration=18025ms
+2026-04-10T20:21:59  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Gallstone'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-10T20:21:59  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-10T20:21:59  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-10T20:21:59  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Gallstone'  retries=0  total_duration=18033ms ===
+2026-04-10T20:21:59  INFO      medvqa.routes.dataset  Sample 2021 analysis complete  baseline=1640ms  workflow=3852ms  agentic=18036ms  total=18039ms
+2026-04-10T20:21:59  INFO      medvqa.routes.dataset  Sample 2021 answers  baseline='Gallstones (calcified stones) in the gallbladder.'  workflow='Large round contrast-filled structure in the left upper abdo'  agentic='Gallstone'  ground_truth='gallstones'

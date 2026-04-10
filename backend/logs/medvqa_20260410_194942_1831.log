@@ -1,0 +1,66 @@
+2026-04-10T19:55:03  INFO      medvqa.routes.dataset  Cache MISS for sample 1831  question='are the lateral ventricles visible?'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T19:55:03  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=191512 bytes  question='are the lateral ventricles visible?'
+2026-04-10T19:55:03  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are the lateral ventricles visible?'  mime_type=image/png  size=191512 bytes ===
+2026-04-10T19:55:03  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T19:55:03  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=191512 bytes)
+2026-04-10T19:55:04  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T19:55:04  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=191512 bytes)
+2026-04-10T19:55:05  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Yes, the lateral ventricles are visible.",
+  "explanation": "This is an axial brain MRI, and the paired lateral ventricles can be seen near the center of the image as dark, symmetric CSF spaces.",
+  "confidence": "high"
+}
+2026-04-10T19:55:05  INFO      medvqa.agents.baseline  Baseline done  answer='Yes, the lateral ventricles are visible.'  confidence=high  duration=1339ms
+2026-04-10T19:55:06  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=4  duration=2281ms
+2026-04-10T19:55:06  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial brain MRI image showing the intracranial contents with both cerebral hemispheres and ventricular structures visible. Several rounded areas of abnormal signal are present in both sides of the brain, along with a larger central abnormal area near the deep midline structures.
+2026-04-10T19:55:06  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple rounded areas of altered signal are visible in both cerebral hemispheres.', 'A larger irregular area of altered signal is present near the central deep brain region.', 'Several lesions show a brighter outer rim with a darker central area.', 'Mild surrounding brightness is seen around some of the lesions.']
+2026-04-10T19:55:06  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the lateral ventricles visible?'
+2026-04-10T19:55:06  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:55:06  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=4  duration=2361ms
+2026-04-10T19:55:06  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial brain MRI image showing both cerebral hemispheres with the ventricular system visible near the midline. Multiple rounded areas of abnormal signal are present in the supratentorial brain, including bilateral deep gray and cortical-subcortical regions.
+2026-04-10T19:55:06  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Multiple rounded ring-like bright areas are visible in both cerebral hemispheres', 'Several lesions are seen in the basal ganglia/deep brain regions', 'A rounded abnormal area is present near the midline in the posterior deep brain region', 'Mild surrounding dark signal is visible around several of the bright foci']
+2026-04-10T19:55:06  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain  duration=2389ms
+2026-04-10T19:55:07  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1073ms
+2026-04-10T19:55:07  DEBUG     medvqa.agents.question_analyzer  Target entity: lateral ventricles  Expected format: yes_no  Rephrased: Are the lateral ventricles visible in the image?
+2026-04-10T19:55:07  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are the lateral ventricles visible?'  modality=MRI  body_region=brain  question_type=yes_no
+2026-04-10T19:55:07  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['lateral ventricles']
+2026-04-10T19:55:07  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-10T19:55:07  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=high  question_type=yes_no  duration=3421ms
+2026-04-10T19:55:07  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are the lateral ventricles visible?'
+2026-04-10T19:55:08  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the lateral ventricles visible?'
+2026-04-10T19:55:08  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:55:09  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1167ms
+2026-04-10T19:55:09  DEBUG     medvqa.agents.question_analyzer  Target entity: lateral ventricles  Expected format: yes_no  Rephrased: Are the lateral ventricles visible?
+2026-04-10T19:55:09  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=1206ms
+2026-04-10T19:55:10  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T19:55:10  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=visual_recognition  med_knowledge=False  modality=MRI  region=brain
+2026-04-10T19:55:11  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1360ms
+2026-04-10T19:55:11  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a clean, image-grounded yes/no brain MRI case with obvious abnormal signal and no major ambiguity, so it should be handled as an easy no-retrieval study.
+2026-04-10T19:55:11  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1385ms
+2026-04-10T19:55:13  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T19:55:13  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are the lateral ventricles visible?'  is_retry=False  question_type=yes_no  yes_no=True
+2026-04-10T19:55:13  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-10T19:55:13  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-10T19:55:15  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='yes'  confidence=high  duration=1592ms
+2026-04-10T19:55:15  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Checked the provided image analysis for listed visible structures.', 'Confirmed that the ventricular system is visible near the midline.', 'Noted that the lateral ventricles are explicitly included among the visible structures.']
+2026-04-10T19:55:15  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Visible structures: cerebral hemispheres, lateral ventricles, basal ganglia, deep white matter, skull outline', 'Visual summary stating the ventricular system is visible near the midline']
+2026-04-10T19:55:15  DEBUG     medvqa.agents.reasoning_agent  Limitations: The answer is based on the provided image analysis rather than direct pixel inspection.
+2026-04-10T19:55:15  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='yes'  confidence=high  duration=1623ms
+2026-04-10T19:55:15  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T19:55:16  INFO      medvqa.agents.verification_agent  Verifying answer='yes'  question='are the lateral ventricles visible?'  question_type=yes_no
+2026-04-10T19:55:17  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1522ms
+2026-04-10T19:55:17  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-10T19:55:17  DEBUG     medvqa.agents.verification_agent  Verification notes: The question is a yes/no query, and the answer 'yes' directly matches it. The explanation is grounded in the provided visual analysis, which explicitly states that the ventricular system and lateral ventricles are visible. No contradictions or overstatement are present.
+2026-04-10T19:55:17  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1553ms
+2026-04-10T19:55:17  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed']
+2026-04-10T19:55:17  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-10T19:55:17  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-10T19:55:17  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-10T19:55:17  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='yes'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=13802ms
+2026-04-10T19:55:17  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='yes'  verification=verified  confidence=High  flag_review=False
+2026-04-10T19:55:17  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-10T19:55:17  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-10T19:55:17  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='yes'  retries=0  total_duration=13807ms ===
+2026-04-10T19:55:17  INFO      medvqa.routes.dataset  Sample 1831 analysis complete  baseline=1343ms  workflow=3425ms  agentic=13811ms  total=13811ms
+2026-04-10T19:55:17  INFO      medvqa.routes.dataset  Sample 1831 answers  baseline='Yes, the lateral ventricles are visible.'  workflow='Yes'  agentic='yes'  ground_truth='yes'

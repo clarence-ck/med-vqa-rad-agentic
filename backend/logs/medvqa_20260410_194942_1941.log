@@ -1,0 +1,112 @@
+2026-04-10T20:15:31  INFO      medvqa.routes.dataset  Cache MISS for sample 1941  question='the lesion seen in the image above is isointense to what object that is normally'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T20:15:31  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=227847 bytes  question='the lesion seen in the image above is isointense to what object that is normally found in the brain?'
+2026-04-10T20:15:31  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='the lesion seen in the image above is isointense to what object that is normally found in the brain?'  mime_type=image/png  size=227847 bytes ===
+2026-04-10T20:15:31  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T20:15:31  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=227847 bytes)
+2026-04-10T20:15:32  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T20:15:32  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=227847 bytes)
+2026-04-10T20:15:34  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=4  duration=2360ms
+2026-04-10T20:15:34  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial MRI image of the brain at the level of the temporal lobes and brainstem. The CSF appears bright, and the brain parenchyma is well visualized with symmetric overall appearance on this slice.
+2026-04-10T20:15:34  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Axial slice through the lower brain showing both temporal lobes and the brainstem region', 'Bright fluid signal within the ventricles and surrounding CSF spaces', 'Symmetric appearance of the cerebral hemispheres on this image', 'No obvious large mass effect or midline shift visible on this single slice']
+2026-04-10T20:15:34  INFO      medvqa.agents.question_analyzer  Analyzing question: 'the lesion seen in the image above is isointense to what object that is normally found in the brain?'
+2026-04-10T20:15:34  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T20:15:34  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "Gray matter",
+  "explanation": "This is an axial brain MRI, and the lesion is described as isointense to gray matter. On MRI, many lesions are compared to the signal of normal brain gray matter.",
+  "confidence": "high"
+}
+2026-04-10T20:15:34  INFO      medvqa.agents.baseline  Baseline done  answer='Gray matter'  confidence=high  duration=2640ms
+2026-04-10T20:15:35  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=head/brain  quality=good  findings=5  duration=2380ms
+2026-04-10T20:15:35  DEBUG     medvqa.agents.image_interpreter  Visual summary: This is an axial MRI image of the brain at the level of the temporal lobes and brainstem. The image shows the intracranial structures with clear soft-tissue contrast and surrounding skull/scalp tissues.
+2026-04-10T20:15:35  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Axial slice through the basal brain and posterior fossa', 'Bright signal within the cerebrospinal fluid spaces', 'Symmetric appearance of the left and right cerebral hemispheres on this slice', 'Visible brainstem in the central posterior fossa', 'Orbits partially included at the superior anterior edges']
+2026-04-10T20:15:35  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=head/brain  duration=2416ms
+2026-04-10T20:15:35  INFO      medvqa.agents.question_analyzer  Question analysis done  type=comparison  reasoning=medical_knowledge  med_knowledge=True  clarity=clear  duration=1176ms
+2026-04-10T20:15:35  DEBUG     medvqa.agents.question_analyzer  Target entity: the lesion's MRI signal intensity relative to a normal brain structure  Expected format: short_phrase  Rephrased: What normal brain structure has the same signal intensity as the lesion seen in the image?
+2026-04-10T20:15:35  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='the lesion seen in the image above is isointense to what object that is normally found in the brain?'  modality=MRI  body_region=brain  question_type=comparison
+2026-04-10T20:15:35  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-10T20:15:35  DEBUG     medvqa.agents.workflow_baseline  Branch taken: fallback/other
+2026-04-10T20:15:35  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Axial MRI image of the brain at the level of the temporal lobes and brainstem. T'  confidence=low  question_type=comparison  duration=3594ms
+2026-04-10T20:15:36  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='the lesion seen in the image above is isointense to what object that is normally'
+2026-04-10T20:15:36  INFO      medvqa.agents.question_analyzer  Analyzing question: 'the lesion seen in the image above is isointense to what object that is normally found in the brain?'
+2026-04-10T20:15:36  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T20:15:37  INFO      medvqa.agents.question_analyzer  Question analysis done  type=comparison  reasoning=medical_knowledge  med_knowledge=True  clarity=ambiguous  duration=1229ms
+2026-04-10T20:15:37  DEBUG     medvqa.agents.question_analyzer  Target entity: lesion's signal intensity relative to a normal intracranial structure  Expected format: short_phrase  Rephrased: What normal brain structure is the lesion isointense to on this MRI?
+2026-04-10T20:15:37  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=comparison  duration=1264ms
+2026-04-10T20:15:38  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T20:15:38  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=comparison  reasoning=medical_knowledge  med_knowledge=True  modality=MRI  region=head/brain
+2026-04-10T20:15:39  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1427ms
+2026-04-10T20:15:39  DEBUG     medvqa.agents.difficulty_router  Routing rationale: The MRI anatomy is clear, but the task is not a direct visual spot diagnosis and the comparison-based, ambiguous question requires external context to answer confidently.
+2026-04-10T20:15:39  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  duration=1456ms
+2026-04-10T20:15:41  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-10T20:15:41  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='the lesion seen in the image above is isointense to what object that is normally found in the brain?'  modality=MRI  body_region=head/brain  question_type=comparison  target_entity=lesion's signal intensity relative to a normal intracranial structure  advanced_rag=True
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='normal' from notable_findings
+2026-04-10T20:15:41  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=the lesion seen in the image above is isointense to what object that is normally found in the brain? | modality=MRI | body_region=head/brain | finding=normal | rerank=mandatory
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag  Using structured query profile (no LLM rewrite): the lesion seen in the image above is isointense to what object that is normally found in the brain? | question_type=comparison | question_family=medical_knowledge | target_entity=lesion's signal intensity relative to a normal intracranial…
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='MRI': 87 matches
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='head/brain': 57 matches
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 46 matches
+2026-04-10T20:15:41  INFO      medvqa.agents.advanced_rag  Metadata filter result: 42 candidates (modality(87) + body_region(57) + finding(46))
+2026-04-10T20:15:41  INFO      medvqa.agents.advanced_rag  Metadata filter: 42 candidates retained
+2026-04-10T20:15:41  INFO      medvqa.agents.advanced_rag  Dense retrieval: top_k=10
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 42 candidates
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/10
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag    1. id=306 score=0.7409 | concept_type=explanation concept=brain edema, brain enhancing tumor, brain non-enh… | Q: What disease is/are shown on the left of brain? | A: Brain Edema, Brain Enhancing Tumor, Brain Non-enhancing Tumor
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag    2. id=307 score=0.7402 | concept_type=explanation concept=brain edema, brain enhancing tumor, brain non-enh… | Q: What disease is/are shown on the right of brain? | A: Brain Edema, Brain Enhancing Tumor, Brain Non-enhancing Tumor
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag    3. id=301 score=0.7375 | concept_type=explanation concept=brain enhancing tumor, brain edema, brain non-enh… | Q: What disease is/are shown on the right of brain? | A: Brain Enhancing Tumor, Brain Edema, Brain Non-enhancing Tumor
+2026-04-10T20:15:41  INFO      medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=10
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 42 candidates
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/10
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag    1. id=315 score=18.9546 | concept_type=laterality concept=left | Q: What is the main cause of the disease on the left lobe of brain in this picture? | A: Craniocerebral injury, intracranial space-occupying lesions, intracranial inflammation, c…
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag    2. id=302 score=16.3855 | concept_type=presence_absence concept=normal | Q: Is/Are there abnormalities in the patient's right brain lobe? | A: No
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag    3. id=311 score=16.3855 | concept_type=presence_absence concept=normal | Q: Is/Are there abnormalities in the patient's left brain lobe? | A: Yes
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=10 sparse=10
+2026-04-10T20:15:41  INFO      medvqa.agents.advanced_rag  Hybrid RRF merge produced 10 unique candidates
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/10
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag    1. id=268 score=0.0299 method=hybrid_rrf | concept_type=anatomy concept=head | Q: Is brain tumor white or gray relative to other tissues? | A: Gray
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag    2. id=270 score=0.0294 method=hybrid_rrf | concept_type=anatomy concept=head | Q: What kind of symptoms will the disease on the right lobe of brain in the picture bring to the patie… | A: Visual impairment, vomiting, tinnitus, increased intracranial pressure
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag    3. id=306 score=0.0164 method=hybrid_rrf | concept_type=explanation concept=brain edema, brain enhancing tumor, brain non-enh… | Q: What disease is/are shown on the left of brain? | A: Brain Edema, Brain Enhancing Tumor, Brain Non-enhancing Tumor
+2026-04-10T20:15:41  INFO      medvqa.agents.advanced_rag  Reranking 10 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-10T20:15:41  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 10 candidates...
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag    1. id=315 score=-3.2080 method=reranked softmax=0.5082 | concept_type=laterality concept=left | Q: What is the main cause of the disease on the left lobe of brain in this picture? | A: Craniocerebral injury, intracranial space-occupying lesions, intracranial inflammation, c…
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag    2. id=302 score=-4.7273 method=reranked softmax=0.0997 | concept_type=presence_absence concept=normal | Q: Is/Are there abnormalities in the patient's right brain lobe? | A: No
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag    3. id=237 score=-4.7733 method=reranked softmax=0.0887 | concept_type=presence_absence concept=normal | Q: Does the brain look abnormal? | A: Yes
+2026-04-10T20:15:41  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=medium weak_signals=1 top1_softmax=0.508 margin=0.409 dense_top1=0.741 agreement=False
+2026-04-10T20:15:41  WARNING   medvqa.agents.advanced_rag  Retrieval confidence is medium; returning results
+2026-04-10T20:15:41  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag    1. id=315 score=-3.2080 method=reranked softmax=0.5082 | concept_type=laterality concept=left | Q: What is the main cause of the disease on the left lobe of brain in this picture? | A: Craniocerebral injury, intracranial space-occupying lesions, intracranial inflammation, c…
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag    2. id=302 score=-4.7273 method=reranked softmax=0.0997 | concept_type=presence_absence concept=normal | Q: Is/Are there abnormalities in the patient's right brain lobe? | A: No
+2026-04-10T20:15:41  DEBUG     medvqa.agents.advanced_rag    3. id=237 score=-4.7733 method=reranked softmax=0.0887 | concept_type=presence_absence concept=normal | Q: Does the brain look abnormal? | A: Yes
+2026-04-10T20:15:41  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases
+2026-04-10T20:15:45  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  key_facts=4  rag_cases=3  duration=4109ms
+2026-04-10T20:15:45  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['MRI signal intensity is sequence-dependent, so a lesion can be isointense on one sequence and different on another.', 'Normal brain parenchyma provides the main internal reference for comparison in head MRI.', 'Isointense means the lesion has similar signal intensity to the chosen comparator tissue.', 'Temporal lobes, brainstem, cerebellum, and orbital structures are common anatomic landmarks on brain MRI.']
+2026-04-10T20:15:45  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On brain MRI, lesions are often compared with normal intracranial reference structures such as gray matter, white matter, cerebrospinal fluid, or sometimes the brainstem/cerebellum depending on the se
+2026-04-10T20:15:45  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  key_facts=4  rag_cases=3  duration=4138ms
+2026-04-10T20:15:47  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T20:15:47  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='the lesion seen in the image above is isointense to what object that is normally found in the brain?'  is_retry=False  question_type=comparison  yes_no=False
+2026-04-10T20:15:47  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=3
+2026-04-10T20:15:49  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='brain parenchyma'  confidence=medium  duration=2302ms
+2026-04-10T20:15:49  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified the modality as brain MRI.', 'Noted that the question asks for the normal structure used for signal comparison.', 'Used the standard MRI reference tissue in the brain: surrounding brain parenchyma.', 'Selected the most direct answer consistent with the image analysis.']
+2026-04-10T20:15:49  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['MRI of the head/brain', 'Visible brain parenchyma on the slice', 'Question asks for a normal intracranial comparator for lesion signal intensity', 'Supporting knowledge that brain parenchyma is the main internal reference on head MRI']
+2026-04-10T20:15:49  DEBUG     medvqa.agents.reasoning_agent  Limitations: The provided image analysis does not specify the exact lesion or MRI sequence, so the comparator is inferred from standard brain MRI practice.
+2026-04-10T20:15:49  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='brain parenchyma'  confidence=medium  duration=2332ms
+2026-04-10T20:15:50  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T20:15:50  INFO      medvqa.agents.verification_agent  Verifying answer='brain parenchyma'  question='the lesion seen in the image above is isointense to what object that is normally'  question_type=comparison
+2026-04-10T20:15:53  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=5/5  duration=2589ms
+2026-04-10T20:15:53  WARNING   medvqa.agents.verification_agent  Verification issues: ["The answer is plausible but somewhat generic; 'brain parenchyma' is a standard comparison target, yet the image analysis does not explicitly describe the lesion's signal relative to surrounding tissue.", 'No specific lesion type or sequence is provided, so the comparison cannot be independently confirmed from the available evidence.']
+2026-04-10T20:15:53  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-10T20:15:53  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is consistent with the question format and the available brain MRI context. However, the exact isointensity relationship is not directly verifiable from the provided image analysis, so the answer should be treated as plausible rather than fully confirmed.
+2026-04-10T20:15:53  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2622ms
+2026-04-10T20:15:53  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-10T20:15:53  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=add_disclaimer  disclaimer=True
+2026-04-10T20:15:53  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=5/5
+2026-04-10T20:15:53  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-10T20:15:53  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='brain parenchyma'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=21275ms
+2026-04-10T20:15:53  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='brain parenchyma'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-10T20:15:53  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-10T20:15:53  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-10T20:15:53  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='brain parenchyma'  retries=0  total_duration=21279ms ===
+2026-04-10T20:15:53  INFO      medvqa.routes.dataset  Sample 1941 analysis complete  baseline=2644ms  workflow=3597ms  agentic=21283ms  total=21283ms
+2026-04-10T20:15:53  INFO      medvqa.routes.dataset  Sample 1941 answers  baseline='Gray matter'  workflow='Axial MRI image of the brain at the level of the temporal lo'  agentic='brain parenchyma'  ground_truth='csf'

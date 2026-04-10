@@ -1,0 +1,66 @@
+2026-04-10T19:53:10  INFO      medvqa.routes.dataset  Cache MISS for sample 1798  question='are the kidneys present in this image?'  refresh=False  running all 3 pipelines in parallel
+2026-04-10T19:53:10  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=310292 bytes  question='are the kidneys present in this image?'
+2026-04-10T19:53:10  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are the kidneys present in this image?'  mime_type=image/png  size=310292 bytes ===
+2026-04-10T19:53:10  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-10T19:53:10  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=310292 bytes)
+2026-04-10T19:53:11  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-10T19:53:11  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=310292 bytes)
+2026-04-10T19:53:12  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No, the kidneys are not present in this image.",
+  "explanation": "This is an axial CT image of the upper abdomen, showing organs like the liver, spleen, stomach, and vessels. The kidneys are located more posteriorly and lower in the abdomen, and are not included in this slice.",
+  "confidence": "high"
+}
+2026-04-10T19:53:12  INFO      medvqa.agents.baseline  Baseline done  answer='No, the kidneys are not present in this image.'  confidence=high  duration=1942ms
+2026-04-10T19:53:13  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=abdomen  quality=good  findings=5  duration=2633ms
+2026-04-10T19:53:13  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver, spleen, stomach, pancreas, and adjacent bowel loops are visible, along with the abdominal aorta and vertebral column.
+2026-04-10T19:53:13  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Axial cross-sectional view through the upper abdomen', 'Contrast-opacified major abdominal vessels are visible centrally', 'Air-filled bowel loops are present in the upper abdomen', 'Solid abdominal organs are well delineated on this slice', 'No motion blur or major artifact is evident']
+2026-04-10T19:53:13  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the kidneys present in this image?'
+2026-04-10T19:53:13  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:53:13  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=CT  body_region=upper abdomen  quality=good  findings=5  duration=2155ms
+2026-04-10T19:53:13  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial contrast-enhanced CT image of the upper abdomen. The liver occupies the right side of the image, with the stomach and spleen visible on the left side and central abdominal vessels and spine posteriorly.
+2026-04-10T19:53:13  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Axial cross-sectional view through the upper abdomen', 'Contrast-opacified vessels are visible in the central abdomen', 'Air-filled stomach and bowel loops are present in the upper abdomen', 'Solid abdominal organs are clearly delineated', 'No obvious external device or motion artifact is seen']
+2026-04-10T19:53:13  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=CT  region=upper abdomen  duration=2184ms
+2026-04-10T19:53:14  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1006ms
+2026-04-10T19:53:14  DEBUG     medvqa.agents.question_analyzer  Target entity: kidneys  Expected format: yes_no  Rephrased: Are the kidneys visible in this image?
+2026-04-10T19:53:14  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are the kidneys present in this image?'  modality=CT  body_region=abdomen  question_type=yes_no
+2026-04-10T19:53:14  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['kidneys']
+2026-04-10T19:53:14  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-10T19:53:14  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Yes'  confidence=high  question_type=yes_no  duration=3700ms
+2026-04-10T19:53:14  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are the kidneys present in this image?'
+2026-04-10T19:53:14  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the kidneys present in this image?'
+2026-04-10T19:53:14  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-10T19:53:15  INFO      medvqa.agents.question_analyzer  Question analysis done  type=yes_no  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1024ms
+2026-04-10T19:53:15  DEBUG     medvqa.agents.question_analyzer  Target entity: kidneys  Expected format: yes_no  Rephrased: Are the kidneys visible in this image?
+2026-04-10T19:53:15  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=yes_no  duration=1054ms
+2026-04-10T19:53:16  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-10T19:53:16  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=yes_no  reasoning=visual_recognition  med_knowledge=False  modality=CT  region=upper abdomen
+2026-04-10T19:53:17  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=easy  needs_retrieval=False  verification=standard  fallback=none  duration=1300ms
+2026-04-10T19:53:17  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a straightforward image-grounded upper abdominal CT case with uncomplicated anatomy and no indication of heavy overlap or artifact, so it should be routed as an easy no-retrieval decision.
+2026-04-10T19:53:17  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  duration=1326ms
+2026-04-10T19:53:18  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-10T19:53:18  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are the kidneys present in this image?'  is_retry=False  question_type=yes_no  yes_no=True
+2026-04-10T19:53:18  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-10T19:53:18  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=yes_no
+2026-04-10T19:53:20  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='yes'  confidence=high  duration=1562ms
+2026-04-10T19:53:20  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: 1. Reviewed the provided image analysis for listed visible structures. 2. Noted that kidneys are explicitly mentioned as visible. 3. Concluded that the kidneys are present in the image.
+2026-04-10T19:53:20  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Visible structures include kidneys', 'Axial contrast-enhanced CT of the upper abdomen', 'Solid abdominal organs are clearly delineated']
+2026-04-10T19:53:20  DEBUG     medvqa.agents.reasoning_agent  Limitations: The conclusion is based on the provided image analysis rather than direct pixel inspection.
+2026-04-10T19:53:20  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='yes'  confidence=high  duration=1591ms
+2026-04-10T19:53:20  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-10T19:53:20  INFO      medvqa.agents.verification_agent  Verifying answer='yes'  question='are the kidneys present in this image?'  question_type=yes_no
+2026-04-10T19:53:22  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1791ms
+2026-04-10T19:53:22  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-10T19:53:22  DEBUG     medvqa.agents.verification_agent  Verification notes: The question is a yes/no query, and the answer 'yes' is appropriate. The explanation is grounded in the provided visual analysis, which explicitly lists the kidneys as visible structures in the upper abdominal CT image. No contradictions or overstatement are present.
+2026-04-10T19:53:22  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1817ms
+2026-04-10T19:53:22  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['knowledge_retrieval_failed']
+2026-04-10T19:53:22  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-10T19:53:22  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-10T19:53:22  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-10T19:53:22  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='yes'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=12246ms
+2026-04-10T19:53:22  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='yes'  verification=verified  confidence=High  flag_review=False
+2026-04-10T19:53:22  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-10T19:53:22  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-10T19:53:22  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='yes'  retries=0  total_duration=12250ms ===
+2026-04-10T19:53:22  INFO      medvqa.routes.dataset  Sample 1798 analysis complete  baseline=1947ms  workflow=3703ms  agentic=12254ms  total=12256ms
+2026-04-10T19:53:22  INFO      medvqa.routes.dataset  Sample 1798 answers  baseline='No, the kidneys are not present in this image.'  workflow='Yes'  agentic='yes'  ground_truth='no'
