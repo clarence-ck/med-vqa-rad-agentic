@@ -273,6 +273,8 @@ Hugging Face is used to download the raw datasets via scripts. The retrieval sta
 
 ## Multimodal Grounding
 
+The system uses **two modalities**: **image** (medical radiology images) and **text** (natural language questions). These modalities interact through a structured pipeline where the image is processed once and its extracted features are consumed by downstream text-based reasoning stages.
+
 - **Image** — converted to base64 PNG and passed as an `ImageContent` block (base64 image + MIME type) to the Haystack vision generator
 - **Text** — user's natural language question
 
@@ -388,6 +390,54 @@ The following shapes describe the main inner `result` payload returned by each H
 
 ## Control and Failure Handling
 
+### Mechanisms for detecting errors or uncertainty
+
+The system detects errors and uncertainty through multiple mechanisms:
+
+1. **VerificationAgent (Agent 6)** — performs 5 structured checks:
+   - `answer_matches_question_type`: whether answer format matches expected type
+   - `format_appropriate`: whether answer is properly formatted
+   - `explanation_grounded_in_evidence`: whether explanation references visible evidence
+   - `answer_strength_appropriate`: whether answer strength is appropriate for the question
+   - `no_contradictions`: whether answer contains self-contradictory statements
+
+2. **Automatic failure categorization** — detects specific failure modes:
+   - `knowledge_retrieval_failed`: RAG retrieval returned no relevant chunks
+   - `reasoning_generation_unstable`: answer generation was unstable
+   - `unsupported_claim`: answer not grounded in visual evidence
+   - `low_confidence`: insufficient evidence for confident answer
+   - `partially_verified`: most checks passed with minor uncertainty
+   - `visual_contradiction`: answer contradicts image interpretation
+   - `question_answer_mismatch`: answer does not address the question
+   - `parser_failure`: JSON parsing error in agent output
+
+3. **Analysis signals** — computed from verification results:
+   - **Self-consistency signal** — ratio of passed verification checks (high/medium/low)
+   - **Cross-modal agreement** — derived from `explanation_grounded_in_evidence` and `no_contradictions` checks
+
+### Retry, self-critique, and fallback strategies
+
+#### Retry with self-critique
+- `run_pipeline()` evaluates the first result with `_should_retry_pipeline()`
+- Retry triggers on: `low_confidence`, `unsupported`, `should_flag_for_review`, or any high-severity failure
+- Second run receives `retry_context` in state (previous status, confidence, failure categories)
+- `ReasoningAgent` uses retry context to self-correct its answer generation
+- Best result selected by `_payload_score()`: verification rank → confidence rank → severity count → review flag
+
+#### Fallback policies (set by DifficultyRouter)
+- **easy** cases: `fallback_policy="none"` — no fallback needed
+- **medium** cases: `fallback_policy="add_disclaimer"` — add disclaimer to answer
+- **hard** cases: `fallback_policy="flag_for_review"` — flag case for manual review
+
+#### Guardrail logic
+The Guardrail combines `verification_status` + `failure_categories` to produce 5 final answer states:
+
+1. **Verified** (`verification_status == "verified"`) — answer shown directly
+2. **Partially Verified** (`verification_status == "partially_verified"`) — answer with minor uncertainty
+3. **Low Confidence** (`verification_status in {"low_confidence", "unsupported"}`) — guarded answer + disclaimer
+4. **Review** (`should_flag_for_review == true` or high-severity failures) — review recommended
+5. **Error** (ImageInterpreter auto-block) — non-radiology image rejected
+
 ### Verification status levels
 | Status | Meaning | Final State |
 |---|---|---|
@@ -396,15 +446,6 @@ The following shapes describe the main inner `result` payload returned by each H
 | `low_confidence` | Insufficient evidence for a confident answer | **Low Confidence** — guarded answer + disclaimer |
 | `unsupported` | Answer is not grounded in visible evidence | **Low Confidence** — guarded answer + disclaimer |
 | `rejected` (image abort) | Non-radiology image detected | **Error** — invalid image type |
-
-### Guardrail logic
-The Guardrail combines `verification_status` + `failure_categories` to produce 5 final answer states:
-
-1. **Verified** (`verification_status == "verified"`) — answer shown directly
-2. **Partially Verified** (`verification_status == "partially_verified"`) — answer with minor uncertainty
-3. **Low Confidence** (`verification_status in {"low_confidence", "unsupported"}`) — guarded answer + disclaimer
-4. **Review** (`should_flag_for_review == true` or high-severity failures) — review recommended
-5. **Error** (ImageInterpreter auto-block) — non-radiology image rejected
 
 - Disclaimer auto-inserted when verifier does not provide one
 - `flag_for_review` triggered by high-severity failure categories
@@ -435,6 +476,21 @@ The Guardrail combines `verification_status` + `failure_categories` to produce 5
 
 ## Evaluation Design
 
+### Task-specific success criteria
+
+The system evaluates success using task-specific criteria that account for the different answer types in medical VQA:
+
+- **Close-ended questions** (yes/no and binary medical assessments): Exact match after normalization
+  - Yes/no answers: normalized by trimming punctuation, responses starting with "yes" or "no" count as matches
+  - Binary medical assessments (normal/abnormal, present/absent, positive/negative, etc.): exact match only
+
+- **Open-ended questions** (non-binary ground truth): Semantic similarity threshold
+  - Uses `S-PubMedBert-MS-MARCO` embeddings for biomedical semantic similarity
+  - Threshold ≥ 0.85 cosine similarity for a match
+  - Lexical overlap (Token F1) computed as diagnostic metric but not used for accuracy
+
+- **Overall accuracy**: Combines close-ended (exact yes/no) and open-ended (semantic similarity ≥ 0.85) correctness per system
+
 ### Metrics computed per cached case
 - **Normalized answer match** — evaluation method depends on ground truth answer style:
   - **Close-ended** (yes/no and other binary medical assessments such as normal/abnormal, present/absent, positive/negative): yes/no answers are normalized by trimming punctuation and matching responses that start with `yes` or `no`; other binary medical assessments use exact match only
@@ -457,6 +513,20 @@ The Guardrail combines `verification_status` + `failure_categories` to produce 5
 2. Subsequent opens serve from cache — use the **Refresh** button to force a re-run
 3. The Evaluation tab reads all cache files and computes the aggregate summary live
 4. `scripts/run_case_explorer_cache.py` can warm or inspect the curated Case Explorer cache (`--refresh`, `--all`, `--dry-run`, `--status`)
+
+### Failure case analysis
+
+The system performs failure case analysis using multiple complementary methods:
+
+- **Self-consistency checks** — The VerificationAgent performs 5 structured checks (answer_matches_question_type, format_appropriate, explanation_grounded_in_evidence, answer_strength_appropriate, no_contradictions). The self-consistency signal is computed as the ratio of passed checks (high/medium/low) and is displayed in the Evaluation UI.
+
+- **Cross-modal agreement checks** — The system evaluates agreement between the visual interpretation (image modality) and the final answer (text modality). This is derived from the verification checks `explanation_grounded_in_evidence` and `no_contradictions`, producing a cross-modal agreement level (high/medium/low) displayed in the Evaluation UI.
+
+- **Verifier models** — Agent 6 (VerificationAgent) serves as the dedicated verifier model, running an OpenAI-backed LLM to perform structured verification of the final answer against the image evidence. The verifier outputs a verification status (verified/partially_verified/low_confidence/unsupported) and identifies specific failure categories.
+
+- **Disagreement analysis** — The system compares outputs across all three methods (baseline, workflow, agentic) using `S-PubMedBert-MS-MARCO` semantic similarity. A 3-system disagreement rate is computed as the percentage of cases where systems produce semantically different answers (similarity < 0.85). The Evaluation UI shows a "Winner" tag (baseline/workflow/agentic/tie) and disagreement status for each case.
+
+These failure analysis signals are displayed in the "Recent Evaluated Cases" table of the Evaluation UI, with columns for verification status, self-consistency level, cross-modal agreement level, and disagreement status.
 
 ### Systems compared
 | System | File | Approach |
