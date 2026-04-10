@@ -207,7 +207,7 @@ These are routing outcomes, not fixed question-type rules; the actual `Difficult
 | 2 | **Dense Retrieval** | FAISS + `NeuML/pubmedbert-base-embeddings` | Semantic similarity search on 768-dim normalized biomedical embeddings |
 | 3 | **Sparse Retrieval** | BM25Okapi | Lexical matching for exact medical terms |
 | 4 | **Hybrid Fusion** | Reciprocal Rank Fusion (RRF) | Merge rankings without score calibration (k=60) |
-| 5 | **Cross-encoder Reranking** | `BAAI/bge-reranker-small` | Fine-grained biomedical-compatible relevance scoring (smaller footprint) |
+| 5 | **Cross-encoder Reranking** | `cross-encoder/ms-marco-MiniLM-L-6-v2` | Lightweight relevance scoring (22M params) for fast reranking |
 | 6 | **Confidence Gating** | 4-signal thresholding | Accept only high-quality retrievals, reject weak matches |
 
 #### Confidence-Based Validation
@@ -247,7 +247,7 @@ This graceful degradation prevents over-filtering while still using metadata whe
 
 ### Model Configuration
 
-The current runtime uses OpenAI for all LLM-driven stages. The Advanced RAG retrieval stack additionally uses local SentenceTransformers, a CrossEncoder reranker, FAISS, and BM25 models. The retrieval stack is configured for the English-only SLAKE KB with `NeuML/pubmedbert-base-embeddings` and `BAAI/bge-reranker-small`. The evaluation scorer uses `S-PubMedBert-MS-MARCO` (`pritamdeka/S-PubMedBert-MS-MARCO`) for semantic similarity on open-ended answers.
+The current runtime uses OpenAI for all LLM-driven stages. The Advanced RAG retrieval stack additionally uses local SentenceTransformers, a CrossEncoder reranker, FAISS, and BM25 models. The retrieval stack is configured for the English-only SLAKE KB with `NeuML/pubmedbert-base-embeddings` and `cross-encoder/ms-marco-MiniLM-L-6-v2`. The evaluation scorer uses `S-PubMedBert-MS-MARCO` (`pritamdeka/S-PubMedBert-MS-MARCO`) for semantic similarity on open-ended answers.
 
 | Env vars | Used by |
 |---|---|
@@ -564,7 +564,7 @@ Hit **Refresh Metrics** to re-aggregate after running new cases in Case Explorer
 | Downloaded manifest | `data/slake/slake.json` |
 | KB output | `data/slake/kb/slake_kb.jsonl` / `.json` / `_summary.json` |
 | Retrieval corpus | 366 English-only concept chunks |
-| Retrieval models | `NeuML/pubmedbert-base-embeddings` + `BAAI/bge-reranker-small` |
+| Retrieval models | `NeuML/pubmedbert-base-embeddings` + `cross-encoder/ms-marco-MiniLM-L-6-v2` |
 
 VQA-RAD is used for the app's Case Explorer browsing and evaluation cache. SLAKE train split is used as the retrieval corpus for the Advanced RAG pipeline — no VQA-RAD cases are used in the retrieval index.
 

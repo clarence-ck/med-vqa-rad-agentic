@@ -48,7 +48,7 @@ class AdvancedRAGRetriever:
     def __init__(
         self,
         embedding_model: str = "NeuML/pubmedbert-base-embeddings",
-        cross_encoder_model: str = "BAAI/bge-reranker-small",
+        cross_encoder_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2",
         top_k_dense: int = 10,
         top_k_sparse: int = 10,
         top_k_final: int = 3,
