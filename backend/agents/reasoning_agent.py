@@ -1,4 +1,5 @@
 import json
+import re
 import time
 from typing import Dict, Any
 from haystack import component
@@ -23,6 +24,98 @@ class ReasoningAgent:
             api_key=Secret.from_token(OPENAI_API_KEY),
             model=OPENAI_MODEL,
         )
+
+    def _normalize_yes_no_answer(self, answer: str, question_text: str) -> str:
+        text = (answer or "").strip().lower()
+        question = (question_text or "").strip().lower()
+
+        if not text:
+            return answer
+
+        if text.startswith("yes"):
+            return "yes"
+        if text.startswith("no"):
+            return "no"
+
+        positive_markers = {
+            "normal", "present", "visible", "seen", "identifiable", "well-defined", "well defined",
+            "enlarged", "abnormal", "ring-enhancing", "ring enhancing", "positive",
+        }
+        negative_markers = {
+            "absent", "negative", "not seen", "not visible", "cannot determine", "indeterminate",
+        }
+
+        if any(marker in text for marker in negative_markers):
+            return "no"
+        if any(marker in text for marker in positive_markers):
+            return "yes"
+
+        if question.startswith(("is ", "are ", "was ", "were ", "do ", "does ", "did ")):
+            return "yes" if "not" not in text and "no" not in text else "no"
+
+        return answer
+
+    def _normalize_location_answer(self, answer: str, question_text: str, image_interpretation: dict, question_analysis: dict) -> str:
+        text = (answer or "").strip().lower()
+        question = (question_text or "").strip().lower()
+        body_region = (image_interpretation or {}).get("body_region", "")
+        target = (question_analysis or {}).get("target_entity", "")
+
+        if not text:
+            return answer
+
+        direction_only = text in {"left", "right", "bilateral", "midline"}
+        if direction_only:
+            hints = [question, target.lower(), str(body_region).lower()]
+            if any("lung" in hint for hint in hints):
+                return f"{text} lung"
+            if any("kidney" in hint for hint in hints):
+                return f"{text} kidney"
+            if any("hemisphere" in hint for hint in hints):
+                return f"{text} hemisphere"
+            if any("upper lobe" in hint for hint in hints):
+                return f"{text} upper lobe"
+
+        if body_region and text in {"brain", "chest", "abdomen", "pelvis", "head", "neck", "musculoskeletal"}:
+            return body_region
+
+        return answer
+
+    def _normalize_final_answer(self, result: dict, qa: dict, vs: dict, original_question: str) -> dict:
+        normalized = dict(result or {})
+        answer = normalized.get("answer", "")
+        question_type = (qa or {}).get("question_type", "")
+        expected_format = (qa or {}).get("expected_answer_format", "")
+
+        if expected_format == "yes_no" or question_type in {"yes_no", "presence_absence"}:
+            normalized["answer"] = self._normalize_yes_no_answer(answer, original_question)
+        elif question_type == "location":
+            normalized["answer"] = self._normalize_location_answer(answer, original_question, vs, qa)
+        elif question_type == "anatomy_identification":
+            body_region = (vs or {}).get("body_region", "")
+            generic_labels = {
+                "nervous system", "central nervous system", "respiratory system", "circulatory system",
+                "musculoskeletal system", "digestive system", "urinary system", "reproductive system",
+            }
+            if body_region and (normalize := normalized.get("answer", "").strip().lower()) in generic_labels:
+                normalized["answer"] = body_region
+
+        return normalized
+
+    def _build_style_guidance(self, question_type: str, expected_format: str, vs: dict) -> str:
+        body_region = (vs or {}).get("body_region", "unknown")
+        modality = (vs or {}).get("modality", "unknown")
+        guidance = [
+            "- Prefer the most direct, image-grounded answer that matches the question wording.",
+            "- Avoid vague abstentions when the image analysis already supports a concrete response.",
+        ]
+        if expected_format == "yes_no" or question_type in {"yes_no", "presence_absence"}:
+            guidance.append("- For yes/no questions, the answer must be exactly yes or no; do not use synonyms like normal/abnormal, present/absent, or positive/negative.")
+        if question_type == "location":
+            guidance.append("- For location questions, include the anatomical noun with the side when appropriate (for example, 'right lung' rather than just 'right').")
+        if question_type == "anatomy_identification":
+            guidance.append(f"- For anatomy identification, prefer the most specific image-grounded anatomical label (current image region: {body_region}; modality: {modality}).")
+        return "\n".join(guidance)
 
     @component.output_types(result=Dict[str, Any])
     def run(self, 
@@ -93,6 +186,7 @@ RETRY CONTEXT:
         question_type = qa.get('question_type', '')
         expected_format = qa.get('expected_answer_format', '')
         is_yes_no = question_type in ('yes_no', 'presence_absence') or expected_format == 'yes_no'
+        style_guidance = self._build_style_guidance(question_type, expected_format, vs)
 
         yes_no_constraint = ""
         if is_yes_no:
@@ -135,6 +229,9 @@ SUPPORTING KNOWLEDGE:
 - Normal findings: {kn.get('expected_normal_findings', 'Not available')}
 {yes_no_constraint}{retry_guidance}
 
+ANSWER STYLE RULES:
+{style_guidance}
+
 Return a JSON object with:
 {{
   {answer_field_desc},
@@ -158,6 +255,7 @@ Return ONLY the JSON object, no additional text."""
 
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
+            result = self._normalize_final_answer(result, qa, vs, original_question)
             result["status"] = "success"
             elapsed_ms = int((time.perf_counter() - started) * 1000)
             _log.info(

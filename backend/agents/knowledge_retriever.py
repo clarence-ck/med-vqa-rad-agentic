@@ -57,12 +57,18 @@ class KnowledgeRetriever:
             qa = question_analysis.get("result", question_analysis)
             question_type = question_type or qa.get("question_type", "")
             target_entity = target_entity or qa.get("target_entity", "")
+            question_family = qa.get("question_family", qa.get("reasoning_type", ""))
+            answer_style = qa.get("expected_answer_format", "")
+        else:
+            question_family = ""
+            answer_style = ""
 
         if image_interpretation:
             ii = image_interpretation.get("result", image_interpretation)
             body_region = body_region or ii.get("body_region", "")
             modality = modality or ii.get("modality", "")
             visual_cues = visual_cues or ii.get("visible_structures", [])
+            visual_cues = visual_cues or ii.get("notable_findings", [])
 
         cues_str = ", ".join(visual_cues) if visual_cues else "none"
         
@@ -100,6 +106,11 @@ class KnowledgeRetriever:
                     modality=modality,
                     body_region=body_region,
                     notable_findings=notable_findings,
+                    question_type=question_type,
+                    question_family=question_family,
+                    target_entity=target_entity,
+                    answer_style=answer_style,
+                    visual_cues=visual_cues,
                 )
 
                 similar_cases = rag_result.get("similar_cases", [])
@@ -186,27 +197,48 @@ class KnowledgeRetriever:
             }}
 
     def _format_similar_cases(self, cases: list) -> str:
-        """Format similar cases as compact answer-focused evidence blocks for prompt injection."""
+        """Format retrieved SLAKE KB concepts as compact evidence cards."""
         formatted = []
         for i, case in enumerate(cases, 1):
-            a = case.get("answer", "")
-            score = case.get("score", 0.0)
             meta = case.get("metadata", {})
-            
-            case_str = f"Case {i}:\n"
-            case_str += f"  Answer: {a}\n"
-            if meta.get("modality"):
-                case_str += f"  Modality: {meta['modality']}\n"
-            if meta.get("body_region"):
-                case_str += f"  Region: {meta['body_region']}\n"
-            if meta.get("question_type"):
-                case_str += f"  Question Type: {meta['question_type']}\n"
-            case_str += f"  Relevance Score: {score:.3f}"
-            
-            formatted.append(case_str)
-        
+            score = case.get("score", 0.0)
+            card_lines = [f"KB Chunk {i}:"]
+
+            for label, key in [
+                ("Concept Type", "concept_type"),
+                ("Concept", "concept"),
+                ("Target Entity", "target_entity"),
+                ("Modality", "modality"),
+                ("Body Region", "body_region"),
+                ("Finding Category", "finding_category"),
+                ("Laterality", "laterality"),
+                ("Language", "language"),
+                ("Question Family", "question_family"),
+                ("Answer Style", "answer_style"),
+            ]:
+                value = meta.get(key)
+                if value:
+                    card_lines.append(f"  {label}: {value}")
+
+            support_count = meta.get("support_count")
+            if support_count is not None:
+                card_lines.append(f"  Support Count: {support_count}")
+
+            visual_cues = meta.get("visual_cues") or []
+            if visual_cues:
+                card_lines.append(f"  Visual Cues: {', '.join(visual_cues[:6])}")
+
+            text_chunk = meta.get("text_chunk")
+            if text_chunk:
+                card_lines.append(f"  Text Chunk: {text_chunk}")
+
+            card_lines.append(f"  Source Q: {case.get('question', '')}")
+            card_lines.append(f"  Source A: {case.get('answer', '')}")
+            card_lines.append(f"  Relevance Score: {score:.3f}")
+            formatted.append("\n".join(card_lines))
+
         return "\n\n".join(formatted)
-    
+
     def _build_prompt(
         self,
         original_question: str,
@@ -215,23 +247,22 @@ class KnowledgeRetriever:
         modality: str,
         cues_str: str,
         target_entity: str,
-        rag_context: str
+        rag_context: str,
     ) -> str:
-        """Build the knowledge retrieval prompt with RAG context"""
-        
-        rag_section = ""
+        """Build the knowledge retrieval prompt with SLAKE concept context."""
+
         if rag_context:
             rag_section = f"""
-RETRIEVED ANSWER-FOCUSED EVIDENCE (from training data):
+RETRIEVED SLAKE CONCEPT CHUNKS (from KB):
 {rag_context}
 
-IMPORTANT: These retrieved answers come from DIFFERENT images and may not match the current image. Do NOT assume the retrieved answers are correct for this case. Use them only for general medical context (terminology, anatomy, what to look for). Never copy a retrieved answer as fact for the current image.
+IMPORTANT: These are distilled medical concept chunks extracted from SLAKE. They provide anatomy, modality, abnormality, and visual-cue context. Do NOT treat them as the answer for the current image. Use them to support reasoning, not to replace image evidence.
 """
         else:
             rag_section = """
-No usable retrieved evidence was found. Rely on the current question context and general medical knowledge only.
+No usable retrieved KB concepts were found. Rely on the current question context and general medical knowledge only.
 """
-        
+
         return f"""You are a medical knowledge support agent. Provide concise, relevant medical context to help answer a question about a medical image.
 
 CURRENT QUESTION CONTEXT:
@@ -244,11 +275,12 @@ CURRENT QUESTION CONTEXT:
 {rag_section}
 Return a JSON object with:
 {{
-  "contextual_notes": "2-3 sentences of relevant medical background for this question type and anatomy. Reference the retrieved similar cases if available.",
+  "contextual_notes": "2-3 sentences of relevant medical background for this question type and anatomy. Prefer the retrieved SLAKE concept chunks if they match the same anatomy, modality, or abnormality.",
   "key_facts": ["List of 3-5 concise medical facts relevant to the question"],
   "expected_normal_findings": "What would typically be seen in a normal image of this type",
   "common_pathologies": ["List of common abnormalities that might be seen in this type of image"],
-  "terminology": {{"term": "definition"}} for 2-3 relevant medical terms
+  "terminology": {{"term": "definition"}} for 2-3 relevant medical terms,
+  "kb_interpretation": "One short sentence explaining how the SLAKE concept chunks relate to the current question"
 }}
 
 Keep responses focused and educational. Do NOT attempt to diagnose. Base your response on established medical knowledge and only the retrieved evidence that directly matches the current anatomy/pathology; ignore weak or loosely related cases.

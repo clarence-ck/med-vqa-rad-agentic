@@ -47,23 +47,31 @@ class AdvancedRAGRetriever:
     
     def __init__(
         self,
-        embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2",
-        cross_encoder_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2",
-        top_k_dense: int = 20,
-        top_k_sparse: int = 20,
+        embedding_model: str = "NeuML/pubmedbert-base-embeddings",
+        cross_encoder_model: str = "BAAI/bge-reranker-base",
+        top_k_dense: int = 10,
+        top_k_sparse: int = 10,
         top_k_final: int = 3,
-        data_dir: str = None
+        data_dir: str = None,
+        corpus_name: str = None,
     ):
         self.embedding_model_name = embedding_model
         self.cross_encoder_name = cross_encoder_model
         self.top_k_dense = top_k_dense
         self.top_k_sparse = top_k_sparse
         self.top_k_final = top_k_final
+        requested_corpus = (corpus_name or os.getenv("RAG_CORPUS_NAME", "slake")).strip().lower()
+        if requested_corpus != "slake":
+            _log.warning(
+                "Requested corpus '%s' is not supported for the SLAKE RAG path; using 'slake' instead.",
+                requested_corpus,
+            )
+        self.corpus_name = "slake"
         
         # Data directory
         if data_dir is None:
             self.data_dir = os.path.normpath(
-                os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'vqa-rad')
+                os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'slake', 'kb')
             )
         else:
             self.data_dir = data_dir
@@ -76,7 +84,7 @@ class AdvancedRAGRetriever:
         self._train_examples: List[Dict[str, Any]] = []
         self._embeddings: Optional[np.ndarray] = None
         self._faiss_index: Optional[faiss.Index] = None
-        self._embedding_dim: int = 384  # Default for all-MiniLM-L6-v2
+        self._embedding_dim: int = 768  # PubMedBERT-base-embeddings dimension
         self._bm25: Optional[BM25Okapi] = None
         self._tokenized_corpus: List[List[str]] = []
         
@@ -84,16 +92,80 @@ class AdvancedRAGRetriever:
         self._modality_index: Dict[str, List[int]] = defaultdict(list)
         self._body_region_index: Dict[str, List[int]] = defaultdict(list)
         self._finding_index: Dict[str, List[int]] = defaultdict(list)
+        self._concept_type_index: Dict[str, List[int]] = defaultdict(list)
+        self._target_entity_index: Dict[str, List[int]] = defaultdict(list)
+        self._question_family_index: Dict[str, List[int]] = defaultdict(list)
         self._device = self._resolve_device()
         _log.info("Using device: %s", self._device)
 
         self._is_indexed = False
+
+    def _resolve_corpus_file(self) -> Optional[str]:
+        """Resolve the corpus file for the configured RAG source."""
+        candidates = ["slake_kb.jsonl", "slake_kb.json", "slake.json"]
+
+        for name in candidates:
+            path = os.path.join(self.data_dir, name)
+            if os.path.exists(path):
+                return path
+        return None
+
+    def _load_jsonl_records(self, jsonl_path: str) -> List[Dict[str, Any]]:
+        records: List[Dict[str, Any]] = []
+        with open(jsonl_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                records.append(json.loads(line))
+        return records
 
     def _shorten_text(self, text: str, limit: int = 120) -> str:
         clean_text = " ".join(str(text or "").split())
         if len(clean_text) <= limit:
             return clean_text
         return clean_text[: max(0, limit - 1)].rstrip() + "…"
+
+    def _normalize_key(self, text: str) -> str:
+        return re.sub(r"\s+", " ", str(text or "")).strip().lower()
+
+    def _build_query_profile(
+        self,
+        question: str,
+        question_type: str = "",
+        question_family: str = "",
+        target_entity: str = "",
+        body_region: str = "",
+        modality: str = "",
+        visual_cues: Optional[List[str]] = None,
+        answer_style: str = "",
+        language: str = "",
+    ) -> str:
+        parts = [question]
+        if question_type:
+            parts.append(f"question_type={question_type}")
+        if question_family:
+            parts.append(f"question_family={question_family}")
+        if target_entity and target_entity != "unknown":
+            parts.append(f"target_entity={target_entity}")
+        if body_region and body_region != "unknown":
+            parts.append(f"body_region={body_region}")
+        if modality and modality != "unknown":
+            parts.append(f"modality={modality}")
+        if answer_style:
+            parts.append(f"answer_style={answer_style}")
+        if language:
+            parts.append(f"language={language}")
+        if visual_cues:
+            parts.append("visual_cues=" + ", ".join(visual_cues[:6]))
+        return " | ".join(part for part in parts if part)
+
+    def _language_matches(self, query_language: str, candidate_language: str) -> bool:
+        q = (query_language or "unknown").lower()
+        c = (candidate_language or "unknown").lower()
+        if q == "unknown" or c == "unknown":
+            return True
+        return q == c
 
     def _log_top_hits(self, label: str, hits: list, limit: int = 3) -> None:
         if not hits:
@@ -109,6 +181,8 @@ class AdvancedRAGRetriever:
                 softmax_score = item.metadata.get("rerank_softmax")
                 question = item.question
                 answer = item.answer
+                concept = item.metadata.get("concept", "")
+                concept_type = item.metadata.get("concept_type", "")
                 method = f" method={item.retrieval_method}"
                 if softmax_score is not None:
                     method += f" softmax={softmax_score:.4f}"
@@ -117,14 +191,18 @@ class AdvancedRAGRetriever:
                 example = self._train_examples[idx]
                 question = example.get("question", "")
                 answer = example.get("answer", "")
+                concept = example.get("concept", "")
+                concept_type = example.get("concept_type", "")
                 method = ""
 
             _log.debug(
-                "  %d. id=%s score=%.4f%s | Q: %s | A: %s",
+                "  %d. id=%s score=%.4f%s | concept_type=%s concept=%s | Q: %s | A: %s",
                 rank,
                 idx,
                 score,
                 method,
+                concept_type,
+                self._shorten_text(concept, 50),
                 self._shorten_text(question, 100),
                 self._shorten_text(answer, 90),
             )
@@ -180,17 +258,24 @@ class AdvancedRAGRetriever:
         return self._cross_encoder
 
     def load_train_data(self) -> bool:
-        """Load and index VQA-RAD train split"""
-        json_path = os.path.join(self.data_dir, "vqa_rad.json")
+        """Load and index the configured train corpus."""
+        json_path = self._resolve_corpus_file()
 
-        if not os.path.exists(json_path):
-            _log.error("Dataset not found at %s. Run download_dataset.py first.", json_path)
+        if not json_path:
+            _log.error(
+                "Dataset not found in %s for corpus=%s. Run the appropriate downloader/converter first.",
+                self.data_dir,
+                self.corpus_name,
+            )
             return False
 
         _log.info("Loading dataset from %s", json_path)
 
-        with open(json_path, 'r', encoding='utf-8') as f:
-            all_data = json.load(f)
+        if json_path.endswith('.jsonl'):
+            all_data = self._load_jsonl_records(json_path)
+        else:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                all_data = json.load(f)
 
         # Filter train split
         train_data = [item for item in all_data if item.get('split') == 'train']
@@ -202,12 +287,19 @@ class AdvancedRAGRetriever:
         for idx, item in enumerate(train_data):
             question = item.get('question', '')
             answer = item.get('answer', '')
+            text_chunk = item.get('text_chunk', '')
             
-            modality = self._infer_modality(question, answer)
-            body_region = self._infer_body_region(question, answer)
-            finding_category = self._infer_finding_category(question, answer)
-            answer_style = self._infer_answer_style(answer)
-            laterality = self._infer_laterality(question)
+            modality = item.get('modality') or self._infer_modality(question, answer)
+            body_region = item.get('body_region') or self._infer_body_region(question, answer)
+            finding_category = item.get('finding_category') or self._infer_finding_category(question, answer)
+            answer_style = item.get('answer_style') or self._infer_answer_style(answer)
+            laterality = item.get('laterality') or self._infer_laterality(question)
+            concept_type = item.get('concept_type', 'case')
+            concept = item.get('concept', '')
+            target_entity = item.get('target_entity', '')
+            language = item.get('language') or item.get('lang') or self._detect_language(f"{question} {answer}")
+            question_family = item.get('question_family', '')
+            support_count = int(item.get('support_count', 1) or 1)
 
             dense_text, sparse_text = self._build_case_retrieval_texts(
                 question=question,
@@ -217,10 +309,17 @@ class AdvancedRAGRetriever:
                 finding_category=finding_category,
                 answer_style=answer_style,
                 laterality=laterality,
+                text_chunk=text_chunk,
+                concept_type=concept_type,
+                concept=concept,
+                target_entity=target_entity,
+                language=language,
+                question_family=question_family,
             )
             
             example = {
                 'id': idx,
+                'source': item.get('source', self.corpus_name),
                 'question': question,
                 'answer': answer,
                 'image_name': item.get('image_name', ''),
@@ -229,6 +328,13 @@ class AdvancedRAGRetriever:
                 'finding_category': finding_category,
                 'answer_style': answer_style,
                 'laterality': laterality,
+                'concept_type': concept_type,
+                'concept': concept,
+                'target_entity': target_entity,
+                'language': language,
+                'question_family': question_family,
+                'visual_cues': item.get('visual_cues', []),
+                'support_count': support_count,
                 'combined_text': sparse_text,
                 'embedding_text': dense_text,
                 'dense_text': dense_text,
@@ -244,6 +350,12 @@ class AdvancedRAGRetriever:
                 self._body_region_index[body_region.lower()].append(idx)
             if finding_category and finding_category != 'other':
                 self._finding_index[finding_category.lower()].append(idx)
+            if concept_type and concept_type != 'case':
+                self._concept_type_index[concept_type.lower()].append(idx)
+            if target_entity and target_entity != 'unknown':
+                self._target_entity_index[self._normalize_key(target_entity)].append(idx)
+            if question_family and question_family != 'other':
+                self._question_family_index[question_family.lower()].append(idx)
         
         return True
 
@@ -256,13 +368,29 @@ class AdvancedRAGRetriever:
         finding_category: str,
         answer_style: str,
         laterality: str,
+        text_chunk: str = "",
+        concept_type: str = "",
+        concept: str = "",
+        target_entity: str = "",
+        language: str = "",
+        question_family: str = "",
     ) -> Tuple[str, str]:
         """Build structured retrieval text for dense and sparse indexing.
 
         Dense text stays concise and question-centric with minimal metadata.
         Sparse text is more verbose and label-rich to help lexical matching.
         """
-        dense_parts = [question]
+        dense_parts = [text_chunk or question]
+        if concept_type and concept_type != 'case':
+            dense_parts.append(concept_type)
+        if concept and concept != 'unknown':
+            dense_parts.append(concept)
+        if target_entity and target_entity != 'unknown':
+            dense_parts.append(target_entity)
+        if question_family and question_family != 'other':
+            dense_parts.append(question_family)
+        if language and language != 'unknown':
+            dense_parts.append(language)
         if modality and modality != 'unknown':
             dense_parts.append(modality)
         if body_region and body_region != 'unknown':
@@ -274,6 +402,18 @@ class AdvancedRAGRetriever:
             f"Question: {question}",
             f"Answer: {answer}",
         ]
+        if text_chunk:
+            sparse_parts.append(f"Text chunk: {text_chunk}")
+        if concept_type and concept_type != 'case':
+            sparse_parts.append(f"Concept type: {concept_type}")
+        if concept and concept != 'unknown':
+            sparse_parts.append(f"Concept: {concept}")
+        if target_entity and target_entity != 'unknown':
+            sparse_parts.append(f"Target entity: {target_entity}")
+        if question_family and question_family != 'other':
+            sparse_parts.append(f"Question family: {question_family}")
+        if language and language != 'unknown':
+            sparse_parts.append(f"Language: {language}")
         if modality and modality != 'unknown':
             sparse_parts.append(f"Modality: {modality}")
         if body_region and body_region != 'unknown':
@@ -438,10 +578,9 @@ class AdvancedRAGRetriever:
         return True
     
     def _tokenize(self, text: str) -> List[str]:
-        """Simple tokenization for BM25"""
-        # Lowercase, remove punctuation, split
-        tokens = re.findall(r'\b[a-zA-Z]+\b', text.lower())
-        return tokens
+        """Simple English-only tokenization for BM25"""
+        cleaned = str(text or "").lower()
+        return re.findall(r'\b[a-zA-Z0-9]+\b', cleaned)
 
     # Retrieval confidence thresholds
     # Lowered from original (0.55, 0.15) to allow more valid retrievals through
@@ -457,6 +596,11 @@ class AdvancedRAGRetriever:
         body_region: str = None,
         finding_category: str = None,
         notable_findings: list = None,
+        question_type: str = None,
+        question_family: str = None,
+        target_entity: str = None,
+        answer_style: str = None,
+        visual_cues: list = None,
     ) -> List[RetrievalResult]:
         """
         Full advanced RAG retrieval pipeline.
@@ -480,6 +624,18 @@ class AdvancedRAGRetriever:
             finding_category = self._infer_finding_category(question, notable_findings_str)
             _log.debug("Inferred finding_category='%s' from notable_findings", finding_category)
 
+        query_profile = self._build_query_profile(
+            question=question,
+            question_type=question_type or "",
+            question_family=question_family or "",
+            target_entity=target_entity or "",
+            body_region=body_region or "",
+            modality=modality or "",
+            visual_cues=visual_cues or notable_findings,
+            answer_style=answer_style or "",
+            language="en",
+        )
+
         _log.info(
             "Retrieval pipeline started | question=%s | modality=%s | body_region=%s | finding=%s | rerank=mandatory",
             self._shorten_text(question, 140),
@@ -489,11 +645,18 @@ class AdvancedRAGRetriever:
         )
 
         # 1. Use original question directly (no LLM rewrite)
-        query = question
-        _log.debug("Using original question as query (no LLM rewrite)")
+        query = query_profile
+        _log.debug("Using structured query profile (no LLM rewrite): %s", self._shorten_text(query_profile, 240))
 
         # 2. Metadata Filtering
-        candidate_indices = self._apply_metadata_filter(modality, body_region, finding_category)
+        candidate_indices = self._apply_metadata_filter(
+            modality=modality,
+            body_region=body_region,
+            finding_category=finding_category,
+            concept_type=question_family or question_type,
+            target_entity=target_entity,
+            answer_style=answer_style,
+        )
         if candidate_indices is None:
             _log.debug("Metadata filter: none applied (full corpus search)")
         else:
@@ -550,6 +713,9 @@ class AdvancedRAGRetriever:
         modality: str = None,
         body_region: str = None,
         finding_category: str = None,
+        concept_type: str = None,
+        target_entity: str = None,
+        answer_style: str = None,
     ) -> Optional[List[int]]:
         """Apply metadata pre-filtering to reduce search space.
 
@@ -557,89 +723,77 @@ class AdvancedRAGRetriever:
         but gracefully degrades to partial filters if intersection is empty.
         Finding category is sparse, so it's applied last and skipped if it causes emptiness.
         """
-        if not modality and not body_region and not finding_category:
+        if not modality and not body_region and not finding_category and not concept_type and not target_entity and not answer_style:
             _log.debug("Metadata filter inputs empty; skipping filter")
             return None  # No filtering
 
-        # Build individual filter sets
-        modality_set = None
-        body_region_set = None
-        finding_set = None
+        filter_sets: List[Tuple[str, set, bool]] = []
 
-        if modality and modality != 'unknown':
-            modality_lower = modality.lower()
-            matching = self._modality_index.get(modality_lower, [])
+        def _resolve_matches(index: Dict[str, List[int]], value: str) -> List[int]:
+            if not value or value in ("unknown", "other"):
+                return []
+            normalized = value.lower()
+            matching = index.get(normalized, [])
             if not matching:
-                for mod_key, indices in self._modality_index.items():
-                    if modality_lower in mod_key or mod_key in modality_lower:
+                for key, indices in index.items():
+                    if normalized in key or key in normalized:
                         matching = indices
                         break
-            if matching:
-                _log.debug("Metadata filter modality='%s': %d matches", modality_lower, len(matching))
-                modality_set = set(matching)
-            else:
-                _log.debug("Metadata filter modality='%s': no exact matches", modality_lower)
+            return list(matching)
 
-        if body_region and body_region != 'unknown':
-            region_lower = body_region.lower()
-            matching = self._body_region_index.get(region_lower, [])
-            if not matching:
-                for region_key, indices in self._body_region_index.items():
-                    if region_lower in region_key or region_key in region_lower:
-                        matching = indices
-                        break
-            if matching:
-                _log.debug("Metadata filter body_region='%s': %d matches", region_lower, len(matching))
-                body_region_set = set(matching)
-            else:
-                _log.debug("Metadata filter body_region='%s': no exact matches", region_lower)
+        modality_matches = _resolve_matches(self._modality_index, modality or "")
+        if modality_matches:
+            _log.debug("Metadata filter modality='%s': %d matches", modality, len(modality_matches))
+            filter_sets.append((f"modality({len(modality_matches)})", set(modality_matches), True))
 
-        if finding_category and finding_category not in ('unknown', 'other'):
-            finding_lower = finding_category.lower()
-            matching = self._finding_index.get(finding_lower, [])
-            if not matching:
-                for find_key, indices in self._finding_index.items():
-                    if finding_lower in find_key or find_key in finding_lower:
-                        matching = indices
-                        break
-            if matching:
-                _log.debug("Metadata filter finding='%s': %d matches", finding_lower, len(matching))
-                finding_set = set(matching)
-            else:
-                _log.debug("Metadata filter finding='%s': no exact matches", finding_lower)
+        body_region_matches = _resolve_matches(self._body_region_index, body_region or "")
+        if body_region_matches:
+            _log.debug("Metadata filter body_region='%s': %d matches", body_region, len(body_region_matches))
+            filter_sets.append((f"body_region({len(body_region_matches)})", set(body_region_matches), True))
 
-        # Smart intersection: try full filter first, then degrade gracefully
+        finding_matches = _resolve_matches(self._finding_index, finding_category or "")
+        if finding_matches:
+            _log.debug("Metadata filter finding='%s': %d matches", finding_category, len(finding_matches))
+            filter_sets.append((f"finding({len(finding_matches)})", set(finding_matches), False))
+
+        concept_matches = _resolve_matches(self._concept_type_index, concept_type or "")
+        if concept_matches:
+            _log.debug("Metadata filter concept_type='%s': %d matches", concept_type, len(concept_matches))
+            filter_sets.append((f"concept_type({len(concept_matches)})", set(concept_matches), False))
+
+        target_matches = _resolve_matches(self._target_entity_index, target_entity or "")
+        if target_matches:
+            _log.debug("Metadata filter target_entity='%s': %d matches", target_entity, len(target_matches))
+            filter_sets.append((f"target_entity({len(target_matches)})", set(target_matches), False))
+
+        style_matches = [idx for idx, ex in enumerate(self._train_examples) if (ex.get('answer_style', '') or '').lower() == (answer_style or '').lower()] if answer_style and answer_style != 'unknown' else []
+        if style_matches:
+            _log.debug("Metadata filter answer_style='%s': %d matches", answer_style, len(style_matches))
+            filter_sets.append((f"answer_style({len(style_matches)})", set(style_matches), False))
+
+        if not filter_sets:
+            _log.debug("Metadata filter produced no specific filters; skipping filter")
+            return None
+
+        # Combine filters. Prefer hard image-grounded filters first; degrade if they collapse to zero.
+        hard_sets = [s for _, s, is_hard in filter_sets if is_hard]
+        soft_sets = [s for _, s, is_hard in filter_sets if not is_hard]
+        filter_applied = [label for label, _, _ in filter_sets]
+
         candidates = None
-        filter_applied = []
-
-        # Step 1: Apply modality filter (base)
-        if modality_set is not None:
-            candidates = modality_set
-            filter_applied.append(f"modality({len(modality_set)})")
-
-        # Step 2: Intersect with body_region if available
-        if body_region_set is not None:
-            if candidates is not None:
-                intersected = candidates.intersection(body_region_set)
-                if intersected:
-                    candidates = intersected
-                    filter_applied.append(f"body_region({len(body_region_set)})")
-                else:
-                    _log.warning("Modality+body_region intersection empty; using body_region only")
-                    candidates = body_region_set
-                    filter_applied = [f"body_region({len(body_region_set)})"]
-            else:
-                candidates = body_region_set
-                filter_applied.append(f"body_region({len(body_region_set)})")
-
-        # Step 3: Try to intersect with finding, but skip if it causes emptiness
-        if finding_set is not None and candidates is not None:
-            intersected = candidates.intersection(finding_set)
-            if intersected:
-                candidates = intersected
-                filter_applied.append(f"finding({len(finding_set)})")
-            else:
-                _log.info("Skipping finding_category filter: would reduce candidates to zero")
+        if hard_sets:
+            candidates = set.intersection(*hard_sets) if len(hard_sets) > 1 else set(next(iter(hard_sets)))
+        if candidates is None or not candidates:
+            # Fall back to the largest soft filter to avoid empty retrieval.
+            if soft_sets:
+                soft_sets_sorted = sorted(soft_sets, key=len, reverse=True)
+                candidates = set(soft_sets_sorted[0])
+                for s in soft_sets_sorted[1:]:
+                    intersected = candidates.intersection(s)
+                    if intersected:
+                        candidates = intersected
+            elif hard_sets:
+                candidates = set(next(iter(hard_sets)))
 
         if candidates:
             result = list(candidates)
@@ -755,8 +909,23 @@ class AdvancedRAGRetriever:
                 answer=example['answer'],
                 score=score,
                 metadata={
+                    'source': example.get('source', self.corpus_name),
+                    'split': example.get('split', 'train'),
                     'modality': example['modality'],
                     'body_region': example['body_region'],
+                    'finding_category': example.get('finding_category', 'other'),
+                    'answer_style': example.get('answer_style', 'unknown'),
+                    'laterality': example.get('laterality', 'unknown'),
+                    'concept_type': example.get('concept_type', 'case'),
+                    'concept': example.get('concept', ''),
+                    'target_entity': example.get('target_entity', ''),
+                    'language': example.get('language', 'unknown'),
+                    'question_family': example.get('question_family', ''),
+                    'visual_cues': example.get('visual_cues', []),
+                    'support_count': example.get('support_count', 1),
+                    'text_chunk': example.get('dense_text', ''),
+                    'source_question': example.get('question', ''),
+                    'source_answer': example.get('answer', ''),
                     'id': example['id']
                 },
                 retrieval_method='hybrid_rrf'
@@ -780,7 +949,22 @@ class AdvancedRAGRetriever:
         
         # Prepare pairs for cross-encoder
         pairs = [
-            (query, f"{c.question} {c.answer}")
+            (
+                query,
+                " ".join(part for part in [
+                    c.metadata.get("text_chunk", ""),
+                    c.metadata.get("concept_type", ""),
+                    c.metadata.get("concept", ""),
+                    c.metadata.get("target_entity", ""),
+                    c.metadata.get("question_family", ""),
+                    c.metadata.get("modality", ""),
+                    c.metadata.get("body_region", ""),
+                    c.metadata.get("finding_category", ""),
+                    c.metadata.get("language", ""),
+                    c.question,
+                    c.answer,
+                ] if part),
+            )
             for c in candidates
         ]
         
@@ -796,7 +980,11 @@ class AdvancedRAGRetriever:
         
         # Attach scores and sort
         for i, candidate in enumerate(candidates):
-            candidate.score = float(scores[i])
+            support_count = float(candidate.metadata.get("support_count", 1) or 1)
+            support_bonus = min(0.25, np.log1p(support_count) / 10.0)
+            language_bonus = 0.05 if candidate.metadata.get("language", "unknown") != "unknown" else 0.0
+            concept_bonus = 0.08 if candidate.metadata.get("concept_type", "case") != "case" else 0.0
+            candidate.score = float(scores[i] + support_bonus + language_bonus + concept_bonus)
             candidate.metadata["rerank_softmax"] = float(softmax_scores[i])
             candidate.retrieval_method = 'reranked'
         
@@ -887,7 +1075,11 @@ def retrieve_knowledge_advanced(
     body_region: str = None,
     finding_category: str = None,
     notable_findings: list = None,
-    **kwargs
+    question_type: str = None,
+    question_family: str = None,
+    target_entity: str = None,
+    answer_style: str = None,
+    visual_cues: list = None,
 ) -> Dict[str, Any]:
     """
     Convenience function for advanced RAG retrieval.
@@ -902,7 +1094,11 @@ def retrieve_knowledge_advanced(
         body_region=body_region,
         finding_category=finding_category,
         notable_findings=notable_findings,
-        **kwargs
+        question_type=question_type,
+        question_family=question_family,
+        target_entity=target_entity,
+        answer_style=answer_style,
+        visual_cues=visual_cues,
     )
     
     return {
@@ -911,7 +1107,14 @@ def retrieve_knowledge_advanced(
                 "question": r.question,
                 "answer": r.answer,
                 "score": r.score,
-                "metadata": r.metadata
+                "metadata": r.metadata,
+                "text_chunk": r.metadata.get("text_chunk", ""),
+                "concept_type": r.metadata.get("concept_type", "case"),
+                "concept": r.metadata.get("concept", ""),
+                "target_entity": r.metadata.get("target_entity", ""),
+                "language": r.metadata.get("language", "unknown"),
+                "question_family": r.metadata.get("question_family", ""),
+                "answer_style": r.metadata.get("answer_style", "unknown"),
             }
             for r in results
         ],

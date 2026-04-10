@@ -24,6 +24,69 @@ class VerificationAgent:
             model=OPENAI_MODEL,
         )
 
+    def _normalize_text(self, text: str) -> str:
+        return (text or "").strip().lower()
+
+    def _normalize_yes_no(self, text: str) -> str:
+        normalized = self._normalize_text(text)
+        if normalized.startswith("yes"):
+            return "yes"
+        if normalized.startswith("no"):
+            return "no"
+        return normalized
+
+    def _format_heuristics(self, answer: str, qa: dict, original_question: str) -> dict:
+        question_type = (qa or {}).get("question_type", "")
+        expected_format = (qa or {}).get("expected_answer_format", "")
+        answer_text = self._normalize_text(answer)
+        question_text = self._normalize_text(original_question)
+
+        checks = {
+            "answer_matches_question_type": True,
+            "explanation_grounded_in_evidence": True,
+            "answer_strength_appropriate": True,
+            "no_contradictions": True,
+            "format_appropriate": True,
+        }
+        issues = []
+
+        yes_no_expected = expected_format == "yes_no" or question_type in {"yes_no", "presence_absence"}
+        if yes_no_expected:
+            yes_no_answer = self._normalize_yes_no(answer_text)
+            if yes_no_answer not in {"yes", "no"}:
+                checks["format_appropriate"] = False
+                issues.append("yes/no answer did not normalize to yes or no")
+
+        if question_type == "location":
+            if answer_text in {"left", "right", "bilateral", "midline"}:
+                checks["format_appropriate"] = False
+                issues.append("location answer is too terse")
+
+        if question_type == "anatomy_identification":
+            generic_labels = {
+                "nervous system", "central nervous system", "respiratory system", "circulatory system",
+                "musculoskeletal system", "digestive system", "urinary system", "reproductive system",
+            }
+            if answer_text in generic_labels and any(token in question_text for token in {"brain", "lung", "kidney", "liver", "heart", "spleen"}):
+                checks["format_appropriate"] = False
+                issues.append("anatomy answer is too generic for the question")
+
+        if "cannot determine" in answer_text or "unable to determine" in answer_text:
+            checks["answer_strength_appropriate"] = False
+            issues.append("answer is an abstention despite a concrete question")
+
+        return {"checks": checks, "issues": issues}
+
+    def _merge_checks(self, model_checks: dict, heuristic_checks: dict) -> dict:
+        merged = {
+            "answer_matches_question_type": bool(model_checks.get("answer_matches_question_type", True)) and bool(heuristic_checks.get("answer_matches_question_type", True)),
+            "explanation_grounded_in_evidence": bool(model_checks.get("explanation_grounded_in_evidence", True)) and bool(heuristic_checks.get("explanation_grounded_in_evidence", True)),
+            "answer_strength_appropriate": bool(model_checks.get("answer_strength_appropriate", True)) and bool(heuristic_checks.get("answer_strength_appropriate", True)),
+            "no_contradictions": bool(model_checks.get("no_contradictions", True)) and bool(heuristic_checks.get("no_contradictions", True)),
+            "format_appropriate": bool(model_checks.get("format_appropriate", True)) and bool(heuristic_checks.get("format_appropriate", True)),
+        }
+        return merged
+
     @component.output_types(result=Dict[str, Any])
     def run(self, 
             answer_data: dict = None, 
@@ -65,6 +128,8 @@ QUESTION ANALYSIS:
 - Question type: {qa.get('question_type', 'unknown')}
 - Expected format: {qa.get('expected_answer_format', 'unknown')}
 
+IMPORTANT: Be stricter about answer format than content plausibility. If the answer is too generic, too terse, or not aligned with the expected format, mark it as not fully verified even if it sounds medically plausible.
+
 Perform these checks:
 1. Does the answer match the question type?
 2. Does the explanation reference evidence actually seen in the image?
@@ -101,6 +166,21 @@ Return ONLY the JSON object, no additional text."""
 
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
+            heuristic = self._format_heuristics(ans.get("answer", ""), qa, original_question)
+            result["checks"] = self._merge_checks(result.get("checks", {}) or {}, heuristic.get("checks", {}) or {})
+
+            issues = list(result.get("issues_found", []) or [])
+            for issue in heuristic.get("issues", []):
+                if issue not in issues:
+                    issues.append(issue)
+            result["issues_found"] = issues
+
+            if not result["checks"].get("format_appropriate", True) or not result["checks"].get("answer_matches_question_type", True):
+                if result.get("verification_status") == "verified":
+                    result["verification_status"] = "partially_verified"
+                if result.get("confidence_label") == "High":
+                    result["confidence_label"] = "Medium"
+
             result["status"] = "success"
             elapsed_ms = int((time.perf_counter() - started) * 1000)
             checks = result.get("checks", {}) or {}

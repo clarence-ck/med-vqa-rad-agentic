@@ -433,6 +433,45 @@ def _build_guardrail_payload(answer_result: dict, verification_result: dict, fai
         "should_flag_for_review": should_flag_for_review,
     }
 
+
+def _normalize_final_answer(answer: str, question_analysis: dict, image_analysis: dict) -> str:
+    text = (answer or "").strip()
+    qa = question_analysis or {}
+    vs = image_analysis or {}
+    question_type = qa.get("question_type", "")
+    expected_format = qa.get("expected_answer_format", "")
+
+    if expected_format == "yes_no" or question_type in {"yes_no", "presence_absence"}:
+        lowered = text.lower()
+        if lowered.startswith("yes"):
+            return "yes"
+        if lowered.startswith("no"):
+            return "no"
+        if any(marker in lowered for marker in ["normal", "present", "visible", "seen", "identifiable", "abnormal"]):
+            return "yes"
+        if any(marker in lowered for marker in ["absent", "negative", "not seen", "not visible", "cannot determine", "unable to determine"]):
+            return "no"
+
+    if question_type == "location":
+        lowered = text.lower()
+        if lowered in {"left", "right", "bilateral", "midline"}:
+            hints = " ".join([str(qa.get("target_entity", "")), str(vs.get("body_region", "")), str(qa.get("rephrased_question", ""))]).lower()
+            if "lung" in hints:
+                return f"{lowered} lung"
+            if "kidney" in hints:
+                return f"{lowered} kidney"
+            if "hemisphere" in hints:
+                return f"{lowered} hemisphere"
+        if lowered in {"brain", "chest", "abdomen", "pelvis", "head", "neck", "musculoskeletal"} and vs.get("body_region"):
+            return str(vs.get("body_region"))
+
+    if question_type == "anatomy_identification":
+        lowered = text.lower()
+        if lowered in {"nervous system", "central nervous system", "respiratory system", "circulatory system", "musculoskeletal system"} and vs.get("body_region"):
+            return str(vs.get("body_region"))
+
+    return text
+
 def _build_self_consistency_signal(verification_result: dict) -> dict:
     checks = verification_result.get("checks", {}) or {}
     total_checks = len(checks)
@@ -616,7 +655,11 @@ def _assemble_pipeline_payload(results: dict, question: str, started_at: float, 
     )
     return {
         "answer": answer_result.get("answer", "Unable to generate an answer."),
-        "guarded_answer": guardrail_payload.get("guarded_answer", answer_result.get("answer", "Unable to generate an answer.")),
+        "guarded_answer": _normalize_final_answer(
+            guardrail_payload.get("guarded_answer", answer_result.get("answer", "Unable to generate an answer.")),
+            question_result,
+            image_result,
+        ),
         "explanation": answer_result.get("explanation", ""),
         "reasoning_trace": answer_result.get("reasoning_trace", ""),
         "evidence_used": answer_result.get("evidence_used", []),
@@ -667,14 +710,16 @@ def _should_retry_pipeline(payload: dict) -> bool:
     flag_review = payload.get("should_flag_for_review", False)
     failure_categories = payload.get("failure_categories", []) or []
     high_severity = any(category.get("severity") == "high" for category in failure_categories)
+    fixable_codes = {"question_answer_mismatch", "parser_failure", "reasoning_generation_unstable"}
+    has_fixable_issue = any(category.get("code") in fixable_codes for category in failure_categories)
     should_retry = (
-        verification_status in {"low_confidence", "unsupported"}
-        or flag_review
+        (verification_status in {"low_confidence", "unsupported"} and has_fixable_issue)
+        or (verification_status == "partially_verified" and has_fixable_issue)
         or high_severity
     )
     _log.debug(
-        "Retry evaluation  verification=%s  flag_review=%s  high_severity=%s  -> retry=%s",
-        verification_status, flag_review, high_severity, should_retry,
+        "Retry evaluation  verification=%s  flag_review=%s  high_severity=%s  fixable=%s  -> retry=%s",
+        verification_status, flag_review, high_severity, has_fixable_issue, should_retry,
     )
     return should_retry
 
@@ -771,6 +816,8 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
         }
 
     first_payload = _assemble_pipeline_payload(first_results, question, pipeline_start)
+    first_payload["answer"] = _normalize_final_answer(first_payload.get("answer", ""), first_payload.get("question_analysis", {}), first_payload.get("image_analysis", {}))
+    first_payload["guarded_answer"] = _normalize_final_answer(first_payload.get("guarded_answer", ""), first_payload.get("question_analysis", {}), first_payload.get("image_analysis", {}))
     _log.info(
         "Pipeline attempt 1 result  answer=%r  verification=%s  confidence=%s  flag_review=%s",
         str(first_payload.get("answer", ""))[:60],
@@ -801,6 +848,8 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
         second_payload = _assemble_pipeline_payload(
             second_results, question, pipeline_start, retry_attempts=1, retry_reason=retry_reason
         )
+        second_payload["answer"] = _normalize_final_answer(second_payload.get("answer", ""), second_payload.get("question_analysis", {}), second_payload.get("image_analysis", {}))
+        second_payload["guarded_answer"] = _normalize_final_answer(second_payload.get("guarded_answer", ""), second_payload.get("question_analysis", {}), second_payload.get("image_analysis", {}))
         _log.info(
             "Pipeline attempt 2 result  answer=%r  verification=%s  confidence=%s",
             str(second_payload.get("answer", ""))[:60],

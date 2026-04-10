@@ -1,4 +1,5 @@
 import json
+import re
 import time
 from typing import Dict, Any
 from haystack import component
@@ -24,11 +25,58 @@ class QuestionAnalyzer:
             model=OPENAI_MODEL,
         )
 
+    def _infer_question_style(self, question: str) -> dict:
+        q = (question or "").strip().lower()
+        if not q:
+            return {}
+
+        starts_binary = bool(re.match(r"^(is|are|was|were|do|does|did|can|could|will|would|has|have|should)\b", q))
+        polarity_words = [
+            "normal", "abnormal", "present", "absent", "visible", "seen", "identifiable",
+            "well-defined", "well defined", "enlarged", "ring-enhancing", "ring enhancing",
+            "hyperinflated", "shifted", "fracture", "lesion", "mass", "effusion", "pneumothorax",
+        ]
+        has_polarity = any(word in q for word in polarity_words)
+        explicit_choice = any(pattern in q for pattern in [
+            "normal or abnormal", "abnormal or normal", "present or absent", "absent or present",
+            "benign or malignant", "malignant or benign", "left or right", "right or left",
+        ])
+
+        if explicit_choice:
+            return {
+                "question_type": "abnormality_description",
+                "expected_answer_format": "short_phrase",
+                "reasoning_type": "comparison",
+                "question_clarity": "clear",
+            }
+
+        if starts_binary and has_polarity:
+            return {
+                "question_type": "yes_no",
+                "expected_answer_format": "yes_no",
+                "reasoning_type": "visual_recognition",
+                "question_clarity": "clear",
+            }
+
+        return {}
+
+    def _apply_style_override(self, result: dict, style_hint: dict) -> dict:
+        if not style_hint:
+            return result
+
+        merged = dict(result or {})
+        for key, value in style_hint.items():
+            if value is not None:
+                merged[key] = value
+        return merged
+
     @component.output_types(result=Dict[str, Any])
     def run(self, question: str, image_interpretation: dict = None):
         visual_summary = ""
         if image_interpretation and isinstance(image_interpretation, dict):
             visual_summary = image_interpretation.get("visual_summary", "")
+
+        style_hint = self._infer_question_style(question)
 
         _log.info("Analyzing question: %r", question[:120])
         _log.debug("Visual context provided: %s", bool(visual_summary))
@@ -67,6 +115,7 @@ Return ONLY the JSON object, no additional text."""
 
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
+            result = self._apply_style_override(result, style_hint)
             result["status"] = "success"
             elapsed_ms = int((time.perf_counter() - started) * 1000)
             _log.info(
