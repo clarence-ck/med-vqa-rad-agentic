@@ -547,6 +547,24 @@ The workflow baseline exhibits **critical implementation failures** independent 
 
 These patterns indicate logical errors in `backend/agents/workflow_baseline.py` rather than inherent workflow baseline limitations. The 0% score on presence/absence questions suggests broken conditional logic in the hand-designed pipeline, underscoring the brittleness of non-agentic approaches that lack dynamic error recovery.
 
+**Specific Bug: `_derive_presence_answer` (line 69)**
+
+The presence/absence detection logic contains a critical flaw: it answers "Yes" to any abnormality question whenever *any* notable finding exists in the image — regardless of whether that finding matches what was asked about.
+
+```python
+# workflow_baseline.py:69
+return ("Yes", "medium") if notable_findings else ("No", ...)
+```
+
+**Example failure:**
+- **Question:** "Is there a **fracture**?"
+- **Image shows:** Cardiomegaly (enlarged heart), no fracture
+- **ImageInterpreter findings:** `["cardiomegaly"]`
+- **Workflow answer:** **"Yes"** (because `notable_findings` is non-empty)
+- **Ground truth:** "No"
+
+The bug: the function checks if the question contains abnormality keywords ("mass", "fracture", "lesion", etc.) and if so, returns "Yes" whenever *any* finding exists — without verifying the finding matches the specific target entity. This produces false positives on 100% of medium difficulty presence/absence questions, making the 65% workflow accuracy a contaminated baseline that cannot fairly compare agentic vs. workflow performance.
+
 ### Failure Mode Analysis
 
 **Lexical overlap metrics** reveal the agentic system produces more semantically diverse outputs (37% lexical overlap vs. 20% for baselines), but this diversity does not correlate with accuracy. The `VerificationAgent`'s semantic similarity threshold (0.85 using PubMedBERT) appears miscalibrated for retrieved-content answers—retrieved chunks with high semantic similarity to the ground truth may nonetheless mislead the reasoning process.
