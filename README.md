@@ -649,18 +649,20 @@ When retrieval activates (medium/hard difficulty):
 
 These examples show that verification checks are imperfect and may miss errors. To debug multi-stage failures properly, you need to examine the full agent traces, not just the final answers.
 
-**Analogy:** A final answer of "verified: no" is like a patient discharge form that says "cleared to leave." The form passed all checks, but the debugging question is: where did the chain break? Mapping the 6-stage pipeline to a medical workflow:
+**Why you need the full trace:** Looking at just the final answer is like reading a discharge form that says "patient cleared to leave." It tells you the outcome, but not where things went wrong. Did the doctor miss something? Did the nurse write it down wrong? Did the discharge clerk just check boxes without reading?
 
-| Agent | Medical Role | What Could Go Wrong |
-|-------|--------------|---------------------|
-| **ImageInterpreter** | **Radiologist** (reads the scan) | Misses a lesion, misidentifies normal anatomy as abnormal |
-| **QuestionAnalyzer** | **Triage nurse** (categorizes the complaint) | Misclassifies question type, expects wrong answer format |
-| **DifficultyRouter** | **Senior physician** (decides on workup depth) | Wrongly triggers retrieval for simple questions, skips it for complex ones |
-| **KnowledgeRetriever** | **Medical librarian** (pulls relevant cases) | Retrieves similar-looking but irrelevant cases |
-| **ReasoningAgent** | **Attending physician** (makes the diagnosis) | Misinterprets radiologist's report, follows wrong retrieved precedent |
-| **VerificationAgent** | **Discharge coordinator** (final sign-off) | Approves answer because paperwork is complete, not because diagnosis is correct |
+The 6 agents work like a hospital team:
 
-In Sample 1857, the discharge coordinator (VerificationAgent) approved "no" as verified — but the error could have started with the radiologist (ImageInterpreter), the attending (ReasoningAgent), or the librarian (KnowledgeRetriever). Without the full 6-stage trace, you cannot tell who made the original mistake.
+| Agent | Role | Common Mistake |
+|-------|------|---------------|
+| **ImageInterpreter** | Radiologist who reads the scan | Misses a small lesion or calls normal tissue abnormal |
+| **QuestionAnalyzer** | Triage nurse who sorts cases | Labels a yes/no question as "counting" or expects a paragraph when a word will do |
+| **DifficultyRouter** | Doctor who decides how deep to investigate | Orders extra tests for simple cases, skips them for hard ones |
+| **KnowledgeRetriever** | Librarian who pulls old cases | Brings back a case that looks similar but is actually different |
+| **ReasoningAgent** | Doctor who makes the final call | Trusts the radiologist's bad read or follows a bad precedent from the librarian |
+| **VerificationAgent** | Clerk who signs off on discharge | Approves the file because all boxes are checked, even if the diagnosis is wrong |
+
+In Sample 1857, the clerk (VerificationAgent) stamped "verified" on "no mass" — but the radiologist (ImageInterpreter) had already missed the mass. You cannot find the real error by looking at the final stamp. You need to check each step.
 
 ---
 
