@@ -649,6 +649,19 @@ When retrieval activates (medium/hard difficulty):
 
 These examples show that verification checks are imperfect and may miss errors. To debug multi-stage failures properly, you need to examine the full agent traces, not just the final answers.
 
+**Analogy:** A final answer of "verified: no" is like a patient discharge form that says "cleared to leave." The form passed all checks, but the debugging question is: where did the chain break? Mapping the 6-stage pipeline to a medical workflow:
+
+| Agent | Medical Role | What Could Go Wrong |
+|-------|--------------|---------------------|
+| **ImageInterpreter** | **Radiologist** (reads the scan) | Misses a lesion, misidentifies normal anatomy as abnormal |
+| **QuestionAnalyzer** | **Triage nurse** (categorizes the complaint) | Misclassifies question type, expects wrong answer format |
+| **DifficultyRouter** | **Senior physician** (decides on workup depth) | Wrongly triggers retrieval for simple questions, skips it for complex ones |
+| **KnowledgeRetriever** | **Medical librarian** (pulls relevant cases) | Retrieves similar-looking but irrelevant cases |
+| **ReasoningAgent** | **Attending physician** (makes the diagnosis) | Misinterprets radiologist's report, follows wrong retrieved precedent |
+| **VerificationAgent** | **Discharge coordinator** (final sign-off) | Approves answer because paperwork is complete, not because diagnosis is correct |
+
+In Sample 1857, the discharge coordinator (VerificationAgent) approved "no" as verified — but the error could have started with the radiologist (ImageInterpreter), the attending (ReasoningAgent), or the librarian (KnowledgeRetriever). Without the full 6-stage trace, you cannot tell who made the original mistake.
+
 ---
 
 ## Reflection and Limitations
