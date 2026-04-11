@@ -556,14 +556,33 @@ The presence/absence detection logic contains a critical flaw: it answers "Yes" 
 return ("Yes", "medium") if notable_findings else ("No", ...)
 ```
 
-**Example failure:**
-- **Question:** "Is there a **fracture**?"
-- **Image shows:** Cardiomegaly (enlarged heart), no fracture
-- **ImageInterpreter findings:** `["cardiomegaly"]`
-- **Workflow answer:** **"Yes"** (because `notable_findings` is non-empty)
-- **Ground truth:** "No"
+**Real examples from test logs:**
 
-The bug: the function checks if the question contains abnormality keywords ("mass", "fracture", "lesion", etc.) and if so, returns "Yes" whenever *any* finding exists — without verifying the finding matches the specific target entity. This produces false positives on 100% of medium difficulty presence/absence questions, making the 65% workflow accuracy a contaminated baseline that cannot fairly compare agentic vs. workflow performance.
+**Example 1 — Sample 2074:**
+- **Question:** "Are the clavicles fractured?"
+- **Image shows:** Chest X-ray with lung findings, no clavicle fracture
+- **Matched findings:** `[]` (empty — no fracture found)
+- **Workflow answer:** **"Yes"**
+- **Ground truth:** "no"
+- **What happened:** The workflow saw unrelated findings (cardiac silhouette, lung markings) and answered "Yes" because something notable was present, even though nothing matched the fracture question.
+
+**Example 2 — Sample 2119:**
+- **Question:** "Are the hepatic lesions ring enhancing?"
+- **Image shows:** CT with liver lesions, but no ring enhancement mentioned
+- **Matched findings:** `[]` (empty — no enhancement pattern found)
+- **Workflow answer:** **"Yes"**
+- **Ground truth:** "no"
+- **What happened:** The workflow detected liver lesions in the findings and said "Yes" to the enhancement question, even though the specific enhancement pattern was not present.
+
+**Example 3 — Sample 1807:**
+- **Question:** "Are the temporal bones fractured?"
+- **Image shows:** Brain CT with a frontal cyst, no temporal bone injury
+- **Matched findings:** `[]` (empty — no fracture found)
+- **Workflow answer:** **"Yes"**
+- **Ground truth:** "no"
+- **What happened:** The workflow found a brain lesion and answered "Yes" to the bone fracture question, confusing any abnormality with the specific target.
+
+**The bug:** The code checks if the question contains abnormality keywords like "fracture", "mass", or "lesion". If it finds these words, it returns "Yes" whenever *any* notable finding exists in the image — without checking if that finding actually matches what was asked about. This produces false positives on presence/absence questions, making the 65% workflow accuracy a contaminated baseline that cannot fairly compare agentic versus workflow performance.
 
 ### Failure Mode Analysis
 
