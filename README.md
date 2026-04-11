@@ -332,6 +332,8 @@ The system detects errors and uncertainty through multiple mechanisms:
 > - Ground truth: **"yes, there is a mass"**
 >
 > Because the verification only checks if stages agree with each other, it will pass even when all stages are wrong together. Sample 1857 in Log Analysis shows this exact case: verification passed as "verified" but the answer was wrong. The system cannot catch errors in the original image interpretation.
+>
+> **Sample 1822** demonstrates the opposite problem: the VerificationAgent penalized the correct answer "lateral ventricles" because the ImageInterpreter incorrectly described normal ventricles as a "focal lesion with mass effect." The retry mechanism selected a more conservative "ventricular system" answer that better matched the flawed image interpretation — improving verification metrics while degrading semantic accuracy.
 
 2. **Automatic failure categorization** — detects specific failure modes:
    - `knowledge_retrieval_failed`: RAG retrieval returned no relevant chunks
@@ -602,7 +604,7 @@ When retrieval activates (medium/hard difficulty):
 |--------|-------|-----------------|-----------------|
 | 1821 | Retry improved: Low confidence → partially verified | Agentic | ✅ Yes (34s total) |
 | 2141 | Retry improved: Low confidence → partially verified, correct answer | Agentic | ✅ Yes (35s total) |
-| 1822 | Retry did not help: Still wrong answer after 41s execution | Agentic | ✅ Yes (41s total) |
+| 1822 | Retry succeeded by system metrics but answer became more generic — changed from specific "lateral ventricles" to "ventricular system" due to ImageInterpreter misidentifying normal ventricles as a focal lesion | Agentic | ✅ Yes (41s total) |
 | **1857** | **Critical**: Agentic "no" vs ground truth "yes" — **no retry triggered** because verification incorrectly passed as "verified" | Agentic | ❌ **No (retries=0)** |
 | Various | Workflow baseline generic answers: "brain", "abdomen", "chest" vs specific anatomy | Workflow | N/A |
 
