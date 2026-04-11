@@ -586,7 +586,7 @@ return ("Yes", "medium") if notable_findings else ("No", ...)
 
 ### Failure Mode Analysis
 
-**Lexical overlap metrics** reveal the agentic system produces more semantically diverse outputs (37% lexical overlap vs. 20% for baselines), but this diversity does not correlate with accuracy. The `VerificationAgent`'s semantic similarity threshold (0.85 using PubMedBERT) appears miscalibrated for retrieved-content answers—retrieved chunks with high semantic similarity to the ground truth may nonetheless mislead the reasoning process.
+**Lexical overlap metrics** reveal the agentic system produces more semantically diverse outputs (37% lexical overlap vs. 20% for baselines), but this diversity does not correlate with accuracy. The post-hoc evaluation's semantic similarity threshold (0.85 using PubMedBERT) measures answer-ground truth alignment during evaluation scoring; it is not used by the VerificationAgent or any other agent during inference. A more subtle failure mode is that retrieved chunks with high semantic similarity to the question may nonetheless mislead the reasoning process—retrieved content can describe similar-looking but different pathologies, creating plausible-sounding but incorrect answers that pass the VerificationAgent's checks.
 
 The discrepancy between **close-ended accuracy** (baseline 65% vs. agentic 63%) and **open-ended semantic similarity** (baseline 88% vs. agentic 81%) suggests the agentic pipeline struggles more with answer formatting than content correctness, potentially due to retrieval-induced answer style drift.
 
