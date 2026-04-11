@@ -645,9 +645,9 @@ When retrieval activates (medium/hard difficulty):
 | **1857** | **Critical**: Agentic "no" vs ground truth "yes" — **no retry triggered** because verification incorrectly passed as "verified" | Agentic | ❌ **No (retries=0)** |
 | Various | Workflow baseline generic answers: "brain", "abdomen", "chest" vs specific anatomy — systematic fallback to `body_region` when no specific finding matches | Workflow | N/A |
 
-**Workflow Baseline Fallback Pattern:** The "Various" entry captures a design limitation in `workflow_baseline.py`: when the pipeline cannot match a specific finding to the question, it falls back to returning the `body_region` (e.g., "brain" for head CTs, "chest" for chest X-rays). This produces technically correct but clinically useless answers — a chest X-ray question about "which lung field shows consolidation?" receiving "chest" as the answer. This fallback occurs across all `anatomy_identification` questions and any `location` questions where `matched_findings` is empty, making it a systematic pattern rather than an isolated bug.
+**Workflow Baseline Generic Answers:** The "Various" entry shows a design flaw in the workflow baseline. When it cannot find a specific answer, it simply returns the body region ("brain", "chest", or "abdomen"). For example, if you ask "which lung field shows consolidation?" on a chest X-ray, it answers "chest" — technically true but completely unhelpful. This happens on all anatomy identification questions and any location questions where no specific finding is matched. It is a systematic problem built into the workflow, not a one-off bug.
 
-These logs confirm that verification checks are heuristics that may not catch all errors, and that debugging multi-stage failures requires examining full agent traces rather than final outputs alone.
+These examples show that verification checks are imperfect and may miss errors. To debug multi-stage failures properly, you need to examine the full agent traces, not just the final answers.
 
 ---
 
