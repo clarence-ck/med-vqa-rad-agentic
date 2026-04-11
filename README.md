@@ -643,7 +643,9 @@ When retrieval activates (medium/hard difficulty):
 | 2141 | Retry improved: Low confidence → partially verified, correct answer | Agentic | ✅ Yes (35s total) |
 | 1822 | Retry succeeded by system metrics but answer became more generic — changed from specific "lateral ventricles" to "ventricular system" due to ImageInterpreter misidentifying normal ventricles as a focal lesion | Agentic | ✅ Yes (41s total) |
 | **1857** | **Critical**: Agentic "no" vs ground truth "yes" — **no retry triggered** because verification incorrectly passed as "verified" | Agentic | ❌ **No (retries=0)** |
-| Various | Workflow baseline generic answers: "brain", "abdomen", "chest" vs specific anatomy | Workflow | N/A |
+| Various | Workflow baseline generic answers: "brain", "abdomen", "chest" vs specific anatomy — systematic fallback to `body_region` when no specific finding matches | Workflow | N/A |
+
+**Workflow Baseline Fallback Pattern:** The "Various" entry captures a design limitation in `workflow_baseline.py`: when the pipeline cannot match a specific finding to the question, it falls back to returning the `body_region` (e.g., "brain" for head CTs, "chest" for chest X-rays). This produces technically correct but clinically useless answers — a chest X-ray question about "which lung field shows consolidation?" receiving "chest" as the answer. This fallback occurs across all `anatomy_identification` questions and any `location` questions where `matched_findings` is empty, making it a systematic pattern rather than an isolated bug.
 
 These logs confirm that verification checks are heuristics that may not catch all errors, and that debugging multi-stage failures requires examining full agent traces rather than final outputs alone.
 
