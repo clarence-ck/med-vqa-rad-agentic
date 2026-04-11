@@ -567,7 +567,7 @@ These results yield three key insights for retrieval-augmented medical VQA syste
 
 ## Log Analysis
 
-Detailed execution traces from `medvqa_20260410` logs (**235 files, ~200 samples with complete traces**) reveal runtime characteristics and failure modes not visible in aggregate evaluation metrics:
+Detailed execution traces from `medvqa_20260410` logs (**200 sample log files**) reveal runtime characteristics and failure modes not visible in aggregate evaluation metrics:
 
 ### Latency Characteristics
 
@@ -580,12 +580,12 @@ The 6-stage pipeline (ImageInterpreter → QuestionAnalyzer → DifficultyRouter
 
 ### Retry Effectiveness
 
-Comprehensive log analysis of 235 execution traces found **37 retry cases (retries=1)** out of all processed samples (15.7% retry rate). Retry outcomes show **mixed effectiveness (32.4% improvement rate)**:
+Comprehensive log analysis of 200 sample traces found **36 retry cases (retries=1)** out of all processed samples (18.0% retry rate). Retry outcomes show **mixed effectiveness (27.8% improvement rate)**:
 
 | Outcome | Count | Percentage | Examples |
 |---------|-------|------------|----------|
-| **Improved result** | 12 | 32.4% | Sample 1821, 2141, 1822, 2088, 2163, 2015, and others — attempt 2 achieved higher payload score |
-| **No improvement** | 25 | 67.6% | Sample 2177, 2187, 1998, 1871, 1899, and others — kept original answer despite retry |
+| **Improved result** | 10 | 27.8% | Sample 1821, 2141, 1822, 2088, 2163, 2015, and others — attempt 2 achieved higher payload score |
+| **No improvement** | 26 | 72.2% | Sample 2177, 2187, 1998, 1871, 1899, and others — kept original answer despite retry |
 | **Incomplete logs** | 0 | 0% | No incomplete logs found in retry cases |
 
 Retry triggers when verification indicates `low_confidence`, `unsupported`, or `partially_verified` with fixable issues, or any high-severity failure category. The retry mechanism re-runs the full 6-stage pipeline with `is_retry=True`, providing `retry_context` (previous status, confidence, failure categories) to the ReasoningAgent for self-correction. The best result is selected by `_payload_score()` comparing verification rank, confidence rank, high-severity failure count, and review flag.
