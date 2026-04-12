@@ -69,7 +69,7 @@ function getBreakdownTooltip(mode) {
     return 'Breakdown by Difficulty Router output. Parent rows show overall difficulty accuracy, and expanding a difficulty row reveals question-type accuracy within that bucket. easy skips retrieval and uses standard verification; medium retrieves knowledge, uses standard verification, and can add a disclaimer; hard retrieves knowledge, uses strict verification, and can flag the case for review.';
   }
 
-  return 'Breakdown by question type. Close-ended questions use exact match for yes/no and binary medical assessments (normal/abnormal, present/absent, positive/negative, etc.). Open-ended questions use S-PubMedBert-MS-MARCO semantic similarity ≥ 0.90 to capture meaning equivalence.';
+  return 'Breakdown by question type. Close-ended questions use exact match for yes/no and binary medical assessments (normal/abnormal, present/absent, positive/negative, etc.). Open-ended questions use S-PubMedBert-MS-MARCO semantic similarity ≥ 0.85 to capture meaning equivalence.';
 }
 
 const QUESTION_TYPE_ORDER = [
@@ -307,7 +307,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
       <section className="evaluation-header-strip">
         <div>
           <h1 className="evaluation-title">Evaluation Dashboard</h1>
-          <p className="evaluation-subtitle">Aggregate accuracy metrics from cached Case Explorer runs. Close-ended: exact match for yes/no and binary medical terms (normal/abnormal, present/absent, etc.). Open-ended: S-PubMedBert-MS-MARCO semantic similarity ≥ 0.90.</p>
+          <p className="evaluation-subtitle">Aggregate accuracy metrics from cached Case Explorer runs. Close-ended: exact match for yes/no and binary medical terms (normal/abnormal, present/absent, etc.). Open-ended: S-PubMedBert-MS-MARCO semantic similarity ≥ 0.85.</p>
         </div>
         <div className="evaluation-actions">
           <button className="btn btn-secondary" onClick={onRefresh} disabled={loading}>
@@ -368,14 +368,14 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
             <div className="card">
               <div className="card-header">
                 <span className="card-title">3-System Disagreement</span>
-                <span className="tag tag-gray" data-tooltip="Percentage of cases where at least one pair of system outputs falls below the semantic-match threshold (0.90), so the three answers are not all semantically aligned." data-tooltip-align="left">info</span>
+                <span className="tag tag-gray" data-tooltip="Percentage of cases where at least one pair of system outputs falls below the semantic-match threshold (0.85), so the three answers are not all semantically aligned." data-tooltip-align="left">info</span>
               </div>
               <div className="evaluation-metric-value">{formatPercent(summary.disagreement_rate)}</div>
             </div>
             <div className="card">
               <div className="card-header">
                 <span className="card-title">Lexical Overlap</span>
-                <span className="tag tag-gray" data-tooltip="Average token F1 overlap score (0-1) across all cases. This is a surface-level diagnostic similarity metric only and is not used for correctness. Compare with Semantic Similarity Accuracy, which uses embedding similarity with a 0.90 threshold." data-tooltip-align="left">info</span>
+                <span className="tag tag-gray" data-tooltip="Average token F1 overlap score (0-1) across all cases. This is a surface-level diagnostic similarity metric only and is not used for correctness. Compare with Semantic Similarity Accuracy, which uses embedding similarity with a 0.85 threshold." data-tooltip-align="left">info</span>
               </div>
               <AccuracyMetricStack
                 baseline={avgBaselineF1}
@@ -414,7 +414,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 <span className="card-title">Semantic Similarity Accuracy (Open-ended)</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.open_ended_cases} cases</span>
-                  <span className="tag tag-gray" data-tooltip="Semantic Similarity Accuracy: Percentage of open-ended answers whose embedding similarity to the ground truth is ≥ 0.90. Uses S-PubMedBert-MS-MARCO, a biomedical sentence-transformer tuned for semantic matching. Not based on token F1." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="Semantic Similarity Accuracy: Percentage of open-ended answers whose embedding similarity to the ground truth is ≥ 0.85. Uses S-PubMedBert-MS-MARCO, a biomedical sentence-transformer tuned for semantic matching. Not based on token F1." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <AccuracyMetricStack
