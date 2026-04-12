@@ -357,6 +357,13 @@ def _has_semantic_disagreement(baseline: str, workflow: str, agentic: str) -> bo
         return False
 
 
+def _resolve_embedding_candidate(candidate, fallback_text: str):
+    """Return a usable embedding without relying on truth-value testing of arrays."""
+    if candidate is not None:
+        return candidate
+    return _get_cached_embedding(fallback_text)
+
+
 def _compute_semantic_scores_batch(baseline: str, workflow: str, agentic: str, ground_truth: str) -> dict:
     """Compute semantic similarity scores for all systems vs ground truth using cached embeddings.
     
@@ -762,9 +769,9 @@ def _compute_semantic_similarity_batch(embeddings_map: dict, text1: str, text2: 
 def _has_semantic_disagreement_batch(embeddings_map: dict, baseline: str, workflow: str, agentic: str) -> bool:
     """Check if systems disagree using pre-computed embeddings."""
     try:
-        baseline_emb = embeddings_map.get(baseline) or _get_cached_embedding(baseline)
-        workflow_emb = embeddings_map.get(workflow) or _get_cached_embedding(workflow)
-        agentic_emb = embeddings_map.get(agentic) or _get_cached_embedding(agentic)
+        baseline_emb = _resolve_embedding_candidate(embeddings_map.get(baseline), baseline)
+        workflow_emb = _resolve_embedding_candidate(embeddings_map.get(workflow), workflow)
+        agentic_emb = _resolve_embedding_candidate(embeddings_map.get(agentic), agentic)
         
         if baseline_emb is None or workflow_emb is None or agentic_emb is None:
             return False
