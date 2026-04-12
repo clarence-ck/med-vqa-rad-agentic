@@ -391,3 +391,17 @@
 2026-04-13T04:41:15  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=106  skipped=0  total_time=18.28s
 2026-04-13T04:41:15  INFO      medvqa.routes.dataset  Embedding cache cleared
 2026-04-13T04:41:15  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=18305ms
+2026-04-13T04:41:48  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-13T04:41:48  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-13T04:41:48  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=40ms
+2026-04-13T04:41:48  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-13T04:41:48  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-13T04:41:48  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=20ms
+2026-04-13T04:41:51  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:41:51  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=106
+2026-04-13T04:41:51  INFO      medvqa.routes.dataset  Loaded 106 cache files in 0.09s
+2026-04-13T04:41:58  INFO      medvqa.routes.dataset  Computed 248 unique embeddings in 6.89s
+2026-04-13T04:42:09  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=106  skipped=0  total_time=18.79s
+2026-04-13T04:42:09  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:42:10  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=18814ms
+2026-04-13T04:42:43  INFO      medvqa.server  MedVisionQuery API shutting down
