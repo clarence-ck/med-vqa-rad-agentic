@@ -40,6 +40,128 @@ class KnowledgeRetriever:
         )
         self.use_advanced_rag = use_advanced_rag and _ADVANCED_RAG_AVAILABLE
 
+    def _normalize_answer_label(self, answer: str) -> str:
+        text = (answer or "").strip().lower()
+        text = " ".join(text.split())
+        if not text:
+            return "unknown"
+
+        if text.startswith("yes") or text in {"positive", "present", "true"}:
+            return "yes"
+        if text.startswith("no") or text in {"negative", "absent", "false"}:
+            return "no"
+
+        if text in {"left", "right", "bilateral", "midline"}:
+            return text
+
+        if text in {"normal", "abnormal"}:
+            return text
+
+        return text
+
+    def _is_binary_or_location_query(self, question_type: str, answer_style: str) -> bool:
+        q_type = (question_type or "").strip().lower()
+        a_style = (answer_style or "").strip().lower()
+        return q_type in {"yes_no", "presence_absence", "location"} or a_style in {"yes_no", "closed"}
+
+    def _split_contradictory_cases(self, cases: list, question_type: str, answer_style: str) -> dict:
+        ordered = list(cases or [])
+        if not ordered:
+            return {
+                "supporting_cases": [],
+                "contradictory_cases": [],
+                "dominant_label": "unknown",
+                "has_contradiction": False,
+                "label_scores": {},
+            }
+
+        if not self._is_binary_or_location_query(question_type, answer_style):
+            dominant_label = self._normalize_answer_label(ordered[0].get("answer", ""))
+            return {
+                "supporting_cases": ordered,
+                "contradictory_cases": [],
+                "dominant_label": dominant_label,
+                "has_contradiction": False,
+                "label_scores": {},
+            }
+
+        label_scores: dict[str, float] = {}
+        for case in ordered:
+            label = self._normalize_answer_label(case.get("answer", ""))
+            score = float(case.get("score", 0.0) or 0.0)
+            if label == "unknown":
+                continue
+            label_scores[label] = label_scores.get(label, 0.0) + max(score, 0.0)
+
+        if label_scores:
+            dominant_label = max(label_scores.items(), key=lambda item: (item[1], item[0]))[0]
+        else:
+            dominant_label = self._normalize_answer_label(ordered[0].get("answer", ""))
+
+        supporting_cases = []
+        contradictory_cases = []
+        for case in ordered:
+            label = self._normalize_answer_label(case.get("answer", ""))
+            if label == dominant_label or label == "unknown":
+                supporting_cases.append(case)
+            else:
+                contradictory_cases.append(case)
+
+        return {
+            "supporting_cases": supporting_cases,
+            "contradictory_cases": contradictory_cases,
+            "dominant_label": dominant_label,
+            "has_contradiction": bool(contradictory_cases),
+            "label_scores": label_scores,
+        }
+
+    def _format_retrieved_cases_section(self, title: str, cases: list) -> str:
+        if not cases:
+            return f"{title}: none"
+
+        formatted = [f"{title}:"]
+        for i, case in enumerate(cases, 1):
+            score = case.get("score", 0.0)
+            answer_label = self._normalize_answer_label(case.get("answer", ""))
+            card_lines = [f"  KB Chunk {i}:"]
+
+            meta = case.get("metadata", {})
+            for label, key in [
+                ("Concept Type", "concept_type"),
+                ("Concept", "concept"),
+                ("Target Entity", "target_entity"),
+                ("Modality", "modality"),
+                ("Body Region", "body_region"),
+                ("Finding Category", "finding_category"),
+                ("Laterality", "laterality"),
+                ("Language", "language"),
+                ("Question Family", "question_family"),
+                ("Answer Style", "answer_style"),
+            ]:
+                value = meta.get(key)
+                if value:
+                    card_lines.append(f"    {label}: {value}")
+
+            support_count = meta.get("support_count")
+            if support_count is not None:
+                card_lines.append(f"    Support Count: {support_count}")
+
+            visual_cues = meta.get("visual_cues") or []
+            if visual_cues:
+                card_lines.append(f"    Visual Cues: {', '.join(visual_cues[:6])}")
+
+            text_chunk = meta.get("text_chunk")
+            if text_chunk:
+                card_lines.append(f"    Text Chunk: {text_chunk}")
+
+            card_lines.append(f"    Source Q: {case.get('question', '')}")
+            card_lines.append(f"    Source A: {case.get('answer', '')}")
+            card_lines.append(f"    Answer Label: {answer_label}")
+            card_lines.append(f"    Relevance Score: {score:.3f}")
+            formatted.append("\n".join(card_lines))
+
+        return "\n\n".join(formatted)
+
     @component.output_types(result=Dict[str, Any])
     def run(self,
             image_interpretation: dict = None,
@@ -87,9 +209,20 @@ class KnowledgeRetriever:
         # Advanced RAG: Retrieve similar cases from train set
         rag_context = ""
         similar_cases = []
+        grouped_cases = {
+            "supporting_cases": [],
+            "contradictory_cases": [],
+            "dominant_label": "unknown",
+            "has_contradiction": False,
+        }
         rag_metadata = {
             "count": 0,
             "triggered": False,
+            "dominant_label": "unknown",
+            "has_contradiction": False,
+            "supporting_count": 0,
+            "contradictory_count": 0,
+            "label_scores": {},
         }
 
         if self.use_advanced_rag and original_question:
@@ -114,16 +247,26 @@ class KnowledgeRetriever:
                 )
 
                 similar_cases = rag_result.get("similar_cases", [])
+                grouped_cases = self._split_contradictory_cases(similar_cases, question_type, answer_style)
                 rag_metadata = {
                     "count": rag_result.get("count", 0),
                     "triggered": True,
+                    "dominant_label": grouped_cases["dominant_label"],
+                    "has_contradiction": grouped_cases["has_contradiction"],
+                    "supporting_count": len(grouped_cases["supporting_cases"]),
+                    "contradictory_count": len(grouped_cases["contradictory_cases"]),
+                    "label_scores": grouped_cases.get("label_scores", {}),
                 }
 
                 if similar_cases:
-                    rag_context = self._format_similar_cases(similar_cases)
+                    support_section = self._format_retrieved_cases_section("SUPPORTING KB CHUNKS", grouped_cases["supporting_cases"])
+                    conflict_section = self._format_retrieved_cases_section("CONTRADICTORY KB CHUNKS", grouped_cases["contradictory_cases"])
+                    rag_context = f"{support_section}\n\n{conflict_section}"
                     _log.info(
-                        "Advanced RAG retrieved %d similar cases",
+                        "Advanced RAG retrieved %d similar cases (supporting=%d contradictory=%d)",
                         len(similar_cases),
+                        len(grouped_cases["supporting_cases"]),
+                        len(grouped_cases["contradictory_cases"]),
                     )
                 else:
                     _log.info("Advanced RAG returned 0 similar cases for this question; proceeding without RAG context")
@@ -160,6 +303,11 @@ class KnowledgeRetriever:
             if self.use_advanced_rag:
                 result["rag_retrieval"] = {
                     "similar_cases": similar_cases,
+                    "supporting_cases": grouped_cases["supporting_cases"],
+                    "contradictory_cases": grouped_cases["contradictory_cases"],
+                    "dominant_label": grouped_cases["dominant_label"],
+                    "has_contradiction": grouped_cases["has_contradiction"],
+                    "label_scores": grouped_cases.get("label_scores", {}),
                     "metadata": rag_metadata
                 }
 

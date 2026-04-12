@@ -157,6 +157,13 @@ class ReasoningAgent:
                    len(kn.get("key_facts", [])),
                    len(kn.get("rag_retrieval", {}).get("similar_cases", [])))
 
+        rag_retrieval = kn.get("rag_retrieval", {}) if isinstance(kn, dict) else {}
+        supporting_cases = rag_retrieval.get("supporting_cases", []) if isinstance(rag_retrieval, dict) else []
+        contradictory_cases = rag_retrieval.get("contradictory_cases", []) if isinstance(rag_retrieval, dict) else []
+        has_contradiction = bool(rag_retrieval.get("has_contradiction", False)) if isinstance(rag_retrieval, dict) else False
+        dominant_label = rag_retrieval.get("dominant_label", "unknown") if isinstance(rag_retrieval, dict) else "unknown"
+        label_scores = rag_retrieval.get("label_scores", {}) if isinstance(rag_retrieval, dict) else {}
+
         failure_categories = rc.get('failure_categories', []) if rc else []
         if isinstance(failure_categories, list):
             formatted_failure_categories = []
@@ -181,6 +188,21 @@ RETRY CONTEXT:
 - Previous fallback recommendation: {rc.get('fallback_recommendation', 'none')}
 - Previous failure categories: {failure_categories_text}
 - Retry instruction: Re-evaluate the answer with extra caution. If the evidence is still insufficient, produce a more conservative answer or explicitly abstain.
+"""
+
+        contradiction_guidance = ""
+        if has_contradiction:
+            contradiction_guidance = f"""
+
+RAG CONTRADICTION WARNING:
+- Retrieved evidence contains conflicting answers for the same or a closely related query.
+- Dominant retrieved label: {dominant_label}
+- Score-weighted label support: {label_scores}
+- Supporting cases: {len(supporting_cases)}
+- Contradictory cases: {len(contradictory_cases)}
+- Treat contradictory retrieved cases as lower-trust context.
+- Prefer the current image analysis over retrieved cases whenever there is disagreement.
+- Use retrieved knowledge only as background support, not as a source of truth.
 """
 
         question_type = qa.get('question_type', '')
@@ -227,7 +249,7 @@ SUPPORTING KNOWLEDGE:
 - Context: {kn.get('contextual_notes', 'Not available')}
 - Key facts: {', '.join(kn.get('key_facts', []))}
 - Normal findings: {kn.get('expected_normal_findings', 'Not available')}
-{yes_no_constraint}{retry_guidance}
+{yes_no_constraint}{retry_guidance}{contradiction_guidance}
 
 ANSWER STYLE RULES:
 {style_guidance}
@@ -243,6 +265,7 @@ Return a JSON object with:
 }}
 
 IMPORTANT: Base your answer on the visual evidence provided. If the evidence is insufficient, say so.
+IMPORTANT: If the retrieved knowledge conflicts with the image analysis, trust the image analysis and down-weight the conflicting retrieval.
 Return ONLY the JSON object, no additional text."""
 
         try:

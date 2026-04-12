@@ -1,7 +1,0 @@
-2026-04-10T19:12:34  INFO      medvqa  Session started  file=medvqa_20260410_191234_5738930c.log  session_id=5738930c
-2026-04-10T19:12:42  INFO      medvqa.agents.knowledge_retriever  Advanced RAG module loaded successfully
-2026-04-10T19:12:43  INFO      medvqa.server  ============================================================
-2026-04-10T19:12:43  INFO      medvqa.server  MedVisionQuery API  v1.0.0  starting up
-2026-04-10T19:12:43  INFO      medvqa.server  CORS origins: ['http://localhost:5173']
-2026-04-10T19:12:43  INFO      medvqa.server  ============================================================
-2026-04-10T19:12:43  INFO      medvqa.server  MedVisionQuery API shutting down
