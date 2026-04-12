@@ -116,10 +116,14 @@ def _tool_filter_image_context(image_interpretation: dict = None, question_analy
     selected_findings = [finding for finding, score in scored_findings if score > 0][:4]
     selected_structures = [structure for structure, score in scored_structures if score > 0][:4]
 
+    used_fallback_findings = False
+    used_fallback_structures = False
     if not selected_findings and notable_findings:
         selected_findings = notable_findings[:2]
+        used_fallback_findings = True
     if not selected_structures and visible_structures:
         selected_structures = visible_structures[:2]
+        used_fallback_structures = True
 
     summary_parts = [part for part in [vs.get("visual_summary", ""), "; ".join(selected_findings), "; ".join(selected_structures)] if part]
     filtered_summary = " | ".join(summary_parts[:2]) if summary_parts else str(vs.get("visual_summary", ""))
@@ -143,12 +147,17 @@ def _tool_filter_image_context(image_interpretation: dict = None, question_analy
     }
     duration_ms = int((time.time() - started) * 1000)
     _log.info(
-        "[tool] filter_image_context done  question_type=%s  findings=%d  structures=%d  duration=%dms",
+        "[tool] filter_image_context done  question_type=%s  findings=%d  structures=%d  fallback_findings=%s  fallback_structures=%s  duration=%dms",
         result.get("question_type", "unknown"),
         len(selected_findings),
         len(selected_structures),
+        used_fallback_findings,
+        used_fallback_structures,
         duration_ms,
     )
+    _log.debug("[tool] filter_image_context selected findings=%s", selected_findings)
+    _log.debug("[tool] filter_image_context selected structures=%s", selected_structures)
+    _log.debug("[tool] filter_image_context filtered summary=%s", filtered_summary)
     return {"result": result, "duration_ms": duration_ms}
 
 
