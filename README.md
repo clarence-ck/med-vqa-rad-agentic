@@ -193,7 +193,7 @@ The orchestrator uses Haystack's `Agent` + `Tool` architecture:
 - The controller LLM decides which tools to invoke and in what order based on prior outputs in state
 - **Routing metadata**: DifficultyRouter stores `verification_policy` + `fallback_policy` in `routing_decision`; downstream payloads and UI surfaces read these fields from shared state
 - **Auto-block**: ImageInterpreter validates radiology images; non-radiology images abort pipeline early → Error state
-- 16 state fields: `image_bytes`, `mime_type`, `question`, `image_interpretation`, `question_analysis`, `routing_decision`, `knowledge`, `answer_data`, `verification_result`, 5 duration fields, `retry_context`
+- 16 state fields: `image_bytes_b64`, `mime_type`, `question`, `image_interpretation`, `question_analysis`, `routing_decision`, `knowledge`, `answer_data`, `verification_result`, 5 duration fields, `retry_context`
 - Exit condition: `verify_answer` finalizes the session
 - A fresh `Agent` is created per request to prevent shared mutable state under concurrency
 
@@ -450,7 +450,7 @@ The system performs failure case analysis using multiple complementary methods:
 
 - **Self-consistency checks** — The VerificationAgent performs 5 structured checks (answer_matches_question_type, format_appropriate, explanation_grounded_in_evidence, answer_strength_appropriate, no_contradictions). The self-consistency signal is computed in `orchestrator.py` (`_build_self_consistency_signal`, lines 475-497) as the ratio of passed checks (high/medium/low) and is displayed in the Evaluation UI.
 
-- **Cross-modal agreement checks** — The system evaluates agreement between the visual interpretation (image modality) and the final answer (text modality). This is computed in `orchestrator.py` (`_build_cross_modal_agreement_signal`, lines 500-513) using VerificationAgent's `explanation_grounded_in_evidence` and `no_contradictions` checks, producing a cross-modal agreement level (high/medium/low) displayed in the Evaluation UI.
+- **Cross-modal agreement checks** — The system evaluates agreement between the visual interpretation (image modality) and the final answer (text modality). This is computed in `orchestrator.py` (`_build_cross_modal_agreement_signal`, lines 500-517) using VerificationAgent's `explanation_grounded_in_evidence` and `no_contradictions` checks, producing a cross-modal agreement level (high/medium/low) displayed in the Evaluation UI.
 
 - **Verifier models** — Agent 6 (VerificationAgent) serves as the dedicated verifier model, running an OpenAI-backed LLM to perform structured verification of the final answer against the image evidence. The verifier outputs a verification status (verified/partially_verified/low_confidence/unsupported) and identifies specific failure categories.
 
