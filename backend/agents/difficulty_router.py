@@ -48,6 +48,45 @@ class DifficultyRouter:
             "Routing difficulty  question_type=%s  reasoning=%s  med_knowledge=%s  modality=%s  region=%s",
             question_type, reasoning_type, requires_medical_knowledge, modality, body_region,
         )
+
+        # HARD RULE: Bypass retrieval for question types that are harmed by retrieval
+        # These question types rely on direct visual interpretation and retrieval contamination
+        # has been empirically shown to reduce accuracy (e.g., yes/no drops from 50% to 17%)
+        RETRIEVAL_INCOMPATIBLE_TYPES = {"yes_no", "presence_absence", "location", "counting"}
+        if question_type in RETRIEVAL_INCOMPATIBLE_TYPES:
+            _log.info(
+                "Hard rule: question_type='%s' is retrieval-incompatible, forcing easy/no-retrieval",
+                question_type
+            )
+            return {"result": {
+                "difficulty": "easy",
+                "needs_retrieval": False,
+                "retrieval_rationale": f"Question type '{question_type}' is incompatible with retrieval (binary/spatial/counting questions rely on direct visual interpretation)",
+                "verification_policy": "standard",
+                "fallback_policy": "none",
+                "routing_rationale": f"Hard rule override: {question_type} questions bypass retrieval to avoid contamination",
+                "status": "success"
+            }}
+
+        # HARD RULE: Poor image quality requires conservative handling
+        # Don't compound bad image with questionable retrieval
+        image_quality = ii.get("image_quality", "unknown")
+        quality_warning = ii.get("quality_warning", False)
+        if quality_warning or image_quality == "poor":
+            _log.info(
+                "Hard rule: image_quality='%s' with quality_warning=%s, forcing hard/strict/no-retrieval",
+                image_quality, quality_warning
+            )
+            return {"result": {
+                "difficulty": "hard",
+                "needs_retrieval": False,
+                "retrieval_rationale": "Poor image quality - retrieval would be unreliable, using strict visual-only analysis",
+                "verification_policy": "strict",
+                "fallback_policy": "flag_for_review",
+                "routing_rationale": f"Hard rule: poor image quality ({image_quality}) requires conservative handling with human review flag",
+                "status": "success"
+            }}
+
         started = time.perf_counter()
 
         prompt = f"""You are a medical VQA routing and planning agent.

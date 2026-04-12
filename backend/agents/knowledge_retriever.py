@@ -154,6 +154,7 @@ class KnowledgeRetriever:
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
             result["status"] = "success"
+            result["retrieval_status"] = "success"
 
             # Add RAG metadata to result (always include if RAG was triggered, even if no cases found)
             if self.use_advanced_rag:
@@ -164,7 +165,8 @@ class KnowledgeRetriever:
 
             elapsed_ms = int((time.perf_counter() - started) * 1000)
             _log.info(
-                "Knowledge retrieval done  key_facts=%d  rag_cases=%d  duration=%dms",
+                "Knowledge retrieval done  retrieval_status=%s  key_facts=%d  rag_cases=%d  duration=%dms",
+                result.get("retrieval_status", "success"),
                 len(result.get("key_facts", [])),
                 len(similar_cases),
                 elapsed_ms,
@@ -177,6 +179,7 @@ class KnowledgeRetriever:
             _log.error("Failed to parse knowledge retrieval JSON response")
             return {"result": {
                 "status": "error",
+                "retrieval_status": "failed",
                 "error": "Failed to parse knowledge retrieval response",
                 "contextual_notes": "Knowledge retrieval was not successful.",
                 "key_facts": [],
@@ -188,6 +191,7 @@ class KnowledgeRetriever:
             _log.error("Unexpected error in knowledge retrieval: %s", e)
             return {"result": {
                 "status": "error",
+                "retrieval_status": "failed",
                 "error": str(e),
                 "contextual_notes": "Knowledge retrieval failed.",
                 "key_facts": [],

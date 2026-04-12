@@ -10,6 +10,7 @@ Usage:
     python scripts/build_slake_kb.py
     python scripts/build_slake_kb.py --input data/slake/slake.json --output-dir data/slake/kb
     python scripts/build_slake_kb.py --language en
+    python scripts/build_slake_kb.py --splits train,validation --language en
     python scripts/build_slake_kb.py --language all
 
 Default behavior:

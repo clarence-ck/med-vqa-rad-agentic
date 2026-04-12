@@ -67,6 +67,12 @@ class AdvancedRAGRetriever:
                 requested_corpus,
             )
         self.corpus_name = "slake"
+        corpus_splits_env = os.getenv("RAG_CORPUS_SPLITS", "train,validation")
+        self.corpus_splits = {
+            split.strip().lower()
+            for split in corpus_splits_env.split(",")
+            if split.strip()
+        } or {"train", "validation"}
         
         # Data directory
         if data_dir is None:
@@ -96,7 +102,7 @@ class AdvancedRAGRetriever:
         self._target_entity_index: Dict[str, List[int]] = defaultdict(list)
         self._question_family_index: Dict[str, List[int]] = defaultdict(list)
         self._device = self._resolve_device()
-        _log.info("Using device: %s", self._device)
+        _log.info("Using device: %s  corpus_splits=%s", self._device, sorted(self.corpus_splits))
 
         self._is_indexed = False
 
@@ -267,10 +273,18 @@ class AdvancedRAGRetriever:
             with open(json_path, 'r', encoding='utf-8') as f:
                 all_data = json.load(f)
 
-        # Filter train split
-        train_data = [item for item in all_data if item.get('split') == 'train']
+        # Filter configured corpus splits (default: train + validation)
+        train_data = [
+            item for item in all_data
+            if str(item.get('split', '')).strip().lower() in self.corpus_splits
+        ]
 
-        _log.info("Loaded %d training examples from dataset", len(train_data))
+        _log.info(
+            "Loaded %d corpus examples from splits=%s  path=%s",
+            len(train_data),
+            sorted(self.corpus_splits),
+            json_path,
+        )
         
         # Store with computed metadata
         self._train_examples = []
@@ -560,10 +574,10 @@ class AdvancedRAGRetriever:
         return re.findall(r'\b[a-zA-Z0-9]+\b', cleaned)
 
     # Retrieval confidence thresholds
-    # Lowered from original (0.55, 0.15) to allow more valid retrievals through
-    _TOP1_SOFTMAX_THRESHOLD = 0.30  # Was 0.55 - cross-encoder softmax confidence
-    _SOFTMAX_MARGIN_THRESHOLD = 0.08  # Was 0.15 - gap between top 1 and 2
-    _DENSE_TOP1_THRESHOLD = 0.35  # Dense retrieval minimum score
+    # Tuned for precision over recall to reduce contamination from weak matches
+    _TOP1_SOFTMAX_THRESHOLD = 0.40  # Cross-encoder softmax confidence (was 0.30)
+    _SOFTMAX_MARGIN_THRESHOLD = 0.12  # Gap between top 1 and 2 (was 0.08)
+    _DENSE_TOP1_THRESHOLD = 0.40  # Dense retrieval minimum score (was 0.35)
     _AGREEMENT_TOPK = 5  # Check if top reranked candidate appears in both dense/sparse top-5
 
     def retrieve(
@@ -630,30 +644,31 @@ class AdvancedRAGRetriever:
             body_region=body_region,
             finding_category=finding_category,
             concept_type=question_family or question_type,
+            question_family=question_family,
             target_entity=target_entity,
             answer_style=answer_style,
         )
         if candidate_indices is None:
             _log.debug("Metadata filter: none applied (full corpus search)")
         else:
-            _log.info("Metadata filter: %d candidates retained", len(candidate_indices))
+            _log.debug("Metadata filter: %d candidates retained", len(candidate_indices))
 
         # 3. Hybrid Retrieval
-        _log.info("Dense retrieval: top_k=%d", self.top_k_dense)
+        _log.debug("Dense retrieval: top_k=%d", self.top_k_dense)
         dense_results = self._dense_retrieval(query, candidate_indices)
         self._log_top_hits("Dense retrieval results", dense_results)
 
-        _log.info("Sparse (BM25) retrieval: top_k=%d", self.top_k_sparse)
+        _log.debug("Sparse (BM25) retrieval: top_k=%d", self.top_k_sparse)
         sparse_results = self._sparse_retrieval(query, candidate_indices)
         self._log_top_hits("Sparse retrieval results", sparse_results)
 
         # Merge and deduplicate
         merged = self._merge_results(dense_results, sparse_results)
-        _log.info("Hybrid RRF merge produced %d unique candidates", len(merged))
+        _log.debug("Hybrid RRF merge produced %d unique candidates", len(merged))
         self._log_top_hits("Merged candidates", merged)
 
         # 4. Reranking (mandatory)
-        _log.info(
+        _log.debug(
             "Reranking %d candidates down to top_k_final=%d (cross-encoder=%s)",
             len(merged),
             self.top_k_final,
@@ -690,14 +705,15 @@ class AdvancedRAGRetriever:
         body_region: str = None,
         finding_category: str = None,
         concept_type: str = None,
+        question_family: str = None,
         target_entity: str = None,
         answer_style: str = None,
     ) -> Optional[List[int]]:
         """Apply metadata pre-filtering to reduce search space.
 
-        Uses smart intersection: tries full filter (modality + body_region + finding),
-        but gracefully degrades to partial filters if intersection is empty.
-        Finding category is sparse, so it's applied last and skipped if it causes emptiness.
+        Uses image-grounded hard filters first (modality/body_region), then refines with
+        softer metadata signals (finding, concept_type, question_family, target_entity,
+        answer_style) only when they do not empty the candidate set.
         """
         if not modality and not body_region and not finding_category and not concept_type and not target_entity and not answer_style:
             _log.debug("Metadata filter inputs empty; skipping filter")
@@ -737,6 +753,11 @@ class AdvancedRAGRetriever:
             _log.debug("Metadata filter concept_type='%s': %d matches", concept_type, len(concept_matches))
             filter_sets.append((f"concept_type({len(concept_matches)})", set(concept_matches), False))
 
+        family_matches = _resolve_matches(self._question_family_index, question_family or "")
+        if family_matches:
+            _log.debug("Metadata filter question_family='%s': %d matches", question_family, len(family_matches))
+            filter_sets.append((f"question_family({len(family_matches)})", set(family_matches), False))
+
         target_matches = _resolve_matches(self._target_entity_index, target_entity or "")
         if target_matches:
             _log.debug("Metadata filter target_entity='%s': %d matches", target_entity, len(target_matches))
@@ -751,25 +772,53 @@ class AdvancedRAGRetriever:
             _log.debug("Metadata filter produced no specific filters; skipping filter")
             return None
 
-        # Combine filters. Prefer hard image-grounded filters first; degrade if they collapse to zero.
-        hard_sets = [s for _, s, is_hard in filter_sets if is_hard]
-        soft_sets = [s for _, s, is_hard in filter_sets if not is_hard]
-        filter_applied = [label for label, _, _ in filter_sets]
+        # Combine filters. Prefer hard image-grounded filters first, then only
+        # apply soft filters when they keep the candidate set non-empty.
+        hard_entries = [(label, s) for label, s, is_hard in filter_sets if is_hard]
+        soft_entries = [(label, s) for label, s, is_hard in filter_sets if not is_hard]
+        filter_applied: List[str] = []
 
-        candidates = None
-        if hard_sets:
-            candidates = set.intersection(*hard_sets) if len(hard_sets) > 1 else set(next(iter(hard_sets)))
-        if candidates is None or not candidates:
-            # Fall back to the largest soft filter to avoid empty retrieval.
-            if soft_sets:
-                soft_sets_sorted = sorted(soft_sets, key=len, reverse=True)
-                candidates = set(soft_sets_sorted[0])
-                for s in soft_sets_sorted[1:]:
-                    intersected = candidates.intersection(s)
-                    if intersected:
-                        candidates = intersected
-            elif hard_sets:
-                candidates = set(next(iter(hard_sets)))
+        candidates: Optional[set] = None
+        if hard_entries:
+            hard_labels = [label for label, _ in hard_entries]
+            hard_sets = [s for _, s in hard_entries]
+            candidates = set.intersection(*hard_sets) if len(hard_sets) > 1 else set(hard_sets[0])
+            filter_applied.extend(hard_labels)
+
+            if candidates:
+                for label, soft_set in sorted(soft_entries, key=lambda item: len(item[1])):
+                    refined = candidates.intersection(soft_set)
+                    if refined:
+                        candidates = refined
+                        filter_applied.append(label)
+                    else:
+                        _log.debug("Skipping soft filter %s because it would empty the hard-filter candidate set", label)
+            elif soft_entries:
+                _log.debug("Hard filters produced no candidates; falling back to soft metadata filters")
+                soft_entries_sorted = sorted(soft_entries, key=lambda item: len(item[1]))
+                first_label, first_set = soft_entries_sorted[0]
+                candidates = set(first_set)
+                filter_applied.append(first_label)
+                for label, soft_set in soft_entries_sorted[1:]:
+                    refined = candidates.intersection(soft_set)
+                    if refined:
+                        candidates = refined
+                        filter_applied.append(label)
+                    else:
+                        _log.debug("Skipping soft filter %s because it would empty the candidate set", label)
+        else:
+            soft_entries_sorted = sorted(soft_entries, key=lambda item: len(item[1]))
+            if soft_entries_sorted:
+                first_label, first_set = soft_entries_sorted[0]
+                candidates = set(first_set)
+                filter_applied.append(first_label)
+                for label, soft_set in soft_entries_sorted[1:]:
+                    refined = candidates.intersection(soft_set)
+                    if refined:
+                        candidates = refined
+                        filter_applied.append(label)
+                    else:
+                        _log.debug("Skipping soft filter %s because it would empty the candidate set", label)
 
         if candidates:
             result = list(candidates)

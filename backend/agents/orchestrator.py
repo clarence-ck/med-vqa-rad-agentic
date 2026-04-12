@@ -39,8 +39,14 @@ def _tool_interpret_image(image_bytes_b64: str, mime_type: str = "image/png") ->
         raise ImageBlockerAbort(str(e))
         
     duration_ms = int((time.time() - started) * 1000)
-    _log.info("[tool] interpret_image done  modality=%s  region=%s  duration=%dms",
-              result.get("modality", "?"), result.get("body_region", "?"), duration_ms)
+    _log.info(
+        "[tool] interpret_image done  modality=%s  region=%s  image_quality=%s  quality_warning=%s  duration=%dms",
+        result.get("modality", "?"),
+        result.get("body_region", "?"),
+        result.get("image_quality", "?"),
+        result.get("quality_warning", False),
+        duration_ms,
+    )
     return {"result": result, "duration_ms": duration_ms}
 
 
@@ -62,17 +68,25 @@ def _tool_route_difficulty(question_analysis: dict = None, image_interpretation:
         image_interpretation=image_interpretation,
     )["result"]
     duration_ms = int((time.time() - started) * 1000)
-    _log.info("[tool] route_difficulty done  difficulty=%s  needs_retrieval=%s  duration=%dms",
-              result.get("difficulty", "?"), result.get("needs_retrieval", "?"), duration_ms)
+    _log.info(
+        "[tool] route_difficulty done  difficulty=%s  needs_retrieval=%s  retrieval_status=%s  verification=%s  fallback=%s  duration=%dms",
+        result.get("difficulty", "?"),
+        result.get("needs_retrieval", "?"),
+        result.get("retrieval_status", "?"),
+        result.get("verification_policy", "?"),
+        result.get("fallback_policy", "?"),
+        duration_ms,
+    )
     return {"result": result, "duration_ms": duration_ms}
 
 
 def _tool_retrieve_knowledge(image_interpretation: dict = None, question_analysis: dict = None,
                              question: str = "", routing_decision: dict = None) -> dict:
     if routing_decision and not routing_decision.get("needs_retrieval", True):
-        _log.info("[tool] retrieve_knowledge SKIPPED (needs_retrieval=False)")
+        _log.info("[tool] retrieve_knowledge SKIPPED (needs_retrieval=False, retrieval_status=skipped)")
         return {"result": {
             "status": "skipped",
+            "retrieval_status": "skipped",
             "contextual_notes": "Retrieval skipped — routing decision: not needed.",
             "key_facts": [],
             "expected_normal_findings": "",
@@ -87,10 +101,13 @@ def _tool_retrieve_knowledge(image_interpretation: dict = None, question_analysi
         original_question=question,
     )["result"]
     duration_ms = int((time.time() - started) * 1000)
-    _log.info("[tool] retrieve_knowledge done  key_facts=%d  rag_cases=%d  duration=%dms",
-              len(result.get("key_facts", [])),
-              len(result.get("rag_retrieval", {}).get("similar_cases", [])),
-              duration_ms)
+    _log.info(
+        "[tool] retrieve_knowledge done  retrieval_status=%s  key_facts=%d  rag_cases=%d  duration=%dms",
+        result.get("retrieval_status", "unknown"),
+        len(result.get("key_facts", [])),
+        len(result.get("rag_retrieval", {}).get("similar_cases", [])),
+        duration_ms,
+    )
     return {"result": result, "duration_ms": duration_ms}
 
 
@@ -305,6 +322,7 @@ def _categorize_failure_modes(knowledge_result: dict, answer_result: dict, verif
     issues = [str(issue) for issue in verification_result.get("issues_found", [])]
     verification_status = verification_result.get("verification_status", "unknown")
     knowledge_status = knowledge_result.get("status", "unknown")
+    retrieval_status = knowledge_result.get("retrieval_status", knowledge_status)
     reasoning_status = answer_result.get("status", "unknown")
     needs_retrieval = bool((routing_result or {}).get("needs_retrieval", False))
 
@@ -318,14 +336,22 @@ def _categorize_failure_modes(knowledge_result: dict, answer_result: dict, verif
             "severity": severity,
         })
 
-    if knowledge_status not in {"success", "skipped"}:
+    if retrieval_status in {"unknown", ""} and not needs_retrieval:
+        retrieval_status = "skipped"
+
+    if retrieval_status == "skipped":
+        knowledge_status = "skipped"
+    elif retrieval_status == "failed":
+        knowledge_status = "error"
+
+    if knowledge_status not in {"success", "skipped"} and retrieval_status != "skipped":
         add_category(
             "knowledge_retrieval_failed",
             "Knowledge retrieval failed",
             "The support agent did not return reliable contextual notes or key facts.",
             "medium",
         )
-    elif knowledge_status == "skipped" and needs_retrieval:
+    elif retrieval_status == "failed" or (knowledge_status == "skipped" and needs_retrieval):
         add_category(
             "knowledge_retrieval_failed",
             "Knowledge retrieval failed",
@@ -612,6 +638,16 @@ def _assemble_pipeline_payload(results: dict, question: str, started_at: float, 
     routing_duration_ms = results.get("difficulty_router", {}).get("duration_ms", 0)
     knowledge_result = results.get("knowledge_retriever", {}).get("result", {})
     knowledge_duration_ms = results.get("knowledge_retriever", {}).get("duration_ms", 0)
+    if not routing_result.get("needs_retrieval", False) and knowledge_result.get("status", "unknown") in {"unknown", ""}:
+        knowledge_result = {
+            "status": "skipped",
+            "retrieval_status": "skipped",
+            "contextual_notes": "Retrieval skipped — routing decision: not needed.",
+            "key_facts": [],
+            "expected_normal_findings": "",
+            "common_pathologies": [],
+            "terminology": {},
+        }
     answer_result = results.get("reasoning_agent", {}).get("result", {})
     answer_duration_ms = results.get("reasoning_agent", {}).get("duration_ms", 0)
     verification_result = results.get("verification_agent", {}).get("result", {})
@@ -693,6 +729,7 @@ def _assemble_pipeline_payload(results: dict, question: str, started_at: float, 
         "routing_decision": {
             "difficulty": routing_result.get("difficulty", "unknown"),
             "needs_retrieval": routing_result.get("needs_retrieval", False),
+            "retrieval_status": routing_result.get("retrieval_status", knowledge_result.get("retrieval_status", "unknown")),
             "retrieval_rationale": routing_result.get("retrieval_rationale", ""),
             "verification_policy": routing_result.get("verification_policy", "standard"),
             "fallback_policy": routing_result.get("fallback_policy", "none"),
@@ -724,7 +761,7 @@ def _should_retry_pipeline(payload: dict) -> bool:
     return should_retry
 
 
-def _payload_score(payload: dict) -> tuple[int, int, int, int]:
+def _payload_score(payload: dict) -> tuple[int, int, int, int, int]:
     verification_status = payload.get("verification_status", "low_confidence")
     verification_rank = {
         "verified": 4,
@@ -740,11 +777,25 @@ def _payload_score(payload: dict) -> tuple[int, int, int, int]:
     failure_categories = payload.get("failure_categories", []) or []
     high_severity_count = sum(1 for category in failure_categories if category.get("severity") == "high")
     review_flag = 1 if payload.get("should_flag_for_review") else 0
+
+    question_analysis = payload.get("question_analysis", {}) or {}
+    question_type = str(question_analysis.get("question_type", "unknown"))
+    expected_answer_format = str(question_analysis.get("expected_answer_format", "short_phrase"))
+
+    specificity_allowed_question_types = {"abnormality_description", "explanation_request", "other"}
+    specificity_allowed_formats = {"sentence", "paragraph"}
+
+    answer = payload.get("answer", "")
+    word_count = len(answer.split()) if answer else 0
+    specificity_score = min(word_count, 50)
+    if question_type not in specificity_allowed_question_types and expected_answer_format not in specificity_allowed_formats:
+        specificity_score = 0
+
     _log.debug(
-        "Payload score  verification_rank=%d  confidence_rank=%d  high_failures=%d  review=%d",
-        verification_rank, confidence_rank, high_severity_count, review_flag,
+        "Payload score  verification_rank=%d  confidence_rank=%d  high_failures=%d  review=%d  qtype=%s  format=%s  specificity=%d",
+        verification_rank, confidence_rank, high_severity_count, review_flag, question_type, expected_answer_format, specificity_score,
     )
-    return verification_rank, confidence_rank, -high_severity_count, -review_flag
+    return verification_rank, confidence_rank, -high_severity_count, -review_flag, specificity_score
 
 
 def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png") -> dict:
@@ -868,10 +919,17 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
     best_payload["retry_attempts"] = retry_attempts
     best_payload["retry_reason"] = retry_reason
     total_ms = int((time.time() - pipeline_start) * 1000)
+    routing_decision = best_payload.get("routing_decision", {}) or {}
+    image_analysis = best_payload.get("image_analysis", {}) or {}
+    retrieval_status = routing_decision.get("retrieval_status", best_payload.get("knowledge_retriever", {}).get("retrieval_status", "unknown"))
     _log.info(
-        "=== Agentic pipeline DONE  answer=%r  retries=%d  total_duration=%dms ===",
+        "=== Agentic pipeline DONE  answer=%r  difficulty=%s  retrieval_status=%s  image_quality=%s  retries=%d  review=%s  total_duration=%dms ===",
         str(best_payload.get("answer", ""))[:60],
+        routing_decision.get("difficulty", "unknown"),
+        retrieval_status,
+        image_analysis.get("image_quality", "unknown"),
         retry_attempts,
+        best_payload.get("should_flag_for_review", False),
         total_ms,
     )
     return best_payload

@@ -5,15 +5,23 @@ export default function RoutingCard({ result }) {
 
   const difficulty = rd.difficulty || 'unknown';
   const needsRetrieval = rd.needs_retrieval;
+  const retrievalStatus = rd.retrieval_status || (needsRetrieval ? 'success' : 'skipped');
   const verificationPolicy = rd.verification_policy || 'standard';
   const fallbackPolicy = rd.fallback_policy || 'none';
   const routingRationale = rd.routing_rationale || '';
   const retrievalRationale = rd.retrieval_rationale || '';
+  const qualityWarning = Boolean(result.image_analysis?.quality_warning);
+  const imageQuality = result.image_analysis?.image_quality || 'unknown';
 
   const difficultyClass =
     difficulty === 'easy' ? 'tag-green' :
     difficulty === 'hard' ? 'tag-red' :
     'tag-amber';
+
+  const retrievalStatusClass =
+    retrievalStatus === 'success' ? 'tag-green' :
+    retrievalStatus === 'skipped' ? 'tag-gray' :
+    'tag-red';
 
   return (
     <div className="card animate-fade-in" style={{ animationDelay: '0.18s' }}>
@@ -26,12 +34,20 @@ export default function RoutingCard({ result }) {
           <span className={`tag ${needsRetrieval ? 'tag-green' : 'tag-gray'}`}>
             retrieval {needsRetrieval ? 'triggered' : 'skipped'}
           </span>
+          <span className={`tag ${retrievalStatusClass}`}>
+            retrieval status: {retrievalStatus.replace(/_/g, ' ')}
+          </span>
           <span className={`tag ${verificationPolicy === 'strict' ? 'tag-amber' : 'tag-gray'}`}>
             {verificationPolicy} verification
           </span>
           <span className={`tag ${fallbackPolicy === 'flag_for_review' ? 'tag-red' : fallbackPolicy === 'add_disclaimer' ? 'tag-amber' : 'tag-gray'}`}>
             fallback: {fallbackPolicy.replace(/_/g, ' ')}
           </span>
+          {qualityWarning && (
+            <span className="tag tag-amber">
+              poor image quality: {imageQuality.replace(/_/g, ' ')}
+            </span>
+          )}
         </div>
         {routingRationale && (
           <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>

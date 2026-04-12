@@ -59,14 +59,21 @@ def _derive_presence_answer(question: str, target_entity: str, evidence_text: st
                             evidence_items: list[str], notable_findings: list[str],
                             image_status: str) -> tuple[str, str]:
     query_text = target_entity if target_entity not in {"unknown", "abnormality"} else question
-    generic_abnormality_query = any(
-        term in _normalize_text(question)
-        for term in ["abnormal", "finding", "patholog", "lesion", "fracture", "mass", "effusion"]
-    )
+
+    # First check: specific target entity must match findings
     if _has_target_match(query_text, evidence_text, evidence_items):
         return "Yes", "high" if notable_findings else "medium"
+
+    # Second check: generic abnormality query (e.g., "is there any abnormality?")
+    # Only return "Yes" if there are findings for generic queries, but "No" if no findings
+    generic_abnormality_query = any(
+        term in _normalize_text(question)
+        for term in ["abnormal", "finding", "patholog"]
+    )
     if generic_abnormality_query:
-        return ("Yes", "medium") if notable_findings else ("No", "medium" if image_status == "success" else "low")
+        return ("Yes", "medium") if notable_findings else ("No", "medium")
+
+    # Default: No specific match and no generic abnormality terms
     return ("No", "low") if image_status == "success" else ("Unable to determine", "low")
 
 

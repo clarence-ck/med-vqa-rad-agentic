@@ -1,14 +1,12 @@
-import base64
 import json
 import time
-from io import BytesIO
 from typing import Dict, Any
 
 from haystack import component
 from haystack.components.generators.chat import OpenAIChatGenerator
-from haystack.dataclasses import ChatMessage, TextContent, ImageContent
+from haystack.components.converters.image import ImageFileToImageContent
+from haystack.dataclasses import ChatMessage, TextContent, ImageContent, ByteStream
 from haystack.utils import Secret
-from PIL import Image
 
 from config import OPENAI_API_KEY, VISION_MODEL
 from utils.json_utils import strip_json_fences
@@ -22,9 +20,11 @@ class ImageInterpreter:
     """
     Agent 1: Image Interpretation Agent
     Takes a medical image and extracts modality, anatomy, visible structures.
+    Uses ImageFileToImageContent for standardized image processing.
     """
     def __init__(self):
         self.generator = OpenAIChatGenerator(api_key=Secret.from_token(OPENAI_API_KEY), model=VISION_MODEL)
+        self.image_converter = ImageFileToImageContent(detail="high", size=(1024, 1024))
 
     @component.output_types(result=Dict[str, Any])
     def run(self, image_bytes: bytes, mime_type: str = "image/png"):
@@ -47,14 +47,16 @@ Return ONLY the JSON object, no additional text."""
         _log.info("Running image interpretation (mime_type=%s, size=%d bytes)", mime_type, len(image_bytes))
         started = time.perf_counter()
         try:
-            image = Image.open(BytesIO(image_bytes)).convert("RGB")
-            buffered = BytesIO()
-            image.save(buffered, format="PNG")
-            image_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+            # Use ImageFileToImageContent for standardized image processing
+            # Wrap bytes in ByteStream for the component
+            stream = ByteStream(data=image_bytes, mime_type=mime_type)
+            converter_result = self.image_converter.run(sources=[stream])
+            image_content = converter_result["image_contents"][0]
+            
             messages = [
                 ChatMessage.from_user(content_parts=[
                     TextContent(text=prompt),
-                    ImageContent(base64_image=image_base64, mime_type=mime_type)
+                    image_content  # Already ImageContent object from converter
                 ])
             ]
             response = self.generator.run(messages=messages, generation_kwargs={"max_completion_tokens": 3000})
@@ -70,6 +72,15 @@ Return ONLY the JSON object, no additional text."""
                 raise ValueError("The uploaded image does not appear to be a radiology image. Please upload a valid X-ray, CT, MRI, or Ultrasound.")
 
             result["status"] = "success"
+
+            # IMAGE QUALITY GATE: Warn if image quality is poor
+            image_quality = result.get("image_quality", "unknown")
+            if image_quality == "poor":
+                _log.warning("Image quality is poor — analysis may be unreliable. Consider providing a clearer image.")
+                result["quality_warning"] = True
+            else:
+                result["quality_warning"] = False
+
             elapsed_ms = int((time.perf_counter() - started) * 1000)
             _log.info(
                 "Image interpretation done  modality=%s  body_region=%s  quality=%s  "

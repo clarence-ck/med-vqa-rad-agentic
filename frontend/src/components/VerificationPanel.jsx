@@ -5,6 +5,8 @@ export default function VerificationPanel({ result }) {
   const issues = result.issues_found || [];
   const verificationNotes = result.verification_notes || '';
   const fallbackRecommendation = result.fallback_recommendation || 'none';
+  const qualityWarning = Boolean(result.image_analysis?.quality_warning);
+  const imageQuality = result.image_analysis?.image_quality || 'unknown';
 
   const checkItems = [
     { key: 'answer_matches_question_type', label: 'Answer matches question type' },
@@ -56,6 +58,12 @@ export default function VerificationPanel({ result }) {
           lineHeight: 1.6,
         }}>
           {verificationNotes}
+        </div>
+      )}
+
+      {qualityWarning && (
+        <div className="tag tag-amber" style={{ marginTop: 'var(--space-3)', display: 'inline-flex' }}>
+          poor image quality: {imageQuality.replace(/_/g, ' ')}
         </div>
       )}
 
