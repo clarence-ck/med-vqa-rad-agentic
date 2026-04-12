@@ -25,7 +25,7 @@ class ReasoningAgent:
             model=OPENAI_MODEL,
         )
 
-    def _normalize_yes_no_answer(self, answer: str, question_text: str) -> str:
+    def _normalize_yes_no_answer(self, answer: str) -> str:
         text = (answer or "").strip().lower()
 
         if not text:
@@ -36,43 +36,38 @@ class ReasoningAgent:
         if text.startswith("no"):
             return "no"
 
-        explicit_positive_phrases = (
-            "not absent",
-            "not negative",
-        )
-        negative_markers = (
-            "not seen",
-            "not visible",
-            "cannot determine",
-            "indeterminate",
-            "no evidence",
-            "no sign",
-            "no definite",
-            "unremarkable",
-            "absent",
-            "negative",
-        )
-        positive_markers = (
-            "normal",
-            "present",
-            "visible",
-            "seen",
-            "identifiable",
-            "well-defined",
-            "well defined",
-            "positive",
-            "detected",
-            "identified",
-        )
+        explicit_rules = {
+            "not present": "no",
+            "not visible": "no",
+            "not seen": "no",
+            "not identifiable": "no",
+            "not detected": "no",
+            "not normal": "no",
+            "not absent": "yes",
+            "not negative": "yes",
+            "absent": "no",
+            "negative": "no",
+            "cannot determine": "no",
+            "indeterminate": "no",
+            "no evidence": "no",
+            "no sign": "no",
+            "no definite": "no",
+            "unremarkable": "no",
+            "normal": "yes",
+            "present": "yes",
+            "visible": "yes",
+            "seen": "yes",
+            "identifiable": "yes",
+            "well-defined": "yes",
+            "well defined": "yes",
+            "positive": "yes",
+            "detected": "yes",
+            "identified": "yes",
+        }
 
-        if any(phrase in text for phrase in explicit_positive_phrases):
-            return "yes"
-
-        if any(marker in text for marker in negative_markers):
-            return "no"
-
-        if any(marker in text for marker in positive_markers):
-            return "yes"
+        for phrase, normalized_answer in explicit_rules.items():
+            if phrase in text:
+                return normalized_answer
 
         return answer
 
@@ -109,7 +104,7 @@ class ReasoningAgent:
         expected_format = (qa or {}).get("expected_answer_format", "")
 
         if expected_format == "yes_no" or question_type in {"yes_no", "presence_absence"}:
-            normalized["answer"] = self._normalize_yes_no_answer(answer, original_question)
+            normalized["answer"] = self._normalize_yes_no_answer(answer)
         elif question_type == "location":
             normalized["answer"] = self._normalize_location_answer(answer, original_question, vs, qa)
         elif question_type == "anatomy_identification":
