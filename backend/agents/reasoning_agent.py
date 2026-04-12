@@ -27,7 +27,6 @@ class ReasoningAgent:
 
     def _normalize_yes_no_answer(self, answer: str, question_text: str) -> str:
         text = (answer or "").strip().lower()
-        question = (question_text or "").strip().lower()
 
         if not text:
             return answer
@@ -37,30 +36,43 @@ class ReasoningAgent:
         if text.startswith("no"):
             return "no"
 
-        negation_patterns = {"not ", "no ", "never ", "neither ", "without ", "absence ", "absent "}
+        explicit_positive_phrases = (
+            "not absent",
+            "not negative",
+        )
+        negative_markers = (
+            "not seen",
+            "not visible",
+            "cannot determine",
+            "indeterminate",
+            "no evidence",
+            "no sign",
+            "no definite",
+            "unremarkable",
+            "absent",
+            "negative",
+        )
+        positive_markers = (
+            "normal",
+            "present",
+            "visible",
+            "seen",
+            "identifiable",
+            "well-defined",
+            "well defined",
+            "positive",
+            "detected",
+            "identified",
+        )
 
-        def has_negation(t: str) -> bool:
-            for pattern in negation_patterns:
-                if pattern in t:
-                    return True
-            return False
-
-        positive_markers = {
-            "normal", "present", "visible", "seen", "identifiable", "well-defined", "well defined",
-            "positive", "detected", "identified",
-        }
-        negative_markers = {
-            "absent", "negative", "not seen", "not visible", "cannot determine", "indeterminate",
-            "no evidence", "no sign", "no definite", "unremarkable",
-        }
+        if any(phrase in text for phrase in explicit_positive_phrases):
+            return "yes"
 
         if any(marker in text for marker in negative_markers):
-            # Negated negative = positive (e.g., "not absent" -> yes)
-            return "no" if not has_negation(text) else "yes"
+            return "no"
 
         if any(marker in text for marker in positive_markers):
-            # Negated positive = negative (e.g., "not present" -> no)
-            return "yes" if not has_negation(text) else "no"
+            return "yes"
 
         return answer
 
