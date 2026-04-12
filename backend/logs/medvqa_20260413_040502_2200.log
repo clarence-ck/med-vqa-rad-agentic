@@ -1,0 +1,122 @@
+2026-04-13T04:05:32  INFO      medvqa.routes.dataset  Cache MISS for sample 2200  question='are >12 ribs present in the image?'  refresh=False  running all 3 pipelines in parallel
+2026-04-13T04:05:32  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=416506 bytes  question='are >12 ribs present in the image?'
+2026-04-13T04:05:32  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are >12 ribs present in the image?'  mime_type=image/png  size=416506 bytes ===
+2026-04-13T04:05:32  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-13T04:05:32  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=416506 bytes)
+2026-04-13T04:05:33  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-13T04:05:33  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=416506 bytes)
+2026-04-13T04:05:33  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No, >12 ribs are not clearly present.",
+  "explanation": "This is a chest radiograph. The visible rib count appears consistent with a standard number rather than supernumerary ribs above 12.",
+  "confidence": "medium"
+}
+2026-04-13T04:05:33  INFO      medvqa.agents.baseline  Baseline done  answer='No, >12 ribs are not clearly present.'  confidence=medium  duration=1428ms
+2026-04-13T04:05:34  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=7  count=2  duration=2466ms
+2026-04-13T04:05:34  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing both lungs, central mediastinal structures, and the bony thorax. The lungs appear mildly hyperinflated, and no focal air-space opacity is evident. Cardiomediastinal silhouette is not enlarged.
+2026-04-13T04:05:34  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Both lungs are well expanded', 'Mildly increased lucency of the lung fields', 'No focal consolidation visible', 'No pleural effusion visible', 'No pneumothorax visible', 'Cardiomediastinal silhouette appears within normal size limits', 'Mild scoliotic curvature of the thoracic spine may be present']
+2026-04-13T04:05:34  DEBUG     medvqa.agents.image_interpreter  Count metadata: {'countable_objects': [{'source': 'notable_findings', 'text': 'Both lungs are well expanded', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}, {'source': 'visual_summary', 'text': 'Frontal chest radiograph showing both lungs, central mediastinal structures, and the bony thorax. The lungs appear mildly hyperinflated, and no focal air-space opacity is evident. Cardiomediastinal silhouette is not enlarged.', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}], 'count_estimate': 2, 'count_confidence': 'low', 'count_method': 'text_inference'}
+2026-04-13T04:05:34  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are >12 ribs present in the image?'
+2026-04-13T04:05:34  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-13T04:05:35  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=Chest  quality=good  findings=6  count=2  duration=2361ms
+2026-04-13T04:05:35  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing both lungs, the cardiomediastinal silhouette, and upper abdomen. The lungs are well expanded with no focal area of dense consolidation visible, and the heart size appears within normal limits.
+2026-04-13T04:05:35  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Both lungs are symmetrically expanded.', 'No focal air-space opacity is evident.', 'No pleural fluid is visible at the lung bases.', 'No visible pneumothorax.', 'Cardiomediastinal silhouette is not enlarged.', 'Mild overall hyperlucency of the lungs is present.']
+2026-04-13T04:05:35  DEBUG     medvqa.agents.image_interpreter  Count metadata: {'countable_objects': [{'source': 'notable_findings', 'text': 'Both lungs are symmetrically expanded.', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}, {'source': 'visual_summary', 'text': 'Frontal chest radiograph showing both lungs, the cardiomediastinal silhouette, and upper abdomen. The lungs are well expanded with no focal area of dense consolidation visible, and the heart size appears within normal limits.', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}], 'count_estimate': 2, 'count_confidence': 'low', 'count_method': 'text_inference'}
+2026-04-13T04:05:35  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=Chest  image_quality=good  quality_warning=False  duration=2407ms
+2026-04-13T04:05:35  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  subtype=yes_no_clinical  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1061ms
+2026-04-13T04:05:35  DEBUG     medvqa.agents.question_analyzer  Target entity: ribs  Expected format: yes_no  Rephrased: Are more than 12 ribs visible in the image?
+2026-04-13T04:05:35  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are >12 ribs present in the image?'  modality=X-ray  body_region=chest  question_type=presence_absence
+2026-04-13T04:05:35  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: ['ribs']
+2026-04-13T04:05:35  DEBUG     medvqa.agents.workflow_baseline  Branch taken: threshold comparison
+2026-04-13T04:05:35  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='No'  confidence=medium  question_type=presence_absence  duration=3597ms
+2026-04-13T04:05:36  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are >12 ribs present in the image?'
+2026-04-13T04:05:36  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are >12 ribs present in the image?'
+2026-04-13T04:05:36  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-13T04:05:37  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  subtype=yes_no_clinical  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1038ms
+2026-04-13T04:05:37  DEBUG     medvqa.agents.question_analyzer  Target entity: ribs  Expected format: yes_no  Rephrased: Are more than 12 ribs present in the image?
+2026-04-13T04:05:37  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=presence_absence  duration=1068ms
+2026-04-13T04:05:37  INFO      medvqa.agents.orchestrator  [tool] filter_image_context called
+2026-04-13T04:05:37  INFO      medvqa.agents.orchestrator  [tool] filter_image_context done  question_type=presence_absence  findings=4  structures=3  fallback_findings=False  fallback_structures=False  duration=3ms
+2026-04-13T04:05:37  DEBUG     medvqa.agents.orchestrator  [tool] filter_image_context selected findings=['Mild overall hyperlucency of the lungs is present.', 'No pleural fluid is visible at the lung bases.', 'Cardiomediastinal silhouette is not enlarged.', 'Both lungs are symmetrically expanded.']
+2026-04-13T04:05:37  DEBUG     medvqa.agents.orchestrator  [tool] filter_image_context selected structures=['Thoracic spine', 'Mediastinum', 'Ribs']
+2026-04-13T04:05:37  DEBUG     medvqa.agents.orchestrator  [tool] filter_image_context filtered summary=Frontal chest radiograph showing both lungs, the cardiomediastinal silhouette, and upper abdomen. The lungs are well expanded with no focal area of dense consolidation visible, and the heart size appears within normal limits. | Mild overall hyperlucency of the lungs is present.; No pleural fluid is visible at the lung bases.; Cardiomediastinal silhouette is not enlarged.; Both lungs are symmetrically expanded.
+2026-04-13T04:05:38  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-13T04:05:38  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=presence_absence  question_subtype=yes_no_clinical  reasoning=visual_recognition  med_knowledge=False  modality=X-ray  region=Chest
+2026-04-13T04:05:38  INFO      medvqa.agents.difficulty_router  Hard rule: question_type='presence_absence' question_subtype='yes_no_clinical' is retrieval-incompatible, forcing easy/no-retrieval
+2026-04-13T04:05:38  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  retrieval_status=?  verification=standard  fallback=none  duration=32ms
+2026-04-13T04:05:39  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-13T04:05:39  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are >12 ribs present in the image?'  is_retry=False  question_type=presence_absence  subtype=yes_no_clinical  yes_no=True
+2026-04-13T04:05:39  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-13T04:05:39  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=presence_absence
+2026-04-13T04:05:41  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=low  duration=2247ms
+2026-04-13T04:05:41  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: 1) Identified the question as asking whether more than 12 ribs are visible. 2) Reviewed the image analysis for any explicit rib count or clear visualization of extra ribs. 3) Noted that the count estimate was low-confidence and based only on text inference, without strong visual support. 4) Chose the more defensible response given insufficient evidence for >12 ribs.
+2026-04-13T04:05:41  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Frontal chest radiograph with visible ribs and upper abdomen', 'Counting signal: count estimate 2 with low confidence, text inference only', 'No explicit image finding indicating more than 12 ribs are present', 'Mild overall hyperlucency and well-expanded lungs do not establish extra ribs']
+2026-04-13T04:05:41  DEBUG     medvqa.agents.reasoning_agent  Limitations: The rib count is not explicitly provided and the available analysis does not clearly show whether more than 12 ribs are visible.
+2026-04-13T04:05:41  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=low  duration=2282ms
+2026-04-13T04:05:42  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-13T04:05:42  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='are >12 ribs present in the image?'  question_type=presence_absence
+2026-04-13T04:05:45  INFO      medvqa.agents.verification_agent  Verification done  status=low_confidence  confidence=Low  checks=3/5  duration=2851ms
+2026-04-13T04:05:45  WARNING   medvqa.agents.verification_agent  Verification issues: ['The explanation does not provide actual visual evidence for rib count; it relies on a generic statement about low-confidence count signal.', "The available analysis does not clearly support a definitive 'no' for >12 ribs; the count estimate is unrelated and based on text inference rather than direct rib counting.", 'The answer is a stronger conclusion than the evidence allows.']
+2026-04-13T04:05:45  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-13T04:05:45  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct yes/no format and does not directly contradict the provided image analysis, but the rationale is weak and not truly grounded in direct rib-count evidence. Given the low-confidence count signals, the safest assessment is that the answer is only weakly supported.
+2026-04-13T04:05:45  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=low_confidence  confidence=Low  duration=2889ms
+2026-04-13T04:05:45  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['low_confidence']
+2026-04-13T04:05:45  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=True  fallback=add_disclaimer  disclaimer=True
+2026-04-13T04:05:45  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-13T04:05:45  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-13T04:05:45  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=low_confidence  guardrail_flag=True  consistency=low  cross_modal=low  duration=13290ms
+2026-04-13T04:05:45  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='no'  verification=low_confidence  confidence=Low  flag_review=True
+2026-04-13T04:05:45  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=low_confidence  flag_review=True  high_severity=True  fixable=False  -> retry=True
+2026-04-13T04:05:45  INFO      medvqa.agents.orchestrator  Pipeline RETRY triggered  reason: verification_status=low_confidence; fallback=add_disclaimer; flag_for_review=True
+2026-04-13T04:05:45  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=True)
+2026-04-13T04:05:46  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-13T04:05:46  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=416506 bytes)
+2026-04-13T04:05:48  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=5  count=2  duration=2169ms
+2026-04-13T04:05:48  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing both lungs, mediastinum, and bony thorax. The lung fields are well expanded, with no focal air-space opacity or pleural fluid visible on this single view.
+2026-04-13T04:05:48  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Both lung fields are symmetrically aerated.', 'No focal dense lung opacity is visible.', 'No visible pleural fluid or pneumothorax line is seen.', 'Cardiomediastinal silhouette appears not enlarged.', 'Mild prominence of the upper thoracic curvature is present.']
+2026-04-13T04:05:48  DEBUG     medvqa.agents.image_interpreter  Count metadata: {'countable_objects': [{'source': 'notable_findings', 'text': 'Both lung fields are symmetrically aerated.', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}, {'source': 'visual_summary', 'text': 'Frontal chest radiograph showing both lungs, mediastinum, and bony thorax. The lung fields are well expanded, with no focal air-space opacity or pleural fluid visible on this single view.', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}], 'count_estimate': 2, 'count_confidence': 'low', 'count_method': 'text_inference'}
+2026-04-13T04:05:48  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=chest  image_quality=good  quality_warning=False  duration=2200ms
+2026-04-13T04:05:50  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are >12 ribs present in the image?'
+2026-04-13T04:05:50  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are >12 ribs present in the image?'
+2026-04-13T04:05:50  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-13T04:05:51  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  subtype=yes_no_clinical  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1026ms
+2026-04-13T04:05:51  DEBUG     medvqa.agents.question_analyzer  Target entity: ribs  Expected format: yes_no  Rephrased: Are there more than 12 ribs visible in the image?
+2026-04-13T04:05:51  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=presence_absence  duration=1072ms
+2026-04-13T04:05:52  INFO      medvqa.agents.orchestrator  [tool] filter_image_context called
+2026-04-13T04:05:52  INFO      medvqa.agents.orchestrator  [tool] filter_image_context done  question_type=presence_absence  findings=4  structures=3  fallback_findings=False  fallback_structures=False  duration=2ms
+2026-04-13T04:05:52  DEBUG     medvqa.agents.orchestrator  [tool] filter_image_context selected findings=['Mild prominence of the upper thoracic curvature is present.', 'No visible pleural fluid or pneumothorax line is seen.', 'Cardiomediastinal silhouette appears not enlarged.', 'Both lung fields are symmetrically aerated.']
+2026-04-13T04:05:52  DEBUG     medvqa.agents.orchestrator  [tool] filter_image_context selected structures=['thoracic spine', 'mediastinum', 'ribs']
+2026-04-13T04:05:52  DEBUG     medvqa.agents.orchestrator  [tool] filter_image_context filtered summary=Frontal chest radiograph showing both lungs, mediastinum, and bony thorax. The lung fields are well expanded, with no focal air-space opacity or pleural fluid visible on this single view. | Mild prominence of the upper thoracic curvature is present.; No visible pleural fluid or pneumothorax line is seen.; Cardiomediastinal silhouette appears not enlarged.; Both lung fields are symmetrically aerated.
+2026-04-13T04:05:52  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-13T04:05:52  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=presence_absence  question_subtype=yes_no_clinical  reasoning=visual_recognition  med_knowledge=False  modality=X-ray  region=chest
+2026-04-13T04:05:52  INFO      medvqa.agents.difficulty_router  Hard rule: question_type='presence_absence' question_subtype='yes_no_clinical' is retrieval-incompatible, forcing easy/no-retrieval
+2026-04-13T04:05:52  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  retrieval_status=?  verification=standard  fallback=none  duration=28ms
+2026-04-13T04:05:53  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=True
+2026-04-13T04:05:53  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are >12 ribs present in the image?'  is_retry=True  question_type=presence_absence  subtype=yes_no_clinical  yes_no=True
+2026-04-13T04:05:53  INFO      medvqa.agents.reasoning_agent  Retry context  prev_status=low_confidence  prev_confidence=Low  fallback=add_disclaimer
+2026-04-13T04:05:53  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-13T04:05:53  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=presence_absence
+2026-04-13T04:05:56  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=low  duration=2419ms
+2026-04-13T04:05:56  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Reviewed the chest X-ray analysis for count-specific rib information.', 'Noted that the image summary mentions the bony thorax but does not describe an increased rib count.', 'Applied the caution that the available count signal is low confidence and based on text inference rather than direct counting.', 'Chose the more conservative answer.']
+2026-04-13T04:05:56  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Frontal chest radiograph showing lungs, mediastinum, and bony thorax', 'No explicit mention of extra ribs or rib-count abnormality in the image analysis', 'Low-confidence count estimate based on text inference']
+2026-04-13T04:05:56  DEBUG     medvqa.agents.reasoning_agent  Limitations: The provided analysis does not include a direct rib count, so the answer is conservative rather than definitive.
+2026-04-13T04:05:56  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=low  duration=2462ms
+2026-04-13T04:05:56  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-13T04:05:56  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='are >12 ribs present in the image?'  question_type=presence_absence
+2026-04-13T04:05:58  INFO      medvqa.agents.verification_agent  Verification done  status=low_confidence  confidence=Low  checks=3/5  duration=2137ms
+2026-04-13T04:05:58  WARNING   medvqa.agents.verification_agent  Verification issues: ['The explanation does not actually describe rib count evidence from the image; it relies on a generic statement that no extra rib pair was identified.', "The answer 'no' is stronger than the available evidence, since the image analysis does not provide a definite rib count and the count confidence is low.", 'The question asks whether >12 ribs are present, which requires direct count-based assessment; the provided evidence is too limited to support a firm negative.']
+2026-04-13T04:05:58  INFO      medvqa.agents.verification_agent  Fallback recommendation: add_disclaimer
+2026-04-13T04:05:58  DEBUG     medvqa.agents.verification_agent  Verification notes: The response is in the correct yes/no format, but the justification is not truly grounded in explicit rib counting from the image. With only low-confidence contextual cues, a definitive 'no' is not fully supported.
+2026-04-13T04:05:58  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=low_confidence  confidence=Low  duration=2179ms
+2026-04-13T04:05:58  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['low_confidence']
+2026-04-13T04:05:58  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=True  fallback=add_disclaimer  disclaimer=True
+2026-04-13T04:05:58  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=low  passed=3/5
+2026-04-13T04:05:58  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=low  grounded=False  no_contradictions=True
+2026-04-13T04:05:58  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=low_confidence  guardrail_flag=True  consistency=low  cross_modal=low  duration=26750ms
+2026-04-13T04:05:58  INFO      medvqa.agents.orchestrator  Pipeline attempt 2 result  answer='no'  verification=low_confidence  confidence=Low
+2026-04-13T04:05:58  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=2  confidence_rank=1  high_failures=1  review=1  qtype=presence_absence  format=yes_no  specificity=0
+2026-04-13T04:05:58  DEBUG     medvqa.agents.orchestrator  Payload score  verification_rank=2  confidence_rank=1  high_failures=1  review=1  qtype=presence_absence  format=yes_no  specificity=0
+2026-04-13T04:05:58  INFO      medvqa.agents.orchestrator  Pipeline RETRY winner: attempt 1 (kept original)
+2026-04-13T04:05:58  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  difficulty=easy  retrieval_status=skipped  image_quality=good  retries=1  review=True  total_duration=26760ms ===
+2026-04-13T04:05:58  INFO      medvqa.routes.dataset  Sample 2200 analysis complete  baseline=1434ms  workflow=3599ms  agentic=26764ms  total=26764ms
+2026-04-13T04:05:58  INFO      medvqa.routes.dataset  Sample 2200 answers  type=presence_absence  subtype=unknown  baseline='No, >12 ribs are not clearly present.'  workflow='No'  agentic='no'  ground_truth='yes'

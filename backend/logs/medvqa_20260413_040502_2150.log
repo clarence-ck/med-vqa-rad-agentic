@@ -1,0 +1,111 @@
+2026-04-13T04:29:22  INFO      medvqa.routes.dataset  Cache MISS for sample 2150  question='what is the abnormality by the right hemidiaphragm?'  refresh=False  running all 3 pipelines in parallel
+2026-04-13T04:29:22  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=413380 bytes  question='what is the abnormality by the right hemidiaphragm?'
+2026-04-13T04:29:22  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what is the abnormality by the right hemidiaphragm?'  mime_type=image/png  size=413380 bytes ===
+2026-04-13T04:29:22  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-13T04:29:22  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=413380 bytes)
+2026-04-13T04:29:22  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-13T04:29:22  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=413380 bytes)
+2026-04-13T04:29:23  DEBUG     medvqa.agents.baseline  Raw baseline response: {"is_radiology_image":true,"answer":"Free subdiaphragmatic air (pneumoperitoneum) beneath the right hemidiaphragm.","explanation":"The chest X-ray shows a lucent crescent of air under the right hemidiaphragm, which is abnormal and suggests free intraperitoneal air. This is typical of pneumoperitoneum.","confidence":"high"}
+2026-04-13T04:29:23  INFO      medvqa.agents.baseline  Baseline done  answer='Free subdiaphragmatic air (pneumoperitoneum) beneath the right hemidiaphragm.'  confidence=high  duration=1660ms
+2026-04-13T04:29:24  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=6  count=2  duration=2527ms
+2026-04-13T04:29:24  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing both lungs, the cardiomediastinal silhouette, and the upper abdomen. The lungs are well expanded with no focal air-space opacity, pleural effusion, or pneumothorax visible on this view.
+2026-04-13T04:29:24  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Frontal upright chest view.', 'Lung fields are clear without a focal dense opacity.', 'Cardiomediastinal silhouette is not enlarged.', 'No pleural fluid is visible at the costophrenic angles.', 'No visible pneumothorax.', 'Small amount of free-appearing subdiaphragmatic air is visible beneath both hemidiaphragms, more conspicuous on the right.']
+2026-04-13T04:29:24  DEBUG     medvqa.agents.image_interpreter  Count metadata: {'countable_objects': [{'source': 'notable_findings', 'text': 'Small amount of free-appearing subdiaphragmatic air is visible beneath both hemidiaphragms, more conspicuous on the right.', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}, {'source': 'visual_summary', 'text': 'Frontal chest radiograph showing both lungs, the cardiomediastinal silhouette, and the upper abdomen. The lungs are well expanded with no focal air-space opacity, pleural effusion, or pneumothorax visible on this view.', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}], 'count_estimate': 2, 'count_confidence': 'low', 'count_method': 'text_inference'}
+2026-04-13T04:29:24  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what is the abnormality by the right hemidiaphragm?'
+2026-04-13T04:29:24  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-13T04:29:25  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=7  count=2  duration=2786ms
+2026-04-13T04:29:25  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing both lungs and central cardiomediastinal structures. The lungs are well expanded without focal dense airspace opacity, and the costophrenic angles are sharp. Mild linear streaky markings are present near the medial left mid/lower lung and there is a small amount of free subdiaphragmatic air beneath both hemidiaphragms.
+2026-04-13T04:29:25  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Frontal upright chest radiograph with both lungs fully included', 'Cardiomediastinal silhouette is not enlarged', 'Mild linear streaky opacity in the left perihilar to left lower lung region', 'No focal dense consolidation is visible', 'No pleural effusion is visible', 'No pneumothorax is visible', 'Free air is visible beneath both hemidiaphragms']
+2026-04-13T04:29:25  DEBUG     medvqa.agents.image_interpreter  Count metadata: {'countable_objects': [{'source': 'notable_findings', 'text': 'Frontal upright chest radiograph with both lungs fully included', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}, {'source': 'notable_findings', 'text': 'Free air is visible beneath both hemidiaphragms', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}, {'source': 'visual_summary', 'text': 'Frontal chest radiograph showing both lungs and central cardiomediastinal structures. The lungs are well expanded without focal dense airspace opacity, and the costophrenic angles are sharp. Mild linear streaky markings are present near the medial left mid/lower lung and there is a small amount of free subdiaphragmatic air beneath both hemidiaphragms.', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}], 'count_estimate': 2, 'count_confidence': 'low', 'count_method': 'text_inference'}
+2026-04-13T04:29:25  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=chest  image_quality=good  quality_warning=False  duration=2816ms
+2026-04-13T04:29:25  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  subtype=finding_description  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1145ms
+2026-04-13T04:29:25  DEBUG     medvqa.agents.question_analyzer  Target entity: abnormality near the right hemidiaphragm  Expected format: short_phrase  Rephrased: What abnormal finding is seen by the right hemidiaphragm?
+2026-04-13T04:29:25  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what is the abnormality by the right hemidiaphragm?'  modality=X-ray  body_region=chest  question_type=abnormality_description
+2026-04-13T04:29:25  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-13T04:29:25  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-13T04:29:25  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Frontal upright chest view.; Lung fields are clear without a focal dense opacity'  confidence=medium  question_type=abnormality_description  duration=3729ms
+2026-04-13T04:29:26  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what is the abnormality by the right hemidiaphragm?'
+2026-04-13T04:29:26  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what is the abnormality by the right hemidiaphragm?'
+2026-04-13T04:29:26  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-13T04:29:27  INFO      medvqa.agents.question_analyzer  Question analysis done  type=location  subtype=generic_location  reasoning=spatial_reasoning  med_knowledge=True  clarity=clear  duration=1006ms
+2026-04-13T04:29:27  DEBUG     medvqa.agents.question_analyzer  Target entity: abnormality by the right hemidiaphragm  Expected format: short_phrase  Rephrased: What abnormal finding is located near the right hemidiaphragm?
+2026-04-13T04:29:27  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=location  duration=1030ms
+2026-04-13T04:29:28  INFO      medvqa.agents.orchestrator  [tool] filter_image_context called
+2026-04-13T04:29:28  INFO      medvqa.agents.orchestrator  [tool] filter_image_context skipped for question_type=location - using full context
+2026-04-13T04:29:29  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-13T04:29:29  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=location  question_subtype=generic_location  reasoning=spatial_reasoning  med_knowledge=True  modality=X-ray  region=chest
+2026-04-13T04:29:29  INFO      medvqa.agents.difficulty_router  Subtype-aware location routing: question_subtype='generic_location' will be routed conservatively without a hard retrieval block
+2026-04-13T04:29:30  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1343ms
+2026-04-13T04:29:30  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a direct location question on a chest radiograph with a visible but not highly complex abnormality, so it is best handled as a systematic moderate-difficulty case with retrieval enabled.
+2026-04-13T04:29:30  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  retrieval_status=?  verification=standard  fallback=add_disclaimer  duration=1399ms
+2026-04-13T04:29:31  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-13T04:29:31  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='what is the abnormality by the right hemidiaphragm?'  modality=X-ray  body_region=chest  question_type=location  target_entity=abnormality by the right hemidiaphragm  advanced_rag=True
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='normal' from notable_findings
+2026-04-13T04:29:31  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=what is the abnormality by the right hemidiaphragm? | modality=X-ray | body_region=chest | finding=normal | rerank=mandatory
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag  Using structured query profile (no LLM rewrite): what is the abnormality by the right hemidiaphragm? | question_type=location | question_family=spatial_reasoning | target_entity=abnormality by the right hemidiaphragm | body_region=chest | modality=X-ray | answer_style=short_phrase | visu…
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='X-ray': 85 matches
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='chest': 126 matches
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 49 matches
+2026-04-13T04:29:31  INFO      medvqa.agents.advanced_rag  Metadata filter result: 14 candidates (modality(85) + body_region(126) + finding(49))
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag  Metadata filter: 14 candidates retained
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag  Dense retrieval: top_k=10
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 14 candidates
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/10
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag    1. id=27 score=0.6969 | concept_type=anatomy concept=chest | Q: Which organ is abnormal, heart or lung? | A: Both
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag    2. id=187 score=0.6895 | concept_type=anatomy concept=chest | Q: Which part of chest is abnormal in this image? | A: Heart
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag    3. id=103 score=0.6354 | concept_type=laterality concept=heart | Q: Where is the abnormality in this image? | A: Heart
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=10
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 14 candidates
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/10
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag    1. id=36 score=2.3563 | concept_type=laterality concept=both lungs | Q: Where is/are the abnormality located? | A: Both Lungs
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag    2. id=103 score=0.5221 | concept_type=laterality concept=heart | Q: Where is the abnormality in this image? | A: Heart
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag    3. id=27 score=0.2896 | concept_type=anatomy concept=chest | Q: Which organ is abnormal, heart or lung? | A: Both
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=10 sparse=10
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag  Hybrid RRF merge produced 10 unique candidates
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/10
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag    1. id=27 score=0.0323 method=hybrid_rrf | concept_type=anatomy concept=chest | Q: Which organ is abnormal, heart or lung? | A: Both
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag    2. id=36 score=0.0320 method=hybrid_rrf | concept_type=laterality concept=both lungs | Q: Where is/are the abnormality located? | A: Both Lungs
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag    3. id=103 score=0.0320 method=hybrid_rrf | concept_type=laterality concept=heart | Q: Where is the abnormality in this image? | A: Heart
+2026-04-13T04:29:31  DEBUG     medvqa.agents.advanced_rag  Reranking 10 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-13T04:29:31  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 10 candidates...
+2026-04-13T04:29:32  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-13T04:29:32  DEBUG     medvqa.agents.advanced_rag    1. id=103 score=2.3122 method=reranked softmax=0.6366 | concept_type=laterality concept=heart | Q: Where is the abnormality in this image? | A: Heart
+2026-04-13T04:29:32  DEBUG     medvqa.agents.advanced_rag    2. id=174 score=0.3291 method=reranked softmax=0.0913 | concept_type=laterality concept=both | Q: Which side of lung is abnormal in this image? | A: Both
+2026-04-13T04:29:32  DEBUG     medvqa.agents.advanced_rag    3. id=105 score=0.2650 method=reranked softmax=0.0766 | concept_type=presence_absence concept=normal | Q: Is/Are there abnormalities in the patient's right lung? | A: No
+2026-04-13T04:29:32  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=high weak_signals=0 top1_softmax=0.637 margin=0.545 dense_top1=0.697 agreement=True
+2026-04-13T04:29:32  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 3 final candidates
+2026-04-13T04:29:32  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: showing top 3/3
+2026-04-13T04:29:32  DEBUG     medvqa.agents.advanced_rag    1. id=103 score=2.3122 method=reranked softmax=0.6366 | concept_type=laterality concept=heart | Q: Where is the abnormality in this image? | A: Heart
+2026-04-13T04:29:32  DEBUG     medvqa.agents.advanced_rag    2. id=174 score=0.3291 method=reranked softmax=0.0913 | concept_type=laterality concept=both | Q: Which side of lung is abnormal in this image? | A: Both
+2026-04-13T04:29:32  DEBUG     medvqa.agents.advanced_rag    3. id=105 score=0.2650 method=reranked softmax=0.0766 | concept_type=presence_absence concept=normal | Q: Is/Are there abnormalities in the patient's right lung? | A: No
+2026-04-13T04:29:32  INFO      medvqa.agents.knowledge_retriever  Advanced RAG retrieved 3 similar cases (supporting=1 contradictory=2)
+2026-04-13T04:29:32  WARNING   medvqa.agents.knowledge_retriever  RAG contradiction detected: dominant_label=heart label_scores={'heart': 2.3121969010548855, 'both': 0.3290915279751444, 'no': 0.26500453233718874}
+2026-04-13T04:29:36  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  retrieval_status=success  key_facts=4  rag_cases=3  duration=4934ms
+2026-04-13T04:29:36  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['The right hemidiaphragm is normally slightly higher than the left due to the liver underneath.', 'A localized opacity near the right hemidiaphragm may represent right lower lobe air-space disease, pleural fluid, or subdiaphragmatic pathology.', 'Loss of the sharp right diaphragmatic contour can indicate adjacent lung base abnormality or pleural abnormality.', 'Free subdiaphragmatic air on X-ray is a critical abnormality, though it is usually seen under the diaphragm rather than just by it.']
+2026-04-13T04:29:36  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On a chest X-ray, the right hemidiaphragm should form a smooth, well-defined dome with the right lung base just above it and the liver providing a normal soft-tissue density beneath. An apparent abnor
+2026-04-13T04:29:36  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  retrieval_status=success  key_facts=4  rag_cases=3  duration=4979ms
+2026-04-13T04:29:37  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-13T04:29:37  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what is the abnormality by the right hemidiaphragm?'  is_retry=False  question_type=location  subtype=generic_location  yes_no=False
+2026-04-13T04:29:37  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=4  rag_cases=3
+2026-04-13T04:29:37  WARNING   medvqa.agents.reasoning_agent  Processing RAG contradiction: dominant=heart supporting=1 contradictory=2
+2026-04-13T04:29:39  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='free subdiaphragmatic air'  confidence=high  duration=2061ms
+2026-04-13T04:29:39  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the region of interest: the right hemidiaphragm.', 'Review the image analysis for findings adjacent to/beneath the diaphragm.', 'Match the described abnormality: free air is visible beneath both hemidiaphragms.']
+2026-04-13T04:29:39  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Small amount of free subdiaphragmatic air beneath both hemidiaphragms', 'Free air is visible beneath both hemidiaphragms', 'No pleural effusion is visible', 'No focal dense consolidation is visible']
+2026-04-13T04:29:39  DEBUG     medvqa.agents.reasoning_agent  Limitations: The description is based on the provided image analysis rather than direct pixel-level review, but the abnormality is clearly stated.
+2026-04-13T04:29:39  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='free subdiaphragmatic air'  confidence=high  duration=2102ms
+2026-04-13T04:29:40  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-13T04:29:40  INFO      medvqa.agents.verification_agent  Verifying answer='free subdiaphragmatic air'  question='what is the abnormality by the right hemidiaphragm?'  question_type=location
+2026-04-13T04:29:41  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1267ms
+2026-04-13T04:29:41  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-13T04:29:41  DEBUG     medvqa.agents.verification_agent  Verification notes: The question asks for the abnormality by the right hemidiaphragm, and the image analysis explicitly reports free air beneath both hemidiaphragms. The answer 'free subdiaphragmatic air' is consistent with that finding and appropriately concise for a location question.
+2026-04-13T04:29:41  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1302ms
+2026-04-13T04:29:41  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-13T04:29:41  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-13T04:29:41  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-13T04:29:41  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='free subdiaphragmatic air'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=19155ms
+2026-04-13T04:29:41  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='free subdiaphragmatic air'  verification=verified  confidence=High  flag_review=False
+2026-04-13T04:29:41  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-13T04:29:41  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-13T04:29:41  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='free subdiaphragmatic air'  difficulty=medium  retrieval_status=success  image_quality=good  retries=0  review=False  total_duration=19158ms ===
+2026-04-13T04:29:41  INFO      medvqa.routes.dataset  Sample 2150 analysis complete  baseline=1664ms  workflow=3731ms  agentic=19162ms  total=19163ms
+2026-04-13T04:29:41  INFO      medvqa.routes.dataset  Sample 2150 answers  type=location  subtype=unknown  baseline='Free subdiaphragmatic air (pneumoperitoneum) beneath the rig'  workflow='Frontal upright chest view.; Lung fields are clear without a'  agentic='free subdiaphragmatic air'  ground_truth='free air'

@@ -1,0 +1,115 @@
+2026-04-13T04:20:55  INFO      medvqa.routes.dataset  Cache MISS for sample 2128  question='what abnormalities are seen within the lungs?'  refresh=False  running all 3 pipelines in parallel
+2026-04-13T04:20:55  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=404641 bytes  question='what abnormalities are seen within the lungs?'
+2026-04-13T04:20:55  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='what abnormalities are seen within the lungs?'  mime_type=image/png  size=404641 bytes ===
+2026-04-13T04:20:55  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-13T04:20:55  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=404641 bytes)
+2026-04-13T04:20:55  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-13T04:20:55  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=404641 bytes)
+2026-04-13T04:20:56  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "There are bilateral multifocal patchy air-space opacities/infiltrates, most pronounced in the upper and mid lungs.",
+  "explanation": "The chest radiograph shows scattered patchy opacities in both lungs, consistent with multifocal infiltrates rather than a focal single lobar process. No pleural effusion is evident.",
+  "confidence": "high"
+}
+2026-04-13T04:20:56  INFO      medvqa.agents.baseline  Baseline done  answer='There are bilateral multifocal patchy air-space opacities/infiltrates, most pron'  confidence=high  duration=1656ms
+2026-04-13T04:20:57  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=5  count=2  duration=2421ms
+2026-04-13T04:20:57  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing both lungs, heart, and mediastinal contours. There are patchy bilateral areas of increased opacity, more noticeable in the upper and mid lungs, with no obvious pleural effusion or pneumothorax.
+2026-04-13T04:20:57  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Patchy bilateral airspace opacities in the upper and mid lung zones', 'Cardiomediastinal silhouette is not enlarged', 'No visible pleural fluid at the lung bases', 'No visible pneumothorax', 'Mild apical pleural thickening/scarring is present']
+2026-04-13T04:20:57  DEBUG     medvqa.agents.image_interpreter  Count metadata: {'countable_objects': [{'source': 'notable_findings', 'text': 'Patchy bilateral airspace opacities in the upper and mid lung zones', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}, {'source': 'visual_summary', 'text': 'Frontal chest radiograph showing both lungs, heart, and mediastinal contours. There are patchy bilateral areas of increased opacity, more noticeable in the upper and mid lungs, with no obvious pleural effusion or pneumothorax.', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}], 'count_estimate': 2, 'count_confidence': 'low', 'count_method': 'text_inference'}
+2026-04-13T04:20:57  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what abnormalities are seen within the lungs?'
+2026-04-13T04:20:57  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-13T04:20:58  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=5  count=2  duration=2233ms
+2026-04-13T04:20:58  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal chest radiograph showing both lungs, the cardiomediastinal silhouette, and upper bony thorax. The lungs appear mildly hyperlucent with patchy bilateral areas of increased opacity, more conspicuous in the mid to upper lungs.
+2026-04-13T04:20:58  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Bilateral patchy areas of increased lung opacity, more prominent in the mid and upper lung regions', 'Lungs appear mildly hyperinflated with relatively low diaphragms', 'Cardiomediastinal silhouette is not enlarged', 'No pleural effusion is visible', 'No pneumothorax is visible']
+2026-04-13T04:20:58  DEBUG     medvqa.agents.image_interpreter  Count metadata: {'countable_objects': [{'source': 'notable_findings', 'text': 'Bilateral patchy areas of increased lung opacity, more prominent in the mid and upper lung regions', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}, {'source': 'visual_summary', 'text': 'Frontal chest radiograph showing both lungs, the cardiomediastinal silhouette, and upper bony thorax. The lungs appear mildly hyperlucent with patchy bilateral areas of increased opacity, more conspicuous in the mid to upper lungs.', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}], 'count_estimate': 2, 'count_confidence': 'low', 'count_method': 'text_inference'}
+2026-04-13T04:20:58  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=chest  image_quality=good  quality_warning=False  duration=2261ms
+2026-04-13T04:20:58  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  subtype=finding_description  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1030ms
+2026-04-13T04:20:58  DEBUG     medvqa.agents.question_analyzer  Target entity: lung abnormalities  Expected format: short_phrase  Rephrased: What abnormalities are seen within the lungs?
+2026-04-13T04:20:58  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='what abnormalities are seen within the lungs?'  modality=X-ray  body_region=chest  question_type=abnormality_description
+2026-04-13T04:20:58  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-13T04:20:58  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-13T04:20:58  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Patchy bilateral airspace opacities in the upper and mid lung zones; Cardiomedia'  confidence=medium  question_type=abnormality_description  duration=3517ms
+2026-04-13T04:20:59  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='what abnormalities are seen within the lungs?'
+2026-04-13T04:20:59  INFO      medvqa.agents.question_analyzer  Analyzing question: 'what abnormalities are seen within the lungs?'
+2026-04-13T04:20:59  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-13T04:21:00  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  subtype=finding_description  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1111ms
+2026-04-13T04:21:00  DEBUG     medvqa.agents.question_analyzer  Target entity: abnormalities within the lungs  Expected format: short_phrase  Rephrased: What abnormalities are seen within the lungs?
+2026-04-13T04:21:00  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1141ms
+2026-04-13T04:21:00  INFO      medvqa.agents.orchestrator  [tool] filter_image_context called
+2026-04-13T04:21:00  INFO      medvqa.agents.orchestrator  [tool] filter_image_context done  question_type=abnormality_description  findings=4  structures=1  fallback_findings=False  fallback_structures=False  duration=0ms
+2026-04-13T04:21:00  DEBUG     medvqa.agents.orchestrator  [tool] filter_image_context selected findings=['Bilateral patchy areas of increased lung opacity, more prominent in the mid and upper lung regions', 'Lungs appear mildly hyperinflated with relatively low diaphragms', 'No pleural effusion is visible', 'No pneumothorax is visible']
+2026-04-13T04:21:00  DEBUG     medvqa.agents.orchestrator  [tool] filter_image_context selected structures=['lungs']
+2026-04-13T04:21:00  DEBUG     medvqa.agents.orchestrator  [tool] filter_image_context filtered summary=Frontal chest radiograph showing both lungs, the cardiomediastinal silhouette, and upper bony thorax. The lungs appear mildly hyperlucent with patchy bilateral areas of increased opacity, more conspicuous in the mid to upper lungs. | Bilateral patchy areas of increased lung opacity, more prominent in the mid and upper lung regions; Lungs appear mildly hyperinflated with relatively low diaphragms; No pleural effusion is visible; No pneumothorax is visible
+2026-04-13T04:21:01  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-13T04:21:01  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  question_subtype=finding_description  reasoning=visual_recognition  med_knowledge=True  modality=X-ray  region=chest
+2026-04-13T04:21:03  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1516ms
+2026-04-13T04:21:03  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a direct image-grounded finding-description task, but the abnormality is mildly subtle with overlapping chest structures, so a medium-difficulty retrieval-augmented route is appropriate.
+2026-04-13T04:21:03  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  retrieval_status=?  verification=standard  fallback=add_disclaimer  duration=1545ms
+2026-04-13T04:21:03  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-13T04:21:03  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='what abnormalities are seen within the lungs?'  modality=X-ray  body_region=chest  question_type=abnormality_description  target_entity=abnormalities within the lungs  advanced_rag=True
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='normal' from notable_findings
+2026-04-13T04:21:03  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=what abnormalities are seen within the lungs? | modality=X-ray | body_region=chest | finding=normal | rerank=mandatory
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Using structured query profile (no LLM rewrite): what abnormalities are seen within the lungs? | question_type=abnormality_description | question_family=visual_recognition | target_entity=abnormalities within the lungs | body_region=chest | modality=X-ray | answer_style=short_phrase | vi…
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='X-ray': 85 matches
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Metadata filter body_region='chest': 126 matches
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='normal': 49 matches
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Metadata filter target_entity='abnormalities within the lungs': 1 matches
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Skipping soft filter target_entity(1) because it would empty the hard-filter candidate set
+2026-04-13T04:21:03  INFO      medvqa.agents.advanced_rag  Metadata filter result: 14 candidates (modality(85) + body_region(126) + finding(49))
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Metadata filter: 14 candidates retained
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Dense retrieval: top_k=10
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 14 candidates
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/10
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag    1. id=27 score=0.7000 | concept_type=anatomy concept=chest | Q: Which organ is abnormal, heart or lung? | A: Both
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag    2. id=187 score=0.6938 | concept_type=anatomy concept=chest | Q: Which part of chest is abnormal in this image? | A: Heart
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag    3. id=36 score=0.6385 | concept_type=laterality concept=both lungs | Q: Where is/are the abnormality located? | A: Both Lungs
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=10
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 14 candidates
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/10
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag    1. id=36 score=10.7933 | concept_type=laterality concept=both lungs | Q: Where is/are the abnormality located? | A: Both Lungs
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag    2. id=90 score=2.5557 | concept_type=presence_absence concept=normal | Q: Is/Are there abnormalities in the patient's left lung? | A: No
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag    3. id=105 score=2.5557 | concept_type=presence_absence concept=normal | Q: Is/Are there abnormalities in the patient's right lung? | A: No
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=10 sparse=10
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Hybrid RRF merge produced 10 unique candidates
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/10
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag    1. id=36 score=0.0323 method=hybrid_rrf | concept_type=laterality concept=both lungs | Q: Where is/are the abnormality located? | A: Both Lungs
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag    2. id=27 score=0.0318 method=hybrid_rrf | concept_type=anatomy concept=chest | Q: Which organ is abnormal, heart or lung? | A: Both
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag    3. id=187 score=0.0313 method=hybrid_rrf | concept_type=anatomy concept=chest | Q: Which part of chest is abnormal in this image? | A: Heart
+2026-04-13T04:21:03  DEBUG     medvqa.agents.advanced_rag  Reranking 10 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-13T04:21:03  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 10 candidates...
+2026-04-13T04:21:04  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-13T04:21:04  DEBUG     medvqa.agents.advanced_rag    1. id=103 score=2.9219 method=reranked softmax=0.2480 | concept_type=laterality concept=heart | Q: Where is the abnormality in this image? | A: Heart
+2026-04-13T04:21:04  DEBUG     medvqa.agents.advanced_rag    2. id=105 score=2.7177 method=reranked softmax=0.1884 | concept_type=presence_absence concept=normal | Q: Is/Are there abnormalities in the patient's right lung? | A: No
+2026-04-13T04:21:04  DEBUG     medvqa.agents.advanced_rag    3. id=90 score=2.7061 method=reranked softmax=0.1919 | concept_type=presence_absence concept=normal | Q: Is/Are there abnormalities in the patient's left lung? | A: No
+2026-04-13T04:21:04  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=low weak_signals=3 top1_softmax=0.248 margin=0.060 dense_top1=0.700 agreement=False
+2026-04-13T04:21:04  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 0 final candidates
+2026-04-13T04:21:04  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: no hits
+2026-04-13T04:21:04  INFO      medvqa.agents.knowledge_retriever  Advanced RAG returned 0 similar cases for this question; proceeding without RAG context
+2026-04-13T04:21:07  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  retrieval_status=success  key_facts=5  rag_cases=0  duration=4029ms
+2026-04-13T04:21:07  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Normal lungs should appear relatively dark (radiolucent) with symmetric vascular markings and no focal air-space opacities.', 'Increased lung opacity can suggest consolidation, edema, atelectasis, or inflammation depending on the pattern and distribution.', 'Diffuse linear or reticular markings may indicate interstitial abnormality, while hyperinflation suggests obstructive air trapping.', 'Pleural effusion, pneumothorax, and enlarged cardiac silhouette can alter lung appearance on chest radiographs.', 'Comparison of both lungs helps identify asymmetry, focal lesions, and subtle volume changes.']
+2026-04-13T04:21:07  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: On a chest X-ray, lung abnormalities are usually assessed by comparing the air-filled lung fields for increased opacity, focal consolidation, diffuse interstitial markings, volume loss, or abnormal hy
+2026-04-13T04:21:07  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  retrieval_status=success  key_facts=5  rag_cases=0  duration=4061ms
+2026-04-13T04:21:08  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-13T04:21:08  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='what abnormalities are seen within the lungs?'  is_retry=False  question_type=abnormality_description  subtype=finding_description  yes_no=False
+2026-04-13T04:21:08  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=0
+2026-04-13T04:21:10  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Bilateral patchy air-space opacities in the mid to upper lungs, with mild hyperi'  confidence=high  duration=2281ms
+2026-04-13T04:21:10  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identify the lung fields on the frontal chest X-ray.', 'Look for abnormal areas of increased opacity within the lungs.', 'Note that the opacities are bilateral and patchy, greatest in the mid to upper lungs.', 'Assess lung volume and diaphragm position, which suggest mild hyperinflation.']
+2026-04-13T04:21:10  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Bilateral patchy areas of increased lung opacity, more prominent in the mid and upper lung regions', 'Lungs appear mildly hyperinflated with relatively low diaphragms', 'No pleural effusion is visible', 'No pneumothorax is visible']
+2026-04-13T04:21:10  DEBUG     medvqa.agents.reasoning_agent  Limitations: The exact cause of the opacities cannot be determined from the image alone.
+2026-04-13T04:21:10  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Bilateral patchy air-space opacities in the mid to upper lun'  confidence=high  duration=2314ms
+2026-04-13T04:21:11  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-13T04:21:11  INFO      medvqa.agents.verification_agent  Verifying answer='Bilateral patchy air-space opacities in the mid to upper lungs, with mild hyperi'  question='what abnormalities are seen within the lungs?'  question_type=abnormality_description
+2026-04-13T04:21:13  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=High  checks=5/5  duration=1486ms
+2026-04-13T04:21:13  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-13T04:21:13  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer directly describes the lung abnormalities asked for and matches the image summary: bilateral patchy air-space opacities in the mid to upper lungs with mild hyperinflation. The explanation is grounded in the provided visual evidence, does not overstate beyond the findings, and is concise enough for the expected short-phrase format.
+2026-04-13T04:21:13  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=High  duration=1510ms
+2026-04-13T04:21:13  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-13T04:21:13  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-13T04:21:13  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-13T04:21:13  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Bilateral patchy air-space opacities in the mid to upper lun'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=18004ms
+2026-04-13T04:21:13  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Bilateral patchy air-space opacities in the mid to upper lun'  verification=verified  confidence=High  flag_review=False
+2026-04-13T04:21:13  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-13T04:21:13  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-13T04:21:13  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Bilateral patchy air-space opacities in the mid to upper lun'  difficulty=medium  retrieval_status=success  image_quality=good  retries=0  review=False  total_duration=18006ms ===
+2026-04-13T04:21:13  INFO      medvqa.routes.dataset  Sample 2128 analysis complete  baseline=1658ms  workflow=3519ms  agentic=18008ms  total=18008ms
+2026-04-13T04:21:13  INFO      medvqa.routes.dataset  Sample 2128 answers  type=abnormality_description  subtype=unknown  baseline='There are bilateral multifocal patchy air-space opacities/in'  workflow='Patchy bilateral airspace opacities in the upper and mid lun'  agentic='Bilateral patchy air-space opacities in the mid to upper lun'  ground_truth='pulmonary nodules'

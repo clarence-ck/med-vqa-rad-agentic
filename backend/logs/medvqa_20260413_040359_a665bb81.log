@@ -1,0 +1,393 @@
+2026-04-13T04:03:59  INFO      medvqa  Session started  file=medvqa_20260413_040359_a665bb81.log  session_id=a665bb81
+2026-04-13T04:04:08  INFO      medvqa.agents.knowledge_retriever  Advanced RAG module loaded successfully
+2026-04-13T04:04:08  INFO      medvqa.server  ============================================================
+2026-04-13T04:04:08  INFO      medvqa.server  MedVisionQuery API  v1.0.0  starting up
+2026-04-13T04:04:08  INFO      medvqa.server  CORS origins: ['http://localhost:5173']
+2026-04-13T04:04:08  INFO      medvqa.server  RAG corpus splits: train,validation
+2026-04-13T04:04:08  INFO      medvqa.server  ============================================================
+2026-04-13T04:04:41  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-13T04:04:41  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-13T04:04:41  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=28ms
+2026-04-13T04:04:41  INFO      medvqa.server  → GET /api/dataset/samples
+2026-04-13T04:04:41  INFO      medvqa.routes.dataset  Listing samples  returned=200
+2026-04-13T04:04:41  INFO      medvqa.server  ← GET /api/dataset/samples  status=200  duration=17ms
+2026-04-13T04:04:45  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:04:45  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=0
+2026-04-13T04:04:45  INFO      medvqa.routes.dataset  Loaded 0 cache files in 0.00s
+2026-04-13T04:04:45  INFO      medvqa.routes.dataset  Computed 0 unique embeddings in 0.00s
+2026-04-13T04:04:45  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=0  skipped=0  total_time=0.01s
+2026-04-13T04:04:45  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:04:45  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=16ms
+2026-04-13T04:06:13  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:06:13  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=3
+2026-04-13T04:06:13  INFO      medvqa.routes.dataset  Loaded 3 cache files in 0.00s
+2026-04-13T04:06:13  WARNING   medvqa.routes.dataset  GPU compute capability 6.1 is below recommended threshold; using CPU for pritamdeka/S-PubMedBert-MS-MARCO
+2026-04-13T04:06:13  INFO      medvqa.routes.dataset  Loading S-PubMedBert-MS-MARCO (pritamdeka/S-PubMedBert-MS-MARCO) on device: cpu
+2026-04-13T04:06:18  INFO      medvqa.routes.dataset  Computed 7 unique embeddings in 4.49s
+2026-04-13T04:06:18  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=3  skipped=0  total_time=4.71s
+2026-04-13T04:06:18  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:06:18  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=4711ms
+2026-04-13T04:06:40  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:06:40  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-13T04:06:40  INFO      medvqa.routes.dataset  Loaded 5 cache files in 0.01s
+2026-04-13T04:06:40  INFO      medvqa.routes.dataset  Computed 15 unique embeddings in 0.31s
+2026-04-13T04:06:40  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0  total_time=0.73s
+2026-04-13T04:06:40  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:06:40  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=734ms
+2026-04-13T04:06:52  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:06:52  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=5
+2026-04-13T04:06:52  INFO      medvqa.routes.dataset  Loaded 5 cache files in 0.00s
+2026-04-13T04:06:53  INFO      medvqa.routes.dataset  Computed 15 unique embeddings in 0.30s
+2026-04-13T04:06:53  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=5  skipped=0  total_time=0.71s
+2026-04-13T04:06:53  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:06:53  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=715ms
+2026-04-13T04:07:01  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:07:01  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=6
+2026-04-13T04:07:01  INFO      medvqa.routes.dataset  Loaded 6 cache files in 0.00s
+2026-04-13T04:07:02  INFO      medvqa.routes.dataset  Computed 19 unique embeddings in 0.85s
+2026-04-13T04:07:02  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=6  skipped=0  total_time=1.64s
+2026-04-13T04:07:02  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:07:02  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=1644ms
+2026-04-13T04:07:11  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:07:11  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=7
+2026-04-13T04:07:11  INFO      medvqa.routes.dataset  Loaded 7 cache files in 0.01s
+2026-04-13T04:07:12  INFO      medvqa.routes.dataset  Computed 20 unique embeddings in 0.91s
+2026-04-13T04:07:13  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=7  skipped=0  total_time=1.90s
+2026-04-13T04:07:13  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:07:13  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=1900ms
+2026-04-13T04:07:21  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:07:21  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=7
+2026-04-13T04:07:21  INFO      medvqa.routes.dataset  Loaded 7 cache files in 0.00s
+2026-04-13T04:07:22  INFO      medvqa.routes.dataset  Computed 20 unique embeddings in 0.85s
+2026-04-13T04:07:23  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=7  skipped=0  total_time=1.58s
+2026-04-13T04:07:23  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:07:23  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=1587ms
+2026-04-13T04:07:32  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:07:32  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=7
+2026-04-13T04:07:32  INFO      medvqa.routes.dataset  Loaded 7 cache files in 0.00s
+2026-04-13T04:07:33  INFO      medvqa.routes.dataset  Computed 20 unique embeddings in 0.82s
+2026-04-13T04:07:34  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=7  skipped=0  total_time=1.50s
+2026-04-13T04:07:34  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:07:34  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=1505ms
+2026-04-13T04:07:40  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:07:40  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=8
+2026-04-13T04:07:40  INFO      medvqa.routes.dataset  Loaded 8 cache files in 0.01s
+2026-04-13T04:07:41  INFO      medvqa.routes.dataset  Computed 23 unique embeddings in 1.02s
+2026-04-13T04:07:42  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=8  skipped=0  total_time=2.16s
+2026-04-13T04:07:42  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:07:42  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2160ms
+2026-04-13T04:08:19  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:08:19  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=9
+2026-04-13T04:08:19  INFO      medvqa.routes.dataset  Loaded 9 cache files in 0.01s
+2026-04-13T04:08:20  INFO      medvqa.routes.dataset  Computed 26 unique embeddings in 1.13s
+2026-04-13T04:08:21  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=9  skipped=0  total_time=2.37s
+2026-04-13T04:08:21  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:08:21  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2368ms
+2026-04-13T04:08:47  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:08:47  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=11
+2026-04-13T04:08:47  INFO      medvqa.routes.dataset  Loaded 11 cache files in 0.01s
+2026-04-13T04:08:48  INFO      medvqa.routes.dataset  Computed 28 unique embeddings in 1.19s
+2026-04-13T04:08:49  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=11  skipped=0  total_time=2.67s
+2026-04-13T04:08:49  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:08:49  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2671ms
+2026-04-13T04:09:38  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:09:38  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=13
+2026-04-13T04:09:38  INFO      medvqa.routes.dataset  Loaded 13 cache files in 0.01s
+2026-04-13T04:09:39  INFO      medvqa.routes.dataset  Computed 36 unique embeddings in 1.35s
+2026-04-13T04:09:41  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=13  skipped=0  total_time=2.67s
+2026-04-13T04:09:41  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:09:41  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2673ms
+2026-04-13T04:09:53  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:09:53  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=14
+2026-04-13T04:09:53  INFO      medvqa.routes.dataset  Loaded 14 cache files in 0.01s
+2026-04-13T04:09:54  INFO      medvqa.routes.dataset  Computed 37 unique embeddings in 1.32s
+2026-04-13T04:09:55  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=14  skipped=0  total_time=2.83s
+2026-04-13T04:09:55  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:09:55  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2833ms
+2026-04-13T04:10:02  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:10:02  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=15
+2026-04-13T04:10:02  INFO      medvqa.routes.dataset  Loaded 15 cache files in 0.01s
+2026-04-13T04:10:04  INFO      medvqa.routes.dataset  Computed 38 unique embeddings in 1.36s
+2026-04-13T04:10:06  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=15  skipped=0  total_time=3.12s
+2026-04-13T04:10:06  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:10:06  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=3120ms
+2026-04-13T04:10:32  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:10:32  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=17
+2026-04-13T04:10:32  INFO      medvqa.routes.dataset  Loaded 17 cache files in 0.01s
+2026-04-13T04:10:33  INFO      medvqa.routes.dataset  Computed 40 unique embeddings in 1.35s
+2026-04-13T04:10:35  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=17  skipped=0  total_time=2.97s
+2026-04-13T04:10:35  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:10:35  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=2975ms
+2026-04-13T04:10:53  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:10:53  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=18
+2026-04-13T04:10:53  INFO      medvqa.routes.dataset  Loaded 18 cache files in 0.01s
+2026-04-13T04:10:55  INFO      medvqa.routes.dataset  Computed 43 unique embeddings in 1.34s
+2026-04-13T04:10:56  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=18  skipped=0  total_time=3.12s
+2026-04-13T04:10:56  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:10:56  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=3120ms
+2026-04-13T04:11:11  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:11:11  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=18
+2026-04-13T04:11:11  INFO      medvqa.routes.dataset  Loaded 18 cache files in 0.02s
+2026-04-13T04:11:13  INFO      medvqa.routes.dataset  Computed 43 unique embeddings in 1.89s
+2026-04-13T04:11:16  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=18  skipped=0  total_time=4.55s
+2026-04-13T04:11:16  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:11:16  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=4559ms
+2026-04-13T04:11:49  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:11:49  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=19
+2026-04-13T04:11:49  INFO      medvqa.routes.dataset  Loaded 19 cache files in 0.02s
+2026-04-13T04:11:50  INFO      medvqa.routes.dataset  Computed 47 unique embeddings in 1.39s
+2026-04-13T04:11:52  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=19  skipped=0  total_time=3.35s
+2026-04-13T04:11:52  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:11:52  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=3353ms
+2026-04-13T04:12:11  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:12:11  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=20
+2026-04-13T04:12:11  INFO      medvqa.routes.dataset  Loaded 20 cache files in 0.01s
+2026-04-13T04:12:12  INFO      medvqa.routes.dataset  Computed 48 unique embeddings in 1.37s
+2026-04-13T04:12:14  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=20  skipped=0  total_time=3.34s
+2026-04-13T04:12:14  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:12:14  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=3346ms
+2026-04-13T04:12:25  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:12:25  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=20
+2026-04-13T04:12:25  INFO      medvqa.routes.dataset  Loaded 20 cache files in 0.02s
+2026-04-13T04:12:26  INFO      medvqa.routes.dataset  Computed 48 unique embeddings in 1.39s
+2026-04-13T04:12:29  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=20  skipped=0  total_time=3.59s
+2026-04-13T04:12:29  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:12:29  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=3597ms
+2026-04-13T04:13:39  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:13:39  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=25
+2026-04-13T04:13:39  INFO      medvqa.routes.dataset  Loaded 25 cache files in 0.02s
+2026-04-13T04:13:40  INFO      medvqa.routes.dataset  Computed 58 unique embeddings in 1.49s
+2026-04-13T04:13:43  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=25  skipped=0  total_time=3.98s
+2026-04-13T04:13:43  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:13:43  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=3990ms
+2026-04-13T04:14:07  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:14:07  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=27
+2026-04-13T04:14:07  INFO      medvqa.routes.dataset  Loaded 27 cache files in 0.02s
+2026-04-13T04:14:08  INFO      medvqa.routes.dataset  Computed 61 unique embeddings in 1.51s
+2026-04-13T04:14:12  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=27  skipped=0  total_time=4.89s
+2026-04-13T04:14:12  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:14:12  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=4894ms
+2026-04-13T04:14:35  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:14:35  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=28
+2026-04-13T04:14:35  INFO      medvqa.routes.dataset  Loaded 28 cache files in 0.02s
+2026-04-13T04:14:37  INFO      medvqa.routes.dataset  Computed 63 unique embeddings in 1.57s
+2026-04-13T04:14:40  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=28  skipped=0  total_time=4.76s
+2026-04-13T04:14:40  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:14:40  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=4761ms
+2026-04-13T04:14:45  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:14:45  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=29
+2026-04-13T04:14:45  INFO      medvqa.routes.dataset  Loaded 29 cache files in 0.02s
+2026-04-13T04:14:46  INFO      medvqa.routes.dataset  Computed 64 unique embeddings in 1.58s
+2026-04-13T04:14:49  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=29  skipped=0  total_time=4.53s
+2026-04-13T04:14:49  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:14:49  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=4539ms
+2026-04-13T04:15:17  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:15:17  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=30
+2026-04-13T04:15:17  INFO      medvqa.routes.dataset  Loaded 30 cache files in 0.03s
+2026-04-13T04:15:18  INFO      medvqa.routes.dataset  Computed 67 unique embeddings in 1.68s
+2026-04-13T04:15:22  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=30  skipped=0  total_time=4.99s
+2026-04-13T04:15:22  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:15:22  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=4997ms
+2026-04-13T04:15:31  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:15:31  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=31
+2026-04-13T04:15:31  INFO      medvqa.routes.dataset  Loaded 31 cache files in 0.02s
+2026-04-13T04:15:33  INFO      medvqa.routes.dataset  Computed 68 unique embeddings in 1.94s
+2026-04-13T04:15:36  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=31  skipped=0  total_time=5.00s
+2026-04-13T04:15:36  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:15:36  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=5004ms
+2026-04-13T04:16:04  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:16:04  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=32
+2026-04-13T04:16:04  INFO      medvqa.routes.dataset  Loaded 32 cache files in 0.03s
+2026-04-13T04:16:06  INFO      medvqa.routes.dataset  Computed 69 unique embeddings in 1.83s
+2026-04-13T04:16:10  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=32  skipped=0  total_time=5.25s
+2026-04-13T04:16:10  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:16:10  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=5258ms
+2026-04-13T04:17:14  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:17:14  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=36
+2026-04-13T04:17:14  INFO      medvqa.routes.dataset  Loaded 36 cache files in 0.04s
+2026-04-13T04:17:16  INFO      medvqa.routes.dataset  Computed 78 unique embeddings in 2.57s
+2026-04-13T04:17:21  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=36  skipped=0  total_time=7.26s
+2026-04-13T04:17:21  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:17:21  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=7269ms
+2026-04-13T04:17:36  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:17:36  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=38
+2026-04-13T04:17:36  INFO      medvqa.routes.dataset  Loaded 38 cache files in 0.03s
+2026-04-13T04:17:38  INFO      medvqa.routes.dataset  Computed 83 unique embeddings in 2.12s
+2026-04-13T04:17:42  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=38  skipped=0  total_time=5.94s
+2026-04-13T04:17:42  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:17:42  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=5945ms
+2026-04-13T04:18:26  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:18:26  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=41
+2026-04-13T04:18:27  INFO      medvqa.routes.dataset  Loaded 41 cache files in 0.04s
+2026-04-13T04:18:29  INFO      medvqa.routes.dataset  Computed 86 unique embeddings in 2.47s
+2026-04-13T04:18:33  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=41  skipped=0  total_time=6.82s
+2026-04-13T04:18:33  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:18:33  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=6829ms
+2026-04-13T04:18:49  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:18:49  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=42
+2026-04-13T04:18:49  INFO      medvqa.routes.dataset  Loaded 42 cache files in 0.04s
+2026-04-13T04:18:51  INFO      medvqa.routes.dataset  Computed 89 unique embeddings in 2.68s
+2026-04-13T04:18:56  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=42  skipped=0  total_time=7.91s
+2026-04-13T04:18:56  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:18:56  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=7915ms
+2026-04-13T04:19:50  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:19:50  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=47
+2026-04-13T04:19:50  INFO      medvqa.routes.dataset  Loaded 47 cache files in 0.04s
+2026-04-13T04:19:52  INFO      medvqa.routes.dataset  Computed 97 unique embeddings in 2.27s
+2026-04-13T04:19:57  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=47  skipped=0  total_time=7.09s
+2026-04-13T04:19:57  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:19:57  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=7098ms
+2026-04-13T04:20:13  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:20:13  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=49
+2026-04-13T04:20:13  INFO      medvqa.routes.dataset  Loaded 49 cache files in 0.04s
+2026-04-13T04:20:15  INFO      medvqa.routes.dataset  Computed 102 unique embeddings in 2.37s
+2026-04-13T04:20:20  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=49  skipped=0  total_time=7.07s
+2026-04-13T04:20:20  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:20:20  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=7082ms
+2026-04-13T04:24:14  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:24:14  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=61
+2026-04-13T04:24:14  INFO      medvqa.routes.dataset  Loaded 61 cache files in 0.05s
+2026-04-13T04:24:16  INFO      medvqa.routes.dataset  Computed 129 unique embeddings in 2.73s
+2026-04-13T04:24:24  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=61  skipped=0  total_time=10.07s
+2026-04-13T04:24:24  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:24:24  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=10084ms
+2026-04-13T04:24:55  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:24:55  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=63
+2026-04-13T04:24:55  INFO      medvqa.routes.dataset  Loaded 63 cache files in 0.05s
+2026-04-13T04:24:58  INFO      medvqa.routes.dataset  Computed 131 unique embeddings in 2.80s
+2026-04-13T04:25:04  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=63  skipped=0  total_time=8.85s
+2026-04-13T04:25:04  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:25:04  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=8858ms
+2026-04-13T04:26:01  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:26:01  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=64
+2026-04-13T04:26:02  INFO      medvqa.routes.dataset  Loaded 64 cache files in 0.05s
+2026-04-13T04:26:05  INFO      medvqa.routes.dataset  Computed 134 unique embeddings in 3.42s
+2026-04-13T04:26:13  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=64  skipped=0  total_time=11.21s
+2026-04-13T04:26:13  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:26:13  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=11220ms
+2026-04-13T04:26:42  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:26:42  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=66
+2026-04-13T04:26:42  INFO      medvqa.routes.dataset  Loaded 66 cache files in 0.06s
+2026-04-13T04:26:45  INFO      medvqa.routes.dataset  Computed 140 unique embeddings in 3.69s
+2026-04-13T04:26:53  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=66  skipped=0  total_time=11.47s
+2026-04-13T04:26:53  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:26:53  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=11483ms
+2026-04-13T04:27:59  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:27:59  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=71
+2026-04-13T04:27:59  INFO      medvqa.routes.dataset  Loaded 71 cache files in 0.07s
+2026-04-13T04:28:03  INFO      medvqa.routes.dataset  Computed 153 unique embeddings in 3.96s
+2026-04-13T04:28:10  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=71  skipped=0  total_time=11.42s
+2026-04-13T04:28:10  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:28:10  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=11438ms
+2026-04-13T04:28:36  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:28:36  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=73
+2026-04-13T04:28:36  INFO      medvqa.routes.dataset  Loaded 73 cache files in 0.06s
+2026-04-13T04:28:40  INFO      medvqa.routes.dataset  Computed 159 unique embeddings in 3.98s
+2026-04-13T04:28:47  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=73  skipped=0  total_time=11.24s
+2026-04-13T04:28:47  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:28:47  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=11252ms
+2026-04-13T04:28:53  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:28:53  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=73
+2026-04-13T04:28:53  INFO      medvqa.routes.dataset  Loaded 73 cache files in 0.06s
+2026-04-13T04:28:57  INFO      medvqa.routes.dataset  Computed 159 unique embeddings in 4.32s
+2026-04-13T04:29:05  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=73  skipped=0  total_time=11.82s
+2026-04-13T04:29:05  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:29:05  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=11832ms
+2026-04-13T04:29:27  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:29:27  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=76
+2026-04-13T04:29:27  INFO      medvqa.routes.dataset  Loaded 76 cache files in 0.06s
+2026-04-13T04:29:31  INFO      medvqa.routes.dataset  Computed 166 unique embeddings in 4.00s
+2026-04-13T04:29:39  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=76  skipped=0  total_time=11.72s
+2026-04-13T04:29:39  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:29:39  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=11736ms
+2026-04-13T04:30:12  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:30:12  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=78
+2026-04-13T04:30:12  INFO      medvqa.routes.dataset  Loaded 78 cache files in 0.06s
+2026-04-13T04:30:16  INFO      medvqa.routes.dataset  Computed 173 unique embeddings in 3.97s
+2026-04-13T04:30:24  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=78  skipped=0  total_time=11.78s
+2026-04-13T04:30:24  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:30:24  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=11792ms
+2026-04-13T04:30:47  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:30:47  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=80
+2026-04-13T04:30:47  INFO      medvqa.routes.dataset  Loaded 80 cache files in 0.06s
+2026-04-13T04:30:51  INFO      medvqa.routes.dataset  Computed 176 unique embeddings in 4.19s
+2026-04-13T04:30:59  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=80  skipped=0  total_time=12.20s
+2026-04-13T04:30:59  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:30:59  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=12213ms
+2026-04-13T04:31:46  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:31:46  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=84
+2026-04-13T04:31:46  INFO      medvqa.routes.dataset  Loaded 84 cache files in 0.08s
+2026-04-13T04:31:51  INFO      medvqa.routes.dataset  Computed 187 unique embeddings in 5.13s
+2026-04-13T04:32:03  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=84  skipped=0  total_time=16.66s
+2026-04-13T04:32:03  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:32:03  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=16684ms
+2026-04-13T04:32:53  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:32:53  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=87
+2026-04-13T04:32:53  INFO      medvqa.routes.dataset  Loaded 87 cache files in 0.07s
+2026-04-13T04:32:58  INFO      medvqa.routes.dataset  Computed 196 unique embeddings in 4.45s
+2026-04-13T04:33:07  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=87  skipped=0  total_time=13.93s
+2026-04-13T04:33:07  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:33:07  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=13952ms
+2026-04-13T04:34:00  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:34:00  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=89
+2026-04-13T04:34:00  INFO      medvqa.routes.dataset  Loaded 89 cache files in 0.07s
+2026-04-13T04:34:06  INFO      medvqa.routes.dataset  Computed 204 unique embeddings in 5.33s
+2026-04-13T04:34:16  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=89  skipped=0  total_time=15.65s
+2026-04-13T04:34:16  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:34:16  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=15667ms
+2026-04-13T04:35:02  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:35:02  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=92
+2026-04-13T04:35:02  INFO      medvqa.routes.dataset  Loaded 92 cache files in 0.06s
+2026-04-13T04:35:08  INFO      medvqa.routes.dataset  Computed 211 unique embeddings in 5.77s
+2026-04-13T04:35:18  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=92  skipped=0  total_time=15.89s
+2026-04-13T04:35:18  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:35:18  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=15908ms
+2026-04-13T04:35:39  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:35:39  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=95
+2026-04-13T04:35:40  INFO      medvqa.routes.dataset  Loaded 95 cache files in 0.79s
+2026-04-13T04:35:45  INFO      medvqa.routes.dataset  Computed 219 unique embeddings in 5.21s
+2026-04-13T04:35:56  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=95  skipped=0  total_time=16.64s
+2026-04-13T04:35:56  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:35:56  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=16658ms
+2026-04-13T04:36:19  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:36:19  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=97
+2026-04-13T04:36:19  INFO      medvqa.routes.dataset  Loaded 97 cache files in 0.07s
+2026-04-13T04:36:25  INFO      medvqa.routes.dataset  Computed 225 unique embeddings in 6.10s
+2026-04-13T04:36:38  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=97  skipped=0  total_time=18.25s
+2026-04-13T04:36:38  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:36:38  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=18269ms
+2026-04-13T04:36:59  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:36:59  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=100
+2026-04-13T04:36:59  INFO      medvqa.routes.dataset  Loaded 100 cache files in 0.08s
+2026-04-13T04:37:05  INFO      medvqa.routes.dataset  Computed 233 unique embeddings in 6.02s
+2026-04-13T04:37:17  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=100  skipped=0  total_time=17.88s
+2026-04-13T04:37:17  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:37:17  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=17913ms
+2026-04-13T04:37:31  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:37:31  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=102
+2026-04-13T04:37:31  INFO      medvqa.routes.dataset  Loaded 102 cache files in 0.08s
+2026-04-13T04:37:37  INFO      medvqa.routes.dataset  Computed 236 unique embeddings in 6.02s
+2026-04-13T04:37:50  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=102  skipped=0  total_time=19.07s
+2026-04-13T04:37:50  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:37:50  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=19095ms
+2026-04-13T04:38:15  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:38:15  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=104
+2026-04-13T04:38:15  INFO      medvqa.routes.dataset  Loaded 104 cache files in 0.08s
+2026-04-13T04:38:21  INFO      medvqa.routes.dataset  Computed 241 unique embeddings in 6.36s
+2026-04-13T04:38:33  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=104  skipped=0  total_time=18.81s
+2026-04-13T04:38:33  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:38:33  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=18833ms
+2026-04-13T04:38:57  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:38:57  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=106
+2026-04-13T04:38:57  INFO      medvqa.routes.dataset  Loaded 106 cache files in 0.09s
+2026-04-13T04:39:03  INFO      medvqa.routes.dataset  Computed 248 unique embeddings in 6.51s
+2026-04-13T04:39:17  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=106  skipped=0  total_time=20.69s
+2026-04-13T04:39:17  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:39:17  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=20733ms
+2026-04-13T04:40:56  INFO      medvqa.server  → GET /api/dataset/evaluation
+2026-04-13T04:40:56  INFO      medvqa.routes.dataset  Evaluation summary requested  cache_files=106
+2026-04-13T04:40:56  INFO      medvqa.routes.dataset  Loaded 106 cache files in 0.08s
+2026-04-13T04:41:03  INFO      medvqa.routes.dataset  Computed 248 unique embeddings in 6.31s
+2026-04-13T04:41:15  INFO      medvqa.routes.dataset  Evaluation summary built  total_rows=106  skipped=0  total_time=18.28s
+2026-04-13T04:41:15  INFO      medvqa.routes.dataset  Embedding cache cleared
+2026-04-13T04:41:15  INFO      medvqa.server  ← GET /api/dataset/evaluation  status=200  duration=18305ms

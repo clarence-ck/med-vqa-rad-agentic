@@ -1,0 +1,114 @@
+2026-04-13T04:16:59  INFO      medvqa.routes.dataset  Cache MISS for sample 2167  question='the image probably had what incidental finding?'  refresh=False  running all 3 pipelines in parallel
+2026-04-13T04:16:59  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=135629 bytes  question='the image probably had what incidental finding?'
+2026-04-13T04:17:00  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='the image probably had what incidental finding?'  mime_type=image/png  size=135629 bytes ===
+2026-04-13T04:17:00  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-13T04:17:00  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=135629 bytes)
+2026-04-13T04:17:00  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-13T04:17:00  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=135629 bytes)
+2026-04-13T04:17:02  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "A left basal ganglia/internal capsule lacunar infarct with incidental mild cerebral atrophy/small-vessel ischemic change.",
+  "explanation": "This is an axial brain MRI. The main finding appears to be a small chronic infarct in the left deep white matter/basal ganglia region, with generalized prominence of the ventricles/sulci suggesting mild incidental atrophy.",
+  "confidence": "medium"
+}
+2026-04-13T04:17:02  INFO      medvqa.agents.baseline  Baseline done  answer='A left basal ganglia/internal capsule lacunar infarct with incidental mild cereb'  confidence=medium  duration=2166ms
+2026-04-13T04:17:02  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=6  count=2  duration=2725ms
+2026-04-13T04:17:02  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial brain MRI image showing both cerebral hemispheres and the ventricular system. The image is well centered and provides a clear view of the brain structures on a T2-weighted sequence, with cerebrospinal fluid appearing bright.
+2026-04-13T04:17:02  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Symmetric appearance of the lateral ventricles', 'Preserved gray-white matter differentiation', 'No obvious midline shift', 'No large focal mass effect visible in this slice', 'No acute hemorrhage is apparent on this image', 'Mild prominence of cortical sulci may be present']
+2026-04-13T04:17:02  DEBUG     medvqa.agents.image_interpreter  Count metadata: {'countable_objects': [{'source': 'visual_summary', 'text': 'Axial brain MRI image showing both cerebral hemispheres and the ventricular system. The image is well centered and provides a clear view of the brain structures on a T2-weighted sequence, with cerebrospinal fluid appearing bright.', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}], 'count_estimate': 2, 'count_confidence': 'low', 'count_method': 'text_inference'}
+2026-04-13T04:17:02  INFO      medvqa.agents.question_analyzer  Analyzing question: 'the image probably had what incidental finding?'
+2026-04-13T04:17:02  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-13T04:17:03  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=MRI  body_region=brain  quality=good  findings=4  count=2  duration=2255ms
+2026-04-13T04:17:03  DEBUG     medvqa.agents.image_interpreter  Visual summary: Axial brain MRI image showing a single slice through the cerebral hemispheres at the level of the lateral ventricles. The cerebrospinal fluid spaces are bright, and the brain parenchyma appears symmetrically displayed on both sides of the midline.
+2026-04-13T04:17:03  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['The lateral ventricles are visible and symmetric in size and shape.', 'The cortical sulci are well seen along the cerebral convexities.', 'No obvious midline shift is visible on this slice.', 'No focal mass effect or large extra-axial collection is evident on this image.']
+2026-04-13T04:17:03  DEBUG     medvqa.agents.image_interpreter  Count metadata: {'countable_objects': [{'source': 'visual_summary', 'text': 'Axial brain MRI image showing a single slice through the cerebral hemispheres at the level of the lateral ventricles. The cerebrospinal fluid spaces are bright, and the brain parenchyma appears symmetrically displayed on both sides of the midline.', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}], 'count_estimate': 2, 'count_confidence': 'low', 'count_method': 'text_inference'}
+2026-04-13T04:17:03  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=MRI  region=brain  image_quality=good  quality_warning=False  duration=2285ms
+2026-04-13T04:17:03  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  subtype=finding_description  reasoning=medical_knowledge  med_knowledge=True  clarity=ambiguous  duration=1120ms
+2026-04-13T04:17:03  DEBUG     medvqa.agents.question_analyzer  Target entity: incidental finding  Expected format: short_phrase  Rephrased: What incidental finding is visible on the brain MRI image?
+2026-04-13T04:17:03  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='the image probably had what incidental finding?'  modality=MRI  body_region=brain  question_type=abnormality_description
+2026-04-13T04:17:03  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-13T04:17:03  DEBUG     medvqa.agents.workflow_baseline  Branch taken: abnormality_description
+2026-04-13T04:17:03  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='Symmetric appearance of the lateral ventricles; Preserved gray-white matter diff'  confidence=medium  question_type=abnormality_description  duration=3914ms
+2026-04-13T04:17:03  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='the image probably had what incidental finding?'
+2026-04-13T04:17:03  INFO      medvqa.agents.question_analyzer  Analyzing question: 'the image probably had what incidental finding?'
+2026-04-13T04:17:03  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-13T04:17:05  INFO      medvqa.agents.question_analyzer  Question analysis done  type=abnormality_description  subtype=finding_description  reasoning=medical_knowledge  med_knowledge=True  clarity=ambiguous  duration=1114ms
+2026-04-13T04:17:05  DEBUG     medvqa.agents.question_analyzer  Target entity: incidental finding  Expected format: short_phrase  Rephrased: What incidental finding is probably present on this brain MRI image?
+2026-04-13T04:17:05  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=abnormality_description  duration=1141ms
+2026-04-13T04:17:05  INFO      medvqa.agents.orchestrator  [tool] filter_image_context called
+2026-04-13T04:17:05  INFO      medvqa.agents.orchestrator  [tool] filter_image_context done  question_type=abnormality_description  findings=3  structures=2  fallback_findings=False  fallback_structures=True  duration=2ms
+2026-04-13T04:17:05  DEBUG     medvqa.agents.orchestrator  [tool] filter_image_context selected findings=['No focal mass effect or large extra-axial collection is evident on this image.', 'The lateral ventricles are visible and symmetric in size and shape.', 'The cortical sulci are well seen along the cerebral convexities.']
+2026-04-13T04:17:05  DEBUG     medvqa.agents.orchestrator  [tool] filter_image_context selected structures=['cerebral hemispheres', 'lateral ventricles']
+2026-04-13T04:17:05  DEBUG     medvqa.agents.orchestrator  [tool] filter_image_context filtered summary=Axial brain MRI image showing a single slice through the cerebral hemispheres at the level of the lateral ventricles. The cerebrospinal fluid spaces are bright, and the brain parenchyma appears symmetrically displayed on both sides of the midline. | No focal mass effect or large extra-axial collection is evident on this image.; The lateral ventricles are visible and symmetric in size and shape.; The cortical sulci are well seen along the cerebral convexities.
+2026-04-13T04:17:06  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-13T04:17:06  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=abnormality_description  question_subtype=finding_description  reasoning=medical_knowledge  med_knowledge=True  modality=MRI  region=brain
+2026-04-13T04:17:08  INFO      medvqa.agents.difficulty_router  Routing decision  difficulty=medium  needs_retrieval=True  verification=standard  fallback=add_disclaimer  duration=1591ms
+2026-04-13T04:17:08  DEBUG     medvqa.agents.difficulty_router  Routing rationale: This is a brain MRI with clear global structure but a potentially ambiguous abnormality-description task, making it a systematic interpretation case where limited retrieval is appropriate rather than a pure direct visual answer.
+2026-04-13T04:17:08  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=medium  needs_retrieval=True  retrieval_status=?  verification=standard  fallback=add_disclaimer  duration=1627ms
+2026-04-13T04:17:08  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge called
+2026-04-13T04:17:08  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval starting  question='the image probably had what incidental finding?'  modality=MRI  body_region=brain  question_type=abnormality_description  target_entity=incidental finding  advanced_rag=True
+2026-04-13T04:17:08  DEBUG     medvqa.agents.advanced_rag  Inferred finding_category='mass' from notable_findings
+2026-04-13T04:17:08  INFO      medvqa.agents.advanced_rag  Retrieval pipeline started | question=the image probably had what incidental finding? | modality=MRI | body_region=brain | finding=mass | rerank=mandatory
+2026-04-13T04:17:08  DEBUG     medvqa.agents.advanced_rag  Using structured query profile (no LLM rewrite): the image probably had what incidental finding? | question_type=abnormality_description | question_family=medical_knowledge | target_entity=incidental finding | body_region=brain | modality=MRI | answer_style=short_phrase | visual_cues=cer…
+2026-04-13T04:17:08  DEBUG     medvqa.agents.advanced_rag  Metadata filter modality='MRI': 93 matches
+2026-04-13T04:17:08  DEBUG     medvqa.agents.advanced_rag  Metadata filter finding='mass': 28 matches
+2026-04-13T04:17:08  INFO      medvqa.agents.advanced_rag  Metadata filter result: 15 candidates (modality(93) + finding(28))
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag  Metadata filter: 15 candidates retained
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag  Dense retrieval: top_k=10
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag  Dense retrieval using filtered subset of 15 candidates
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag  Dense retrieval results: showing top 3/10
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag    1. id=306 score=0.6672 | concept_type=explanation concept=brain edema, brain enhancing tumor, brain non-enh… | Q: What disease is/are shown on the left of brain? | A: Brain Edema, Brain Enhancing Tumor, Brain Non-enhancing Tumor
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag    2. id=307 score=0.6660 | concept_type=explanation concept=brain edema, brain enhancing tumor, brain non-enh… | Q: What disease is/are shown on the right of brain? | A: Brain Edema, Brain Enhancing Tumor, Brain Non-enhancing Tumor
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag    3. id=301 score=0.6625 | concept_type=explanation concept=brain enhancing tumor, brain edema, brain non-enh… | Q: What disease is/are shown on the right of brain? | A: Brain Enhancing Tumor, Brain Edema, Brain Non-enhancing Tumor
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval: top_k=10
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag  Sparse (BM25) retrieval using filtered subset of 15 candidates
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag  Sparse retrieval results: showing top 3/10
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag    1. id=313 score=3.5543 | concept_type=explanation concept=white | Q: What color does the brain enhancing tumor show in the picture? | A: White
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag    2. id=268 score=2.1956 | concept_type=anatomy concept=head | Q: Is brain tumor white or gray relative to other tissues? | A: Gray
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag    3. id=289 score=0.5502 | concept_type=explanation concept=brain edema, brain enhancing tumor | Q: What disease is/are shown on the left of brain? | A: Brain Edema, Brain Enhancing Tumor
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag  Merging results via RRF: dense=10 sparse=10
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag  Hybrid RRF merge produced 10 unique candidates
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag  Merged candidates: showing top 3/10
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag    1. id=313 score=0.0313 method=hybrid_rrf | concept_type=explanation concept=white | Q: What color does the brain enhancing tumor show in the picture? | A: White
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag    2. id=289 score=0.0310 method=hybrid_rrf | concept_type=explanation concept=brain edema, brain enhancing tumor | Q: What disease is/are shown on the left of brain? | A: Brain Edema, Brain Enhancing Tumor
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag    3. id=306 score=0.0309 method=hybrid_rrf | concept_type=explanation concept=brain edema, brain enhancing tumor, brain non-enh… | Q: What disease is/are shown on the left of brain? | A: Brain Edema, Brain Enhancing Tumor, Brain Non-enhancing Tumor
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag  Reranking 10 candidates down to top_k_final=3 (cross-encoder=cross-encoder/ms-marco-MiniLM-L-6-v2)
+2026-04-13T04:17:09  INFO      medvqa.agents.advanced_rag  Cross-encoder reranking 10 candidates...
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag  Reranked candidates: showing top 3/3
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag    1. id=307 score=-3.8103 method=reranked softmax=0.1367 | concept_type=explanation concept=brain edema, brain enhancing tumor, brain non-enh… | Q: What disease is/are shown on the right of brain? | A: Brain Edema, Brain Enhancing Tumor, Brain Non-enhancing Tumor
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag    2. id=306 score=-3.8104 method=reranked softmax=0.1589 | concept_type=explanation concept=brain edema, brain enhancing tumor, brain non-enh… | Q: What disease is/are shown on the left of brain? | A: Brain Edema, Brain Enhancing Tumor, Brain Non-enhancing Tumor
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag    3. id=313 score=-4.0453 method=reranked softmax=0.1256 | concept_type=explanation concept=white | Q: What color does the brain enhancing tumor show in the picture? | A: White
+2026-04-13T04:17:09  INFO      medvqa.agents.advanced_rag  Retrieval confidence | level=low weak_signals=3 top1_softmax=0.137 margin=-0.022 dense_top1=0.667 agreement=False
+2026-04-13T04:17:09  INFO      medvqa.agents.advanced_rag  Retrieval complete: returning 0 final candidates
+2026-04-13T04:17:09  DEBUG     medvqa.agents.advanced_rag  Final retrieved cases: no hits
+2026-04-13T04:17:09  INFO      medvqa.agents.knowledge_retriever  Advanced RAG returned 0 similar cases for this question; proceeding without RAG context
+2026-04-13T04:17:13  INFO      medvqa.agents.knowledge_retriever  Knowledge retrieval done  retrieval_status=success  key_facts=5  rag_cases=0  duration=4448ms
+2026-04-13T04:17:13  DEBUG     medvqa.agents.knowledge_retriever  Key facts: ['Normal brain MRI should show symmetric cerebral hemispheres and appropriately sized ventricles and cortical sulci for age.', 'Incidental findings on brain MRI are often benign and unrelated to the presenting complaint.', 'Common incidental intracranial findings include small arachnoid cysts, mild chronic white matter hyperintensities, and benign calcifications or developmental variants.', 'The falx is a midline dural fold; midline shift or distortion can indicate mass effect rather than an incidental finding.', 'Subcortical white matter abnormalities may reflect chronic microvascular change, demyelination, migraine-related changes, or nonspecific incidental signal alteration.']
+2026-04-13T04:17:13  DEBUG     medvqa.agents.knowledge_retriever  Contextual notes: Brain MRI is commonly reviewed for both focal pathology and incidental findings such as developmental variants, benign cysts, or small age-related white matter changes. When the cerebral hemispheres, 
+2026-04-13T04:17:13  INFO      medvqa.agents.orchestrator  [tool] retrieve_knowledge done  retrieval_status=success  key_facts=5  rag_cases=0  duration=4475ms
+2026-04-13T04:17:14  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-13T04:17:14  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='the image probably had what incidental finding?'  is_retry=False  question_type=abnormality_description  subtype=finding_description  yes_no=False
+2026-04-13T04:17:14  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=5  rag_cases=0
+2026-04-13T04:17:17  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='Mild generalized cerebral atrophy'  confidence=medium  duration=2845ms
+2026-04-13T04:17:17  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: ['Identified that the ventricles are symmetric and there is no focal mass effect.', 'Noted that the cortical sulci and CSF spaces are relatively prominent.', 'Interpreted this pattern as mild diffuse cerebral volume loss/atrophy rather than a focal lesion.']
+2026-04-13T04:17:17  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['Lateral ventricles are visible and symmetric in size and shape', 'Cortical sulci are well seen along the cerebral convexities', 'No obvious midline shift', 'No focal mass effect or large extra-axial collection']
+2026-04-13T04:17:17  DEBUG     medvqa.agents.reasoning_agent  Limitations: Only a single axial slice is provided, so subtle focal abnormalities or age-related degree of sulcal prominence cannot be assessed definitively.
+2026-04-13T04:17:17  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='Mild generalized cerebral atrophy'  confidence=medium  duration=2903ms
+2026-04-13T04:17:17  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-13T04:17:17  INFO      medvqa.agents.verification_agent  Verifying answer='Mild generalized cerebral atrophy'  question='the image probably had what incidental finding?'  question_type=abnormality_description
+2026-04-13T04:17:20  INFO      medvqa.agents.verification_agent  Verification done  status=partially_verified  confidence=Medium  checks=4/5  duration=2384ms
+2026-04-13T04:17:20  WARNING   medvqa.agents.verification_agent  Verification issues: ['The answer is medically plausible but somewhat stronger than the visual evidence supports; a single axial slice with visible sulci and symmetric ventricles does not firmly establish generalized cerebral atrophy.', 'The explanation infers diffuse volume loss from prominence of sulci/CSF spaces, but the available image context only supports that the sulci are well seen and ventricles are symmetric.', 'Incidental finding phrasing is acceptable, but the conclusion should be more tentative.']
+2026-04-13T04:17:20  INFO      medvqa.agents.verification_agent  Fallback recommendation: rephrase_answer
+2026-04-13T04:17:20  DEBUG     medvqa.agents.verification_agent  Verification notes: The answer fits the question type and is not contradicted by the image analysis, but the evidence is limited to one MRI slice and does not definitively confirm mild generalized cerebral atrophy. A more cautious phrasing would be better.
+2026-04-13T04:17:20  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=partially_verified  confidence=Medium  duration=2437ms
+2026-04-13T04:17:20  DEBUG     medvqa.agents.orchestrator  Failure categories detected: ['partially_verified']
+2026-04-13T04:17:20  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=rephrase_answer  disclaimer=True
+2026-04-13T04:17:20  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=medium  passed=4/5
+2026-04-13T04:17:20  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-13T04:17:20  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='Mild generalized cerebral atrophy'  verification=partially_verified  guardrail_flag=False  consistency=medium  cross_modal=high  duration=20274ms
+2026-04-13T04:17:20  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='Mild generalized cerebral atrophy'  verification=partially_verified  confidence=Medium  flag_review=False
+2026-04-13T04:17:20  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=partially_verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-13T04:17:20  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-13T04:17:20  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='Mild generalized cerebral atrophy'  difficulty=medium  retrieval_status=success  image_quality=good  retries=0  review=False  total_duration=20281ms ===
+2026-04-13T04:17:20  INFO      medvqa.routes.dataset  Sample 2167 analysis complete  baseline=2171ms  workflow=3916ms  agentic=20285ms  total=20285ms
+2026-04-13T04:17:20  INFO      medvqa.routes.dataset  Sample 2167 answers  type=abnormality_description  subtype=unknown  baseline='A left basal ganglia/internal capsule lacunar infarct with i'  workflow='Symmetric appearance of the lateral ventricles; Preserved gr'  agentic='Mild generalized cerebral atrophy'  ground_truth='cavum vergae'

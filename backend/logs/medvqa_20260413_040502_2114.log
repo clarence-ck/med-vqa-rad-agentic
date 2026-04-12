@@ -1,0 +1,71 @@
+2026-04-13T04:23:17  INFO      medvqa.routes.dataset  Cache MISS for sample 2114  question='are the bronchial airways enlarged?'  refresh=False  running all 3 pipelines in parallel
+2026-04-13T04:23:17  INFO      medvqa.agents.baseline  Baseline (single-shot) request  mime_type=image/png  size=175472 bytes  question='are the bronchial airways enlarged?'
+2026-04-13T04:23:17  INFO      medvqa.agents.orchestrator  === Agentic pipeline START  question='are the bronchial airways enlarged?'  mime_type=image/png  size=175472 bytes ===
+2026-04-13T04:23:17  INFO      medvqa.agents.orchestrator  Running agentic pipeline (is_retry=False)
+2026-04-13T04:23:17  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=175472 bytes)
+2026-04-13T04:23:18  INFO      medvqa.agents.orchestrator  [tool] interpret_image called
+2026-04-13T04:23:18  INFO      medvqa.agents.image_interpreter  Running image interpretation (mime_type=image/png, size=175472 bytes)
+2026-04-13T04:23:18  DEBUG     medvqa.agents.baseline  Raw baseline response: {
+  "is_radiology_image": true,
+  "answer": "No, the bronchial airways do not appear enlarged.",
+  "explanation": "This is a chest X-ray. The central airways do not show obvious bronchial wall thickening or bronchiectatic enlargement on this image.",
+  "confidence": "medium"
+}
+2026-04-13T04:23:18  INFO      medvqa.agents.baseline  Baseline done  answer='No, the bronchial airways do not appear enlarged.'  confidence=medium  duration=1305ms
+2026-04-13T04:23:20  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=7  count=2  duration=2644ms
+2026-04-13T04:23:20  DEBUG     medvqa.agents.image_interpreter  Visual summary: Upright PA chest radiograph showing both lungs, the cardiomediastinal silhouette, and bony thorax. The lungs are well aerated overall, and the image includes standard orientation markers and side markers.
+2026-04-13T04:23:20  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Both lung fields are visible and mostly clear', 'Mild increased central/perihilar bronchovascular markings are present', 'No focal dense air-space opacity is seen', 'No pleural effusion is visible', 'No pneumothorax is visible', 'Cardiomediastinal silhouette appears within normal size limits', 'Mild leftward curvature of the thoracic spine is visible']
+2026-04-13T04:23:20  DEBUG     medvqa.agents.image_interpreter  Count metadata: {'countable_objects': [{'source': 'notable_findings', 'text': 'Both lung fields are visible and mostly clear', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}, {'source': 'visual_summary', 'text': 'Upright PA chest radiograph showing both lungs, the cardiomediastinal silhouette, and bony thorax. The lungs are well aerated overall, and the image includes standard orientation markers and side markers.', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}], 'count_estimate': 2, 'count_confidence': 'low', 'count_method': 'text_inference'}
+2026-04-13T04:23:20  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the bronchial airways enlarged?'
+2026-04-13T04:23:20  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-13T04:23:20  INFO      medvqa.agents.image_interpreter  Image interpretation done  modality=X-ray  body_region=chest  quality=good  findings=6  count=2  duration=2264ms
+2026-04-13T04:23:20  DEBUG     medvqa.agents.image_interpreter  Visual summary: Frontal upright chest radiograph showing both lungs, the cardiomediastinal silhouette, and the bony thorax. The image is well centered with adequate inspiration and exposure.
+2026-04-13T04:23:20  DEBUG     medvqa.agents.image_interpreter  Notable findings: ['Both lungs are well expanded.', 'Cardiomediastinal silhouette is visible and not enlarged in appearance.', 'No focal air-space opacity is evident.', 'No pleural effusion is visible.', 'No pneumothorax is visible.', 'Mild curvature of the thoracic spine is present.']
+2026-04-13T04:23:20  DEBUG     medvqa.agents.image_interpreter  Count metadata: {'countable_objects': [{'source': 'notable_findings', 'text': 'Both lungs are well expanded.', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}, {'source': 'visual_summary', 'text': 'Frontal upright chest radiograph showing both lungs, the cardiomediastinal silhouette, and the bony thorax. The image is well centered with adequate inspiration and exposure.', 'label': 'paired_structure', 'count_estimate': 2, 'count_confidence': 'low', 'count_source': 'text_inference'}], 'count_estimate': 2, 'count_confidence': 'low', 'count_method': 'text_inference'}
+2026-04-13T04:23:20  INFO      medvqa.agents.orchestrator  [tool] interpret_image done  modality=X-ray  region=chest  image_quality=good  quality_warning=False  duration=2290ms
+2026-04-13T04:23:21  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  subtype=yes_no_clinical  reasoning=visual_recognition  med_knowledge=False  clarity=clear  duration=1061ms
+2026-04-13T04:23:21  DEBUG     medvqa.agents.question_analyzer  Target entity: bronchial airways  Expected format: yes_no  Rephrased: Are the bronchial airways enlarged?
+2026-04-13T04:23:21  INFO      medvqa.agents.workflow_baseline  Workflow baseline  question='are the bronchial airways enlarged?'  modality=X-ray  body_region=chest  question_type=presence_absence
+2026-04-13T04:23:21  DEBUG     medvqa.agents.workflow_baseline  Matched findings: []  Matched structures: []
+2026-04-13T04:23:21  DEBUG     medvqa.agents.workflow_baseline  Branch taken: yes_no/presence_absence
+2026-04-13T04:23:21  INFO      medvqa.agents.workflow_baseline  Workflow baseline done  answer='No'  confidence=low  question_type=presence_absence  duration=3769ms
+2026-04-13T04:23:22  INFO      medvqa.agents.orchestrator  [tool] analyze_question called  question='are the bronchial airways enlarged?'
+2026-04-13T04:23:22  INFO      medvqa.agents.question_analyzer  Analyzing question: 'are the bronchial airways enlarged?'
+2026-04-13T04:23:22  DEBUG     medvqa.agents.question_analyzer  Visual context provided: True
+2026-04-13T04:23:24  INFO      medvqa.agents.question_analyzer  Question analysis done  type=presence_absence  subtype=yes_no_clinical  reasoning=visual_recognition  med_knowledge=True  clarity=clear  duration=1199ms
+2026-04-13T04:23:24  DEBUG     medvqa.agents.question_analyzer  Target entity: bronchial airways  Expected format: yes_no  Rephrased: Are the bronchial airways enlarged?
+2026-04-13T04:23:24  INFO      medvqa.agents.orchestrator  [tool] analyze_question done  type=presence_absence  duration=1226ms
+2026-04-13T04:23:24  INFO      medvqa.agents.orchestrator  [tool] filter_image_context called
+2026-04-13T04:23:24  INFO      medvqa.agents.orchestrator  [tool] filter_image_context done  question_type=presence_absence  findings=4  structures=2  fallback_findings=False  fallback_structures=True  duration=1ms
+2026-04-13T04:23:24  DEBUG     medvqa.agents.orchestrator  [tool] filter_image_context selected findings=['Cardiomediastinal silhouette is visible and not enlarged in appearance.', 'Mild curvature of the thoracic spine is present.', 'No pleural effusion is visible.', 'Both lungs are well expanded.']
+2026-04-13T04:23:24  DEBUG     medvqa.agents.orchestrator  [tool] filter_image_context selected structures=['lungs', 'heart']
+2026-04-13T04:23:24  DEBUG     medvqa.agents.orchestrator  [tool] filter_image_context filtered summary=Frontal upright chest radiograph showing both lungs, the cardiomediastinal silhouette, and the bony thorax. The image is well centered with adequate inspiration and exposure. | Cardiomediastinal silhouette is visible and not enlarged in appearance.; Mild curvature of the thoracic spine is present.; No pleural effusion is visible.; Both lungs are well expanded.
+2026-04-13T04:23:25  INFO      medvqa.agents.orchestrator  [tool] route_difficulty called
+2026-04-13T04:23:25  INFO      medvqa.agents.difficulty_router  Routing difficulty  question_type=presence_absence  question_subtype=yes_no_clinical  reasoning=visual_recognition  med_knowledge=True  modality=X-ray  region=chest
+2026-04-13T04:23:25  INFO      medvqa.agents.difficulty_router  Hard rule: question_type='presence_absence' question_subtype='yes_no_clinical' is retrieval-incompatible, forcing easy/no-retrieval
+2026-04-13T04:23:25  INFO      medvqa.agents.orchestrator  [tool] route_difficulty done  difficulty=easy  needs_retrieval=False  retrieval_status=?  verification=standard  fallback=none  duration=22ms
+2026-04-13T04:23:26  INFO      medvqa.agents.orchestrator  [tool] reason_answer called  is_retry=False
+2026-04-13T04:23:26  INFO      medvqa.agents.reasoning_agent  Reasoning agent starting  question='are the bronchial airways enlarged?'  is_retry=False  question_type=presence_absence  subtype=yes_no_clinical  yes_no=True
+2026-04-13T04:23:26  DEBUG     medvqa.agents.reasoning_agent  Knowledge input  key_facts=0  rag_cases=0
+2026-04-13T04:23:26  INFO      medvqa.agents.reasoning_agent  Yes/no constraint applied for question_type=presence_absence
+2026-04-13T04:23:28  INFO      medvqa.agents.reasoning_agent  Reasoning done  answer='no'  confidence=medium  duration=2160ms
+2026-04-13T04:23:28  DEBUG     medvqa.agents.reasoning_agent  Reasoning trace: Reviewed the image analysis for direct mention of bronchial enlargement or airway abnormality. No such finding was reported, and the overall chest film is otherwise unremarkable aside from mild thoracic spine curvature. Therefore, bronchial airways are not enlarged based on the provided evidence.
+2026-04-13T04:23:28  DEBUG     medvqa.agents.reasoning_agent  Evidence used: ['No bronchial enlargement or airway abnormality reported in the image analysis', 'Both lungs are well expanded', 'No focal air-space opacity is evident', 'No pleural effusion is visible', 'No pneumothorax is visible']
+2026-04-13T04:23:28  DEBUG     medvqa.agents.reasoning_agent  Limitations: Bronchial airways are not directly detailed in the summary, so this is inferred from the absence of reported airway abnormality rather than from a dedicated airway assessment.
+2026-04-13T04:23:28  INFO      medvqa.agents.orchestrator  [tool] reason_answer done  answer='no'  confidence=medium  duration=2190ms
+2026-04-13T04:23:29  INFO      medvqa.agents.orchestrator  [tool] verify_answer called
+2026-04-13T04:23:29  INFO      medvqa.agents.verification_agent  Verifying answer='no'  question='are the bronchial airways enlarged?'  question_type=presence_absence
+2026-04-13T04:23:30  INFO      medvqa.agents.verification_agent  Verification done  status=verified  confidence=Medium  checks=5/5  duration=1520ms
+2026-04-13T04:23:30  INFO      medvqa.agents.verification_agent  Fallback recommendation: none
+2026-04-13T04:23:30  DEBUG     medvqa.agents.verification_agent  Verification notes: The question asks a yes/no finding about bronchial airway enlargement. The answer 'no' is consistent with the provided chest X-ray context, and the explanation does not introduce unsupported findings. No contradictions are present, and the response format is appropriate.
+2026-04-13T04:23:30  INFO      medvqa.agents.orchestrator  [tool] verify_answer done  status=verified  confidence=Medium  duration=1545ms
+2026-04-13T04:23:30  INFO      medvqa.agents.orchestrator  Guardrail decision  flag_for_review=False  fallback=none  disclaimer=False
+2026-04-13T04:23:30  DEBUG     medvqa.agents.orchestrator  Self-consistency signal: level=high  passed=5/5
+2026-04-13T04:23:30  DEBUG     medvqa.agents.orchestrator  Cross-modal agreement: level=high  grounded=True  no_contradictions=True
+2026-04-13T04:23:30  INFO      medvqa.agents.orchestrator  Pipeline payload assembled  answer='no'  verification=verified  guardrail_flag=False  consistency=high  cross_modal=high  duration=13403ms
+2026-04-13T04:23:30  INFO      medvqa.agents.orchestrator  Pipeline attempt 1 result  answer='no'  verification=verified  confidence=Medium  flag_review=False
+2026-04-13T04:23:30  DEBUG     medvqa.agents.orchestrator  Retry evaluation  verification=verified  flag_review=False  high_severity=False  fixable=False  -> retry=False
+2026-04-13T04:23:30  INFO      medvqa.agents.orchestrator  Pipeline retry NOT needed
+2026-04-13T04:23:30  INFO      medvqa.agents.orchestrator  === Agentic pipeline DONE  answer='no'  difficulty=easy  retrieval_status=skipped  image_quality=good  retries=0  review=False  total_duration=13406ms ===
+2026-04-13T04:23:30  INFO      medvqa.routes.dataset  Sample 2114 analysis complete  baseline=1306ms  workflow=3770ms  agentic=13411ms  total=13412ms
+2026-04-13T04:23:30  INFO      medvqa.routes.dataset  Sample 2114 answers  type=presence_absence  subtype=unknown  baseline='No, the bronchial airways do not appear enlarged.'  workflow='No'  agentic='no'  ground_truth='yes'
