@@ -192,6 +192,7 @@ RETRY CONTEXT:
 
         contradiction_guidance = ""
         if has_contradiction:
+            _log.warning("Processing RAG contradiction: dominant=%s supporting=%d contradictory=%d", dominant_label, len(supporting_cases), len(contradictory_cases))
             contradiction_guidance = f"""
 
 RAG CONTRADICTION WARNING:

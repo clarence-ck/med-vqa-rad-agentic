@@ -268,6 +268,12 @@ class KnowledgeRetriever:
                         len(grouped_cases["supporting_cases"]),
                         len(grouped_cases["contradictory_cases"]),
                     )
+                    if grouped_cases["has_contradiction"]:
+                        _log.warning(
+                            "RAG contradiction detected: dominant_label=%s label_scores=%s",
+                            grouped_cases["dominant_label"],
+                            grouped_cases.get("label_scores", {}),
+                        )
                 else:
                     _log.info("Advanced RAG returned 0 similar cases for this question; proceeding without RAG context")
 
