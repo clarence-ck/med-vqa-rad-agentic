@@ -37,21 +37,30 @@ class ReasoningAgent:
         if text.startswith("no"):
             return "no"
 
+        negation_patterns = {"not ", "no ", "never ", "neither ", "without ", "absence ", "absent "}
+
+        def has_negation(t: str) -> bool:
+            for pattern in negation_patterns:
+                if pattern in t:
+                    return True
+            return False
+
         positive_markers = {
             "normal", "present", "visible", "seen", "identifiable", "well-defined", "well defined",
-            "enlarged", "abnormal", "ring-enhancing", "ring enhancing", "positive",
+            "positive", "detected", "identified",
         }
         negative_markers = {
             "absent", "negative", "not seen", "not visible", "cannot determine", "indeterminate",
+            "no evidence", "no sign", "no definite", "unremarkable",
         }
 
         if any(marker in text for marker in negative_markers):
-            return "no"
-        if any(marker in text for marker in positive_markers):
-            return "yes"
+            # Negated negative = positive (e.g., "not absent" -> yes)
+            return "no" if not has_negation(text) else "yes"
 
-        if question.startswith(("is ", "are ", "was ", "were ", "do ", "does ", "did ")):
-            return "yes" if "not" not in text and "no" not in text else "no"
+        if any(marker in text for marker in positive_markers):
+            # Negated positive = negative (e.g., "not present" -> no)
+            return "yes" if not has_negation(text) else "no"
 
         return answer
 
@@ -282,7 +291,6 @@ Return a JSON object with:
 }}
 
 IMPORTANT: Base your answer on the visual evidence provided. If the evidence is insufficient, say so.
-IMPORTANT: Prefer the question-focused image context when it is available, but do not ignore the full image analysis if the filtered context is incomplete.
 IMPORTANT: If the retrieved knowledge conflicts with the image analysis, trust the image analysis and down-weight the conflicting retrieval.
 Return ONLY the JSON object, no additional text."""
 

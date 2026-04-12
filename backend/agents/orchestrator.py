@@ -63,6 +63,29 @@ def _tool_filter_image_context(image_interpretation: dict = None, question_analy
         qa = {}
 
     qtype = str(qa.get("question_type", "unknown") or "unknown").strip().lower()
+
+    NO_FILTER_TYPES = {"counting", "location"}
+    if qtype in NO_FILTER_TYPES:
+        _log.info("[tool] filter_image_context skipped for question_type=%s - using full context", qtype)
+        result = {
+            "status": "success",
+            "question_type": qtype,
+            "target_entity": qa.get("target_entity", "unknown"),
+            "modality": vs.get("modality", "unknown"),
+            "body_region": vs.get("body_region", "unknown"),
+            "relevant_findings": vs.get("notable_findings", []),
+            "relevant_structures": vs.get("visible_structures", []),
+            "filtered_visual_summary": vs.get("visual_summary", ""),
+            "relevance_notes": {
+                "question_type": qtype,
+                "keywords_used": [],
+                "findings_considered": len(vs.get("notable_findings", [])),
+                "structures_considered": len(vs.get("visible_structures", [])),
+                "filter_skipped": True,
+            },
+            "raw_image_interpretation": vs,
+        }
+        return {"result": result, "duration_ms": 0}
     target = str(qa.get("target_entity", "") or "").strip().lower()
     question_text = str(question or "").strip().lower()
     body_region = str(vs.get("body_region", "") or "").strip().lower()
