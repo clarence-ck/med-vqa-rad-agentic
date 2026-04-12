@@ -241,6 +241,9 @@ class ReasoningAgent:
             guidance.append("- For exact counting questions, provide a numeric answer when supported by the image; if the count is not clear, state the uncertainty rather than inventing a precise number.")
         if question_subtype == "counting_approx":
             guidance.append("- For approximate counting questions, a concise estimate such as 'multiple' or 'few' is acceptable if the image does not support an exact count.")
+        if question_type == "counting":
+            guidance.append("- If count metadata is low-confidence or text-inferred, prefer conservative wording such as 'multiple', 'few', or 'unable to determine' rather than a precise number.")
+            guidance.append("- Only commit to an exact numeric count when the image analysis explicitly supports it.")
         return "\n".join(guidance)
 
     @component.output_types(result=Dict[str, Any])
@@ -296,6 +299,13 @@ class ReasoningAgent:
             relevant_findings = []
         if not isinstance(relevant_structures, list):
             relevant_structures = []
+
+        countable_objects = vs.get("countable_objects", []) if isinstance(vs, dict) else []
+        count_estimate = vs.get("count_estimate", "unknown") if isinstance(vs, dict) else "unknown"
+        count_confidence = vs.get("count_confidence", "unknown") if isinstance(vs, dict) else "unknown"
+        count_method = vs.get("count_method", "none") if isinstance(vs, dict) else "none"
+        if not isinstance(countable_objects, list):
+            countable_objects = []
 
         rag_retrieval = kn.get("rag_retrieval", {}) if isinstance(kn, dict) else {}
         supporting_cases = rag_retrieval.get("supporting_cases", []) if isinstance(rag_retrieval, dict) else []
@@ -390,6 +400,16 @@ QUESTION ANALYSIS:
 - Target entity: {qa.get('target_entity', 'unknown')}
 - Expected answer format: {qa.get('expected_answer_format', 'short_phrase')}
 - Rephrased question: {qa.get('rephrased_question', original_question)}
+
+COUNTING SIGNALS:
+- Count estimate: {count_estimate}
+- Count confidence: {count_confidence}
+- Count method: {count_method}
+- Countable objects: {countable_objects}
+
+COUNTING SAFETY RULES:
+- If count confidence is low or count method is text_inference, avoid asserting a precise count unless the image analysis strongly supports it.
+- Prefer conservative estimates or explicit uncertainty when the count signal is weak.
 
 SUPPORTING KNOWLEDGE:
 - Context: {kn.get('contextual_notes', 'Not available')}

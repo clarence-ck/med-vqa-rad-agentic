@@ -90,6 +90,14 @@ class VerificationAgent:
             if not re.search(r"\b\d+\b", answer_text) and answer_text not in {"multiple", "few", "several", "cannot reliably count", "unable to count", "uncertain"}:
                 checks["format_appropriate"] = False
                 issues.append("exact counting answer is not numeric")
+            if count_estimate not in {None, "", "unknown"} and re.search(r"\b\d+\b", answer_text):
+                answer_count = int(re.search(r"\b(\d+)\b", answer_text).group(1))
+                if isinstance(count_estimate, int) and abs(answer_count - count_estimate) > 1 and count_confidence == "high":
+                    checks["answer_strength_appropriate"] = False
+                    issues.append("counting answer disagrees with image count estimate")
+                if count_method == "text_inference" and count_confidence != "high":
+                    checks["answer_strength_appropriate"] = False
+                    issues.append("counting answer is too precise for a text-inferred estimate")
 
         if question_type == "anatomy_identification":
             generic_labels = {
@@ -134,6 +142,13 @@ class VerificationAgent:
         if not isinstance(qa, dict): qa = {}
         if not isinstance(fc, dict): fc = {}
 
+        countable_objects = vs.get("countable_objects", []) if isinstance(vs, dict) else []
+        count_estimate = vs.get("count_estimate", "unknown") if isinstance(vs, dict) else "unknown"
+        count_confidence = vs.get("count_confidence", "unknown") if isinstance(vs, dict) else "unknown"
+        count_method = vs.get("count_method", "none") if isinstance(vs, dict) else "none"
+        if not isinstance(countable_objects, list):
+            countable_objects = []
+
         _log.info(
             "Verifying answer=%r  question=%r  question_type=%s",
             str(ans.get("answer", ""))[:80],
@@ -165,6 +180,12 @@ QUESTION ANALYSIS:
 - Question type: {qa.get('question_type', 'unknown')}
 - Question subtype: {qa.get('question_subtype', 'other')}
 - Expected format: {qa.get('expected_answer_format', 'unknown')}
+
+COUNTING SIGNALS:
+- Count estimate: {count_estimate}
+- Count confidence: {count_confidence}
+- Count method: {count_method}
+- Countable objects: {countable_objects}
 
 IMPORTANT: Be stricter about answer format than content plausibility. If the answer is too generic, too terse, or not aligned with the expected format, mark it as not fully verified even if it sounds medically plausible.
 
