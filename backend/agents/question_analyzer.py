@@ -24,11 +24,48 @@ class QuestionAnalyzer:
             api_key=Secret.from_token(OPENAI_API_KEY),
             model=OPENAI_MODEL,
         )
+        self._allowed_question_subtypes = {
+            "lesion_location",
+            "generic_location",
+            "finding_description",
+            "counting_exact",
+            "counting_approx",
+            "yes_no_clinical",
+            "presence_absence",
+            "anatomy_identification",
+            "modality_identification",
+            "explanation_request",
+            "other",
+        }
+
+    def _sanitize_question_subtype(self, subtype: str) -> str:
+        value = (subtype or "").strip()
+        return value if value in self._allowed_question_subtypes else ""
 
     def _infer_question_style(self, question: str) -> dict:
         q = (question or "").strip().lower()
         if not q:
             return {}
+
+        anatomy_words = [
+            "what organ", "which organ", "what body part", "which body part",
+            "what structure", "which structure", "what anatomy", "anatomical",
+            "what is shown", "what is visible", "what region", "body region",
+            "identify the organ", "identify the structure", "identify the anatomy",
+            "what is the name of", "what is the anatomical name of", "name this organ",
+            "name this structure", "what part of the body", "which part of the body",
+        ]
+        modality_words = [
+            "what modality", "which modality", "imaging modality", "scan type",
+            "xray", "x-ray", "ct", "mri", "ultrasound", "radiograph", "plain film",
+            "what kind of scan", "what type of scan", "what kind of image", "what type of image",
+            "what is this scan", "what is this image", "what kind of xray", "what type of xray",
+        ]
+        explanation_words = [
+            "why", "what does", "what is the significance", "what is going on",
+            "describe the image", "explain", "interpret", "what could this be",
+            "what does this mean", "what is the impression", "what is the diagnosis",
+        ]
 
         starts_binary = bool(re.match(r"^(is|are|was|were|do|does|did|can|could|will|would|has|have|should)\b", q))
         starts_counting = bool(re.match(r"^(how many|count|what number|what is the number|what is the count|number of)\b", q))
@@ -79,6 +116,38 @@ class QuestionAnalyzer:
                 "question_clarity": "clear",
             }
 
+        if any(phrase in q for phrase in modality_words) or (
+            any(token in q for token in {"xray", "x-ray", "ct", "mri", "ultrasound", "radiograph"})
+            and any(token in q for token in {"what", "which", "identify", "determine", "is this", "is it"})
+        ):
+            return {
+                "question_type": "modality_identification",
+                "expected_answer_format": "single_word",
+                "reasoning_type": "visual_recognition",
+                "question_clarity": "clear",
+            }
+
+        if any(phrase in q for phrase in anatomy_words) or (
+            any(token in q for token in {"organ", "structure", "body part", "anatomy", "anatomical", "region"})
+            and any(token in q for token in {"what", "which", "identify", "name", "is this", "is it"})
+        ):
+            return {
+                "question_type": "anatomy_identification",
+                "expected_answer_format": "short_phrase",
+                "reasoning_type": "visual_recognition",
+                "question_clarity": "clear",
+            }
+
+        if any(phrase in q for phrase in explanation_words) or (
+            q.startswith("what") and any(token in q for token in {"mean", "diagnosis", "impression", "caused", "cause"})
+        ):
+            return {
+                "question_type": "explanation_request",
+                "expected_answer_format": "sentence",
+                "reasoning_type": "medical_knowledge",
+                "question_clarity": "clear",
+            }
+
         if starts_binary and (has_polarity or has_location_signal):
             # Keep binary yes/no questions strict, but do not let location-style or polarity-style wording
             # get downgraded into generic yes/no when the answer needs an anatomical phrase.
@@ -126,6 +195,11 @@ class QuestionAnalyzer:
         )
         counting_cues = ("about", "approximately", "approx", "roughly", "estimate", "estimated", "around")
 
+        if question_type == "counting":
+            if any(cue in q for cue in counting_cues):
+                return "counting_approx"
+            return "counting_exact"
+
         if question_type == "location":
             if any(term in q for term in lesion_terms) or any(term in target for term in lesion_terms):
                 return "lesion_location"
@@ -134,15 +208,35 @@ class QuestionAnalyzer:
         if question_type == "abnormality_description":
             return "finding_description"
 
-        if question_type == "counting":
-            if any(cue in q for cue in counting_cues):
-                return "counting_approx"
-            return "counting_exact"
-
         if question_type in {"yes_no", "presence_absence"}:
             return "yes_no_clinical"
 
+        if question_type == "anatomy_identification":
+            return "anatomy_identification"
+
+        if question_type == "modality_identification":
+            return "modality_identification"
+
+        if question_type == "explanation_request":
+            return "explanation_request"
+
         return "other"
+
+    def _resolve_question_subtype(self, question_type: str, model_subtype: str, heuristic_subtype: str) -> str:
+        model_subtype = self._sanitize_question_subtype(model_subtype)
+        heuristic_subtype = (heuristic_subtype or "").strip()
+
+        if not heuristic_subtype or heuristic_subtype == "other":
+            return model_subtype or heuristic_subtype or "other"
+
+        if question_type == "counting":
+            return heuristic_subtype
+        if question_type == "location":
+            return heuristic_subtype
+        if question_type in {"yes_no", "presence_absence", "abnormality_description", "anatomy_identification", "modality_identification", "explanation_request"}:
+            return heuristic_subtype
+
+        return model_subtype or heuristic_subtype or "other"
 
     def _apply_style_override(self, result: dict, style_hint: dict) -> dict:
         if not style_hint:
@@ -177,7 +271,7 @@ Visual context (from image analysis): {visual_summary if visual_summary else "No
 Return a JSON object with:
 {{
   "question_type": "One of: anatomy_identification, modality_identification, presence_absence, location, counting, abnormality_description, explanation_request, yes_no, other",
-  "question_subtype": "One of: lesion_location, generic_location, finding_description, counting_exact, counting_approx, yes_no_clinical, presence_absence, anatomy_identification, modality_identification, other",
+  "question_subtype": "One of: lesion_location, generic_location, finding_description, counting_exact, counting_approx, yes_no_clinical, presence_absence, anatomy_identification, modality_identification, explanation_request, other",
   "target_entity": "What the question is asking about (e.g., 'body region', 'organ', 'modality', 'abnormality')",
   "reasoning_type": "One of: visual_recognition, spatial_reasoning, medical_knowledge, comparison, descriptive",
   "expected_answer_format": "One of: single_word, short_phrase, yes_no, sentence, paragraph",
@@ -203,7 +297,13 @@ Return ONLY the JSON object, no additional text."""
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
             result = self._apply_style_override(result, style_hint)
-            result["question_subtype"] = result.get("question_subtype") or question_subtype
+            result["question_subtype"] = self._resolve_question_subtype(
+                result.get("question_type", "other"),
+                result.get("question_subtype"),
+                question_subtype,
+            )
+            if result.get("question_subtype") not in self._allowed_question_subtypes:
+                result["question_subtype"] = "other"
             result["status"] = "success"
             elapsed_ms = int((time.perf_counter() - started) * 1000)
             _log.info(
