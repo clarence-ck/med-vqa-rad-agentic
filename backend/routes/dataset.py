@@ -699,8 +699,191 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
         sample_id_var.reset(token)
 
 
+async def _load_cache_file(cache_file: str) -> dict | None:
+    """Load a single cache file asynchronously."""
+    try:
+        loop = asyncio.get_event_loop()
+        with open(cache_file, "r", encoding="utf-8") as f:
+            payload = await loop.run_in_executor(None, json.load, f)
+        return payload
+    except Exception as exc:
+        _log.warning("Skipping cache file %s: %s", os.path.basename(cache_file), exc)
+        return None
+
+
+def _compute_embeddings_batch(texts: list[str]) -> dict[str, any]:
+    """Compute embeddings for a batch of texts efficiently.
+    
+    Returns a dict mapping text to embedding vector.
+    """
+    if not texts:
+        return {}
+    
+    # Deduplicate texts while preserving order
+    unique_texts = list(dict.fromkeys(t for t in texts if t))
+    if not unique_texts:
+        return {}
+    
+    model = _get_embedding_model()
+    batch_size = 64  # Process embeddings in batches for efficiency
+    embeddings_map = {}
+    
+    for i in range(0, len(unique_texts), batch_size):
+        batch = unique_texts[i:i + batch_size]
+        try:
+            embeddings = model.encode(batch, show_progress_bar=False)
+            for text, emb in zip(batch, embeddings):
+                embeddings_map[text] = emb
+        except Exception as exc:
+            _log.error("Failed to encode batch %d-%d: %s", i, i + len(batch), exc)
+    
+    return embeddings_map
+
+
+def _compute_semantic_similarity_batch(embeddings_map: dict, text1: str, text2: str) -> float:
+    """Compute cosine similarity using pre-computed embeddings."""
+    if not text1 or not text2:
+        return 1.0 if text1 == text2 else 0.0
+    
+    emb1 = embeddings_map.get(text1)
+    emb2 = embeddings_map.get(text2)
+    
+    if emb1 is None or emb2 is None:
+        # Fallback to cached embedding computation
+        emb1 = _get_cached_embedding(text1)
+        emb2 = _get_cached_embedding(text2)
+        if emb1 is None or emb2 is None:
+            return 0.0
+    
+    similarity = cosine_similarity([emb1], [emb2])[0][0]
+    return float(similarity)
+
+
+def _has_semantic_disagreement_batch(embeddings_map: dict, baseline: str, workflow: str, agentic: str) -> bool:
+    """Check if systems disagree using pre-computed embeddings."""
+    try:
+        baseline_emb = embeddings_map.get(baseline) or _get_cached_embedding(baseline)
+        workflow_emb = embeddings_map.get(workflow) or _get_cached_embedding(workflow)
+        agentic_emb = embeddings_map.get(agentic) or _get_cached_embedding(agentic)
+        
+        if baseline_emb is None or workflow_emb is None or agentic_emb is None:
+            return False
+        
+        baseline_workflow_same = cosine_similarity([baseline_emb], [workflow_emb])[0][0] >= _SEMANTIC_THRESHOLD
+        baseline_agentic_same = cosine_similarity([baseline_emb], [agentic_emb])[0][0] >= _SEMANTIC_THRESHOLD
+        workflow_agentic_same = cosine_similarity([workflow_emb], [agentic_emb])[0][0] >= _SEMANTIC_THRESHOLD
+        return not (baseline_workflow_same and baseline_agentic_same and workflow_agentic_same)
+    except Exception as exc:
+        _log.error("Failed to compute semantic disagreement: %s", exc)
+        return False
+
+
+def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
+    """Build evaluation row using pre-computed batch embeddings."""
+    sample = payload.get("sample", {})
+    baseline_result = payload.get("baseline_result", {})
+    workflow_result = payload.get("workflow_result", {})
+    agentic_result = payload.get("agentic_result", {})
+    ground_truth = payload.get("ground_truth_answer", sample.get("answer", ""))
+    baseline_answer_text = baseline_result.get("answer", "")
+    workflow_answer_text = workflow_result.get("answer", "")
+    agentic_answer_text = agentic_result.get("answer", "")
+    baseline_normalized = _normalize_answer(baseline_answer_text)
+    workflow_normalized = _normalize_answer(workflow_answer_text)
+    agentic_normalized = _normalize_answer(agentic_answer_text)
+    ground_truth_normalized = _normalize_answer(ground_truth)
+    is_close_ended = _is_close_ended_answer(ground_truth_normalized)
+    question_type = sample.get("question_type", "unknown")
+    
+    # Use batch embeddings for semantic similarity checks in _answers_match
+    baseline_correct = _answers_match(baseline_normalized, ground_truth_normalized, is_close_ended, question_type)
+    workflow_correct = _answers_match(workflow_normalized, ground_truth_normalized, is_close_ended, question_type)
+    agentic_correct = _answers_match(agentic_normalized, ground_truth_normalized, is_close_ended, question_type)
+    
+    answer_style = "close_ended" if is_close_ended else "open_ended"
+    candidates = {
+        "baseline": baseline_correct,
+        "workflow": workflow_correct,
+        "agentic": agentic_correct,
+    }
+    correct_systems = [name for name, is_correct in candidates.items() if is_correct]
+    if len(correct_systems) == 1:
+        winner = correct_systems[0]
+    elif len(correct_systems) > 1:
+        winner = f"tie: {' & '.join(sys.capitalize() for sys in correct_systems)}"
+    else:
+        winner = "tie_all_wrong"
+
+    original_question_type = sample.get("question_type", "unknown")
+    agentic_question_type = agentic_result.get("question_analysis", {}).get("question_type")
+    question_type = agentic_question_type or original_question_type
+    question_type_source = "agentic" if agentic_question_type else "dataset"
+    knowledge_details = _extract_knowledge_retriever_details(agentic_result)
+    routing_decision = agentic_result.get("routing_decision", {}) or {}
+    routing_difficulty = routing_decision.get("difficulty", "unknown")
+    routing_needs_retrieval = bool(routing_decision.get("needs_retrieval", False))
+    routing_verification_policy = routing_decision.get("verification_policy", "standard")
+    routing_fallback_policy = routing_decision.get("fallback_policy", "none")
+    routing_rationale = routing_decision.get("routing_rationale", "")
+    routing_retrieval_rationale = routing_decision.get("retrieval_rationale", "")
+
+    # Use batch embeddings for semantic scores
+    baseline_semantic = _compute_semantic_similarity_batch(embeddings_map, baseline_normalized, ground_truth_normalized)
+    workflow_semantic = _compute_semantic_similarity_batch(embeddings_map, workflow_normalized, ground_truth_normalized)
+    agentic_semantic = _compute_semantic_similarity_batch(embeddings_map, agentic_normalized, ground_truth_normalized)
+
+    return {
+        "sample_id": sample.get("id"),
+        "question": sample.get("question", ""),
+        "question_type": question_type,
+        "original_question_type": original_question_type,
+        "agentic_question_type": agentic_question_type,
+        "question_type_source": question_type_source,
+        "split": sample.get("split", "unknown"),
+        "answer_style": answer_style,
+        "ground_truth_answer": ground_truth,
+        "baseline_answer": baseline_answer_text,
+        "workflow_answer": workflow_answer_text,
+        "agentic_answer": agentic_answer_text,
+        "baseline_correct": baseline_correct,
+        "workflow_correct": workflow_correct,
+        "agentic_correct": agentic_correct,
+        "baseline_token_f1": round(_token_f1(baseline_normalized, ground_truth_normalized), 4),
+        "workflow_token_f1": round(_token_f1(workflow_normalized, ground_truth_normalized), 4),
+        "agentic_token_f1": round(_token_f1(agentic_normalized, ground_truth_normalized), 4),
+        "baseline_semantic": round(baseline_semantic, 4),
+        "workflow_semantic": round(workflow_semantic, 4),
+        "agentic_semantic": round(agentic_semantic, 4),
+        "winner": winner,
+        "disagreement": _has_semantic_disagreement_batch(embeddings_map, baseline_normalized, workflow_normalized, agentic_normalized),
+        "verification_status": agentic_result.get("verification_status", "unknown"),
+        "confidence": agentic_result.get("confidence", "Low"),
+        "issues_found": agentic_result.get("issues_found", []),
+        "self_consistency_level": agentic_result.get("self_consistency_signal", {}).get("level", "low"),
+        "cross_modal_agreement_level": agentic_result.get("cross_modal_agreement", {}).get("level", "medium"),
+        "routing_difficulty": routing_difficulty,
+        "routing_needs_retrieval": routing_needs_retrieval,
+        "routing_verification_policy": routing_verification_policy,
+        "routing_fallback_policy": routing_fallback_policy,
+        "routing_rationale": routing_rationale,
+        "routing_retrieval_rationale": routing_retrieval_rationale,
+        "knowledge_retriever_triggered": knowledge_details["knowledge_retriever_triggered"],
+        "knowledge_retriever_status": knowledge_details["knowledge_retriever_status"],
+        "knowledge_key_facts_count": knowledge_details["knowledge_key_facts_count"],
+        "knowledge_summary": knowledge_details["knowledge_summary"],
+        "duration_ms": payload.get("duration_ms", 0),
+        "baseline_duration_ms": payload.get("baseline_duration_ms"),
+        "workflow_duration_ms": payload.get("workflow_duration_ms"),
+        "agentic_duration_ms": payload.get("agentic_duration_ms"),
+        "cached_at": payload.get("cached_at"),
+    }
+
+
 @router.get("/evaluation")
 async def get_evaluation_summary():
+    import time
+    start_time = time.time()
+    
     os.makedirs(CACHE_DIR, exist_ok=True)
     cache_files = [
         os.path.join(CACHE_DIR, filename)
@@ -709,18 +892,47 @@ async def get_evaluation_summary():
     ]
     _log.info("Evaluation summary requested  cache_files=%d", len(cache_files))
 
+    # Load all cache files concurrently
+    load_start = time.time()
+    payload_tasks = [_load_cache_file(f) for f in cache_files]
+    payloads = await asyncio.gather(*payload_tasks)
+    payloads = [p for p in payloads if p is not None]
+    skipped = len(cache_files) - len(payloads)
+    _log.info("Loaded %d cache files in %.2fs", len(payloads), time.time() - load_start)
+
+    # Collect all unique texts that need embeddings
+    # This avoids recomputing embeddings for the same text multiple times
+    all_texts = set()
+    for payload in payloads:
+        sample = payload.get("sample", {})
+        baseline_result = payload.get("baseline_result", {})
+        workflow_result = payload.get("workflow_result", {})
+        agentic_result = payload.get("agentic_result", {})
+        ground_truth = payload.get("ground_truth_answer", sample.get("answer", ""))
+        
+        texts = [
+            _normalize_answer(baseline_result.get("answer", "")),
+            _normalize_answer(workflow_result.get("answer", "")),
+            _normalize_answer(agentic_result.get("answer", "")),
+            _normalize_answer(ground_truth),
+        ]
+        all_texts.update(t for t in texts if t)
+    
+    # Compute all embeddings in batches (much faster than individual calls)
+    embed_start = time.time()
+    embeddings_map = await asyncio.to_thread(_compute_embeddings_batch, list(all_texts))
+    _log.info("Computed %d unique embeddings in %.2fs", len(embeddings_map), time.time() - embed_start)
+
+    # Build evaluation rows using pre-computed embeddings
     rows = []
-    skipped = 0
-    for cache_file in cache_files:
+    for payload in payloads:
         try:
-            with open(cache_file, "r", encoding="utf-8") as f:
-                payload = json.load(f)
-            row = _build_evaluation_row(payload)
+            row = _build_evaluation_row_batch(payload, embeddings_map)
             if row.get("sample_id") in EXCLUDED_SAMPLE_IDS:
                 continue
             rows.append(row)
         except Exception as exc:
-            _log.warning("Skipping cache file %s: %s", os.path.basename(cache_file), exc)
+            _log.warning("Error building evaluation row: %s", exc)
             skipped += 1
             continue
 
@@ -731,9 +943,10 @@ async def get_evaluation_summary():
         row.get("sample_id") or 0,
     ))
 
+    total_time = time.time() - start_time
     _log.info(
-        "Evaluation summary built  total_rows=%d  skipped=%d",
-        len(rows), skipped,
+        "Evaluation summary built  total_rows=%d  skipped=%d  total_time=%.2fs",
+        len(rows), skipped, total_time,
     )
     
     summary = {
