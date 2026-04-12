@@ -71,6 +71,105 @@ class ReasoningAgent:
 
         return answer
 
+    def _normalize_counting_answer(self, answer: str) -> str:
+        text = (answer or "").strip().lower()
+        if not text:
+            return answer
+
+        number_words = {
+            "zero": 0,
+            "one": 1,
+            "single": 1,
+            "two": 2,
+            "double": 2,
+            "three": 3,
+            "triple": 3,
+            "four": 4,
+            "five": 5,
+            "six": 6,
+            "seven": 7,
+            "eight": 8,
+            "nine": 9,
+            "ten": 10,
+            "eleven": 11,
+            "twelve": 12,
+            "thirteen": 13,
+            "fourteen": 14,
+            "fifteen": 15,
+            "sixteen": 16,
+            "seventeen": 17,
+            "eighteen": 18,
+            "nineteen": 19,
+            "twenty": 20,
+            "thirty": 30,
+            "forty": 40,
+            "fifty": 50,
+        }
+
+        def _words_to_int(value: str) -> int | None:
+            cleaned = value.replace("-", " ")
+            parts = [part for part in cleaned.split() if part]
+            if not parts:
+                return None
+            if len(parts) == 1:
+                return number_words.get(parts[0])
+            if len(parts) == 2 and parts[0] in {"twenty", "thirty", "forty", "fifty"} and parts[1] in {
+                "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"
+            }:
+                return number_words[parts[0]] + number_words[parts[1]]
+            return None
+
+        def _extract_numeric_token(value: str) -> str | None:
+            match = re.search(r"\b(\d{1,2})\b", value)
+            if match:
+                parsed = int(match.group(1))
+                if 0 <= parsed <= 50:
+                    return str(parsed)
+            return None
+
+        if any(marker in text for marker in {" or ", " to ", "-"}):
+            range_match = re.search(r"\b(\d{1,2}|[a-z-]+)\b\s*(?:-|to|or)\s*\b(\d{1,2}|[a-z-]+)\b", text)
+            if range_match:
+                left_raw, right_raw = range_match.group(1), range_match.group(2)
+                left_value = int(left_raw) if left_raw.isdigit() else _words_to_int(left_raw)
+                right_value = int(right_raw) if right_raw.isdigit() else _words_to_int(right_raw)
+                if left_value is not None and right_value is not None and 0 <= left_value <= 50 and 0 <= right_value <= 50:
+                    low, high = sorted((left_value, right_value))
+                    return f"{low}-{high}"
+
+        if text.isdigit():
+            value = int(text)
+            if 0 <= value <= 50:
+                return str(value)
+
+        word_value = _words_to_int(text)
+        if word_value is not None and 0 <= word_value <= 50:
+            return str(word_value)
+
+        numeric_token = _extract_numeric_token(text)
+        if numeric_token is not None:
+            return numeric_token
+
+        approx_prefixes = ("about ", "around ", "approximately ", "roughly ", "nearly ", "close to ")
+        for prefix in approx_prefixes:
+            if text.startswith(prefix):
+                remainder = text[len(prefix):].strip()
+                if remainder:
+                    if remainder in {"a dozen", "dozen"}:
+                        return "12"
+                    remainder_value = int(remainder) if remainder.isdigit() else _words_to_int(remainder)
+                    if remainder_value is not None and 0 <= remainder_value <= 50:
+                        return str(remainder_value)
+
+        if text in {"a dozen", "dozen"}:
+            return "12"
+        if text in {"half dozen", "half a dozen"}:
+            return "6"
+
+        if text in {"multiple", "few", "several", "cannot reliably count", "unable to count"}:
+            return text
+        return answer
+
     def _normalize_location_answer(self, answer: str, question_text: str, image_interpretation: dict, question_analysis: dict) -> str:
         text = (answer or "").strip().lower()
         question = (question_text or "").strip().lower()
@@ -102,9 +201,12 @@ class ReasoningAgent:
         answer = normalized.get("answer", "")
         question_type = (qa or {}).get("question_type", "")
         expected_format = (qa or {}).get("expected_answer_format", "")
+        question_subtype = (qa or {}).get("question_subtype", "")
 
         if expected_format == "yes_no" or question_type in {"yes_no", "presence_absence"}:
             normalized["answer"] = self._normalize_yes_no_answer(answer)
+        elif question_type == "counting" or question_subtype in {"counting_exact", "counting_approx"}:
+            normalized["answer"] = self._normalize_counting_answer(answer)
         elif question_type == "location":
             normalized["answer"] = self._normalize_location_answer(answer, original_question, vs, qa)
         elif question_type == "anatomy_identification":
@@ -118,7 +220,7 @@ class ReasoningAgent:
 
         return normalized
 
-    def _build_style_guidance(self, question_type: str, expected_format: str, vs: dict) -> str:
+    def _build_style_guidance(self, question_type: str, expected_format: str, vs: dict, question_subtype: str = "") -> str:
         body_region = (vs or {}).get("body_region", "unknown")
         modality = (vs or {}).get("modality", "unknown")
         guidance = [
@@ -129,8 +231,16 @@ class ReasoningAgent:
             guidance.append("- For yes/no questions, the answer must be exactly yes or no; do not use synonyms like normal/abnormal, present/absent, or positive/negative.")
         if question_type == "location":
             guidance.append("- For location questions, include the anatomical noun with the side when appropriate (for example, 'right lung' rather than just 'right').")
+            if question_subtype == "lesion_location":
+                guidance.append("- For lesion location questions, answer where the mass/lesion is located rather than whether a mass is visible; prefer an anatomical phrase like 'anterior mediastinum' when supported.")
         if question_type == "anatomy_identification":
             guidance.append(f"- For anatomy identification, prefer the most specific image-grounded anatomical label (current image region: {body_region}; modality: {modality}).")
+        if question_subtype == "finding_description":
+            guidance.append("- For finding description questions, describe the observable abnormality, its location, and its extent; avoid collapsing the answer into a generic 'abnormal' statement.")
+        if question_subtype == "counting_exact":
+            guidance.append("- For exact counting questions, provide a numeric answer when supported by the image; if the count is not clear, state the uncertainty rather than inventing a precise number.")
+        if question_subtype == "counting_approx":
+            guidance.append("- For approximate counting questions, a concise estimate such as 'multiple' or 'few' is acceptable if the image does not support an exact count.")
         return "\n".join(guidance)
 
     @component.output_types(result=Dict[str, Any])
@@ -156,13 +266,16 @@ class ReasoningAgent:
         rc = retry_context if isinstance(retry_context, dict) else {}
 
         is_retry = bool(rc)
+        question_type = qa.get("question_type", "unknown")
+        question_subtype = qa.get("question_subtype", "other")
         _log.info(
             "Reasoning agent starting  question=%r  is_retry=%s  "
-            "question_type=%s  yes_no=%s",
+            "question_type=%s  subtype=%s  yes_no=%s",
             original_question[:100] if original_question else "",
             is_retry,
-            qa.get("question_type", "unknown"),
-            qa.get("question_type", "") in ("yes_no", "presence_absence"),
+            question_type,
+            question_subtype,
+            question_type in ("yes_no", "presence_absence"),
         )
         if is_retry:
             _log.info(
@@ -233,10 +346,9 @@ RAG CONTRADICTION WARNING:
 - Use retrieved knowledge only as background support, not as a source of truth.
 """
 
-        question_type = qa.get('question_type', '')
         expected_format = qa.get('expected_answer_format', '')
         is_yes_no = question_type in ('yes_no', 'presence_absence') or expected_format == 'yes_no'
-        style_guidance = self._build_style_guidance(question_type, expected_format, vs)
+        style_guidance = self._build_style_guidance(question_type, expected_format, vs, question_subtype)
 
         yes_no_constraint = ""
         if is_yes_no:
@@ -274,6 +386,7 @@ QUESTION-FOCUSED IMAGE CONTEXT:
 
 QUESTION ANALYSIS:
 - Question type: {qa.get('question_type', 'unknown')}
+- Question subtype: {qa.get('question_subtype', 'other')}
 - Target entity: {qa.get('target_entity', 'unknown')}
 - Expected answer format: {qa.get('expected_answer_format', 'short_phrase')}
 - Rephrased question: {qa.get('rephrased_question', original_question)}

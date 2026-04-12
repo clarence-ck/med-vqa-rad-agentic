@@ -745,9 +745,10 @@ def _build_agent_trace(image_result: dict, question_result: dict, filter_result:
             "agent": "Question Understanding",
             "agent_id": 2,
             "status": "pass" if question_result.get("status") == "success" else "warning",
-            "summary": f"Type: {question_result.get('question_type', 'unknown')} | Format: {question_result.get('expected_answer_format', 'unknown')}",
+            "summary": f"Type: {question_result.get('question_type', 'unknown')} | Subtype: {question_result.get('question_subtype', 'unknown')} | Format: {question_result.get('expected_answer_format', 'unknown')}",
             "output": {
                 "question_type": question_result.get("question_type", "unknown"),
+                "question_subtype": question_result.get("question_subtype", "unknown"),
                 "target_entity": question_result.get("target_entity", "unknown"),
                 "expected_answer_format": question_result.get("expected_answer_format", "short_phrase"),
             },

@@ -1,4 +1,5 @@
 import json
+import re
 import time
 from typing import Dict, Any
 from haystack import component
@@ -38,6 +39,7 @@ class VerificationAgent:
     def _format_heuristics(self, answer: str, qa: dict, original_question: str) -> dict:
         question_type = (qa or {}).get("question_type", "")
         expected_format = (qa or {}).get("expected_answer_format", "")
+        question_subtype = (qa or {}).get("question_subtype", "")
         answer_text = self._normalize_text(answer)
         question_text = self._normalize_text(original_question)
 
@@ -61,6 +63,33 @@ class VerificationAgent:
             if answer_text in {"left", "right", "bilateral", "midline"}:
                 checks["format_appropriate"] = False
                 issues.append("location answer is too terse")
+            if question_subtype == "lesion_location":
+                if any(phrase in answer_text for phrase in {
+                    "no discrete mass is visible",
+                    "no mass is visible",
+                    "no focal mass is visible",
+                    "no lesion is visible",
+                    "no discrete lesion is visible",
+                }):
+                    checks["answer_strength_appropriate"] = False
+                    issues.append("lesion location answer abstains instead of localizing the finding")
+                if answer_text in {"mass", "lesion", "nodule", "opacity", "finding", "abnormality"}:
+                    checks["format_appropriate"] = False
+                    issues.append("lesion location answer is too generic")
+
+        if question_subtype == "finding_description":
+            generic_labels = {
+                "abnormal", "abnormality", "finding", "mass", "lesion", "opacity", "nodule",
+                "present", "seen", "visible", "detected", "identified",
+            }
+            if answer_text in generic_labels:
+                checks["format_appropriate"] = False
+                issues.append("finding description answer is too generic")
+
+        if question_subtype == "counting_exact":
+            if not re.search(r"\b\d+\b", answer_text) and answer_text not in {"multiple", "few", "several", "cannot reliably count", "unable to count", "uncertain"}:
+                checks["format_appropriate"] = False
+                issues.append("exact counting answer is not numeric")
 
         if question_type == "anatomy_identification":
             generic_labels = {
@@ -134,6 +163,7 @@ QUESTION-FOCUSED IMAGE CONTEXT:
 
 QUESTION ANALYSIS:
 - Question type: {qa.get('question_type', 'unknown')}
+- Question subtype: {qa.get('question_subtype', 'other')}
 - Expected format: {qa.get('expected_answer_format', 'unknown')}
 
 IMPORTANT: Be stricter about answer format than content plausibility. If the answer is too generic, too terse, or not aligned with the expected format, mark it as not fully verified even if it sounds medically plausible.

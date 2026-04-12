@@ -115,6 +115,35 @@ class QuestionAnalyzer:
 
         return {}
 
+    def _infer_question_subtype(self, question: str, style_hint: dict, target_entity: str = "") -> str:
+        q = (question or "").strip().lower()
+        question_type = (style_hint or {}).get("question_type", "")
+        target = (target_entity or "").strip().lower()
+
+        lesion_terms = (
+            "mass", "lesion", "nodule", "opacity", "tumor", "tumour", "masslike", "mass-like",
+            "abnormality", "finding", "calcification", "effusion", "pneumothorax",
+        )
+        counting_cues = ("about", "approximately", "approx", "roughly", "estimate", "estimated", "around")
+
+        if question_type == "location":
+            if any(term in q for term in lesion_terms) or any(term in target for term in lesion_terms):
+                return "lesion_location"
+            return "generic_location"
+
+        if question_type == "abnormality_description":
+            return "finding_description"
+
+        if question_type == "counting":
+            if any(cue in q for cue in counting_cues):
+                return "counting_approx"
+            return "counting_exact"
+
+        if question_type in {"yes_no", "presence_absence"}:
+            return "yes_no_clinical"
+
+        return "other"
+
     def _apply_style_override(self, result: dict, style_hint: dict) -> dict:
         if not style_hint:
             return result
@@ -137,6 +166,8 @@ class QuestionAnalyzer:
         _log.debug("Visual context provided: %s", bool(visual_summary))
         started = time.perf_counter()
 
+        question_subtype = self._infer_question_subtype(question, style_hint)
+
         prompt = f"""You are a medical VQA question understanding agent. Analyze the following question asked about a medical image.
 
 Question: "{question}"
@@ -146,6 +177,7 @@ Visual context (from image analysis): {visual_summary if visual_summary else "No
 Return a JSON object with:
 {{
   "question_type": "One of: anatomy_identification, modality_identification, presence_absence, location, counting, abnormality_description, explanation_request, yes_no, other",
+  "question_subtype": "One of: lesion_location, generic_location, finding_description, counting_exact, counting_approx, yes_no_clinical, presence_absence, anatomy_identification, modality_identification, other",
   "target_entity": "What the question is asking about (e.g., 'body region', 'organ', 'modality', 'abnormality')",
   "reasoning_type": "One of: visual_recognition, spatial_reasoning, medical_knowledge, comparison, descriptive",
   "expected_answer_format": "One of: single_word, short_phrase, yes_no, sentence, paragraph",
@@ -171,11 +203,13 @@ Return ONLY the JSON object, no additional text."""
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
             result = self._apply_style_override(result, style_hint)
+            result["question_subtype"] = result.get("question_subtype") or question_subtype
             result["status"] = "success"
             elapsed_ms = int((time.perf_counter() - started) * 1000)
             _log.info(
-                "Question analysis done  type=%s  reasoning=%s  med_knowledge=%s  clarity=%s  duration=%dms",
+                "Question analysis done  type=%s  subtype=%s  reasoning=%s  med_knowledge=%s  clarity=%s  duration=%dms",
                 result.get("question_type", "unknown"),
+                result.get("question_subtype", "unknown"),
                 result.get("reasoning_type", "unknown"),
                 result.get("requires_medical_knowledge", "?"),
                 result.get("question_clarity", "unknown"),
@@ -195,6 +229,7 @@ Return ONLY the JSON object, no additional text."""
                 "status": "error",
                 "error": "Failed to parse question analysis response",
                 "question_type": "other",
+                "question_subtype": question_subtype,
                 "target_entity": "unknown",
                 "reasoning_type": "visual_recognition",
                 "expected_answer_format": "short_phrase",
@@ -208,6 +243,7 @@ Return ONLY the JSON object, no additional text."""
                 "status": "error",
                 "error": str(e),
                 "question_type": "other",
+                "question_subtype": question_subtype,
                 "target_entity": "unknown",
                 "reasoning_type": "visual_recognition",
                 "expected_answer_format": "short_phrase",

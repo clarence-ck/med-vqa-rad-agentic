@@ -671,13 +671,25 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
             )
 
         total_ms = int((time.time() - started_at) * 1000)
+        question_subtype = str(
+            agentic_result.get("question_analysis", {}).get("question_subtype", "unknown")
+            if isinstance(agentic_result, dict)
+            else "unknown"
+        )
+        question_type = str(
+            agentic_result.get("question_analysis", {}).get("question_type", "unknown")
+            if isinstance(agentic_result, dict)
+            else "unknown"
+        )
         _log.info(
             "Sample %d analysis complete  baseline=%dms  workflow=%dms  agentic=%dms  total=%dms",
             sample_id, baseline_ms, workflow_ms, agentic_ms, total_ms,
         )
         _log.info(
-            "Sample %d answers  baseline=%r  workflow=%r  agentic=%r  ground_truth=%r",
+            "Sample %d answers  type=%s  subtype=%s  baseline=%r  workflow=%r  agentic=%r  ground_truth=%r",
             sample_id,
+            question_type,
+            question_subtype,
             str(baseline_result.get("answer", ""))[:60],
             str(workflow_result.get("answer", ""))[:60],
             str(agentic_result.get("answer", ""))[:60],

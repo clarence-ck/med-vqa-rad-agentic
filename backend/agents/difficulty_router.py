@@ -36,6 +36,7 @@ class DifficultyRouter:
         ii = image_interpretation or {}
 
         question_type = qa.get("question_type", "unknown")
+        question_subtype = qa.get("question_subtype", "other")
         requires_medical_knowledge = qa.get("requires_medical_knowledge", False)
         reasoning_type = qa.get("reasoning_type", "visual_recognition")
         question_clarity = qa.get("question_clarity", "clear")
@@ -45,28 +46,40 @@ class DifficultyRouter:
         visual_summary = ii.get("visual_summary", "") or ""
 
         _log.info(
-            "Routing difficulty  question_type=%s  reasoning=%s  med_knowledge=%s  modality=%s  region=%s",
-            question_type, reasoning_type, requires_medical_knowledge, modality, body_region,
+            "Routing difficulty  question_type=%s  question_subtype=%s  reasoning=%s  med_knowledge=%s  modality=%s  region=%s",
+            question_type, question_subtype, reasoning_type, requires_medical_knowledge, modality, body_region,
         )
 
-        # HARD RULE: Bypass retrieval for question types that are harmed by retrieval
-        # These question types rely on direct visual interpretation and retrieval contamination
-        # has been empirically shown to reduce accuracy (e.g., yes/no drops from 50% to 17%)
-        RETRIEVAL_INCOMPATIBLE_TYPES = {"yes_no", "presence_absence", "location", "counting"}
-        if question_type in RETRIEVAL_INCOMPATIBLE_TYPES:
+        # HARD RULE: Bypass retrieval only for question types/subtypes that are most harmed by it.
+        # Visual-only categories can still use the normal router if the image is poor or the case is hard.
+        RETRIEVAL_INCOMPATIBLE_TYPES = {"yes_no", "presence_absence", "counting"}
+        RETRIEVAL_INCOMPATIBLE_SUBTYPES = {"counting_exact", "counting_approx", "yes_no_clinical"}
+        if question_type in RETRIEVAL_INCOMPATIBLE_TYPES or question_subtype in RETRIEVAL_INCOMPATIBLE_SUBTYPES:
             _log.info(
-                "Hard rule: question_type='%s' is retrieval-incompatible, forcing easy/no-retrieval",
-                question_type
+                "Hard rule: question_type='%s' question_subtype='%s' is retrieval-incompatible, forcing easy/no-retrieval",
+                question_type,
+                question_subtype,
             )
             return {"result": {
                 "difficulty": "easy",
                 "needs_retrieval": False,
-                "retrieval_rationale": f"Question type '{question_type}' is incompatible with retrieval (binary/spatial/counting questions rely on direct visual interpretation)",
+                "retrieval_rationale": (
+                    f"Question type '{question_type}' / subtype '{question_subtype}' is incompatible with retrieval "
+                    "(direct visual interpretation is more reliable than background knowledge for this question)"
+                ),
                 "verification_policy": "standard",
                 "fallback_policy": "none",
-                "routing_rationale": f"Hard rule override: {question_type} questions bypass retrieval to avoid contamination",
+                "routing_rationale": (
+                    f"Hard rule override: {question_type} / {question_subtype} bypass retrieval to avoid contamination"
+                ),
                 "status": "success"
             }}
+
+        if question_type == "location" and question_subtype in {"lesion_location", "generic_location"}:
+            _log.info(
+                "Subtype-aware location routing: question_subtype='%s' will be routed conservatively without a hard retrieval block",
+                question_subtype,
+            )
 
         # HARD RULE: Poor image quality requires conservative handling
         # Don't compound bad image with questionable retrieval
@@ -95,6 +108,7 @@ Given the following question analysis and image interpretation, act like a profe
 
 QUESTION ANALYSIS:
 - Question type: {question_type}
+- Question subtype: {question_subtype}
 - Requires medical knowledge: {requires_medical_knowledge}
 - Reasoning type: {reasoning_type}
 - Question clarity: {question_clarity}
@@ -120,6 +134,9 @@ ROUTING RULES:
 1. ROUTING PRIORITY
 - Prefer "easy" and no retrieval when the question is direct, image-grounded, and can be answered from the current visual analysis.
 - Use retrieval only when the question genuinely needs broader medical context, is ambiguous, or cannot be answered confidently from the current image interpretation alone.
+- Hard no-retrieval is reserved for yes/no, presence/absence, and counting questions.
+- For location, finding-description, anatomy-identification, and explanation questions, decide case-by-case; retrieval is allowed when the image is subtle, the wording is ambiguous, or broader context would improve confidence.
+- If a location question is explicitly about a lesion or mass, stay conservative, but do not hard-block retrieval unless the question is clearly direct and image-grounded.
 
 2. RADIOLOGY-STYLE DIFFICULTY LEVEL (Combine Question + Image Context)
 - "easy": A classic spot diagnosis on a clean study. The abnormality is conspicuous, the anatomy is straightforward, and the answer should be evident on first pass: obvious fracture, large consolidation, large foreign body, textbook anatomy, or a direct yes/no answer on an uncomplicated image.
@@ -140,6 +157,11 @@ Policies are strictly determined by the holistic difficulty level:
    -> needs_retrieval=true
    -> verification_policy="strict"
    -> fallback_policy="flag_for_review"
+
+4. SUBTYPE-SPECIFIC GUIDANCE
+- lesion_location / generic_location: route conservatively, but allow retrieval when the lesion is subtle, the wording is ambiguous, or the image context is insufficient.
+- finding_description: allow retrieval when the finding is subtle, broad, or harder to characterize from the image alone.
+- counting_exact / counting_approx: hard no-retrieval.
 
 Return ONLY the JSON object, no additional text."""
 
