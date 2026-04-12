@@ -121,6 +121,7 @@ class ReasoningAgent:
     def run(self, 
             image_interpretation: dict = None, 
             question_analysis: dict = None,
+            filtered_image_context: dict = None,
             knowledge: dict = None, 
             original_question: str = "",
             retry_context: dict = None):
@@ -128,11 +129,13 @@ class ReasoningAgent:
         # Default fallback values
         vs = image_interpretation.get("result", image_interpretation) if image_interpretation else {}
         qa = question_analysis.get("result", question_analysis) if question_analysis else {}
+        fc = filtered_image_context.get("result", filtered_image_context) if filtered_image_context else {}
         kn = knowledge.get("result", knowledge) if knowledge else {}
 
         # Safely handle potential None returns from previous agents
         if not isinstance(vs, dict): vs = {}
         if not isinstance(qa, dict): qa = {}
+        if not isinstance(fc, dict): fc = {}
         if not isinstance(kn, dict): kn = {}
         rc = retry_context if isinstance(retry_context, dict) else {}
 
@@ -156,6 +159,14 @@ class ReasoningAgent:
         _log.debug("Knowledge input  key_facts=%d  rag_cases=%d",
                    len(kn.get("key_facts", [])),
                    len(kn.get("rag_retrieval", {}).get("similar_cases", [])))
+
+        relevant_findings = fc.get("relevant_findings", []) if isinstance(fc, dict) else []
+        relevant_structures = fc.get("relevant_structures", []) if isinstance(fc, dict) else []
+        filtered_summary = fc.get("filtered_visual_summary", "") if isinstance(fc, dict) else ""
+        if not isinstance(relevant_findings, list):
+            relevant_findings = []
+        if not isinstance(relevant_structures, list):
+            relevant_structures = []
 
         rag_retrieval = kn.get("rag_retrieval", {}) if isinstance(kn, dict) else {}
         supporting_cases = rag_retrieval.get("supporting_cases", []) if isinstance(rag_retrieval, dict) else []
@@ -240,6 +251,11 @@ IMAGE ANALYSIS:
 - Visual summary: {vs.get('visual_summary', 'Not available')}
 - Notable findings: {', '.join(vs.get('notable_findings', []))}
 
+QUESTION-FOCUSED IMAGE CONTEXT:
+- Filtered visual summary: {filtered_summary or 'Not available'}
+- Relevant findings: {', '.join(relevant_findings) if relevant_findings else 'Not available'}
+- Relevant structures: {', '.join(relevant_structures) if relevant_structures else 'Not available'}
+
 QUESTION ANALYSIS:
 - Question type: {qa.get('question_type', 'unknown')}
 - Target entity: {qa.get('target_entity', 'unknown')}
@@ -266,6 +282,7 @@ Return a JSON object with:
 }}
 
 IMPORTANT: Base your answer on the visual evidence provided. If the evidence is insufficient, say so.
+IMPORTANT: Prefer the question-focused image context when it is available, but do not ignore the full image analysis if the filtered context is incomplete.
 IMPORTANT: If the retrieved knowledge conflicts with the image analysis, trust the image analysis and down-weight the conflicting retrieval.
 Return ONLY the JSON object, no additional text."""
 
@@ -320,7 +337,8 @@ Return ONLY the JSON object, no additional text."""
 
 # Wrapper function for compatibility
 def generate_answer(visual_summary: dict, question_analysis: dict,
-                    knowledge: dict, original_question: str, retry_context: dict = None) -> dict:
+                    knowledge: dict, original_question: str, retry_context: dict = None,
+                    filtered_image_context: dict = None) -> dict:
     agent = ReasoningAgent()
     return agent.run(
         image_interpretation={"result": visual_summary},
@@ -328,4 +346,5 @@ def generate_answer(visual_summary: dict, question_analysis: dict,
         knowledge={"result": knowledge},
         original_question=original_question,
         retry_context=retry_context,
+        filtered_image_context={"result": filtered_image_context} if filtered_image_context is not None else None,
     )["result"]

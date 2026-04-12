@@ -1,4 +1,5 @@
 import base64
+import re
 import time
 from typing import Any
 from haystack.components.agents import Agent
@@ -45,6 +46,107 @@ def _tool_interpret_image(image_bytes_b64: str, mime_type: str = "image/png") ->
         result.get("body_region", "?"),
         result.get("image_quality", "?"),
         result.get("quality_warning", False),
+        duration_ms,
+    )
+    return {"result": result, "duration_ms": duration_ms}
+
+
+def _tool_filter_image_context(image_interpretation: dict = None, question_analysis: dict = None,
+                              question: str = "") -> dict:
+    started = time.time()
+    _log.info("[tool] filter_image_context called")
+    vs = image_interpretation.get("result", image_interpretation) if image_interpretation else {}
+    qa = question_analysis.get("result", question_analysis) if question_analysis else {}
+    if not isinstance(vs, dict):
+        vs = {}
+    if not isinstance(qa, dict):
+        qa = {}
+
+    qtype = str(qa.get("question_type", "unknown") or "unknown").strip().lower()
+    target = str(qa.get("target_entity", "") or "").strip().lower()
+    question_text = str(question or "").strip().lower()
+    body_region = str(vs.get("body_region", "") or "").strip().lower()
+    modality = str(vs.get("modality", "") or "").strip().lower()
+    visible_structures = [str(item).strip() for item in (vs.get("visible_structures", []) or []) if str(item).strip()]
+    notable_findings = [str(item).strip() for item in (vs.get("notable_findings", []) or []) if str(item).strip()]
+
+    keyword_groups = {
+        "location": {
+            "left", "right", "bilateral", "midline", "upper", "lower", "medial", "lateral", "anterior", "posterior",
+            "superior", "inferior", "peripheral", "central", "near", "around", "adjacent",
+        },
+        "anatomy_identification": {
+            body_region, target, modality, "rib", "ribs", "costal cartilage", "lung", "heart", "liver", "spleen",
+            "kidney", "brain", "skull", "spine", "bone", "cartilage", "vessel",
+        },
+        "abnormality_description": {
+            "abnormal", "lesion", "mass", "opacity", "hyperdense", "hypodense", "calcified", "edema",
+            "effusion", "fracture", "pneumothorax", "opacity", "density", "fluid", "shadow",
+        },
+        "yes_no": {
+            target, "present", "absent", "normal", "abnormal", "seen", "visible", "identified", "detected", "negative", "positive",
+        },
+        "presence_absence": {
+            target, "present", "absent", "normal", "abnormal", "seen", "visible", "identified", "detected", "negative", "positive",
+        },
+        "counting": {
+            "multiple", "few", "several", "count", "number", "one", "two", "three", "four", "five", "six", "seven",
+            "eight", "nine", "ten", "single", "paired",
+        },
+        "modality_identification": {modality, "ct", "mri", "x-ray", "xray", "ultrasound", "fluoroscopy"},
+        "explanation_request": {body_region, modality, target},
+    }
+
+    relevance_terms = {term for term in keyword_groups.get(qtype, set()) if term}
+    relevance_terms.update(term for term in re.split(r"[^a-z0-9]+", f"{question_text} {target} {body_region} {modality}") if term)
+
+    def _score_text(text: str) -> int:
+        lowered = text.lower()
+        score = 0
+        for term in relevance_terms:
+            if len(term) < 2:
+                continue
+            if term in lowered:
+                score += 2 if term in {"left", "right", "bilateral", "midline", "upper", "lower", "peripheral", "central"} else 1
+        return score
+
+    scored_findings = sorted(((finding, _score_text(finding)) for finding in notable_findings), key=lambda item: (item[1], len(item[0])), reverse=True)
+    scored_structures = sorted(((structure, _score_text(structure)) for structure in visible_structures), key=lambda item: (item[1], len(item[0])), reverse=True)
+
+    selected_findings = [finding for finding, score in scored_findings if score > 0][:4]
+    selected_structures = [structure for structure, score in scored_structures if score > 0][:4]
+
+    if not selected_findings and notable_findings:
+        selected_findings = notable_findings[:2]
+    if not selected_structures and visible_structures:
+        selected_structures = visible_structures[:2]
+
+    summary_parts = [part for part in [vs.get("visual_summary", ""), "; ".join(selected_findings), "; ".join(selected_structures)] if part]
+    filtered_summary = " | ".join(summary_parts[:2]) if summary_parts else str(vs.get("visual_summary", ""))
+
+    result = {
+        "status": "success",
+        "question_type": qtype or "unknown",
+        "target_entity": qa.get("target_entity", "unknown"),
+        "modality": vs.get("modality", "unknown"),
+        "body_region": vs.get("body_region", "unknown"),
+        "relevant_findings": selected_findings,
+        "relevant_structures": selected_structures,
+        "filtered_visual_summary": filtered_summary,
+        "relevance_notes": {
+            "question_type": qtype or "unknown",
+            "keywords_used": sorted(term for term in relevance_terms if term),
+            "findings_considered": len(notable_findings),
+            "structures_considered": len(visible_structures),
+        },
+        "raw_image_interpretation": vs,
+    }
+    duration_ms = int((time.time() - started) * 1000)
+    _log.info(
+        "[tool] filter_image_context done  question_type=%s  findings=%d  structures=%d  duration=%dms",
+        result.get("question_type", "unknown"),
+        len(selected_findings),
+        len(selected_structures),
         duration_ms,
     )
     return {"result": result, "duration_ms": duration_ms}
@@ -112,6 +214,7 @@ def _tool_retrieve_knowledge(image_interpretation: dict = None, question_analysi
 
 
 def _tool_reason_answer(image_interpretation: dict = None, question_analysis: dict = None,
+                        filtered_image_context: dict = None,
                         knowledge: dict = None, question: str = "",
                         retry_context: dict = None) -> dict:
     started = time.time()
@@ -119,6 +222,7 @@ def _tool_reason_answer(image_interpretation: dict = None, question_analysis: di
     result = ReasoningAgent().run(
         image_interpretation=image_interpretation,
         question_analysis=question_analysis,
+        filtered_image_context=filtered_image_context,
         knowledge=knowledge,
         original_question=question,
         retry_context=retry_context,
@@ -130,13 +234,15 @@ def _tool_reason_answer(image_interpretation: dict = None, question_analysis: di
 
 
 def _tool_verify_answer(answer_data: dict = None, image_interpretation: dict = None,
-                        question_analysis: dict = None, question: str = "") -> dict:
+                        question_analysis: dict = None, filtered_image_context: dict = None,
+                        question: str = "") -> dict:
     started = time.time()
     _log.info("[tool] verify_answer called")
     result = VerificationAgent().run(
         answer_data=answer_data,
         image_interpretation=image_interpretation,
         question_analysis=question_analysis,
+        filtered_image_context=filtered_image_context,
         original_question=question,
     )["result"]
     duration_ms = int((time.time() - started) * 1000)
@@ -161,6 +267,25 @@ _INTERPRET_IMAGE_TOOL = Tool(
     outputs_to_state={
         "image_interpretation": {"source": "result"},
         "image_duration_ms": {"source": "duration_ms"},
+    },
+)
+
+_FILTER_IMAGE_CONTEXT_TOOL = Tool(
+    name="filter_image_context",
+    description=(
+        "Select the most relevant image findings and structures for the current question type. "
+        "Call this after analyze_question and before retrieve_knowledge or reason_answer."
+    ),
+    parameters={"type": "object", "properties": {}, "required": []},
+    function=_tool_filter_image_context,
+    inputs_from_state={
+        "image_interpretation": "image_interpretation",
+        "question_analysis": "question_analysis",
+        "question": "question",
+    },
+    outputs_to_state={
+        "filtered_image_context": {"source": "result"},
+        "filtered_context_duration_ms": {"source": "duration_ms"},
     },
 )
 
@@ -232,6 +357,7 @@ _REASON_ANSWER_TOOL = Tool(
     inputs_from_state={
         "image_interpretation": "image_interpretation",
         "question_analysis": "question_analysis",
+        "filtered_image_context": "filtered_image_context",
         "knowledge": "knowledge",
         "question": "question",
         "retry_context": "retry_context",
@@ -254,6 +380,7 @@ _VERIFY_ANSWER_TOOL = Tool(
         "answer_data": "answer_data",
         "image_interpretation": "image_interpretation",
         "question_analysis": "question_analysis",
+        "filtered_image_context": "filtered_image_context",
         "question": "question",
     },
     outputs_to_state={
@@ -268,12 +395,13 @@ _AGENT_SYSTEM_PROMPT = (
     "PROCEDURE (follow in order):\n"
     "1. interpret_image — always required first.\n"
     "2. analyze_question — always required second.\n"
-    "3. route_difficulty — always required third. Evaluates question complexity and sets "
+    "3. filter_image_context — always required third. Selects only the most relevant findings and structures for the question.\n"
+    "4. route_difficulty — always required fourth. Evaluates question complexity and sets "
     "needs_retrieval, verification_policy, and fallback_policy for downstream steps.\n"
-    "4. retrieve_knowledge — call ONLY if routing_decision.needs_retrieval is true. "
+    "5. retrieve_knowledge — call ONLY if routing_decision.needs_retrieval is true. "
     "Skip if routing_decision.needs_retrieval is false.\n"
-    "5. reason_answer — always required.\n"
-    "6. verify_answer — always required last; finalizes the session."
+    "6. reason_answer — always required.\n"
+    "7. verify_answer — always required last; finalizes the session."
 )
 
 _STATE_SCHEMA = {
@@ -282,12 +410,14 @@ _STATE_SCHEMA = {
     "question": {"type": str},
     "image_interpretation": {"type": dict},
     "question_analysis": {"type": dict},
+    "filtered_image_context": {"type": dict},
     "routing_decision": {"type": dict},
     "knowledge": {"type": dict},
     "answer_data": {"type": dict},
     "verification_result": {"type": dict},
     "image_duration_ms": {"type": int},
     "question_duration_ms": {"type": int},
+    "filtered_context_duration_ms": {"type": int},
     "routing_duration_ms": {"type": int},
     "knowledge_duration_ms": {"type": int},
     "answer_duration_ms": {"type": int},
@@ -306,6 +436,7 @@ def _create_agent() -> Agent:
         tools=[
             _INTERPRET_IMAGE_TOOL,
             _ANALYZE_QUESTION_TOOL,
+            _FILTER_IMAGE_CONTEXT_TOOL,
             _ROUTE_DIFFICULTY_TOOL,
             _RETRIEVE_KNOWLEDGE_TOOL,
             _REASON_ANSWER_TOOL,
@@ -543,10 +674,10 @@ def _build_cross_modal_agreement_signal(verification_result: dict) -> dict:
     }
 
 
-def _build_agent_trace(image_result: dict, question_result: dict, routing_result: dict,
-                       knowledge_result: dict, answer_result: dict, verification_result: dict,
-                       image_duration_ms: int, question_duration_ms: int,
-                       routing_duration_ms: int, knowledge_duration_ms: int,
+def _build_agent_trace(image_result: dict, question_result: dict, filter_result: dict,
+                       routing_result: dict, knowledge_result: dict, answer_result: dict,
+                       verification_result: dict, image_duration_ms: int, question_duration_ms: int,
+                       filter_duration_ms: int, routing_duration_ms: int, knowledge_duration_ms: int,
                        answer_duration_ms: int, verification_duration_ms: int) -> list:
     return [
         {
@@ -574,8 +705,20 @@ def _build_agent_trace(image_result: dict, question_result: dict, routing_result
             "duration_ms": question_duration_ms,
         },
         {
-            "agent": "Difficulty Routing",
+            "agent": "Image Context Filter",
             "agent_id": 3,
+            "status": "pass" if filter_result.get("status") == "success" else "warning",
+            "summary": f"Relevant findings: {len(filter_result.get('relevant_findings', []))} | Relevant structures: {len(filter_result.get('relevant_structures', []))}",
+            "output": {
+                "filtered_visual_summary": filter_result.get("filtered_visual_summary", ""),
+                "relevant_findings": filter_result.get("relevant_findings", []),
+                "relevant_structures": filter_result.get("relevant_structures", []),
+            },
+            "duration_ms": filter_duration_ms,
+        },
+        {
+            "agent": "Difficulty Routing",
+            "agent_id": 4,
             "status": "pass" if routing_result.get("status") == "success" else "warning",
             "summary": (
                 f"Difficulty: {routing_result.get('difficulty', 'unknown')} | "
@@ -594,7 +737,7 @@ def _build_agent_trace(image_result: dict, question_result: dict, routing_result
         },
         {
             "agent": "Knowledge Support",
-            "agent_id": 4,
+            "agent_id": 5,
             "status": "skipped" if (knowledge_duration_ms == 0 and not knowledge_result.get("key_facts")) else ("pass" if knowledge_result.get("status") == "success" else "warning"),
             "summary": "Skipped — routing decision: retrieval not needed." if (knowledge_duration_ms == 0 and not knowledge_result.get("key_facts")) else knowledge_result.get("contextual_notes", "No context retrieved."),
             "output": {
@@ -604,7 +747,7 @@ def _build_agent_trace(image_result: dict, question_result: dict, routing_result
         },
         {
             "agent": "Reasoning & Answer",
-            "agent_id": 5,
+            "agent_id": 6,
             "status": "pass" if answer_result.get("status") == "success" else "warning",
             "summary": f"Answer: {answer_result.get('answer', 'N/A')}",
             "output": {
@@ -615,7 +758,7 @@ def _build_agent_trace(image_result: dict, question_result: dict, routing_result
         },
         {
             "agent": "Verification",
-            "agent_id": 6,
+            "agent_id": 7,
             "status": "pass" if verification_result.get("verification_status") == "verified" else "warning" if verification_result.get("verification_status") == "partially_verified" else "fail",
             "summary": f"Status: {verification_result.get('verification_status', 'unknown')} | Confidence: {verification_result.get('confidence_label', 'unknown')}",
             "output": {
@@ -634,6 +777,8 @@ def _assemble_pipeline_payload(results: dict, question: str, started_at: float, 
     image_duration_ms = results.get("image_interpreter", {}).get("duration_ms", 0)
     question_result = results.get("question_analyzer", {}).get("result", {})
     question_duration_ms = results.get("question_analyzer", {}).get("duration_ms", 0)
+    filter_result = results.get("image_context_filter", {}).get("result", {})
+    filter_duration_ms = results.get("image_context_filter", {}).get("duration_ms", 0)
     routing_result = results.get("difficulty_router", {}).get("result", {})
     routing_duration_ms = results.get("difficulty_router", {}).get("duration_ms", 0)
     knowledge_result = results.get("knowledge_retriever", {}).get("result", {})
@@ -668,12 +813,14 @@ def _assemble_pipeline_payload(results: dict, question: str, started_at: float, 
     agent_trace = _build_agent_trace(
         image_result=image_result,
         question_result=question_result,
+        filter_result=filter_result,
         routing_result=routing_result,
         knowledge_result=knowledge_result,
         answer_result=answer_result,
         verification_result=verification_result,
         image_duration_ms=image_duration_ms,
         question_duration_ms=question_duration_ms,
+        filter_duration_ms=filter_duration_ms,
         routing_duration_ms=routing_duration_ms,
         knowledge_duration_ms=knowledge_duration_ms,
         answer_duration_ms=answer_duration_ms,
@@ -726,6 +873,7 @@ def _assemble_pipeline_payload(results: dict, question: str, started_at: float, 
             "reasoning_type": question_result.get("reasoning_type", "visual_recognition"),
             "rephrased_question": question_result.get("rephrased_question", question),
         },
+        "filtered_image_context": filter_result,
         "routing_decision": {
             "difficulty": routing_result.get("difficulty", "unknown"),
             "needs_retrieval": routing_result.get("needs_retrieval", False),
@@ -832,6 +980,10 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
             "question_analyzer": {
                 "result": response.get("question_analysis") or {},
                 "duration_ms": response.get("question_duration_ms") or 0,
+            },
+            "image_context_filter": {
+                "result": response.get("filtered_image_context") or {},
+                "duration_ms": response.get("filtered_context_duration_ms") or 0,
             },
             "difficulty_router": {
                 "result": response.get("routing_decision") or {},

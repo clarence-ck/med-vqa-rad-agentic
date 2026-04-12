@@ -91,16 +91,19 @@ class VerificationAgent:
     def run(self, 
             answer_data: dict = None, 
             image_interpretation: dict = None,
-            question_analysis: dict = None, 
+            question_analysis: dict = None,
+            filtered_image_context: dict = None,
             original_question: str = ""):
 
         ans = answer_data.get("result", answer_data) if answer_data else {}
         vs = image_interpretation.get("result", image_interpretation) if image_interpretation else {}
         qa = question_analysis.get("result", question_analysis) if question_analysis else {}
+        fc = filtered_image_context.get("result", filtered_image_context) if filtered_image_context else {}
 
         if not isinstance(ans, dict): ans = {}
         if not isinstance(vs, dict): vs = {}
         if not isinstance(qa, dict): qa = {}
+        if not isinstance(fc, dict): fc = {}
 
         _log.info(
             "Verifying answer=%r  question=%r  question_type=%s",
@@ -123,6 +126,11 @@ IMAGE ANALYSIS (from visual interpreter):
 - Body region: {vs.get('body_region', 'unknown')}
 - Visible structures: {', '.join(vs.get('visible_structures', []))}
 - Visual summary: {vs.get('visual_summary', '')}
+
+QUESTION-FOCUSED IMAGE CONTEXT:
+- Filtered visual summary: {fc.get('filtered_visual_summary', 'Not available')}
+- Relevant findings: {', '.join(fc.get('relevant_findings', [])) if isinstance(fc.get('relevant_findings', []), list) else fc.get('relevant_findings', 'Not available')}
+- Relevant structures: {', '.join(fc.get('relevant_structures', [])) if isinstance(fc.get('relevant_structures', []), list) else fc.get('relevant_structures', 'Not available')}
 
 QUESTION ANALYSIS:
 - Question type: {qa.get('question_type', 'unknown')}
@@ -229,11 +237,13 @@ Return ONLY the JSON object, no additional text."""
 
 # Wrapper function for compatibility
 def verify_answer(answer_data: dict, visual_summary: dict,
-                  question_analysis: dict, original_question: str) -> dict:
+                  question_analysis: dict, original_question: str,
+                  filtered_image_context: dict = None) -> dict:
     agent = VerificationAgent()
     return agent.run(
         answer_data={"result": answer_data},
         image_interpretation={"result": visual_summary},
         question_analysis={"result": question_analysis},
+        filtered_image_context={"result": filtered_image_context} if filtered_image_context is not None else None,
         original_question=original_question
     )["result"]

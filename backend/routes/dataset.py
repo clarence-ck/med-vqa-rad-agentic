@@ -27,7 +27,7 @@ _log = get_logger("routes.dataset")
 
 _EMBED_MODEL = None
 _EMBED_MODEL_LOCK = threading.Lock()
-_SEMANTIC_THRESHOLD = 0.85  # Threshold for semantic similarity match for open-ended evaluation
+_SEMANTIC_THRESHOLD = 0.90  # Threshold for semantic similarity match for open-ended evaluation
 
 _MEDICAL_SBERT_MODEL_NAME = "pritamdeka/S-PubMedBert-MS-MARCO"
 _MEDICAL_SBERT_MODEL_LABEL = "S-PubMedBert-MS-MARCO"

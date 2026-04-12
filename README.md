@@ -416,20 +416,20 @@ The system evaluates success using task-specific criteria that account for the d
 
 - **Open-ended questions** (non-binary ground truth): Semantic similarity threshold
   - Uses `S-PubMedBert-MS-MARCO` embeddings for biomedical semantic similarity
-  - Threshold ≥ 0.85 cosine similarity for a match
+  - Threshold ≥ 0.90 cosine similarity for a match
   - Lexical overlap (Token F1) computed as diagnostic metric but not used for accuracy
 
-- **Overall accuracy**: Combines close-ended (exact yes/no) and open-ended (semantic similarity ≥ 0.85) correctness per system
+- **Overall accuracy**: Combines close-ended (exact yes/no) and open-ended (semantic similarity ≥ 0.90) correctness per system
 
 ### Metrics computed per cached case
 - **Normalized answer match** — evaluation method depends on ground truth answer style:
   - **Close-ended** (yes/no and other binary medical assessments such as normal/abnormal, present/absent, positive/negative): yes/no answers are normalized by trimming punctuation and matching responses that start with `yes` or `no`; other binary medical assessments use exact match only
-  - **Open-ended** (non-binary ground truth): `S-PubMedBert-MS-MARCO` semantic similarity ≥ 0.85
+  - **Open-ended** (non-binary ground truth): `S-PubMedBert-MS-MARCO` semantic similarity ≥ 0.90
 - **Yes/no normalization** — responses beginning with `yes` or `no` count as `yes` / `no` after punctuation trimming
 - **Semantic similarity** — cosine similarity between answer embeddings using `S-PubMedBert-MS-MARCO`
 - **Lexical Overlap (Token F1)** — unigram overlap between predicted and ground-truth answer; diagnostic metric only, NOT used for accuracy
 - **Winner** — `baseline` / `workflow` / `agentic` / `tie: ...` / `tie_all_wrong`
-- **Disagreement** — whether any two systems produced semantically different answers (`S-PubMedBert-MS-MARCO` similarity < 0.85)
+- **Disagreement** — whether any two systems produced semantically different answers (`S-PubMedBert-MS-MARCO` similarity < 0.90)
 
 ### Aggregate evaluation summary
 - Overall accuracy per system (baseline / workflow / agentic) — combines close-ended (exact yes/no) and open-ended (`S-PubMedBert-MS-MARCO`) correctness
