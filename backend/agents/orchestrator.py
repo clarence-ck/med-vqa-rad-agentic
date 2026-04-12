@@ -97,8 +97,19 @@ def _tool_filter_image_context(image_interpretation: dict = None, question_analy
         "explanation_request": {body_region, modality, target},
     }
 
+    modality_cues = {
+        modality,
+        body_region,
+        "ct", "mri", "x-ray", "xray", "ultrasound", "fluoroscopy",
+        "axial", "coronal", "sagittal", "scan", "image", "slice", "cross sectional", "cross-sectional",
+        "radiograph", "computed tomography", "magnetic resonance", "ultrasound image",
+    }
+
     relevance_terms = {term for term in keyword_groups.get(qtype, set()) if term}
     relevance_terms.update(term for term in re.split(r"[^a-z0-9]+", f"{question_text} {target} {body_region} {modality}") if term)
+
+    if qtype == "modality_identification":
+        relevance_terms = {term for term in modality_cues if term}
 
     def _score_text(text: str) -> int:
         lowered = text.lower()
@@ -107,22 +118,28 @@ def _tool_filter_image_context(image_interpretation: dict = None, question_analy
             if len(term) < 2:
                 continue
             if term in lowered:
-                score += 2 if term in {"left", "right", "bilateral", "midline", "upper", "lower", "peripheral", "central"} else 1
+                if qtype == "modality_identification":
+                    score += 2 if term in {modality, body_region, "ct", "mri", "x-ray", "xray", "ultrasound", "fluoroscopy"} else 1
+                else:
+                    score += 2 if term in {"left", "right", "bilateral", "midline", "upper", "lower", "peripheral", "central"} else 1
         return score
 
     scored_findings = sorted(((finding, _score_text(finding)) for finding in notable_findings), key=lambda item: (item[1], len(item[0])), reverse=True)
     scored_structures = sorted(((structure, _score_text(structure)) for structure in visible_structures), key=lambda item: (item[1], len(item[0])), reverse=True)
 
-    selected_findings = [finding for finding, score in scored_findings if score > 0][:4]
-    selected_structures = [structure for structure, score in scored_structures if score > 0][:4]
+    max_findings = 2 if qtype == "modality_identification" else 4
+    max_structures = 1 if qtype == "modality_identification" else 4
+
+    selected_findings = [finding for finding, score in scored_findings if score > 0][:max_findings]
+    selected_structures = [structure for structure, score in scored_structures if score > 0][:max_structures]
 
     used_fallback_findings = False
     used_fallback_structures = False
     if not selected_findings and notable_findings:
-        selected_findings = notable_findings[:2]
+        selected_findings = notable_findings[:1] if qtype == "modality_identification" else notable_findings[:2]
         used_fallback_findings = True
     if not selected_structures and visible_structures:
-        selected_structures = visible_structures[:2]
+        selected_structures = visible_structures[:1] if qtype == "modality_identification" else visible_structures[:2]
         used_fallback_structures = True
 
     summary_parts = [part for part in [vs.get("visual_summary", ""), "; ".join(selected_findings), "; ".join(selected_structures)] if part]

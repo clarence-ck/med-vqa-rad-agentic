@@ -31,16 +31,45 @@ class QuestionAnalyzer:
             return {}
 
         starts_binary = bool(re.match(r"^(is|are|was|were|do|does|did|can|could|will|would|has|have|should)\b", q))
+        starts_counting = bool(re.match(r"^(how many|count|what number|what is the number|what is the count|number of)\b", q))
+        starts_location = bool(re.match(r"^(where|which side|what side|on which side|where is|where are)\b", q))
         polarity_words = [
             "normal", "abnormal", "present", "absent", "visible", "seen", "identifiable",
             "well-defined", "well defined", "enlarged", "ring-enhancing", "ring enhancing",
             "hyperinflated", "shifted", "fracture", "lesion", "mass", "effusion", "pneumothorax",
         ]
         has_polarity = any(word in q for word in polarity_words)
+        counting_words = [
+            "how many", "count", "number of", "number", "total", "total number", "many",
+            "single", "double", "triple", "one", "two", "three", "four", "five", "six", "seven",
+            "eight", "nine", "ten",
+        ]
+        has_counting_signal = any(word in q for word in counting_words)
+        location_words = [
+            "where", "located", "location", "side", "left", "right", "bilateral", "midline",
+            "upper", "lower", "anterior", "posterior", "superior", "inferior", "medial", "lateral",
+        ]
+        has_location_signal = any(word in q for word in location_words)
         explicit_choice = any(pattern in q for pattern in [
             "normal or abnormal", "abnormal or normal", "present or absent", "absent or present",
             "benign or malignant", "malignant or benign", "left or right", "right or left",
         ])
+
+        if starts_counting or (has_counting_signal and re.search(r"\bhow many\b|\bnumber of\b|\bcount\b", q)):
+            return {
+                "question_type": "counting",
+                "expected_answer_format": "single_word",
+                "reasoning_type": "visual_recognition",
+                "question_clarity": "clear",
+            }
+
+        if starts_location or (has_location_signal and ("where" in q or "located" in q or "side" in q)):
+            return {
+                "question_type": "location",
+                "expected_answer_format": "short_phrase",
+                "reasoning_type": "spatial_reasoning",
+                "question_clarity": "clear",
+            }
 
         if explicit_choice:
             return {
@@ -50,7 +79,33 @@ class QuestionAnalyzer:
                 "question_clarity": "clear",
             }
 
+        if starts_binary and (has_polarity or has_location_signal):
+            # Keep binary yes/no questions strict, but do not let location-style or polarity-style wording
+            # get downgraded into generic yes/no when the answer needs an anatomical phrase.
+            if has_location_signal and not has_polarity:
+                return {
+                    "question_type": "location",
+                    "expected_answer_format": "short_phrase",
+                    "reasoning_type": "spatial_reasoning",
+                    "question_clarity": "clear",
+                }
+            if has_polarity and not has_location_signal:
+                return {
+                    "question_type": "presence_absence",
+                    "expected_answer_format": "yes_no",
+                    "reasoning_type": "visual_recognition",
+                    "question_clarity": "clear",
+                }
+
         if starts_binary and has_polarity:
+            return {
+                "question_type": "yes_no",
+                "expected_answer_format": "yes_no",
+                "reasoning_type": "visual_recognition",
+                "question_clarity": "clear",
+            }
+
+        if starts_binary:
             return {
                 "question_type": "yes_no",
                 "expected_answer_format": "yes_no",
