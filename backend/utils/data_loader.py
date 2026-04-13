@@ -2,11 +2,6 @@ import json
 import os
 from config import DATA_DIR
 
-# SLAKE dataset paths
-SLAKE_DATA_DIR = os.path.join(os.path.dirname(DATA_DIR), "slake")
-SLAKE_JSON_PATH = os.path.join(SLAKE_DATA_DIR, "slake.json")
-SLAKE_IMAGES_DIR = os.path.join(SLAKE_DATA_DIR, "images")
-
 
 # Excluded sample IDs (problematic test cases)
 # 2070: Problematic question and answer pair (ground truth issue)
@@ -25,9 +20,8 @@ QUESTION_TYPE_ORDER = [
 
 
 def load_dataset():
-    """Load SLAKE test dataset from the data directory."""
-    # Use SLAKE instead of VQA-RAD
-    json_path = SLAKE_JSON_PATH
+    """Load VQA-RAD dataset from the data directory."""
+    json_path = os.path.join(DATA_DIR, "vqa_rad.json")
     if not os.path.exists(json_path):
         return []
 
@@ -72,8 +66,6 @@ def get_sample_cases(limit: int = 200) -> list:
             "image_name": image_name,
             "question_type": q_type,
             "split": sample_split,
-            "answer_type": item.get("answer_type", "OPEN"),  # SLAKE field
-            "modality": item.get("modality", ""),  # SLAKE field
         }
         buckets.setdefault(q_type, []).append(sample)
 
@@ -115,7 +107,7 @@ def get_sample_by_id(sample_id: int) -> dict | None:
     sample_split = _resolve_split(item, image_name)
     if sample_split != "test":
         return None
-    image_path = os.path.join(SLAKE_IMAGES_DIR, image_name)
+    image_path = os.path.join(DATA_DIR, "images", image_name)
 
     return {
         "id": sample_id,
@@ -125,14 +117,12 @@ def get_sample_by_id(sample_id: int) -> dict | None:
         "image_path": image_path if os.path.exists(image_path) else None,
         "question_type": _classify_question(item.get("question", "")),
         "split": sample_split,
-        "answer_type": item.get("answer_type", "OPEN"),  # SLAKE field
-        "modality": item.get("modality", ""),  # SLAKE field
     }
 
 
 def get_image_bytes(image_name: str) -> bytes | None:
-    """Read image bytes from the SLAKE data directory."""
-    image_path = os.path.join(SLAKE_IMAGES_DIR, image_name)
+    """Read image bytes from the data directory."""
+    image_path = os.path.join(DATA_DIR, "images", image_name)
     if not os.path.exists(image_path):
         return None
     with open(image_path, "rb") as f:
