@@ -8,7 +8,70 @@ Usage:
 import json
 import os
 import re
+import shutil
 import sys
+import urllib.request
+import urllib.error
+import zipfile
+
+
+def download_file(url: str, output_path: str) -> bool:
+    """Download a file from URL to the specified path."""
+    try:
+        urllib.request.urlretrieve(url, output_path)
+        return True
+    except (urllib.error.URLError, urllib.error.HTTPError) as e:
+        print(f"Failed to download {url}: {e}")
+        return False
+
+
+def extract_required_images(zip_path: str, images_dir: str, required_images: set[str]) -> dict[str, int]:
+    """Extract only the required images from the SLAKE archive."""
+    stats = {"downloaded": 0, "existing": 0, "missing": 0}
+
+    def normalize(name: str) -> str:
+        return name.replace("\\", "/").lstrip("./")
+
+    required_images = {normalize(name) for name in required_images if name}
+    if not required_images:
+        return stats
+
+    with zipfile.ZipFile(zip_path, "r") as archive:
+        archive_lookup = {}
+        archive_names = []
+        for member in archive.namelist():
+            if member.endswith("/"):
+                continue
+            normalized = normalize(member)
+            archive_names.append(normalized)
+            archive_lookup[normalized] = member
+
+        for image_name in sorted(required_images):
+            target_path = os.path.join(images_dir, image_name)
+            os.makedirs(os.path.dirname(target_path), exist_ok=True)
+
+            if os.path.exists(target_path):
+                stats["existing"] += 1
+                continue
+
+            member_name = archive_lookup.get(image_name)
+            if member_name is None:
+                suffix = "/" + image_name
+                for candidate in archive_names:
+                    if candidate == image_name or candidate.endswith(suffix):
+                        member_name = archive_lookup.get(candidate)
+                        break
+
+            if member_name is None:
+                stats["missing"] += 1
+                print(f"      Warning: image not found in archive: {image_name}")
+                continue
+
+            with archive.open(member_name) as src, open(target_path, "wb") as dst:
+                shutil.copyfileobj(src, dst)
+            stats["downloaded"] += 1
+
+    return stats
 
 
 def main():
@@ -26,10 +89,11 @@ def main():
     ds = load_dataset("BoKelvin/SLAKE")
 
     all_items = []
+    required_images = set()
 
     def detect_language(item):
         """Infer language from explicit metadata or text content."""
-        lang = item.get("lang") or item.get("language") or item.get("lang_code")
+        lang = item.get("q_lang") or item.get("lang") or item.get("language") or item.get("lang_code")
         if isinstance(lang, str) and lang.strip():
             return lang.strip().lower()
 
@@ -51,22 +115,17 @@ def main():
         split = ds[split_name]
         print(f"Processing split: {split_name} ({len(split)} items)")
 
-        for i, item in enumerate(split):
+        for item in split:
             question = item.get("question", "")
             answer = item.get("answer", "")
-            image = item.get("image", None)
+            image_name = item.get("img_name") or item.get("image_name") or ""
+            if image_name:
+                required_images.add(image_name)
 
             # Include additional SLAKE-specific metadata if available
-            question_type = item.get("question_type", "")
+            question_type = item.get("content_type", item.get("question_type", ""))
             answer_type = item.get("answer_type", "")
             lang = detect_language(item)
-
-            image_name = f"{split_name}_{i:04d}.png"
-
-            if image is not None:
-                image_path = os.path.join(images_dir, image_name)
-                if not os.path.exists(image_path):
-                    image.save(image_path)
 
             entry = {
                 "id": len(all_items),
@@ -77,6 +136,12 @@ def main():
                 "question_type": question_type,
                 "answer_type": answer_type,
                 "lang": lang,
+                "img_id": item.get("img_id", ""),
+                "qid": item.get("qid", ""),
+                "base_type": item.get("base_type", ""),
+                "content_type": item.get("content_type", ""),
+                "location": item.get("location", ""),
+                "triple": item.get("triple", []),
             }
 
             # Add modality and body part if available (SLAKE-specific fields)
@@ -89,16 +154,28 @@ def main():
 
             all_items.append(entry)
 
+    imgs_zip_path = os.path.join(output_dir, "imgs.zip")
+    if not os.path.exists(imgs_zip_path):
+        print("Downloading SLAKE images archive (imgs.zip) from Hugging Face...")
+        imgs_zip_url = "https://huggingface.co/datasets/BoKelvin/SLAKE/resolve/main/imgs.zip?download=true"
+        if not download_file(imgs_zip_url, imgs_zip_path):
+            print("Error: failed to download imgs.zip")
+            sys.exit(1)
+
+    print(f"Extracting {len(required_images)} referenced images from imgs.zip...")
+    image_stats = extract_required_images(imgs_zip_path, images_dir, required_images)
+
     json_path = os.path.join(output_dir, "slake.json")
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(all_items, f, indent=2, ensure_ascii=False)
 
     print(f"\nDone! Saved {len(all_items)} items to {json_path}")
     print(f"Images saved to {images_dir}")
+    print(f"\nImage extract stats: {image_stats['downloaded']} extracted, {image_stats['existing']} existing, {image_stats['missing']} missing")
 
     # Print summary by language and split
     print(f"\nLanguage breakdown by split:")
-    split_lang_counts: Dict[str, Dict[str, int]] = {}
+    split_lang_counts = {}
     for item in all_items:
         split = item.get("split", "unknown")
         lang = item.get("lang", "unknown")
