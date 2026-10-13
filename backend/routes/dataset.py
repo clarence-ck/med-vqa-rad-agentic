@@ -19,6 +19,7 @@ from agents.orchestrator import run_pipeline
 from agents.workflow_baseline import workflow_answer
 from utils.data_loader import get_sample_cases, get_sample_by_id, get_image_bytes, EXCLUDED_SAMPLE_IDS
 from utils import scoring
+from config import model_manifest
 from logger import get_logger, sample_id_var
 
 router = APIRouter(prefix="/api/dataset")
@@ -447,6 +448,7 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
             "baseline_duration_ms": baseline_ms,
             "workflow_duration_ms": workflow_ms,
             "agentic_duration_ms": agentic_ms,
+            "models": model_manifest(),
         }
 
         with open(cache_path, "w", encoding="utf-8") as f:

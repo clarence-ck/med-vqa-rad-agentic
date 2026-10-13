@@ -13,7 +13,7 @@ from agents.difficulty_router import DifficultyRouter
 from agents.knowledge_retriever import KnowledgeRetriever
 from agents.reasoning_agent import ReasoningAgent
 from agents.verification_agent import VerificationAgent
-from config import OPENAI_API_KEY, OPENAI_MODEL
+from config import OPENAI_API_KEY, MODELS, generation_kwargs
 from logger import get_logger
 from utils.answer_utils import leading_yes_no
 
@@ -480,7 +480,8 @@ def _create_agent() -> Agent:
     return Agent(
         chat_generator=OpenAIChatGenerator(
             api_key=Secret.from_token(OPENAI_API_KEY),
-            model=OPENAI_MODEL,
+            model=MODELS["controller"],
+            generation_kwargs=generation_kwargs("controller"),
         ),
         system_prompt=_AGENT_SYSTEM_PROMPT,
         tools=[

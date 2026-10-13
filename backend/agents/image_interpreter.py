@@ -9,7 +9,7 @@ from haystack.components.converters.image import ImageFileToImageContent
 from haystack.dataclasses import ChatMessage, TextContent, ImageContent, ByteStream
 from haystack.utils import Secret
 
-from config import OPENAI_API_KEY, VISION_MODEL
+from config import OPENAI_API_KEY, MODELS, generation_kwargs
 from utils.json_utils import strip_json_fences
 from logger import get_logger
 
@@ -250,7 +250,7 @@ class ImageInterpreter:
     Uses ImageFileToImageContent for standardized image processing.
     """
     def __init__(self):
-        self.generator = OpenAIChatGenerator(api_key=Secret.from_token(OPENAI_API_KEY), model=VISION_MODEL)
+        self.generator = OpenAIChatGenerator(api_key=Secret.from_token(OPENAI_API_KEY), model=MODELS["look"])
         self.image_converter = ImageFileToImageContent(detail="high", size=(1024, 1024))
 
     @component.output_types(result=Dict[str, Any])
@@ -304,7 +304,7 @@ Return ONLY the JSON object, no additional text."""
                     image_content  # Already ImageContent object from converter
                 ])
             ]
-            response = self.generator.run(messages=messages, generation_kwargs={"max_completion_tokens": 3000})
+            response = self.generator.run(messages=messages, generation_kwargs=generation_kwargs("look"))
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
             

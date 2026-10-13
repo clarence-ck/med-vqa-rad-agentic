@@ -2,7 +2,7 @@ import base64
 import json
 import time
 from openai import OpenAI
-from config import OPENAI_API_KEY, VISION_MODEL
+from config import OPENAI_API_KEY, MODELS, generation_kwargs
 from utils.json_utils import strip_json_fences
 from logger import get_logger
 
@@ -51,7 +51,7 @@ Return ONLY the JSON object, no additional text."""
 
     try:
         response = _get_client().chat.completions.create(
-            model=VISION_MODEL,
+            model=MODELS["baseline"],
             messages=[
                 {
                     "role": "user",
@@ -66,7 +66,7 @@ Return ONLY the JSON object, no additional text."""
                     ]
                 }
             ],
-            max_completion_tokens=3000,
+            **generation_kwargs("baseline"),
 
         )
 

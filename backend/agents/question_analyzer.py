@@ -6,7 +6,7 @@ from haystack import component
 from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage
 from haystack.utils import Secret
-from config import OPENAI_API_KEY, OPENAI_MODEL
+from config import OPENAI_API_KEY, MODELS, generation_kwargs
 from utils.json_utils import strip_json_fences
 from logger import get_logger
 
@@ -31,7 +31,7 @@ class QuestionAnalyzer:
     def __init__(self):
         self.generator = OpenAIChatGenerator(
             api_key=Secret.from_token(OPENAI_API_KEY),
-            model=OPENAI_MODEL,
+            model=MODELS["analyze"],
         )
         self._allowed_question_subtypes = {
             "lesion_location",
@@ -298,9 +298,7 @@ Return ONLY the JSON object, no additional text."""
         try:
             response = self.generator.run(
                 messages=[ChatMessage.from_user(prompt)],
-                generation_kwargs={
-                    "max_completion_tokens": 3000,
-                }
+                generation_kwargs=generation_kwargs("analyze")
             )
 
             raw = strip_json_fences(response["replies"][0].text or "")
