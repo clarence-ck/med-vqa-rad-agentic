@@ -243,7 +243,7 @@ function App() {
                       </div>
                       <div className="baseline-note">
                         <div className="baseline-note-text">
-                          ℹ️ This is a single-shot result without agent decomposition, knowledge support, or verification.
+                          ℹ️ This is a single-shot result without agent decomposition, routing, or verification.
                           Switch to <strong>Agentic Pipeline</strong> to see the full analysis.
                         </div>
                       </div>

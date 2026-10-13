@@ -6,7 +6,6 @@ dependencies:
   - python=3.12
   - pip
   - numpy
-  - faiss-cpu
   - pytorch
   - pip:
       - fastapi
@@ -19,5 +18,4 @@ dependencies:
       - datasets
       - haystack-ai
       - sentence-transformers
-      - rank-bm25
       - scikit-learn

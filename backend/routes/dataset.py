@@ -230,28 +230,6 @@ def _subset_accuracy(subset_rows: list[dict], key: str) -> float:
     return sum(1 for row in subset_rows if row.get(key)) / total
 
 
-def _extract_knowledge_retriever_details(agentic_result: dict) -> dict:
-    trace = agentic_result.get("agent_trace", []) or []
-    knowledge_step = next(
-        (
-            step for step in trace
-            if str(step.get("agent", "")).strip().lower() == "knowledge support"
-        ),
-        {},
-    )
-    status = str(knowledge_step.get("status", "unknown")).strip().lower()
-    key_facts = knowledge_step.get("output", {}).get("key_facts", []) or []
-    summary = knowledge_step.get("summary", "")
-    triggered = status not in {"", "unknown", "skipped"}
-
-    return {
-        "knowledge_retriever_triggered": triggered,
-        "knowledge_retriever_status": status or "unknown",
-        "knowledge_key_facts_count": len(key_facts),
-        "knowledge_summary": summary,
-    }
-
-
 def _build_accuracy_breakdown(rows: list[dict], group_key: str, preferred_order: list[str] | None = None) -> list[dict]:
     grouped_rows = {}
     for row in rows:
@@ -579,14 +557,11 @@ def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
     agentic_question_type = agentic_result.get("question_analysis", {}).get("question_type")
     question_type = original_question_type
     question_type_source = "dataset"
-    knowledge_details = _extract_knowledge_retriever_details(agentic_result)
     routing_decision = agentic_result.get("routing_decision", {}) or {}
     routing_difficulty = routing_decision.get("difficulty", "unknown")
-    routing_needs_retrieval = bool(routing_decision.get("needs_retrieval", False))
     routing_verification_policy = routing_decision.get("verification_policy", "standard")
     routing_fallback_policy = routing_decision.get("fallback_policy", "none")
     routing_rationale = routing_decision.get("routing_rationale", "")
-    routing_retrieval_rationale = routing_decision.get("retrieval_rationale", "")
 
     # Use batch embeddings for semantic scores
     baseline_semantic = _compute_semantic_similarity_batch(embeddings_map, baseline_normalized, ground_truth_normalized)
@@ -630,15 +605,9 @@ def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
         "self_consistency_level": agentic_result.get("self_consistency_signal", {}).get("level", "low"),
         "cross_modal_agreement_level": agentic_result.get("cross_modal_agreement", {}).get("level", "medium"),
         "routing_difficulty": routing_difficulty,
-        "routing_needs_retrieval": routing_needs_retrieval,
         "routing_verification_policy": routing_verification_policy,
         "routing_fallback_policy": routing_fallback_policy,
         "routing_rationale": routing_rationale,
-        "routing_retrieval_rationale": routing_retrieval_rationale,
-        "knowledge_retriever_triggered": knowledge_details["knowledge_retriever_triggered"],
-        "knowledge_retriever_status": knowledge_details["knowledge_retriever_status"],
-        "knowledge_key_facts_count": knowledge_details["knowledge_key_facts_count"],
-        "knowledge_summary": knowledge_details["knowledge_summary"],
         "duration_ms": payload.get("duration_ms", 0),
         "baseline_duration_ms": payload.get("baseline_duration_ms"),
         "workflow_duration_ms": payload.get("workflow_duration_ms"),

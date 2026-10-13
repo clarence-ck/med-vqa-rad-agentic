@@ -8,5 +8,4 @@ httpx
 datasets
 haystack-ai
 sentence-transformers
-rank-bm25
 scikit-learn

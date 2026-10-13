@@ -42,31 +42,27 @@ function getVerificationPolicyTagClass(policy) {
   return String(policy || 'standard').toLowerCase() === 'strict' ? 'tag-amber' : 'tag-gray';
 }
 
-function getRetrievalTagClass(needsRetrieval) {
-  return needsRetrieval ? 'tag-green' : 'tag-gray';
-}
-
 function getRoutingProcedureTooltip(difficulty) {
   const normalized = String(difficulty || 'unknown').toLowerCase();
 
   if (normalized === 'easy') {
-    return 'Procedure: interpret image → analyze question → skip retrieval → use standard verification → finalize.';
+    return 'Procedure: interpret image → analyze question → standard verification → finalize.';
   }
 
   if (normalized === 'medium') {
-    return 'Procedure: interpret image → analyze question → retrieve knowledge → use standard verification → add disclaimer if needed.';
+    return 'Procedure: interpret image → analyze question → standard verification → add disclaimer if needed.';
   }
 
   if (normalized === 'hard') {
-    return 'Procedure: interpret image → analyze question → retrieve knowledge → use strict verification → flag for review if needed.';
+    return 'Procedure: interpret image → analyze question → strict verification → flag for review if needed.';
   }
 
-  return 'Procedure: interpret image → analyze question → route difficulty → retrieve knowledge only when needed → verify the final answer.';
+  return 'Procedure: interpret image → analyze question → route difficulty → verify the final answer.';
 }
 
 function getBreakdownTooltip(mode) {
   if (mode === 'difficulty_type') {
-    return 'Breakdown by Difficulty Router output. Parent rows show overall difficulty accuracy, and expanding a difficulty row reveals question-type accuracy within that bucket. easy skips retrieval and uses standard verification; medium retrieves knowledge, uses standard verification, and can add a disclaimer; hard retrieves knowledge, uses strict verification, and can flag the case for review.';
+    return 'Breakdown by Difficulty Router output. Parent rows show overall difficulty accuracy, and expanding a difficulty row reveals question-type accuracy within that bucket. easy uses standard verification; medium uses standard verification and can add a disclaimer; hard uses strict verification and can flag the case for review.';
   }
 
   return 'Breakdown by question type. Close-ended questions use exact match for yes/no and binary medical assessments (normal/abnormal, present/absent, positive/negative, etc.). Grouped by the dataset question type. Open-ended: content-word match (aliases, plurals folded); left/right conflicts and answers starting with “no” are wrong; S-PubMedBert-MS-MARCO similarity only as a strict fallback (≥ 0.95 short, ≥ 0.90 long).';
@@ -651,7 +647,6 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                       <th>Answers</th>
                       <th>Winner</th>
                       <th>Routing</th>
-                      <th>Agentic Retriever</th>
                       <th>Agentic Verify</th>
                       <th>Agentic Signals</th>
                       <th>Runtime</th>
@@ -706,9 +701,6 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                             >
                               {formatLabel(row.routing_difficulty)}
                             </span>
-                            <span className={`tag ${getRetrievalTagClass(row.routing_needs_retrieval)}`}>
-                              retrieval {row.routing_needs_retrieval ? 'yes' : 'no'}
-                            </span>
                             <span className={`tag ${getVerificationPolicyTagClass(row.routing_verification_policy)}`}>
                               {formatLabel(row.routing_verification_policy)} verify
                             </span>
@@ -717,21 +709,10 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                               data-tooltip={[
                                 row.routing_fallback_policy ? `Fallback: ${formatLabel(row.routing_fallback_policy)}` : null,
                                 row.routing_rationale ? `Routing: ${row.routing_rationale}` : null,
-                                row.routing_retrieval_rationale ? `Retrieval: ${row.routing_retrieval_rationale}` : null,
                               ].filter(Boolean).join(' | ') || 'Routing details unavailable'}
                             >
                               details
                             </span>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="evaluation-signal-stack">
-                            <span className={`tag ${row.knowledge_retriever_triggered ? 'tag-green' : 'tag-gray'}`}>
-                              {row.knowledge_retriever_triggered
-                                ? (row.knowledge_retriever_status || 'triggered')
-                                : 'skipped'}
-                            </span>
-                            <span className="evaluation-list-subtitle">facts {row.knowledge_key_facts_count ?? 0}</span>
                           </div>
                         </td>
                         <td>

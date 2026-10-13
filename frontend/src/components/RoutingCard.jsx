@@ -4,12 +4,9 @@ export default function RoutingCard({ result }) {
   if (!rd) return null;
 
   const difficulty = rd.difficulty || 'unknown';
-  const needsRetrieval = rd.needs_retrieval;
-  const retrievalStatus = rd.retrieval_status || (needsRetrieval ? 'success' : 'skipped');
   const verificationPolicy = rd.verification_policy || 'standard';
   const fallbackPolicy = rd.fallback_policy || 'none';
   const routingRationale = rd.routing_rationale || '';
-  const retrievalRationale = rd.retrieval_rationale || '';
   const qualityWarning = Boolean(result.image_analysis?.quality_warning);
   const imageQuality = result.image_analysis?.image_quality || 'unknown';
 
@@ -17,11 +14,6 @@ export default function RoutingCard({ result }) {
     difficulty === 'easy' ? 'tag-green' :
     difficulty === 'hard' ? 'tag-red' :
     'tag-amber';
-
-  const retrievalStatusClass =
-    retrievalStatus === 'success' ? 'tag-green' :
-    retrievalStatus === 'skipped' ? 'tag-gray' :
-    'tag-red';
 
   return (
     <div className="card animate-fade-in" style={{ animationDelay: '0.18s' }}>
@@ -31,12 +23,6 @@ export default function RoutingCard({ result }) {
       </div>
       <div className="card-content">
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
-          <span className={`tag ${needsRetrieval ? 'tag-green' : 'tag-gray'}`}>
-            retrieval {needsRetrieval ? 'triggered' : 'skipped'}
-          </span>
-          <span className={`tag ${retrievalStatusClass}`}>
-            retrieval status: {retrievalStatus.replace(/_/g, ' ')}
-          </span>
           <span className={`tag ${verificationPolicy === 'strict' ? 'tag-amber' : 'tag-gray'}`}>
             {verificationPolicy} verification
           </span>
@@ -52,11 +38,6 @@ export default function RoutingCard({ result }) {
         {routingRationale && (
           <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
             {routingRationale}
-          </p>
-        )}
-        {!routingRationale && retrievalRationale && (
-          <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
-            {retrievalRationale}
           </p>
         )}
       </div>

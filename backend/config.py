@@ -37,7 +37,6 @@ _ROLE_DEFAULTS = {
     "controller": ("gpt-6-luna",   "none"),   # Haystack Agent controller (chat-completions tool calls reject other efforts)
     "look":       ("gpt-6-luna",   "medium"), # ImageInterpreter
     "analyze":    ("gpt-6-luna",   "low"),    # QuestionAnalyzer, DifficultyRouter
-    "lookup":     ("gpt-6-luna",   "low"),    # KnowledgeRetriever synthesis
     "answer":     ("gpt-6-luna",   "medium"), # ReasoningAgent
     "check":      ("gpt-6.1-sol",  "low"),    # VerificationAgent
     "baseline":   ("gpt-6-luna",   "medium"), # single-shot baseline

@@ -4,7 +4,7 @@ const AGENT_NAMES = {
   'Image Interpretation': 'Image',
   'Question Understanding': 'Question',
   'Difficulty Routing': 'Router',
-  'Knowledge Support': 'Knowledge',
+  'Image Context Filter': 'Filter',
   'Reasoning & Answer': 'Reasoning',
   'Verification': 'Verify',
 };

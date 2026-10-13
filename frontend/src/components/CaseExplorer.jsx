@@ -27,32 +27,6 @@ function getStatusTagClass(status) {
   return 'tag-red';
 }
 
-function getKnowledgeSupportDetails(agenticResult) {
-  const trace = agenticResult?.agent_trace || [];
-  const knowledgeStep = trace.find(
-    (step) => String(step?.agent || '').toLowerCase() === 'knowledge support',
-  );
-
-  if (!knowledgeStep) {
-    return {
-      triggered: false,
-      status: 'unknown',
-      keyFactsCount: 0,
-      summary: '',
-    };
-  }
-
-  const status = String(knowledgeStep.status || 'unknown').toLowerCase();
-  const keyFacts = knowledgeStep.output?.key_facts || [];
-
-  return {
-    triggered: status !== 'skipped',
-    status,
-    keyFactsCount: keyFacts.length,
-    summary: knowledgeStep.summary || '',
-  };
-}
-
 function getModeLabel(mode) {
   if (mode === 'baseline') return 'Single-shot Baseline';
   if (mode === 'workflow') return 'Workflow Baseline';
@@ -109,7 +83,7 @@ function MethodologyLabels() {
           <span style={{ color: 'var(--color-accent)', fontWeight: 'bold' }}>🔗 Agentic Pipeline</span>
         </div>
         <p style={{ color: 'var(--color-text-secondary)', lineHeight: '1.4' }}>
-          Decomposes queries into visual interpretation, context retrieval, and iterative reasoning with a final verification loop.
+          Decomposes queries into visual interpretation, question analysis, difficulty routing, and reasoning with a final verification loop.
         </p>
       </div>
       <div>
@@ -151,10 +125,6 @@ export default function CaseExplorer({
     () => getSummaryBadge(comparisonMode, selectedResult),
     [comparisonMode, selectedResult],
   );
-  const knowledgeSupport = useMemo(
-    () => getKnowledgeSupportDetails(analysisData?.agentic_result),
-    [analysisData],
-  );
 
   const selectedSample = useMemo(
     () => samples.find((sample) => String(sample.id) === String(selectedSampleId)) || null,
@@ -164,7 +134,6 @@ export default function CaseExplorer({
   const selectedConfidence = selectedResult?.confidence || 'low';
   const selectedExplanation = selectedResult?.explanation || '';
   const overallVerification = analysisData?.agentic_result?.verification_status || 'unknown';
-  const hasRetrieverDetails = knowledgeSupport.triggered;
   const selfConsistencyLevel = analysisData?.agentic_result?.self_consistency_signal?.level || 'low';
   const showAgenticDetails = comparisonMode === 'agentic';
   const questionAnalysis = analysisData?.agentic_result?.question_analysis || {};
@@ -601,7 +570,7 @@ export default function CaseExplorer({
 
                       <div className="summary-summary-text">
                         {showAgenticDetails
-                          ? 'Agentic mode includes question understanding, retrieval, and verification metadata.'
+                          ? 'Agentic mode includes question understanding, routing, and verification metadata.'
                           : 'This view shows the selected baseline answer path for direct comparison.'}
                       </div>
                     </div>
@@ -648,28 +617,18 @@ export default function CaseExplorer({
                       </section>
 
                       <section className="summary-section">
-                        <div className="summary-section-title">Routing &amp; Retrieval</div>
+                        <div className="summary-section-title">Routing</div>
                         <div className="summary-stat-list">
                           <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label" data-tooltip="Question difficulty assessed by the Difficulty Router agent: easy (simple visual recognition), medium (some clinical context needed), hard (requires background knowledge).">Difficulty</span>
+                            <span className="summary-stat-label" data-tooltip="Question difficulty assessed by the Difficulty Router agent: easy (conspicuous finding, clean study), medium (subtle finding needing systematic review), hard (near the limits of visibility or poor image quality).">Difficulty</span>
                             <span className={`tag ${getDifficultyTagClass(routingDifficulty)}`}>{routingDifficulty}</span>
-                          </div>
-                          <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label" data-tooltip="Whether the Knowledge Retriever agent was invoked. Determined by the Difficulty Router based on complexity and requires_medical_knowledge flag.">Knowledge retriever</span>
-                            <span className={`tag ${hasRetrieverDetails ? 'tag-green' : 'tag-gray'}`}>
-                              {hasRetrieverDetails ? 'triggered' : 'skipped'}
-                            </span>
                           </div>
                           <div className="summary-stat-row summary-stat-row-inline">
                             <span className="summary-stat-label" data-tooltip="Fallback policy set by the Difficulty Router. Controls whether a disclaimer is added or the case is flagged for review on low confidence.">Fallback policy</span>
                             <span className={`tag ${routingFallbackPolicy === 'flag_for_review' ? 'tag-red' : routingFallbackPolicy === 'add_disclaimer' ? 'tag-amber' : 'tag-gray'}`}>{routingFallbackPolicy.replace(/_/g, ' ')}</span>
                           </div>
-                          <div className="summary-stat-row">
-                            <span className="summary-stat-label" data-tooltip="Number of specific 'key facts' extracted by the Knowledge Support agent from external context to assist the reasoning phase.">Key facts</span>
-                            <span className="summary-stat-value">{knowledgeSupport.keyFactsCount}</span>
-                          </div>
                           <div className="summary-summary-text">
-                            {routingRationale || (hasRetrieverDetails ? knowledgeSupport.summary : 'No retrieval context was added for this case.')}
+                            {routingRationale || 'No routing rationale recorded for this case.'}
                           </div>
                         </div>
                       </section>
@@ -765,7 +724,7 @@ export default function CaseExplorer({
                     {comparisonMode === 'workflow'
                       ? 'Workflow Baseline: a deterministic sequence of analysis steps without agentic self-correction.'
                       : 'Single-shot Baseline: a direct, single-prompt approach without intermediate decomposition.'}
-                    {' '}Switch to Agentic Pipeline to inspect step-by-step reasoning, retrieval, and verification details.
+                    {' '}Switch to Agentic Pipeline to inspect step-by-step reasoning, routing, and verification details.
                   </p>
                 </div>
               </div>

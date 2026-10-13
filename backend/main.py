@@ -66,7 +66,6 @@ async def _on_startup():
     _log.info("=" * 60)
     _log.info("MedVisionQuery API  v1.0.0  starting up")
     _log.info("CORS origins: %s", BACKEND_CORS_ORIGINS)
-    _log.info("RAG corpus splits: %s", os.getenv("RAG_CORPUS_SPLITS", "train,validation"))
     _log.info("=" * 60)
 
 
