@@ -12,7 +12,7 @@ from agents.question_analyzer import QuestionAnalyzer
 from agents.difficulty_router import DifficultyRouter
 from agents.reasoning_agent import ReasoningAgent
 from agents.verification_agent import VerificationAgent
-from config import OPENAI_API_KEY, MODELS, generation_kwargs
+from config import OPENAI_API_KEY, MODELS, REASONER_SEES_IMAGE, generation_kwargs
 from logger import get_logger
 from utils.answer_utils import leading_yes_no
 from utils.usage import record_usage
@@ -232,15 +232,18 @@ def _tool_route_difficulty(question_analysis: dict = None, image_interpretation:
 
 def _tool_reason_answer(image_interpretation: dict = None, question_analysis: dict = None,
                         filtered_image_context: dict = None, question: str = "",
-                        retry_context: dict = None) -> dict:
+                        retry_context: dict = None, image_bytes_b64: str = "",
+                        mime_type: str = "image/png", reasoner_sees_image: bool = False) -> dict:
     started = time.time()
-    _log.info("[tool] reason_answer called  is_retry=%s", bool(retry_context))
+    _log.info("[tool] reason_answer called  is_retry=%s  sees_image=%s", bool(retry_context), bool(reasoner_sees_image))
     result = ReasoningAgent().run(
         image_interpretation=image_interpretation,
         question_analysis=question_analysis,
         filtered_image_context=filtered_image_context,
         original_question=question,
         retry_context=retry_context,
+        image_bytes_b64=image_bytes_b64 if reasoner_sees_image else "",
+        mime_type=mime_type,
     )["result"]
     duration_ms = int((time.time() - started) * 1000)
     _log.info("[tool] reason_answer done  answer=%r  confidence=%s  duration=%dms",
@@ -352,6 +355,9 @@ _REASON_ANSWER_TOOL = Tool(
         "filtered_image_context": "filtered_image_context",
         "question": "question",
         "retry_context": "retry_context",
+        "image_bytes_b64": "image_bytes_b64",
+        "mime_type": "mime_type",
+        "reasoner_sees_image": "reasoner_sees_image",
     },
     outputs_to_state={
         "answer_data": {"source": "result"},
@@ -410,6 +416,7 @@ _STATE_SCHEMA = {
     "answer_duration_ms": {"type": int},
     "verification_duration_ms": {"type": int},
     "retry_context": {"type": dict},
+    "reasoner_sees_image": {"type": bool},
 }
 
 
@@ -882,7 +889,10 @@ def _payload_score(payload: dict) -> tuple[int, int, int, int, int]:
     return verification_rank, confidence_rank, -high_severity_count, -review_flag, specificity_score
 
 
-def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png") -> dict:
+def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png",
+                 reasoner_sees_image: bool | None = None) -> dict:
+    if reasoner_sees_image is None:
+        reasoner_sees_image = REASONER_SEES_IMAGE
     pipeline_start = time.time()
     _log.info(
         "=== Agentic pipeline START  question=%r  mime_type=%s  size=%d bytes ===",
@@ -900,6 +910,7 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
                 mime_type=mime_type,
                 question=question,
                 retry_context=retry_context or {},
+                reasoner_sees_image=reasoner_sees_image,
             )
         except ImageBlockerAbort as e:
             _log.warning("Agentic pipeline halted by ImageBlockerAbort: %s", e)

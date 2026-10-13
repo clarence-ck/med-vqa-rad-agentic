@@ -4,7 +4,7 @@ import time
 from typing import Dict, Any
 from haystack import component
 from haystack.components.generators.chat import OpenAIChatGenerator
-from haystack.dataclasses import ChatMessage
+from haystack.dataclasses import ChatMessage, ImageContent, TextContent
 from haystack.utils import Secret
 from config import OPENAI_API_KEY, MODELS, generation_kwargs
 from utils.json_utils import strip_json_fences
@@ -253,7 +253,11 @@ class ReasoningAgent:
             question_analysis: dict = None,
             filtered_image_context: dict = None,
             original_question: str = "",
-            retry_context: dict = None):
+            retry_context: dict = None,
+            image_bytes_b64: str = "",
+            mime_type: str = "image/png"):
+        """When image_bytes_b64 is given, the image is sent alongside the text context
+        so the answer is grounded in the image itself, not only in the stage-1 summary."""
 
         # Default fallback values
         vs = image_interpretation.get("result", image_interpretation) if image_interpretation else {}
@@ -401,8 +405,19 @@ IMPORTANT: Base your answer on the visual evidence provided. If the evidence is 
 Return ONLY the JSON object, no additional text."""
 
         try:
+            if image_bytes_b64:
+                prompt += (
+                    "\n\nThe medical image is attached. Use it directly as the primary evidence; "
+                    "treat the IMAGE ANALYSIS above as notes that may be incomplete or wrong."
+                )
+                message = ChatMessage.from_user(content_parts=[
+                    TextContent(text=prompt),
+                    ImageContent(base64_image=image_bytes_b64, mime_type=mime_type, detail="high"),
+                ])
+            else:
+                message = ChatMessage.from_user(prompt)
             response = self.generator.run(
-                messages=[ChatMessage.from_user(prompt)],
+                messages=[message],
                 generation_kwargs=generation_kwargs("answer")
             )
 

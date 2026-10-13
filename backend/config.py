@@ -43,6 +43,9 @@ _ROLE_DEFAULTS = {
     "judge":      ("gpt-6.1-sol",  "low"),    # evaluation judge for borderline answers
 }
 
+# Send the image to the reasoning agent as well as the stage-1 summary (experiment flag).
+REASONER_SEES_IMAGE = os.getenv("REASONER_SEES_IMAGE", "false").strip().lower() in {"1", "true", "yes"}
+
 # Reasoning models count hidden reasoning tokens toward this limit, so keep it generous.
 MAX_COMPLETION_TOKENS = int(os.getenv("MAX_COMPLETION_TOKENS", "8000"))
 
