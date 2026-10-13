@@ -45,6 +45,25 @@ MAX_ANSWERS = 3
 MAX_AGENT_STEPS = 16
 ABSTAIN_ANSWER = "Unable to determine from this image."
 
+_VERIFICATION_RANK = {"verified": 4, "partially_verified": 3, "low_confidence": 2, "unsupported": 1}
+_CONFIDENCE_RANK = {"High": 3, "Medium": 2, "Low": 1}
+
+
+def select_best_attempt(checks: list[dict]) -> int:
+    """Index of the answer to keep: best verification status, then confidence.
+
+    Ties keep the earliest answer, so a later re-look or re-answer only replaces an
+    answer when its check is strictly better (re-looks can also over-interpret).
+    """
+    def score(index: int) -> tuple:
+        check = checks[index] or {}
+        return (
+            _VERIFICATION_RANK.get(check.get("verification_status"), 0),
+            _CONFIDENCE_RANK.get(str(check.get("confidence_label")), 0),
+            -index,
+        )
+    return max(range(len(checks)), key=score)
+
 _SYSTEM_PROMPT = """You are the controller of a medical visual question answering agent.
 Goal: give a correct, image-grounded answer to the user's question about a radiology image, verified against the image.
 
@@ -55,7 +74,7 @@ Tools:
 - answer(guidance): produce an answer from the image and all observations so far. Use guidance to say what the new
   answer must fix.
 - check: verify the latest answer against the image. It returns a verdict and a recommended next action.
-- finish(abstain, reason): end the episode with the latest checked answer, or abstain.
+- finish(abstain, reason): end the episode. The best-verified checked answer is kept, or abstain.
 
 How to work:
 1. Call analyze_question and look first.
@@ -299,8 +318,11 @@ def run_agentic_loop(image_bytes: bytes, question: str, mime_type: str = "image/
         _log.warning("Latest answer was not checked; checking now")
         ctx.check()
 
-    answer_result = dict(ctx.answers[-1])
-    verification_result = ctx.checks[-1]
+    best = select_best_attempt(ctx.checks)
+    if best != len(ctx.answers) - 1:
+        _log.info("Keeping answer %d of %d (better verified than the latest)", best + 1, len(ctx.answers))
+    answer_result = dict(ctx.answers[best])
+    verification_result = ctx.checks[best]
     if ctx.abstained:
         answer_result["answer"] = ABSTAIN_ANSWER
     answer_text = _normalize_final_answer(answer_result.get("answer", ""), ctx.question_analysis, _image_analysis(ctx))
@@ -343,6 +365,8 @@ def run_agentic_loop(image_bytes: bytes, question: str, mime_type: str = "image/
         "agent_mode": "loop",
         "controller_actions": ctx.actions,
         "abstained": ctx.abstained,
+        "selected_attempt": best + 1,
+        "attempts": len(ctx.answers),
         "total_duration_ms": int((time.time() - started) * 1000),
         "retry_attempts": relooks + reanswers,
         "retry_reason": "; ".join(

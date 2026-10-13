@@ -103,5 +103,16 @@ class ScorerTests(unittest.TestCase):
         self.assertFalse(scoring.answers_agree("yes", "no", True))
 
 
+class AttemptSelectionTests(unittest.TestCase):
+    def test_later_answer_must_be_strictly_better_verified(self):
+        from agents.agentic_loop import select_best_attempt
+        partial = {"verification_status": "partially_verified", "confidence_label": "Medium"}
+        verified = {"verification_status": "verified", "confidence_label": "High"}
+        low = {"verification_status": "low_confidence", "confidence_label": "Low"}
+        self.assertEqual(select_best_attempt([partial, partial]), 0)   # tie keeps the original
+        self.assertEqual(select_best_attempt([low, verified]), 1)      # improvement replaces it
+        self.assertEqual(select_best_attempt([verified, partial]), 0)  # regression is ignored
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -132,7 +132,7 @@ class QuestionAnalyzer:
         ):
             return {
                 "question_type": "modality_identification",
-                "expected_answer_format": "single_word",
+                "expected_answer_format": "short_phrase",
                 "reasoning_type": "visual_recognition",
                 "question_clarity": "clear",
             }

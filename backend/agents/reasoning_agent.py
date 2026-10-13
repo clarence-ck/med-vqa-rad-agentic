@@ -236,6 +236,8 @@ class ReasoningAgent:
                 guidance.append("- For lesion location questions, answer where the mass/lesion is located rather than whether a mass is visible; prefer an anatomical phrase like 'anterior mediastinum' when supported.")
         if question_type == "anatomy_identification":
             guidance.append(f"- For anatomy identification, prefer the most specific image-grounded anatomical label (current image region: {body_region}; modality: {modality}).")
+        if question_type == "modality_identification":
+            guidance.append("- For modality questions, name the modality and, when visible, the sequence/weighting, contrast phase or plane (for example 'MRI, axial T2-weighted' or 'CT with contrast').")
         if question_subtype == "finding_description":
             guidance.append("- For finding description questions, describe the observable abnormality, its location, and its extent; avoid collapsing the answer into a generic 'abnormal' statement.")
         if question_subtype == "counting_exact":
