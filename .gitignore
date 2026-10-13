@@ -32,3 +32,6 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Runtime logs (existing committed logs stay tracked)
+backend/logs/*.log
