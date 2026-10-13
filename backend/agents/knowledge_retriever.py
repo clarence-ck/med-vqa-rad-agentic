@@ -7,6 +7,7 @@ from haystack.dataclasses import ChatMessage
 from haystack.utils import Secret
 from config import OPENAI_API_KEY, MODELS, generation_kwargs
 from utils.json_utils import strip_json_fences
+from utils.usage import record_usage
 from logger import get_logger
 
 _log = get_logger("agents.knowledge_retriever")
@@ -307,6 +308,8 @@ class KnowledgeRetriever:
                 messages=[ChatMessage.from_user(prompt)],
                 generation_kwargs=generation_kwargs("lookup")
             )
+
+            record_usage("lookup", MODELS["lookup"], response["replies"][0].meta.get("usage"))
 
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)

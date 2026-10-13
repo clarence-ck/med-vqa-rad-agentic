@@ -8,6 +8,7 @@ from haystack.dataclasses import ChatMessage
 from haystack.utils import Secret
 from config import OPENAI_API_KEY, MODELS, generation_kwargs
 from utils.json_utils import strip_json_fences
+from utils.usage import record_usage
 from logger import get_logger
 
 _log = get_logger("agents.question_analyzer")
@@ -300,6 +301,8 @@ Return ONLY the JSON object, no additional text."""
                 messages=[ChatMessage.from_user(prompt)],
                 generation_kwargs=generation_kwargs("analyze")
             )
+
+            record_usage("analyze", MODELS["analyze"], response["replies"][0].meta.get("usage"))
 
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)

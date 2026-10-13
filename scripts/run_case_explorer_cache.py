@@ -9,6 +9,7 @@ Usage (run from repo root):
     python scripts/run_case_explorer_cache.py --refresh   # Restart: recompute all 200 cases
     python scripts/run_case_explorer_cache.py --dry-run   # Preview: show what would run
     python scripts/run_case_explorer_cache.py --status    # Stats: show cache coverage only
+    python scripts/run_case_explorer_cache.py --limit 20 --max-cost 1.0   # Pilot with a spend cap
 
 Note: Only the base command (no flags) resumes from interruption. Already-cached cases are skipped.
 """
@@ -61,7 +62,8 @@ def _show_cache_status(selected_samples: list) -> None:
     print("=" * 50)
 
 
-async def warm_cache(skip: int, limit: int, refresh: bool, dry_run: bool = False, status_only: bool = False) -> None:
+async def warm_cache(skip: int, limit: int, refresh: bool, dry_run: bool = False, status_only: bool = False,
+                     max_cost: float | None = None) -> None:
     if skip < 0:
         raise ValueError("skip must be >= 0")
     if limit < 0:
@@ -117,6 +119,7 @@ async def warm_cache(skip: int, limit: int, refresh: bool, dry_run: bool = False
     # Process samples
     completed = 0
     errors = 0
+    total_cost = 0.0
     for index, sample in enumerate(samples, start=1):
         sample_id = int(sample["id"])
         question = str(sample.get("question", ""))
@@ -126,18 +129,31 @@ async def warm_cache(skip: int, limit: int, refresh: bool, dry_run: bool = False
         if cache_path.exists() and not refresh:
             continue  # Skip silently (already counted in preview)
 
+        if max_cost is not None and total_cost >= max_cost:
+            print(f"Stopping: estimated spend ${total_cost:.4f} reached --max-cost ${max_cost:.2f}")
+            break
+
         print(f"[{index}/{len(samples)}] sample_id={sample_id}  question_type={question_type}")
         payload = await analyze_sample_case(sample_id, refresh=refresh)
-        if isinstance(payload, dict) and payload.get("error"):
-            print(f"  -> ERROR: {payload['error']}")
+        if not isinstance(payload, dict) or payload.get("error"):
+            message = payload.get("error") if isinstance(payload, dict) else getattr(payload, "status_code", payload)
+            print(f"  -> ERROR: {message}")
             errors += 1
-        else:
-            cached_flag = payload.get("cached", False) if isinstance(payload, dict) else False
-            print(f"  -> stored in cache (cached={cached_flag})")
-            completed += 1
+            continue
+
+        usage = payload.get("usage") or {}
+        case_cost = sum((usage.get(system) or {}).get("cost_usd", 0.0) for system in ("baseline", "workflow", "agentic"))
+        total_cost += case_cost
+        cost_note = "  ".join(
+            f"{system}=${(usage.get(system) or {}).get('cost_usd', 0.0):.4f}" for system in ("baseline", "workflow", "agentic")
+        )
+        print(f"  -> stored in cache  case=${case_cost:.4f}  ({cost_note})  running total=${total_cost:.4f}")
+        completed += 1
 
     print()
     print(f"Done. Successfully cached: {completed} | Errors: {errors}")
+    if completed:
+        print(f"Estimated spend: ${total_cost:.4f} total, ${total_cost / completed:.4f} per case")
     print(f"Cache files are written under backend/.case_explorer_cache")
 
 
@@ -167,6 +183,12 @@ def parse_args() -> argparse.Namespace:
         help="Preview which cases would be processed without running analysis.",
     )
     parser.add_argument(
+        "--max-cost",
+        type=float,
+        default=None,
+        help="Stop starting new cases once estimated OpenAI spend reaches this many USD.",
+    )
+    parser.add_argument(
         "--status",
         action="store_true",
         help="Show cache coverage statistics and exit.",
@@ -182,7 +204,8 @@ def main() -> None:
         limit=args.limit,
         refresh=args.refresh,
         dry_run=args.dry_run,
-        status_only=args.status
+        status_only=args.status,
+        max_cost=args.max_cost,
     ))
 
 

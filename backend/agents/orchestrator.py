@@ -16,6 +16,7 @@ from agents.verification_agent import VerificationAgent
 from config import OPENAI_API_KEY, MODELS, generation_kwargs
 from logger import get_logger
 from utils.answer_utils import leading_yes_no
+from utils.usage import record_usage
 
 _log = get_logger("agents.orchestrator")
 
@@ -1030,7 +1031,11 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
                 "image_interpreter": {"result": {"status": "error", "error": str(e)}},
                 "abort": str(e)
             }
-            
+
+        for message in response.get("messages", []) or []:
+            if message.role.value == "assistant" and message.meta.get("usage"):
+                record_usage("controller", MODELS["controller"], message.meta["usage"])
+
         return {
             "image_interpreter": {
                 "result": response.get("image_interpretation") or {},

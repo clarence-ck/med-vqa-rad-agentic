@@ -20,6 +20,7 @@ from agents.workflow_baseline import workflow_answer
 from utils.data_loader import get_sample_cases, get_sample_by_id, get_image_bytes, EXCLUDED_SAMPLE_IDS
 from utils import scoring
 from config import model_manifest
+from utils.usage import track_usage, summarize as summarize_usage
 from logger import get_logger, sample_id_var
 
 router = APIRouter(prefix="/api/dataset")
@@ -398,17 +399,29 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
         )
         started_at = time.time()
 
+        def run_with_usage(fn, *args):
+            with track_usage() as records:
+                result = fn(*args)
+            return result, summarize_usage(records)
+
         async def timed(fn, *args):
             t0 = time.time()
-            result = await asyncio.to_thread(fn, *args)
-            return result, int((time.time() - t0) * 1000)
+            result, usage = await asyncio.to_thread(run_with_usage, fn, *args)
+            return result, int((time.time() - t0) * 1000), usage
 
-        (baseline_result, baseline_ms), (workflow_result, workflow_ms), (agentic_result, agentic_ms) = \
-            await asyncio.gather(
+        (baseline_result, baseline_ms, baseline_usage), (workflow_result, workflow_ms, workflow_usage), \
+            (agentic_result, agentic_ms, agentic_usage) = await asyncio.gather(
                 timed(baseline_answer, image_bytes, question, mime_type),
                 timed(workflow_answer, image_bytes, question, mime_type),
                 timed(run_pipeline, image_bytes, question, mime_type),
             )
+        _log.info(
+            "Sample %d usage  baseline=$%.4f (%d calls)  workflow=$%.4f (%d calls)  agentic=$%.4f (%d calls)",
+            sample_id,
+            baseline_usage["cost_usd"], baseline_usage["calls"],
+            workflow_usage["cost_usd"], workflow_usage["calls"],
+            agentic_usage["cost_usd"], agentic_usage["calls"],
+        )
 
         total_ms = int((time.time() - started_at) * 1000)
         question_subtype = str(
@@ -449,6 +462,11 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
             "workflow_duration_ms": workflow_ms,
             "agentic_duration_ms": agentic_ms,
             "models": model_manifest(),
+            "usage": {
+                "baseline": baseline_usage,
+                "workflow": workflow_usage,
+                "agentic": agentic_usage,
+            },
         }
 
         with open(cache_path, "w", encoding="utf-8") as f:

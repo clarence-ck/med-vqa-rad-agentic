@@ -4,6 +4,7 @@ import time
 from openai import OpenAI
 from config import OPENAI_API_KEY, MODELS, generation_kwargs
 from utils.json_utils import strip_json_fences
+from utils.usage import record_usage
 from logger import get_logger
 
 _log = get_logger("agents.baseline")
@@ -69,6 +70,8 @@ Return ONLY the JSON object, no additional text."""
             **generation_kwargs("baseline"),
 
         )
+
+        record_usage("baseline", MODELS["baseline"], response.usage)
 
         raw = strip_json_fences(response.choices[0].message.content or "")
         _log.debug("Raw baseline response: %s", raw[:500])

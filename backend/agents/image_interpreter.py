@@ -11,6 +11,7 @@ from haystack.utils import Secret
 
 from config import OPENAI_API_KEY, MODELS, generation_kwargs
 from utils.json_utils import strip_json_fences
+from utils.usage import record_usage
 from logger import get_logger
 
 _log = get_logger("agents.image_interpreter")
@@ -305,6 +306,7 @@ Return ONLY the JSON object, no additional text."""
                 ])
             ]
             response = self.generator.run(messages=messages, generation_kwargs=generation_kwargs("look"))
+            record_usage("look", MODELS["look"], response["replies"][0].meta.get("usage"))
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
             
