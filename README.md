@@ -4,6 +4,11 @@ MedVisionQuery is an **agentic multimodal system** for medical visual question a
 
 > ⚠️ **For educational and research purposes only. Not for clinical use.**
 
+> **Update (October 2026):** SLAKE-based retrieval (Advanced RAG) has been removed, the evaluation scorer and
+> question classifier have been fixed, and models are now configured per role (see `.env.example`). The
+> architecture, results, log-analysis and reflection sections below still describe the April 2026 version and
+> will be rewritten after the redesigned agent is re-evaluated.
+
 ---
 
 ## Quick Links
@@ -14,7 +19,7 @@ MedVisionQuery is an **agentic multimodal system** for medical visual question a
 
 **Understanding the System**
 - **🏗️ [Agent Architecture](#agent-architecture)** — System design and agents
-- **📚 [Dataset](#dataset)** — VQA-RAD and SLAKE information
+- **📚 [Dataset](#dataset)** — VQA-RAD information
 
 **Evaluation & Results**
 - **🎯 [Evaluation Design](#evaluation-design)** — How evaluation works
@@ -215,56 +220,6 @@ These are routing outcomes, not fixed question-type rules; the actual `Difficult
 | `presence_absence`, `abnormality_description` | medium |
 | `explanation_request` (complex clinical reasoning) | hard |
 
-### Knowledge Retrieval (Advanced RAG)
-
-`KnowledgeRetriever` uses `advanced_rag.py` to retrieve supporting SLAKE concept chunks when the router requests retrieval, then uses the OpenAI generator to synthesize the final medical context. The retrieval logic inside `advanced_rag.py` is local and LLM-free: embeddings, FAISS, BM25, and cross-encoder reranking all run on-device.
-
-#### Pipeline Overview
-
-| Stage | Component | Technology | Purpose |
-|-------|-----------|------------|---------|
-| 1 | **Metadata Pre-filtering** | Inverted indices | Narrow corpus using image-grounded metadata (`modality`, `body_region`, `finding_category`) |
-| 2 | **Dense Retrieval** | FAISS + `NeuML/pubmedbert-base-embeddings` | Semantic similarity search on 768-dim normalized biomedical embeddings |
-| 3 | **Sparse Retrieval** | BM25Okapi | Lexical matching for exact medical terms |
-| 4 | **Hybrid Fusion** | Reciprocal Rank Fusion (RRF) | Merge rankings without score calibration (k=60) |
-| 5 | **Cross-encoder Reranking** | `cross-encoder/ms-marco-MiniLM-L-6-v2` | Lightweight relevance scoring (22M params) for fast reranking |
-| 6 | **Confidence Gating** | 4-signal thresholding | Accept only high-quality retrievals, reject weak matches |
-
-#### Confidence-Based Validation
-
-The confidence gate acts as a quality filter before evidence reaches the prompt:
-
-| Signal | Threshold | What It Measures |
-|--------|-----------|------------------|
-| `top1_softmax` | ≥ 0.30 | Cross-encoder certainty about the top candidate |
-| `softmax_margin` | ≥ 0.08 | Confidence gap between top-1 and top-2 candidates |
-| `dense_top1` | ≥ 0.35 | Semantic retrieval quality (cosine similarity) |
-| `agreement` | present in both | Whether the top reranked candidate appears in dense AND sparse top-5 |
-
-**Decision Logic**:
-- **High confidence** (0 weak signals): Retrieve and inject evidence
-- **Medium confidence** (1 weak signal): Retrieve and log a warning
-- **Low confidence** (2+ weak signals): Return empty — no RAG context injected
-
-This prevents low-relevance training cases from contaminating the retrieval context that is later summarized by the LLM.
-
-#### Metadata Filtering
-
-**At Index Time** (corpus building): Metadata is extracted from question+answer text heuristics:
-- `modality`: x-ray, ct, mri, ultrasound, etc.
-- `body_region`: chest, head, abdomen, musculoskeletal, etc.
-- `finding_category`: pneumonia, fracture, mass, hemorrhage, etc.
-- `laterality`: left, right, bilateral
-
-**At Query Time**: The pipeline receives metadata from `ImageInterpreter` (vision model output for `modality`, `body_region`) and image-grounded `notable_findings` for `finding_category`. The smart intersection logic inside `advanced_rag.py` is:
-1. Start with `modality` when available.
-2. Intersect `body_region` when available.
-3. Try `finding_category` last.
-4. If `finding_category` would reduce candidates to zero, skip it.
-5. If `modality ∩ body_region` is empty, fall back to `body_region` alone.
-
-This graceful degradation prevents over-filtering while still using metadata whenever it helps.
-
 ### Model Configuration
 
 The current runtime uses OpenAI for all LLM-driven stages. The Advanced RAG retrieval stack additionally uses local SentenceTransformers, a CrossEncoder reranker, FAISS, and BM25 models. The retrieval stack is configured for the English-only SLAKE KB with `NeuML/pubmedbert-base-embeddings` and `cross-encoder/ms-marco-MiniLM-L-6-v2`. The evaluation scorer uses `S-PubMedBert-MS-MARCO` (`pritamdeka/S-PubMedBert-MS-MARCO`) for semantic similarity on open-ended answers.
@@ -286,7 +241,7 @@ Hugging Face is used to download the raw datasets via scripts. The retrieval sta
 - **FAISS (`faiss-cpu`)** — dense vector index for fast semantic retrieval in Advanced RAG
 - **SentenceTransformers + CrossEncoder** — dense embeddings and cross-encoder reranking
 - **BM25 (`rank-bm25`)** — sparse lexical retrieval for hybrid search
-- **Hugging Face `datasets`** — used by `scripts/download_dataset.py` and `scripts/download_slake_dataset.py` to materialize local datasets
+- **Hugging Face `datasets`** — used by `scripts/download_dataset.py` to materialize the local VQA-RAD dataset
 - **Matplotlib** — `scripts/system_diagram.py` regenerates `system_diagram.png`
 
 ---
@@ -798,42 +753,9 @@ Hit **Refresh Metrics** to re-aggregate after running new cases in Case Explorer
 | Image types | Radiology images |
 | Question styles | Yes/no (close-ended) and open-ended |
 
-**SLAKE** — a medical VQA dataset from [BoKelvin/SLAKE](https://huggingface.co/datasets/BoKelvin/SLAKE) on Hugging Face.
+VQA-RAD is used for the app's Case Explorer browsing and evaluation cache. The scorer rules live in `backend/utils/scoring.py`.
 
-| Field | Value |
-|---|---|
-| KB source | Train split only |
-| Downloaded manifest | `data/slake/slake.json` |
-| KB output | `data/slake/kb/slake_kb.jsonl` / `.json` / `_summary.json` |
-| Retrieval corpus | 366 English-only concept chunks |
-| Retrieval models | `NeuML/pubmedbert-base-embeddings` + `cross-encoder/ms-marco-MiniLM-L-6-v2` |
-
-VQA-RAD is used for the app's Case Explorer browsing and evaluation cache. SLAKE train split is used as the retrieval corpus for the Advanced RAG pipeline — no VQA-RAD cases are used in the retrieval index.
-
-The evaluation scorer uses exact `yes` / `no` matching for close-ended questions and `S-PubMedBert-MS-MARCO` semantic similarity with a 0.85 threshold for open-ended questions.
-
-The download scripts flatten the Hugging Face datasets into local manifests with split labels, and local image filenames are saved as `{split}_{index:04d}.png`.
-
-### SLAKE Data Pipeline
-
-The SLAKE dataset goes through a transformation process to create a concept-level knowledge base for RAG:
-
-1. **Download SLAKE dataset** (`scripts/download_slake_dataset.py`)
-   - Downloads from Hugging Face: `BoKelvin/SLAKE`
-   - Total: 14,028 items (9,835 train / 2,099 validation / 2,099 test)
-   - Outputs: `data/slake/slake.json` with fields: id, split, question, answer, answer_type, image_name, lang, modality
-
-2. **Build SLAKE KB** (`scripts/build_slake_kb.py --language en`)
-   - Filters to train split only: 4,919 rows
-   - Filters to English-only: 4,919 rows
-   - Extracts metadata from each row (concept type, concept label, modality, body region, finding category, laterality, visual cues, target entity)
-   - Aggregates by concept signature (concept_type, concept, modality, body_region, finding_category, laterality, answer_type, language)
-   - 4,919 rows → 366 unique concept chunks
-   - Each chunk aggregates similar QA pairs around one medical concept
-   - Includes `support_count` (how many original rows contributed) and sample questions/answers for context
-   - Outputs: `data/slake/kb/slake_kb.jsonl`, `slake_kb.json`, `slake_kb_summary.json`
-
-The aggregation is intentional — creates a concept-level knowledge base for retrieval rather than raw QA pairs. Each chunk represents a unique medical concept with aggregated evidence from multiple similar questions.
+The download script flattens the Hugging Face dataset into a local manifest with split labels, and local image filenames are saved as `{split}_{index:04d}.png`.
 
 ---
 
@@ -843,7 +765,7 @@ The aggregation is intentional — creates a concept-level knowledge base for re
 
 - Python 3.12
 - Node.js 18+
-- OpenAI API key with access to the selected `OPENAI_MODEL`
+- OpenAI API key with access to the models set in `.env` (see `.env.example`)
 
 ### 1. Clone and configure
 
@@ -853,16 +775,8 @@ cd Medical-VQA-Explanation-Agent
 cp .env.example .env
 ```
 
-Edit `.env`:
-```env
-OPENAI_API_KEY=sk-...
-VISION_MODEL=gpt-5.4-mini-2026-03-17
-OPENAI_MODEL=gpt-5.4-mini-2026-03-17
-HF_TOKEN=hf_...
-
-# Frontend origin allowed by CORS
-BACKEND_CORS_ORIGINS=http://localhost:5173
-```
+Edit `.env`: set `OPENAI_API_KEY`, and optionally change the per-role models (`MODEL_<ROLE>`) and
+reasoning efforts (`REASONING_EFFORT_<ROLE>`). `.env.example` documents every setting.
 
 Optional: create `frontend/.env` if the frontend should point to a non-default backend URL.
 ```env
@@ -879,7 +793,7 @@ conda env create -f environment.yml
 conda activate medvisionquery
 ```
 
-This path installs native ML dependencies (`numpy`, `faiss-cpu`, `pytorch`) from conda first, then installs Python-level packages with pip. This is the recommended setup to avoid OpenMP runtime conflicts on Windows.
+This path installs native ML dependencies (`numpy`, `pytorch`) from conda first, then installs Python-level packages with pip. This is the recommended setup to avoid OpenMP runtime conflicts on Windows.
 
 **Option B — pip (fallback, more fragile for native deps on Windows)**
 ```bash
@@ -888,26 +802,17 @@ pip install -r backend/requirements.txt
 
 If you use the pip fallback, install native packages from conda first in the same environment:
 ```bash
-conda install -c conda-forge numpy faiss-cpu pytorch
+conda install -c conda-forge numpy pytorch
 pip install -r backend/requirements.txt
 ```
 
-### 3. Download the datasets
+### 3. Download the dataset
 
 ```bash
 python scripts/download_dataset.py
-python scripts/download_slake_dataset.py
 ```
 
-Downloads the VQA-RAD case-evaluation dataset and the SLAKE dataset from Hugging Face. VQA-RAD is used for the app's dataset browser and evaluation cache, while SLAKE is converted into the English-only retrieval KB used by Advanced RAG.
-
-To build the SLAKE KB after download:
-
-```bash
-python scripts/build_slake_kb.py --language en
-```
-
-This writes `data/slake/kb/slake_kb.jsonl`, `slake_kb.json`, and `slake_kb_summary.json`.
+Downloads VQA-RAD from Hugging Face into `data/vqa-rad/`.
 
 ### 4. Start the backend
 
@@ -945,9 +850,7 @@ Medical-VQA-Explanation-Agent/
 │   │   ├── orchestrator.py          # Haystack Agent controller, tool routing, retry logic, guardrails
 │   │   ├── image_interpreter.py     # Agent 1: multimodal image interpretation (OpenAI-backed vision model)
 │   │   ├── question_analyzer.py     # Agent 2: question classification and intent analysis (OpenAI)
-│   │   ├── difficulty_router.py     # Agent 3: planning — sets difficulty, retrieval flag, verification policy, fallback policy
-│   │   ├── advanced_rag.py          # Advanced RAG engine: SLAKE KB retrieval, metadata filtering, reranking, confidence gating
-│   │   ├── knowledge_retriever.py   # Agent 4: optional medical context retrieval with SLAKE KB grounding
+│   │   ├── difficulty_router.py     # Agent 3: planning — sets difficulty, verification policy, fallback policy
 │   │   ├── reasoning_agent.py       # Agent 5: answer synthesis with retry context support (OpenAI)
 │   │   ├── verification_agent.py    # Agent 6: structured verification and fallback recommendations (OpenAI)
 │   │   ├── baseline.py              # Single-shot multimodal baseline (OpenAI)
@@ -977,7 +880,7 @@ Medical-VQA-Explanation-Agent/
 │       │   ├── ExplanationCard.jsx  # explanation text, evidence used, reasoning trace
 │       │   ├── FailureModeDrawer.jsx# collapsible failure category list and failure hints
 │       │   ├── ImageViewer.jsx      # image display with zoom and predicted tags
-│       │   ├── RoutingCard.jsx      # difficulty badge, retrieval trigger, verification policy, fallback policy
+│       │   ├── RoutingCard.jsx      # difficulty badge, verification policy, fallback policy
 │       │   └── VerificationPanel.jsx# verification checks, notes, fallback, review flag
 │       └── hooks/
 │           ├── useAnalysis.js       # analyze / analyzeBaseline / analyzeWorkflow API calls
@@ -985,20 +888,14 @@ Medical-VQA-Explanation-Agent/
 │           └── useEvaluation.js     # evaluation summary fetch
 ├── scripts/
 │   ├── download_dataset.py          # downloads VQA-RAD from Hugging Face, writes JSON + images
-│   ├── download_slake_dataset.py    # downloads SLAKE from Hugging Face, writes JSON + images + language labels
-│   ├── build_slake_kb.py            # builds the English-only SLAKE concept KB for retrieval
 │   ├── run_case_explorer_cache.py   # warms/inspects the curated Case Explorer cache
 │   ├── system_diagram.py            # regenerates the architecture figure
 ├── system_diagram.png               # rendered system diagram asset
 ├── eval-dashboard-screenshots/      # UI screenshots of the evaluation dashboard
 └── data/
-    ├── vqa-rad/                     # gitignored — created by download_dataset.py
-    │   ├── vqa_rad.json             # flattened QA manifest with split labels and image filenames
-    │   └── images/                  # PNG images named {split}_{index:04d}.png
-    └── slake/                       # gitignored — created by download_slake_dataset.py / build_slake_kb.py
-        ├── slake.json               # flattened SLAKE manifest with language labels
-        ├── images/                  # PNG images named {split}_{index:04d}.png
-        └── kb/                      # English-only concept KB JSONL/JSON + summary files
+    └── vqa-rad/                     # gitignored — created by download_dataset.py
+        ├── vqa_rad.json             # flattened QA manifest with split labels and image filenames
+        └── images/                  # PNG images named {split}_{index:04d}.png
 ```
 
 ---
@@ -1040,27 +937,9 @@ The following shapes describe the main inner `result` payload returned by each H
 {
   "status": "success | error",
   "difficulty": "easy | medium | hard",
-  "needs_retrieval": true,
-  "retrieval_rationale": "...",
   "verification_policy": "standard | strict",
   "fallback_policy": "none | add_disclaimer | flag_for_review",
   "routing_rationale": "..."
-}
-```
-
-### KnowledgeRetriever
-```json
-{
-  "status": "success | error",
-  "contextual_notes": "...",
-  "key_facts": ["..."],
-  "expected_normal_findings": "...",
-  "common_pathologies": ["..."],
-  "terminology": {"term": "definition"},
-  "rag_retrieval": {
-    "similar_cases": ["..."],
-    "metadata": {"count": 0, "triggered": true}
-  }
 }
 ```
 
