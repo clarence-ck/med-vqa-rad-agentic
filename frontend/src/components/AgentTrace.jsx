@@ -6,23 +6,25 @@ const STEP_META = {
   'Image Context Filter': { stage: 'Perception', subtitle: 'question-relevant findings', className: 'perception' },
   'Difficulty Routing': { stage: 'Planning', subtitle: 'difficulty + verification policy', className: 'routing' },
   'Reasoning & Answer': { stage: 'Reasoning', subtitle: 'final synthesis', className: 'reasoning' },
-  'Verification': { stage: 'Safety', subtitle: 'support + confidence gate', className: 'verification' },
+  'Verification': { stage: 'Safety', subtitle: 'checked against the image', className: 'verification' },
+  'Focused Look': { stage: 'Perception', subtitle: 're-examination chosen by the controller', className: 'perception' },
+  'Finish': { stage: 'Decision', subtitle: 'controller ends the episode', className: 'routing' },
 };
 
 function getStepMeta(step) {
-  return STEP_META[step.agent] || { stage: 'Stage', subtitle: '', className: 'default' };
+  const name = String(step.agent || '');
+  const key = name.startsWith('Focused Look') ? 'Focused Look' : name;
+  return STEP_META[key] || { stage: 'Stage', subtitle: '', className: 'default' };
 }
 
 export default function AgentTrace({ agentTrace, loading }) {
   const [expandedStep, setExpandedStep] = useState(null);
 
   const defaultSteps = [
-    { agent: 'Image Interpretation', agent_id: 1 },
-    { agent: 'Question Understanding', agent_id: 2 },
-    { agent: 'Image Context Filter', agent_id: 3 },
-    { agent: 'Difficulty Routing', agent_id: 4 },
-    { agent: 'Reasoning & Answer', agent_id: 5 },
-    { agent: 'Verification', agent_id: 6 },
+    { agent: 'Question Understanding', agent_id: 1 },
+    { agent: 'Image Interpretation', agent_id: 2 },
+    { agent: 'Reasoning & Answer', agent_id: 3 },
+    { agent: 'Verification', agent_id: 4 },
   ];
 
   const steps = agentTrace || (loading ? defaultSteps : []);

@@ -7,6 +7,7 @@ const AGENT_NAMES = {
   'Image Context Filter': 'Filter',
   'Reasoning & Answer': 'Reasoning',
   'Verification': 'Verify',
+  'Finish': 'Finish',
 };
 
 function formatDuration(ms) {
@@ -28,7 +29,7 @@ export default function CaseHeader({ result, baselineResult, workflowResult }) {
 
   // Agent pipeline timings
   const agentTimings = result.agent_trace?.map(step => {
-    const name = AGENT_NAMES[step.agent] || step.agent;
+    const name = String(step.agent || '').startsWith('Focused Look') ? 'Re-look' : (AGENT_NAMES[step.agent] || step.agent);
     const duration = formatDuration(step.duration_ms);
     return { name, duration, raw: step.duration_ms };
   }).filter(item => item.raw !== undefined) || [];
