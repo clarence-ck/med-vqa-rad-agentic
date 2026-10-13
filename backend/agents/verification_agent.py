@@ -4,7 +4,7 @@ import time
 from typing import Dict, Any
 from haystack import component
 from haystack.components.generators.chat import OpenAIChatGenerator
-from haystack.dataclasses import ChatMessage
+from haystack.dataclasses import ChatMessage, ImageContent, TextContent
 from haystack.utils import Secret
 from config import OPENAI_API_KEY, MODELS, generation_kwargs
 from utils.json_utils import strip_json_fences
@@ -130,7 +130,11 @@ class VerificationAgent:
             image_interpretation: dict = None,
             question_analysis: dict = None,
             filtered_image_context: dict = None,
-            original_question: str = ""):
+            original_question: str = "",
+            image_bytes_b64: str = "",
+            mime_type: str = "image/png"):
+        """With image_bytes_b64 the verifier checks the answer against the image itself
+        (a cross-modal check) and recommends the next action for the agent controller."""
 
         ans = answer_data.get("result", answer_data) if answer_data else {}
         vs = image_interpretation.get("result", image_interpretation) if image_interpretation else {}
@@ -156,6 +160,14 @@ class VerificationAgent:
             qa.get("question_type", "unknown"),
         )
         started = time.perf_counter()
+
+        action_fields = ""
+        if image_bytes_b64:
+            action_fields = (
+                ',\n  "recommended_action": "accept / relook / reanswer / abstain",'
+                '\n  "relook_focus": "If relook: the specific region or structure to re-examine, else empty",'
+                '\n  "reanswer_guidance": "If reanswer: what the next answer must fix, else empty"'
+            )
 
         prompt = f"""You are a medical VQA verification agent. Your job is to critically evaluate whether the following answer is consistent, grounded, and appropriate.
 
@@ -210,14 +222,29 @@ Return a JSON object with:
   "issues_found": ["List of any specific issues found, empty if none"],
   "fallback_recommendation": "none / rephrase_answer / add_disclaimer / flag_for_review",
   "verification_notes": "Brief explanation of the verification result",
-  "suggested_disclaimer": "If needed, a safety disclaimer to append (empty string if not needed)"
+  "suggested_disclaimer": "If needed, a safety disclaimer to append (empty string if not needed)"{action_fields}
 }}
 
 Return ONLY the JSON object, no additional text."""
 
         try:
+            if image_bytes_b64:
+                prompt += """
+
+The medical image is attached. Judge the answer against the IMAGE ITSELF, not only against the text
+analysis above: the text analysis can be incomplete or wrong. Then recommend the next action:
+- "accept": the image supports the answer.
+- "relook": the answer depends on a region or structure that needs a closer, focused look (name it in relook_focus).
+- "reanswer": the evidence is adequate but the answer is wrong, unsupported, or badly formatted (say what to fix).
+- "abstain": the image cannot answer the question reliably."""
+                message = ChatMessage.from_user(content_parts=[
+                    TextContent(text=prompt),
+                    ImageContent(base64_image=image_bytes_b64, mime_type=mime_type, detail="high"),
+                ])
+            else:
+                message = ChatMessage.from_user(prompt)
             response = self.generator.run(
-                messages=[ChatMessage.from_user(prompt)],
+                messages=[message],
                 generation_kwargs=generation_kwargs("check")
             )
 

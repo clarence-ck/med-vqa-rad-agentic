@@ -15,7 +15,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 
 from agents.baseline import baseline_answer
-from agents.orchestrator import run_pipeline
+from agents.agentic_loop import run_agentic
 from agents.workflow_baseline import workflow_answer
 from utils.data_loader import get_sample_cases, get_sample_by_id, get_image_bytes, EXCLUDED_SAMPLE_IDS
 from utils import scoring
@@ -391,7 +391,7 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
             (agentic_result, agentic_ms, agentic_usage) = await asyncio.gather(
                 timed(baseline_answer, image_bytes, question, mime_type),
                 timed(workflow_answer, image_bytes, question, mime_type),
-                timed(run_pipeline, image_bytes, question, mime_type),
+                timed(run_agentic, image_bytes, question, mime_type),
             )
         _log.info(
             "Sample %d usage  baseline=$%.4f (%d calls)  workflow=$%.4f (%d calls)  agentic=$%.4f (%d calls)",

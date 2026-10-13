@@ -1,7 +1,7 @@
 import asyncio
 import time
 from fastapi import APIRouter, UploadFile, File, Form
-from agents.orchestrator import run_pipeline
+from agents.agentic_loop import run_agentic
 from agents.baseline import baseline_answer
 from agents.workflow_baseline import workflow_answer
 from logger import get_logger
@@ -13,7 +13,7 @@ _log = get_logger("routes.analyze")
 @router.post("/analyze")
 async def analyze(image: UploadFile = File(...), question: str = Form(...)):
     """
-    Run the full 6-stage agentic pipeline.
+    Run the agentic system (controller loop by default; AGENT_MODE=pipeline for the fixed pipeline).
     Accepts a medical image and a question, returns structured analysis.
     """
     image_bytes = await image.read()
@@ -25,7 +25,7 @@ async def analyze(image: UploadFile = File(...), question: str = Form(...)):
         question,
     )
     started = time.perf_counter()
-    result = await asyncio.to_thread(run_pipeline, image_bytes, question, mime_type)
+    result = await asyncio.to_thread(run_agentic, image_bytes, question, mime_type)
     elapsed_ms = int((time.perf_counter() - started) * 1000)
     _log.info(
         "[agentic-pipeline] done  answer=%r  verification=%s  confidence=%s  duration=%dms",

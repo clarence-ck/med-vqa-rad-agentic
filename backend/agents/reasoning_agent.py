@@ -255,7 +255,8 @@ class ReasoningAgent:
             original_question: str = "",
             retry_context: dict = None,
             image_bytes_b64: str = "",
-            mime_type: str = "image/png"):
+            mime_type: str = "image/png",
+            guidance: str = ""):
         """When image_bytes_b64 is given, the image is sent alongside the text context
         so the answer is grounded in the image itself, not only in the stage-1 summary."""
 
@@ -331,6 +332,11 @@ RETRY CONTEXT:
 - Retry instruction: Re-evaluate the answer with extra caution. If the evidence is still insufficient, produce a more conservative answer or explicitly abstain.
 """
 
+        revision_guidance = (
+            f"\n\nREVISION REQUESTED BY THE VERIFIER:\n- {guidance.strip()}\n- Fix this in the new answer.\n"
+            if guidance and guidance.strip() else ""
+        )
+
         expected_format = qa.get('expected_answer_format', '')
         is_yes_no = question_type in ('yes_no', 'presence_absence') or expected_format == 'yes_no'
         style_guidance = self._build_style_guidance(question_type, expected_format, vs, question_subtype)
@@ -386,7 +392,7 @@ COUNTING SAFETY RULES:
 - If count confidence is low or count method is text_inference, avoid asserting a precise count unless the image analysis strongly supports it.
 - Prefer conservative estimates or explicit uncertainty when the count signal is weak.
 
-{yes_no_constraint}{retry_guidance}
+{yes_no_constraint}{retry_guidance}{revision_guidance}
 
 ANSWER STYLE RULES:
 {style_guidance}

@@ -1,4 +1,4 @@
-"""Pilot: does giving the reasoning agent the image close the gap to the single-shot baseline?
+"""Pilot comparisons on a seeded random sample of VQA-RAD test cases (spend-capped).
 
 Runs, on a seeded random sample of VQA-RAD test cases:
   - single-shot baseline
@@ -26,6 +26,7 @@ sys.path.insert(0, str(ROOT_DIR / "backend"))
 from sklearn.metrics.pairwise import cosine_similarity  # noqa: E402
 
 from agents.baseline import baseline_answer  # noqa: E402
+from agents.agentic_loop import run_agentic_loop  # noqa: E402
 from agents.orchestrator import run_pipeline  # noqa: E402
 from config import model_manifest  # noqa: E402
 from routes.dataset import _get_cached_embedding, _normalize_answer  # noqa: E402
@@ -33,8 +34,8 @@ from utils import scoring  # noqa: E402
 from utils.data_loader import EXCLUDED_SAMPLE_IDS, get_image_bytes, get_sample_by_id, load_dataset  # noqa: E402
 from utils.usage import summarize, track_usage  # noqa: E402
 
-OUTPUT = ROOT_DIR / "experiments" / "reasoner_sees_image" / "results.json"
-SYSTEMS = ("baseline", "agentic_text_only", "agentic_with_image")
+OUTPUT_DIR = ROOT_DIR / "experiments"
+ALL_SYSTEMS = ("baseline", "agentic_text_only", "agentic_with_image", "agentic_loop")
 
 
 def similarity(first: str, second: str) -> float:
@@ -49,6 +50,8 @@ def run_system(name: str, image_bytes: bytes, question: str):
     with track_usage() as records:
         if name == "baseline":
             result = baseline_answer(image_bytes, question, "image/png")
+        elif name == "agentic_loop":
+            result = run_agentic_loop(image_bytes, question, "image/png")
         else:
             result = run_pipeline(image_bytes, question, "image/png",
                                   reasoner_sees_image=(name == "agentic_with_image"))
@@ -60,7 +63,15 @@ def main() -> None:
     parser.add_argument("--n", type=int, default=20)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--max-cost", type=float, default=1.0, help="Stop before starting a case once spend reaches this (USD).")
+    parser.add_argument("--systems", default="baseline,agentic_text_only,agentic_with_image",
+                        help=f"Comma-separated subset of {', '.join(ALL_SYSTEMS)}")
+    parser.add_argument("--name", default="reasoner_sees_image", help="Results folder under experiments/")
     args = parser.parse_args()
+    systems = tuple(name.strip() for name in args.systems.split(",") if name.strip())
+    unknown = set(systems) - set(ALL_SYSTEMS)
+    if unknown:
+        parser.error(f"unknown systems: {sorted(unknown)}")
+    output = OUTPUT_DIR / args.name / "results.json"
 
     test_ids = [item["id"] for item in load_dataset()
                 if item.get("split") == "test" and item["id"] not in EXCLUDED_SAMPLE_IDS]
@@ -77,8 +88,8 @@ def main() -> None:
         gt_norm = _normalize_answer(ground_truth)
         close_ended = scoring.is_close_ended(gt_norm)
 
-        with ThreadPoolExecutor(max_workers=len(SYSTEMS)) as pool:
-            futures = {name: pool.submit(run_system, name, image_bytes, question) for name in SYSTEMS}
+        with ThreadPoolExecutor(max_workers=len(systems)) as pool:
+            futures = {name: pool.submit(run_system, name, image_bytes, question) for name in systems}
             outputs = {name: future.result() for name, future in futures.items()}
 
         row = {"sample_id": sample_id, "question": question, "ground_truth": ground_truth,
@@ -94,15 +105,16 @@ def main() -> None:
                 "usage": usage,
                 "verification_status": result.get("verification_status"),
                 "retry_attempts": result.get("retry_attempts"),
+                "controller_actions": result.get("controller_actions"),
             }
             case_cost += usage["cost_usd"]
         total_cost += case_cost
         rows.append(row)
-        marks = "  ".join(f"{name}={'Y' if row[name]['correct'] else 'N'}" for name in SYSTEMS)
+        marks = "  ".join(f"{name}={'Y' if row[name]['correct'] else 'N'}" for name in systems)
         print(f"[{index}/{len(sample_ids)}] {sample_id} {question[:50]!r:54} {marks}  ${case_cost:.4f} (total ${total_cost:.4f})", flush=True)
 
     summary = {}
-    for name in SYSTEMS:
+    for name in systems:
         done = [row[name] for row in rows]
         summary[name] = {
             "accuracy": sum(r["correct"] for r in done) / len(done) if done else 0.0,
@@ -113,14 +125,14 @@ def main() -> None:
             "cost_usd": round(sum(r["usage"]["cost_usd"] for r in done), 4),
         }
 
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(json.dumps({"seed": args.seed, "models": model_manifest(), "summary": summary,
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps({"seed": args.seed, "models": model_manifest(), "summary": summary,
                                   "total_cost_usd": round(total_cost, 4), "rows": rows}, indent=2), encoding="utf-8")
 
     print("\nsystem               accuracy   avg time  avg calls  cost")
     for name, s in summary.items():
         print(f"{name:20} {s['correct']:>3}/{s['cases']:<3} {s['accuracy']:6.0%}  {s['avg_duration_ms']/1000:6.1f}s  {s['avg_calls']:9}  ${s['cost_usd']:.4f}")
-    print(f"total spend ${total_cost:.4f}  ->  {OUTPUT.relative_to(ROOT_DIR)}")
+    print(f"total spend ${total_cost:.4f}  ->  {output.relative_to(ROOT_DIR)}")
 
 
 if __name__ == "__main__":

@@ -43,6 +43,10 @@ _ROLE_DEFAULTS = {
     "judge":      ("gpt-6.1-sol",  "low"),    # evaluation judge for borderline answers
 }
 
+# Agentic system: "loop" = controller decides look/answer/check/finish (default);
+# "pipeline" = the original fixed six-stage pipeline (kept as an ablation).
+AGENT_MODE = os.getenv("AGENT_MODE", "loop").strip().lower()
+
 # Send the image to the reasoning agent as well as the stage-1 summary (experiment flag).
 REASONER_SEES_IMAGE = os.getenv("REASONER_SEES_IMAGE", "false").strip().lower() in {"1", "true", "yes"}
 
