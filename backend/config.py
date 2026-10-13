@@ -34,7 +34,7 @@ _ROLE_DEFAULTS = {
     #  role        model            effort    used by
     # Budget profile: Luna everywhere except the verifier and judge, which use a
     # different model (Sol) so checking is not done by the model that answered.
-    "controller": ("gpt-6-luna",   "low"),    # Haystack Agent controller
+    "controller": ("gpt-6-luna",   "none"),   # Haystack Agent controller (chat-completions tool calls reject other efforts)
     "look":       ("gpt-6-luna",   "medium"), # ImageInterpreter
     "analyze":    ("gpt-6-luna",   "low"),    # QuestionAnalyzer, DifficultyRouter
     "lookup":     ("gpt-6-luna",   "low"),    # KnowledgeRetriever synthesis
