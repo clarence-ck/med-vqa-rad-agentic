@@ -116,6 +116,12 @@ def _configure_root() -> None:
     console_handler.setFormatter(console_formatter)
     root.addHandler(console_handler)
 
+    # Tests and offline scripts can opt out of writing session/per-sample log files.
+    if os.getenv("MEDVQA_DISABLE_FILE_LOGS", "").strip().lower() in {"1", "true", "yes"}:
+        for noisy in ("httpx", "httpcore", "openai", "haystack"):
+            logging.getLogger(noisy).setLevel(logging.WARNING)
+        return
+
     # ── File handler (plain text, one file per server session) ───────────────
     os.makedirs(_LOG_DIR, exist_ok=True)
     log_file_path = os.path.join(_LOG_DIR, _SESSION_LOG_FILENAME)

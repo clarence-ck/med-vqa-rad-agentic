@@ -275,11 +275,21 @@ class KnowledgeRetriever:
                             grouped_cases.get("label_scores", {}),
                         )
                 else:
-                    _log.info("Advanced RAG returned 0 similar cases for this question; proceeding without RAG context")
+                    # The confidence gate rejected every candidate. Do not ask the LLM to
+                    # invent "key facts" from general knowledge in place of evidence.
+                    _log.info("Advanced RAG returned 0 similar cases; returning empty knowledge (no LLM synthesis)")
+                    return {"result": self._no_evidence_result(
+                        "success", "empty",
+                        "No knowledge-base evidence passed the retrieval confidence gate; "
+                        "the answer relies on image analysis only.",
+                        rag_metadata,
+                    )}
 
             except Exception as e:
-                _log.error("Advanced RAG retrieval failed: %s — continuing without RAG context", e)
-                rag_context = ""
+                _log.error("Advanced RAG retrieval failed: %s", e)
+                return {"result": self._no_evidence_result(
+                    "error", "failed", f"Knowledge retrieval failed: {e}", rag_metadata,
+                )}
 
         # Build enhanced prompt with RAG context
         prompt = self._build_prompt(
@@ -353,6 +363,26 @@ class KnowledgeRetriever:
                 "common_pathologies": [],
                 "terminology": {}
             }}
+
+    def _no_evidence_result(self, status: str, retrieval_status: str, notes: str, rag_metadata: dict) -> dict:
+        return {
+            "status": status,
+            "retrieval_status": retrieval_status,
+            "contextual_notes": notes,
+            "key_facts": [],
+            "expected_normal_findings": "",
+            "common_pathologies": [],
+            "terminology": {},
+            "rag_retrieval": {
+                "similar_cases": [],
+                "supporting_cases": [],
+                "contradictory_cases": [],
+                "dominant_label": "unknown",
+                "has_contradiction": False,
+                "label_scores": {},
+                "metadata": rag_metadata,
+            },
+        }
 
     def _format_similar_cases(self, cases: list) -> str:
         """Format retrieved SLAKE KB concepts as compact evidence cards."""

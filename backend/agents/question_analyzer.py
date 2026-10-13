@@ -13,6 +13,15 @@ from logger import get_logger
 _log = get_logger("agents.question_analyzer")
 
 
+def _has_term(text: str, term: str) -> bool:
+    """Whole-word/phrase match, so 'ct' does not fire inside 'fracture' or 'structure'."""
+    return re.search(rf"(?<![a-z0-9]){re.escape(term)}(?![a-z0-9])", text) is not None
+
+
+def _has_any(text: str, terms) -> bool:
+    return any(_has_term(text, term) for term in terms)
+
+
 @component
 class QuestionAnalyzer:
     """
@@ -75,19 +84,19 @@ class QuestionAnalyzer:
             "well-defined", "well defined", "enlarged", "ring-enhancing", "ring enhancing",
             "hyperinflated", "shifted", "fracture", "lesion", "mass", "effusion", "pneumothorax",
         ]
-        has_polarity = any(word in q for word in polarity_words)
+        has_polarity = _has_any(q, polarity_words)
         counting_words = [
             "how many", "count", "number of", "number", "total", "total number", "many",
             "single", "double", "triple", "one", "two", "three", "four", "five", "six", "seven",
             "eight", "nine", "ten",
         ]
-        has_counting_signal = any(word in q for word in counting_words)
+        has_counting_signal = _has_any(q, counting_words)
         location_words = [
             "where", "located", "location", "side", "left", "right", "bilateral", "midline",
             "upper", "lower", "anterior", "posterior", "superior", "inferior", "medial", "lateral",
         ]
-        has_location_signal = any(word in q for word in location_words)
-        explicit_choice = any(pattern in q for pattern in [
+        has_location_signal = _has_any(q, location_words)
+        explicit_choice = _has_any(q, [
             "normal or abnormal", "abnormal or normal", "present or absent", "absent or present",
             "benign or malignant", "malignant or benign", "left or right", "right or left",
         ])
@@ -100,7 +109,7 @@ class QuestionAnalyzer:
                 "question_clarity": "clear",
             }
 
-        if starts_location or (has_location_signal and ("where" in q or "located" in q or "side" in q)):
+        if starts_location or (has_location_signal and _has_any(q, ["where", "located", "side"])):
             return {
                 "question_type": "location",
                 "expected_answer_format": "short_phrase",
@@ -116,9 +125,9 @@ class QuestionAnalyzer:
                 "question_clarity": "clear",
             }
 
-        if any(phrase in q for phrase in modality_words) or (
-            any(token in q for token in {"xray", "x-ray", "ct", "mri", "ultrasound", "radiograph"})
-            and any(token in q for token in {"what", "which", "identify", "determine", "is this", "is it"})
+        if _has_any(q, modality_words) or (
+            _has_any(q, {"xray", "x-ray", "ct", "mri", "ultrasound", "radiograph"})
+            and _has_any(q, {"what", "which", "identify", "determine", "is this", "is it"})
         ):
             return {
                 "question_type": "modality_identification",
@@ -127,9 +136,9 @@ class QuestionAnalyzer:
                 "question_clarity": "clear",
             }
 
-        if any(phrase in q for phrase in anatomy_words) or (
-            any(token in q for token in {"organ", "structure", "body part", "anatomy", "anatomical", "region"})
-            and any(token in q for token in {"what", "which", "identify", "name", "is this", "is it"})
+        if _has_any(q, anatomy_words) or (
+            _has_any(q, {"organ", "structure", "body part", "anatomy", "anatomical", "region"})
+            and _has_any(q, {"what", "which", "identify", "name", "is this", "is it"})
         ):
             return {
                 "question_type": "anatomy_identification",
@@ -138,8 +147,8 @@ class QuestionAnalyzer:
                 "question_clarity": "clear",
             }
 
-        if any(phrase in q for phrase in explanation_words) or (
-            q.startswith("what") and any(token in q for token in {"mean", "diagnosis", "impression", "caused", "cause"})
+        if _has_any(q, explanation_words) or (
+            q.startswith("what") and _has_any(q, {"mean", "diagnosis", "impression", "caused", "cause"})
         ):
             return {
                 "question_type": "explanation_request",
@@ -196,12 +205,12 @@ class QuestionAnalyzer:
         counting_cues = ("about", "approximately", "approx", "roughly", "estimate", "estimated", "around")
 
         if question_type == "counting":
-            if any(cue in q for cue in counting_cues):
+            if _has_any(q, counting_cues):
                 return "counting_approx"
             return "counting_exact"
 
         if question_type == "location":
-            if any(term in q for term in lesion_terms) or any(term in target for term in lesion_terms):
+            if _has_any(q, lesion_terms) or _has_any(target, lesion_terms):
                 return "lesion_location"
             return "generic_location"
 

@@ -18,6 +18,7 @@ from agents.baseline import baseline_answer
 from agents.orchestrator import run_pipeline
 from agents.workflow_baseline import workflow_answer
 from utils.data_loader import get_sample_cases, get_sample_by_id, get_image_bytes, EXCLUDED_SAMPLE_IDS
+from utils import scoring
 from logger import get_logger, sample_id_var
 
 router = APIRouter(prefix="/api/dataset")
@@ -27,7 +28,6 @@ _log = get_logger("routes.dataset")
 
 _EMBED_MODEL = None
 _EMBED_MODEL_LOCK = threading.Lock()
-_SEMANTIC_THRESHOLD = 0.85  # Threshold for semantic similarity match for open-ended evaluation
 
 _MEDICAL_SBERT_MODEL_NAME = "pritamdeka/S-PubMedBert-MS-MARCO"
 _MEDICAL_SBERT_MODEL_LABEL = "S-PubMedBert-MS-MARCO"
@@ -125,24 +125,6 @@ def _clear_embedding_cache():
         _log.info("Embedding cache cleared")
 
 
-def _semantic_similarity(prediction: str, ground_truth: str) -> float:
-    """Compute semantic similarity using embeddings (cosine similarity).
-    
-    Returns float between 0 and 1, where 1 = identical meaning.
-    """
-    if not prediction or not ground_truth:
-        return 1.0 if prediction == ground_truth else 0.0
-    
-    try:
-        model = _get_embedding_model()
-        embeddings = model.encode([prediction, ground_truth])
-        similarity = cosine_similarity(embeddings[0:1], embeddings[1:2])[0][0]
-        return float(similarity)
-    except Exception as exc:
-        _log.error("Failed to compute semantic similarity: %s", exc)
-        return 0.0
-
-
 @router.get("/samples")
 async def list_samples():
     samples = get_sample_cases()
@@ -225,20 +207,6 @@ def _normalize_answer(text: str) -> str:
     return " ".join(cleaned.split())
 
 
-def _normalize_yes_no(text: str) -> str:
-    """Normalize answer text for yes/no comparison.
-    
-    Returns the yes/no prefix if the answer starts with yes/no,
-    otherwise returns the full normalized text for fallback matching.
-    """
-    normalized = _normalize_answer(text)
-    if normalized.startswith("yes"):
-        return "yes"
-    if normalized.startswith("no"):
-        return "no"
-    return normalized
-
-
 def _token_f1(prediction: str, ground_truth: str) -> float:
     """Compute token-level F1 between two normalized answer strings."""
     pred_tokens = set(prediction.split())
@@ -253,146 +221,11 @@ def _token_f1(prediction: str, ground_truth: str) -> float:
     return 2 * precision * recall / (precision + recall)
 
 
-def _extract_number(text: str) -> int | None:
-    """Extract the first integer from text, handling word numbers like 'one', 'two', etc."""
-    import re
-    # Try to extract digit first
-    digit_match = re.search(r'\d+', text)
-    if digit_match:
-        return int(digit_match.group())
-    # Map word numbers to integers
-    word_to_num = {
-        'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
-        'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
-        'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
-        'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'twenty': 20,
-        'twenty-one': 21, 'twenty-two': 22, 'twenty-three': 23, 'twenty-four': 24, 'twenty-five': 25,
-        'twenty-six': 26, 'twenty-seven': 27, 'twenty-eight': 28, 'twenty-nine': 29, 'thirty': 30,
-        'thirty-one': 31, 'thirty-two': 32, 'thirty-three': 33, 'thirty-four': 34, 'thirty-five': 35,
-        'thirty-six': 36, 'thirty-seven': 37, 'thirty-eight': 38, 'thirty-nine': 39, 'forty': 40,
-        'forty-one': 41, 'forty-two': 42, 'forty-three': 43, 'forty-four': 44, 'forty-five': 45,
-        'forty-six': 46, 'forty-seven': 47, 'forty-eight': 48, 'forty-nine': 49, 'fifty': 50
-    }
-    words = re.findall(r'\b[a-z]+\b', text.lower())
-    for word in words:
-        if word in word_to_num:
-            return word_to_num[word]
-    return None
-
-
-def _answers_match(predicted: str, ground_truth: str, is_close_ended: bool = False, question_type: str = None) -> bool:
-    """Return True if the predicted answer is correct based on question type.
-
-    For close-ended (yes/no) questions: uses exact yes/no only.
-    For counting questions: uses numerical extraction and exact comparison.
-    For other open-ended questions: uses semantic similarity >= 0.85 threshold only.
-    """
-    if is_close_ended:
-        # Close-ended: strict exact yes/no matching
-        return _normalize_yes_no(predicted) == _normalize_yes_no(ground_truth)
-    elif question_type == "counting":
-        # Counting: extract numbers and compare exactly
-        import re
-        pred_num = _extract_number(predicted)
-        gt_num = _extract_number(ground_truth)
-        if pred_num is not None and gt_num is not None:
-            return pred_num == gt_num
-        # Fallback to semantic if number extraction fails
-        return _semantic_similarity(predicted, ground_truth) >= _SEMANTIC_THRESHOLD
-    else:
-        # Open-ended: Semantic similarity >= threshold
-        return _semantic_similarity(predicted, ground_truth) >= _SEMANTIC_THRESHOLD
-
-
-def _is_close_ended_answer(text: str) -> bool:
-    """Check if answer is close-ended (yes/no or binary medical assessment).
-
-    Binary medical assessments like normal/abnormal, present/absent, positive/negative
-    should also use exact matching, not semantic similarity.
-    """
-    normalized = _normalize_yes_no(text)
-    # Traditional yes/no answers
-    if normalized in {"yes", "no"}:
-        return True
-    # Binary medical assessments that are opposites (should not use semantic similarity)
-    binary_medical_terms = {
-        "normal", "abnormal",
-        "present", "absent",
-        "positive", "negative",
-        "benign", "malignant",
-        "acute", "chronic",
-        "diffuse", "focal",
-    }
-    if normalized in binary_medical_terms:
-        return True
-    return False
-
-
 def _subset_accuracy(subset_rows: list[dict], key: str) -> float:
     total = len(subset_rows)
     if total == 0:
         return 0.0
     return sum(1 for row in subset_rows if row.get(key)) / total
-
-
-def _has_semantic_disagreement(baseline: str, workflow: str, agentic: str) -> bool:
-    """Check if any two systems disagree using S-PubMedBert-MS-MARCO semantic similarity with cached embeddings.
-    
-    Disagreement exists if not all pairs are semantically equivalent (similarity >= 0.85).
-    """
-    try:
-        baseline_emb = _get_cached_embedding(baseline)
-        workflow_emb = _get_cached_embedding(workflow)
-        agentic_emb = _get_cached_embedding(agentic)
-        
-        if baseline_emb is None or workflow_emb is None or agentic_emb is None:
-            return False
-        
-        baseline_workflow_same = cosine_similarity([baseline_emb], [workflow_emb])[0][0] >= _SEMANTIC_THRESHOLD
-        baseline_agentic_same = cosine_similarity([baseline_emb], [agentic_emb])[0][0] >= _SEMANTIC_THRESHOLD
-        workflow_agentic_same = cosine_similarity([workflow_emb], [agentic_emb])[0][0] >= _SEMANTIC_THRESHOLD
-        return not (baseline_workflow_same and baseline_agentic_same and workflow_agentic_same)
-    except Exception as exc:
-        _log.error("Failed to compute semantic disagreement: %s", exc)
-        return False
-
-
-def _resolve_embedding_candidate(candidate, fallback_text: str):
-    """Return a usable embedding without relying on truth-value testing of arrays."""
-    if candidate is not None:
-        return candidate
-    return _get_cached_embedding(fallback_text)
-
-
-def _compute_semantic_scores_batch(baseline: str, workflow: str, agentic: str, ground_truth: str) -> dict:
-    """Compute semantic similarity scores for all systems vs ground truth using cached embeddings.
-    
-    Returns dict with baseline_semantic, workflow_semantic, agentic_semantic.
-    """
-    if not baseline or not workflow or not agentic or not ground_truth:
-        return {
-            "baseline_semantic": 1.0 if baseline == ground_truth else 0.0,
-            "workflow_semantic": 1.0 if workflow == ground_truth else 0.0,
-            "agentic_semantic": 1.0 if agentic == ground_truth else 0.0,
-        }
-    
-    try:
-        baseline_emb = _get_cached_embedding(baseline)
-        workflow_emb = _get_cached_embedding(workflow)
-        agentic_emb = _get_cached_embedding(agentic)
-        gt_emb = _get_cached_embedding(ground_truth)
-        
-        if baseline_emb is None or workflow_emb is None or agentic_emb is None or gt_emb is None:
-            return {"baseline_semantic": 0.0, "workflow_semantic": 0.0, "agentic_semantic": 0.0}
-        
-        return {
-            "baseline_semantic": float(cosine_similarity([baseline_emb], [gt_emb])[0][0]),
-            "workflow_semantic": float(cosine_similarity([workflow_emb], [gt_emb])[0][0]),
-            "agentic_semantic": float(cosine_similarity([agentic_emb], [gt_emb])[0][0]),
-        }
-    except Exception as exc:
-        _log.error("Failed to compute semantic scores batch: %s", exc)
-        return {"baseline_semantic": 0.0, "workflow_semantic": 0.0, "agentic_semantic": 0.0}
 
 
 def _extract_knowledge_retriever_details(agentic_result: dict) -> dict:
@@ -454,100 +287,6 @@ def _build_accuracy_breakdown(rows: list[dict], group_key: str, preferred_order:
         }
         for bucket in sorted(grouped_rows.values(), key=sort_key)
     ]
-
-
-def _build_evaluation_row(payload: dict) -> dict:
-    sample = payload.get("sample", {})
-    baseline_result = payload.get("baseline_result", {})
-    workflow_result = payload.get("workflow_result", {})
-    agentic_result = payload.get("agentic_result", {})
-    ground_truth = payload.get("ground_truth_answer", sample.get("answer", ""))
-    baseline_answer_text = baseline_result.get("answer", "")
-    workflow_answer_text = workflow_result.get("answer", "")
-    agentic_answer_text = agentic_result.get("answer", "")
-    baseline_normalized = _normalize_answer(baseline_answer_text)
-    workflow_normalized = _normalize_answer(workflow_answer_text)
-    agentic_normalized = _normalize_answer(agentic_answer_text)
-    ground_truth_normalized = _normalize_answer(ground_truth)
-    is_close_ended = _is_close_ended_answer(ground_truth_normalized)
-    question_type = sample.get("question_type", "unknown")
-    baseline_correct = _answers_match(baseline_normalized, ground_truth_normalized, is_close_ended, question_type)
-    workflow_correct = _answers_match(workflow_normalized, ground_truth_normalized, is_close_ended, question_type)
-    agentic_correct = _answers_match(agentic_normalized, ground_truth_normalized, is_close_ended, question_type)
-    answer_style = "close_ended" if is_close_ended else "open_ended"
-    candidates = {
-        "baseline": baseline_correct,
-        "workflow": workflow_correct,
-        "agentic": agentic_correct,
-    }
-    correct_systems = [name for name, is_correct in candidates.items() if is_correct]
-    if len(correct_systems) == 1:
-        winner = correct_systems[0]
-    elif len(correct_systems) > 1:
-        winner = f"tie: {' & '.join(sys.capitalize() for sys in correct_systems)}"
-    else:
-        winner = "tie_all_wrong"
-
-    original_question_type = sample.get("question_type", "unknown")
-    agentic_question_type = agentic_result.get("question_analysis", {}).get("question_type")
-    question_type = agentic_question_type or original_question_type
-    question_type_source = "agentic" if agentic_question_type else "dataset"
-    knowledge_details = _extract_knowledge_retriever_details(agentic_result)
-    routing_decision = agentic_result.get("routing_decision", {}) or {}
-    routing_difficulty = routing_decision.get("difficulty", "unknown")
-    routing_needs_retrieval = bool(routing_decision.get("needs_retrieval", False))
-    routing_verification_policy = routing_decision.get("verification_policy", "standard")
-    routing_fallback_policy = routing_decision.get("fallback_policy", "none")
-    routing_rationale = routing_decision.get("routing_rationale", "")
-    routing_retrieval_rationale = routing_decision.get("retrieval_rationale", "")
-
-    semantic_scores = _compute_semantic_scores_batch(baseline_normalized, workflow_normalized, agentic_normalized, ground_truth_normalized)
-
-    return {
-        "sample_id": sample.get("id"),
-        "question": sample.get("question", ""),
-        "question_type": question_type,
-        "original_question_type": original_question_type,
-        "agentic_question_type": agentic_question_type,
-        "question_type_source": question_type_source,
-        "split": sample.get("split", "unknown"),
-        "answer_style": answer_style,
-        "ground_truth_answer": ground_truth,
-        "baseline_answer": baseline_answer_text,
-        "workflow_answer": workflow_answer_text,
-        "agentic_answer": agentic_answer_text,
-        "baseline_correct": baseline_correct,
-        "workflow_correct": workflow_correct,
-        "agentic_correct": agentic_correct,
-        "baseline_token_f1": round(_token_f1(baseline_normalized, ground_truth_normalized), 4),
-        "workflow_token_f1": round(_token_f1(workflow_normalized, ground_truth_normalized), 4),
-        "agentic_token_f1": round(_token_f1(agentic_normalized, ground_truth_normalized), 4),
-        "baseline_semantic": round(semantic_scores["baseline_semantic"], 4),
-        "workflow_semantic": round(semantic_scores["workflow_semantic"], 4),
-        "agentic_semantic": round(semantic_scores["agentic_semantic"], 4),
-        "winner": winner,
-        "disagreement": _has_semantic_disagreement(baseline_normalized, workflow_normalized, agentic_normalized),
-        "verification_status": agentic_result.get("verification_status", "unknown"),
-        "confidence": agentic_result.get("confidence", "Low"),
-        "issues_found": agentic_result.get("issues_found", []),
-        "self_consistency_level": agentic_result.get("self_consistency_signal", {}).get("level", "low"),
-        "cross_modal_agreement_level": agentic_result.get("cross_modal_agreement", {}).get("level", "medium"),
-        "routing_difficulty": routing_difficulty,
-        "routing_needs_retrieval": routing_needs_retrieval,
-        "routing_verification_policy": routing_verification_policy,
-        "routing_fallback_policy": routing_fallback_policy,
-        "routing_rationale": routing_rationale,
-        "routing_retrieval_rationale": routing_retrieval_rationale,
-        "knowledge_retriever_triggered": knowledge_details["knowledge_retriever_triggered"],
-        "knowledge_retriever_status": knowledge_details["knowledge_retriever_status"],
-        "knowledge_key_facts_count": knowledge_details["knowledge_key_facts_count"],
-        "knowledge_summary": knowledge_details["knowledge_summary"],
-        "duration_ms": payload.get("duration_ms", 0),
-        "baseline_duration_ms": payload.get("baseline_duration_ms"),
-        "workflow_duration_ms": payload.get("workflow_duration_ms"),
-        "agentic_duration_ms": payload.get("agentic_duration_ms"),
-        "cached_at": payload.get("cached_at"),
-    }
 
 
 def _build_evaluation_summary(rows: list[dict]) -> dict:
@@ -778,25 +517,6 @@ def _compute_semantic_similarity_batch(embeddings_map: dict, text1: str, text2: 
     return float(similarity)
 
 
-def _has_semantic_disagreement_batch(embeddings_map: dict, baseline: str, workflow: str, agentic: str) -> bool:
-    """Check if systems disagree using pre-computed embeddings."""
-    try:
-        baseline_emb = _resolve_embedding_candidate(embeddings_map.get(baseline), baseline)
-        workflow_emb = _resolve_embedding_candidate(embeddings_map.get(workflow), workflow)
-        agentic_emb = _resolve_embedding_candidate(embeddings_map.get(agentic), agentic)
-        
-        if baseline_emb is None or workflow_emb is None or agentic_emb is None:
-            return False
-        
-        baseline_workflow_same = cosine_similarity([baseline_emb], [workflow_emb])[0][0] >= _SEMANTIC_THRESHOLD
-        baseline_agentic_same = cosine_similarity([baseline_emb], [agentic_emb])[0][0] >= _SEMANTIC_THRESHOLD
-        workflow_agentic_same = cosine_similarity([workflow_emb], [agentic_emb])[0][0] >= _SEMANTIC_THRESHOLD
-        return not (baseline_workflow_same and baseline_agentic_same and workflow_agentic_same)
-    except Exception as exc:
-        _log.error("Failed to compute semantic disagreement: %s", exc)
-        return False
-
-
 def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
     """Build evaluation row using pre-computed batch embeddings."""
     sample = payload.get("sample", {})
@@ -811,14 +531,16 @@ def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
     workflow_normalized = _normalize_answer(workflow_answer_text)
     agentic_normalized = _normalize_answer(agentic_answer_text)
     ground_truth_normalized = _normalize_answer(ground_truth)
-    is_close_ended = _is_close_ended_answer(ground_truth_normalized)
-    question_type = sample.get("question_type", "unknown")
-    
-    # Use batch embeddings for semantic similarity checks in _answers_match
-    baseline_correct = _answers_match(baseline_normalized, ground_truth_normalized, is_close_ended, question_type)
-    workflow_correct = _answers_match(workflow_normalized, ground_truth_normalized, is_close_ended, question_type)
-    agentic_correct = _answers_match(agentic_normalized, ground_truth_normalized, is_close_ended, question_type)
-    
+    is_close_ended = scoring.is_close_ended(ground_truth_normalized)
+    original_question_type = sample.get("question_type", "unknown")
+
+    def similarity(text1: str, text2: str) -> float:
+        return _compute_semantic_similarity_batch(embeddings_map, text1, text2)
+
+    baseline_correct = scoring.answers_match(baseline_normalized, ground_truth_normalized, is_close_ended, original_question_type, similarity)
+    workflow_correct = scoring.answers_match(workflow_normalized, ground_truth_normalized, is_close_ended, original_question_type, similarity)
+    agentic_correct = scoring.answers_match(agentic_normalized, ground_truth_normalized, is_close_ended, original_question_type, similarity)
+
     answer_style = "close_ended" if is_close_ended else "open_ended"
     candidates = {
         "baseline": baseline_correct,
@@ -833,10 +555,10 @@ def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
     else:
         winner = "tie_all_wrong"
 
-    original_question_type = sample.get("question_type", "unknown")
+    # Group by the dataset-side label, which is independent of the system under test.
     agentic_question_type = agentic_result.get("question_analysis", {}).get("question_type")
-    question_type = agentic_question_type or original_question_type
-    question_type_source = "agentic" if agentic_question_type else "dataset"
+    question_type = original_question_type
+    question_type_source = "dataset"
     knowledge_details = _extract_knowledge_retriever_details(agentic_result)
     routing_decision = agentic_result.get("routing_decision", {}) or {}
     routing_difficulty = routing_decision.get("difficulty", "unknown")
@@ -874,7 +596,14 @@ def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
         "workflow_semantic": round(workflow_semantic, 4),
         "agentic_semantic": round(agentic_semantic, 4),
         "winner": winner,
-        "disagreement": _has_semantic_disagreement_batch(embeddings_map, baseline_normalized, workflow_normalized, agentic_normalized),
+        "disagreement": not all(
+            scoring.answers_agree(first, second, is_close_ended, original_question_type, similarity)
+            for first, second in [
+                (baseline_normalized, workflow_normalized),
+                (baseline_normalized, agentic_normalized),
+                (workflow_normalized, agentic_normalized),
+            ]
+        ),
         "verification_status": agentic_result.get("verification_status", "unknown"),
         "confidence": agentic_result.get("confidence", "Low"),
         "issues_found": agentic_result.get("issues_found", []),

@@ -8,6 +8,7 @@ from haystack.dataclasses import ChatMessage
 from haystack.utils import Secret
 from config import OPENAI_API_KEY, OPENAI_MODEL
 from utils.json_utils import strip_json_fences
+from utils.answer_utils import leading_yes_no
 from logger import get_logger
 
 _log = get_logger("agents.verification_agent")
@@ -30,13 +31,11 @@ class VerificationAgent:
 
     def _normalize_yes_no(self, text: str) -> str:
         normalized = self._normalize_text(text)
-        if normalized.startswith("yes"):
-            return "yes"
-        if normalized.startswith("no"):
-            return "no"
-        return normalized
+        return leading_yes_no(normalized) or normalized
 
-    def _format_heuristics(self, answer: str, qa: dict, original_question: str) -> dict:
+    def _format_heuristics(self, answer: str, qa: dict, original_question: str,
+                           count_estimate=None, count_confidence: str = "unknown",
+                           count_method: str = "none") -> dict:
         question_type = (qa or {}).get("question_type", "")
         expected_format = (qa or {}).get("expected_answer_format", "")
         question_subtype = (qa or {}).get("question_subtype", "")
@@ -225,7 +224,12 @@ Return ONLY the JSON object, no additional text."""
 
             raw = strip_json_fences(response["replies"][0].text or "")
             result = json.loads(raw)
-            heuristic = self._format_heuristics(ans.get("answer", ""), qa, original_question)
+            heuristic = self._format_heuristics(
+                ans.get("answer", ""), qa, original_question,
+                count_estimate=count_estimate,
+                count_confidence=count_confidence,
+                count_method=count_method,
+            )
             result["checks"] = self._merge_checks(result.get("checks", {}) or {}, heuristic.get("checks", {}) or {})
 
             issues = list(result.get("issues_found", []) or [])

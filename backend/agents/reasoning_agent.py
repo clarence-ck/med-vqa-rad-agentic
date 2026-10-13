@@ -8,6 +8,7 @@ from haystack.dataclasses import ChatMessage
 from haystack.utils import Secret
 from config import OPENAI_API_KEY, OPENAI_MODEL
 from utils.json_utils import strip_json_fences
+from utils.answer_utils import leading_yes_no
 from logger import get_logger
 
 _log = get_logger("agents.reasoning_agent")
@@ -31,10 +32,9 @@ class ReasoningAgent:
         if not text:
             return answer
 
-        if text.startswith("yes"):
-            return "yes"
-        if text.startswith("no"):
-            return "no"
+        leading = leading_yes_no(text)
+        if leading:
+            return leading
 
         explicit_rules = {
             "not present": "no",

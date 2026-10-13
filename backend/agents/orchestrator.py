@@ -15,6 +15,7 @@ from agents.reasoning_agent import ReasoningAgent
 from agents.verification_agent import VerificationAgent
 from config import OPENAI_API_KEY, OPENAI_MODEL
 from logger import get_logger
+from utils.answer_utils import leading_yes_no
 
 _log = get_logger("agents.orchestrator")
 
@@ -649,10 +650,9 @@ def _normalize_final_answer(answer: str, question_analysis: dict, image_analysis
 
     if expected_format == "yes_no" or question_type in {"yes_no", "presence_absence"}:
         lowered = text.lower()
-        if lowered.startswith("yes"):
-            return "yes"
-        if lowered.startswith("no"):
-            return "no"
+        leading = leading_yes_no(lowered)
+        if leading:
+            return leading
         if any(marker in lowered for marker in ["normal", "present", "visible", "seen", "identifiable", "abnormal"]):
             return "yes"
         if any(marker in lowered for marker in ["absent", "negative", "not seen", "not visible", "cannot determine", "unable to determine"]):
@@ -916,6 +916,7 @@ def _assemble_pipeline_payload(results: dict, question: str, started_at: float, 
             "visible_structures": image_result.get("visible_structures", []),
             "visual_summary": image_result.get("visual_summary", ""),
             "image_quality": image_result.get("image_quality", "unknown"),
+            "quality_warning": bool(image_result.get("quality_warning", False)),
             "notable_findings": image_result.get("notable_findings", []),
             "countable_objects": image_result.get("countable_objects", []),
             "count_estimate": image_result.get("count_estimate", "unknown"),
