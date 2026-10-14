@@ -155,8 +155,7 @@ The April version described the image once, *without the question*, and every la
 | Targeted recovery | The controller re-examines a region (`look(focus)`) or revises (`answer(guidance)`) instead of re-running everything |
 | Best-verified answer | A later answer replaces an earlier one only if its check is strictly better (re-looks can over-read) |
 | Self-consistency | After finishing, the answerer is re-asked independently (2×); low agreement adds `self_inconsistent` and flags the case for review |
-| Second opinion | If the loop ends without a *verified* answer, or the controller abstains, one independent single-shot answer is given instead and the case is flagged for review (`SECOND_OPINION`, on by default). Chosen after the 14 Oct run, where verified loop answers beat the single prompt (119 vs 109 of 168) but unverified and abstained ones did not (10 vs 18 of 32) |
-| Abstention | The controller may abstain; with the second opinion off, abstentions are reported as such (never normalised into "no") |
+| Abstention | The controller may abstain; abstentions are reported as such (never normalised into "no") |
 | Guardrail | Failure categories (`unsupported_claim`, `low_confidence`, `visual_contradiction`, `partially_verified`, `question_answer_mismatch`, `reasoning_generation_unstable`, `parser_failure`, `self_inconsistent`), a disclaimer and a review flag |
 | Input rejection | Non-radiology images are rejected on the first look. Unreadable images fall back to the raw bytes; if the first look still fails, the system stops instead of answering blind |
 

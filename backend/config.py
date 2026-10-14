@@ -50,11 +50,6 @@ _ROLE_DEFAULTS = {
 # "pipeline" = the original fixed six-stage pipeline (kept as an ablation).
 AGENT_MODE = os.getenv("AGENT_MODE", "loop").strip().lower()
 
-# Agentic loop: when the loop ends without a verified answer (or abstains), use one independent single-shot
-# answer instead, flagged for review. Chosen after the 14 Oct run (verified loop answers beat the single prompt,
-# unverified ones did not); set false to reproduce the loop without it.
-SECOND_OPINION = os.getenv("SECOND_OPINION", "true").strip().lower() in {"1", "true", "yes"}
-
 # Agentic loop: independent re-answers used to measure self-consistency (0 disables).
 SELF_CONSISTENCY_SAMPLES = int(os.getenv("SELF_CONSISTENCY_SAMPLES", "2"))
 

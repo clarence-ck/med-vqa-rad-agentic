@@ -585,9 +585,6 @@ export default function EvaluationView({ loading, evaluationData, error, onRefre
                             <div>
                               <span className="tag tag-green" style={{ fontSize: '9px', padding: '1px 5px', minWidth: '55px', justifyContent: 'center', marginRight: '6px' }}>Agentic</span>
                               <span style={{ color: row.agentic_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.agentic_correct && row.agentic_answer ? 'line-through' : 'none' }}>{row.agentic_answer || '—'}</span>{' '}<JudgeTag verdict={row.agentic_judge_verdict} />
-                              {row.agentic_answer_source === 'second_opinion' && (
-                                <span className="tag tag-amber" style={{ fontSize: '10px' }} data-tooltip="The loop could not verify its own answer; this is an independent single-shot second opinion.">2nd opinion</span>
-                              )}
                             </div>
                             {row.pipeline_answer !== null && row.pipeline_answer !== undefined && (
                               <div>

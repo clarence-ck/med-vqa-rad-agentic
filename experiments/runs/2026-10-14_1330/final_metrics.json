@@ -135,18 +135,6 @@
       "agentic": 0.0
     }
   },
-  "second_opinion": {
-    "cases": 0,
-    "correct": 0,
-    "loop_alone_correct": 0,
-    "baseline_correct": 0,
-    "loop_alone_strict": 64.5,
-    "loop_alone_vs_baseline": {
-      "only_first": 17,
-      "only_second": 15,
-      "p": 0.86
-    }
-  },
   "agentic_answered": {
     "cases": 189,
     "strict": 68.25

@@ -10,7 +10,6 @@ const STEP_META = {
   'Focused Look': { stage: 'Perception', subtitle: 're-examination chosen by the controller', className: 'perception' },
   'Finish': { stage: 'Decision', subtitle: 'controller ends the episode', className: 'routing' },
   'Self-Consistency': { stage: 'Safety', subtitle: 'independent re-answers vs final answer', className: 'verification' },
-  'Second Opinion': { stage: 'Decision', subtitle: 'independent answer when the check is not verified', className: 'routing' },
 };
 
 function getStepMeta(step) {

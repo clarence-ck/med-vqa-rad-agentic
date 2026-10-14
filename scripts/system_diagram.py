@@ -118,14 +118,13 @@ def main():
 
     # ---- Output / guardrails -----------------------------------------------------------
     frame(ax, 14.6, 3.6, 4.1, 6.5, "Decision & safety", RED)
-    box(ax, 14.9, 8.85, 3.5, 0.95, RED_SOFT, RED, "Best-verified answer", "a later answer replaces an earlier\none only if its check is better", fs1=11, fs2=7.8)
-    box(ax, 14.9, 7.6, 3.5, 0.95, RED_SOFT, RED, "Second opinion", "not verified or abstained →\nindependent single-shot answer", fs1=11, fs2=7.8)
-    box(ax, 14.9, 6.35, 3.5, 0.95, RED_SOFT, RED, "Self-consistency", "2 independent re-answers;\nlow agreement → review flag", fs1=11, fs2=7.8)
-    box(ax, 14.9, 5.1, 3.5, 0.95, RED_SOFT, RED, "Guardrail", "failure categories, disclaimer,\nflag for review", fs1=11, fs2=7.8)
-    box(ax, 14.9, 3.85, 3.5, 0.95, "white", RED, "Final state",
-        "verified · partially verified · low confidence\n· review · second opinion · rejected", fs1=11, fs2=7.4)
-    path(ax, [(13.65, 5.5), (14.45, 5.5), (14.45, 9.3), (14.9, 9.3)], color=RED, label="final", label_xy=(14.45, 7.2), lc=RED)
-    for y0, y1 in [(8.85, 8.55), (7.6, 7.3), (6.35, 6.05), (5.1, 4.8)]:
+    box(ax, 14.9, 8.4, 3.5, 1.1, RED_SOFT, RED, "Best-verified answer", "a later answer replaces an earlier\none only if its check is better")
+    box(ax, 14.9, 6.9, 3.5, 1.1, RED_SOFT, RED, "Self-consistency", "2 independent re-answers;\nlow agreement → review flag")
+    box(ax, 14.9, 5.4, 3.5, 1.1, RED_SOFT, RED, "Guardrail", "failure categories, disclaimer,\nflag for review")
+    box(ax, 14.9, 3.9, 3.5, 1.1, "white", RED, "Final state",
+        "verified · partially verified · low confidence\n· review · abstained · rejected (non-radiology)", fs2=7.6)
+    path(ax, [(13.65, 5.5), (14.45, 5.5), (14.45, 8.95), (14.9, 8.95)], color=RED, label="final", label_xy=(14.45, 7.2), lc=RED)
+    for y0, y1 in [(8.4, 8.0), (6.9, 6.5), (5.4, 5.0)]:
         arrow(ax, (16.65, y0), (16.65, y1), color=RED)
     path(ax, [(14.9, 4.2), (14.4, 4.2), (14.4, 3.3), (3.6, 3.3), (3.6, 5.2), (3.1, 5.2)], color=SLATE,
          ls=(0, (4, 3)), label="answer + explanation + trace + signals → UI", label_xy=(9.0, 3.3))
