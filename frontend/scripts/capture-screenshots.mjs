@@ -87,12 +87,20 @@ async function main() {
     await page.waitForSelector('.agent-trace', { timeout: 120000 });
     await sleep(1500);
     const prefix = `${String(5 + index).padStart(2, '0')}-case-${caseId}`;
+    // Typing into the search box can scroll the page under the sticky header; reset before the overview.
+    await page.evaluate(() => {
+      document.activeElement?.blur();
+      window.scrollTo(0, 0);
+      document.querySelectorAll('*').forEach((el) => { if (el.scrollTop) el.scrollTop = 0; });
+    });
+    await sleep(400);
     await page.screenshot({ path: path.join(OUT_DIR, `${prefix}-overview.png`) });
     // Panels scroll internally; let them grow to full height so the whole agent trace is captured.
     const unclip = await page.addStyleTag({ content: `
       .case-explorer-layout, .case-explorer-layout .panel, .case-explorer-layout .panel-body {
         height: auto !important; max-height: none !important; overflow: visible !important;
-      }` });
+      }
+      .app-header { display: none !important; }` });
     await sleep(500);
     const panels = await page.$$('.case-explorer-layout > .panel');
     await shotElement(page, `${prefix}-analysis-panel.png`, panels[panels.length - 1]);

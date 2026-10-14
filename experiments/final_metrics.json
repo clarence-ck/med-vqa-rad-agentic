@@ -1,0 +1,184 @@
+{
+  "cases": 200,
+  "close_ended_cases": 111,
+  "open_ended_cases": 89,
+  "systems": {
+    "baseline": {
+      "strict": 63.5,
+      "judged": 70.0,
+      "close_ended": 76.6,
+      "open_ended": 47.2,
+      "open_ended_judged": 61.8,
+      "mean_time_s": 4.4,
+      "median_time_s": 3.6,
+      "mean_cost_usd": 0.0002
+    },
+    "workflow": {
+      "strict": 28.0,
+      "judged": 31.0,
+      "close_ended": 42.3,
+      "open_ended": 10.1,
+      "open_ended_judged": 16.9,
+      "mean_time_s": 9.0,
+      "median_time_s": 8.7,
+      "mean_cost_usd": 0.0005
+    },
+    "agentic": {
+      "strict": 64.5,
+      "judged": 72.0,
+      "close_ended": 76.6,
+      "open_ended": 49.4,
+      "open_ended_judged": 66.3,
+      "mean_time_s": 37.2,
+      "median_time_s": 29.3,
+      "mean_cost_usd": 0.0094
+    },
+    "pipeline": {
+      "strict": 57.0,
+      "judged": 61.5,
+      "close_ended": 68.5,
+      "open_ended": 42.7,
+      "open_ended_judged": 52.8,
+      "mean_time_s": 38.1,
+      "median_time_s": 29.4,
+      "mean_cost_usd": 0.007
+    }
+  },
+  "paired": {
+    "agentic_vs_baseline_strict": {
+      "only_first": 17,
+      "only_second": 15,
+      "p": 0.86
+    },
+    "agentic_vs_baseline_judged": {
+      "only_first": 19,
+      "only_second": 15,
+      "p": 0.608
+    },
+    "agentic_vs_pipeline_strict": {
+      "only_first": 26,
+      "only_second": 11,
+      "p": 0.02
+    },
+    "agentic_vs_pipeline_judged": {
+      "only_first": 32,
+      "only_second": 11,
+      "p": 0.002
+    }
+  },
+  "wins": {
+    "baseline": 12,
+    "workflow": 7,
+    "agentic": 16,
+    "ties": 165
+  },
+  "disagreement_pct": 65.0,
+  "controller_paths": {
+    "direct": {
+      "cases": 141,
+      "agentic": 73.8,
+      "baseline": 72.3,
+      "workflow": 28.4,
+      "pipeline": 66.7
+    },
+    "relook": {
+      "cases": 19,
+      "agentic": 47.4,
+      "baseline": 36.8,
+      "workflow": 31.6,
+      "pipeline": 36.8
+    },
+    "reanswer": {
+      "cases": 29,
+      "agentic": 55.2,
+      "baseline": 44.8,
+      "workflow": 31.0,
+      "pipeline": 31.0
+    },
+    "abstained": {
+      "cases": 11,
+      "agentic": 0.0,
+      "baseline": 45.5,
+      "workflow": 9.1,
+      "pipeline": 36.4
+    }
+  },
+  "verification_signal": {
+    "verified": {
+      "cases": 169,
+      "agentic": 70.4
+    },
+    "partially_verified": {
+      "cases": 25,
+      "agentic": 40.0
+    },
+    "unsupported_or_low": {
+      "cases": 6,
+      "agentic": 0.0
+    }
+  },
+  "self_consistency_signal": {
+    "high": {
+      "cases": 162,
+      "agentic": 71.6
+    },
+    "medium": {
+      "cases": 10,
+      "agentic": 40.0
+    },
+    "low": {
+      "cases": 17,
+      "agentic": 52.9
+    },
+    "not_run": {
+      "cases": 11,
+      "agentic": 0.0
+    }
+  },
+  "agentic_answered": {
+    "cases": 189,
+    "strict": 68.3
+  },
+  "variance": {
+    "baseline": {
+      "run1": 33,
+      "run2": 33,
+      "cases": 50,
+      "flips": 6
+    },
+    "agentic": {
+      "run1": 35,
+      "run2": 34,
+      "cases": 50,
+      "flips": 1
+    }
+  },
+  "costs_usd": {
+    "evaluation_run": 3.43,
+    "variance_repeats": 0.54,
+    "judge": 0.11
+  },
+  "run_timings": {
+    "main_evaluation": {
+      "start": "13:30:51",
+      "end": "14:10:55",
+      "wall_clock_s": 2404,
+      "cases": 199,
+      "concurrency": 4
+    },
+    "variance_repeats": {
+      "start": "14:10:55",
+      "end": "14:45:36",
+      "wall_clock_s": 2081,
+      "cases": 50,
+      "concurrency": 1
+    },
+    "judge": {
+      "start": "15:20:09",
+      "end": "15:26:28",
+      "wall_clock_s": 379,
+      "cases": 82
+    }
+  },
+  "case_wall_time_mean_s": 45.9
+}

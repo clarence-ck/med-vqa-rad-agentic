@@ -1,16 +1,33 @@
-# React + Vite
+# MedVisionQuery frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19 + Vite UI for MedVisionQuery. It talks to the FastAPI backend at `VITE_API_BASE`
+(default `http://localhost:8000`, see `src/config.js`). See the [root README](../README.md) for the system itself.
 
-Currently, two official plugins are available:
+## Run
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev      # http://localhost:5173 (start the backend first)
+npm run lint
+npm run build
+```
 
-## React Compiler
+## Views
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Dashboard** — upload an image and ask a question; shows the answer, explanation, verification and the agent trace.
+- **Case Explorer** — VQA-RAD test cases with all systems side by side (`CaseExplorer.jsx`, `AgentTrace.jsx`,
+  `VerificationPanel.jsx`, `FailureModeDrawer.jsx`).
+- **Evaluation** (`EvaluationView.jsx`) — reads `/api/dataset/evaluation`: strict and LLM-judged accuracy, mean and
+  median time per case, accuracy by question type and by controller path, disagreement, and a per-case table.
+  Data hooks live in `src/hooks/`.
 
-## Expanding the ESLint configuration
+## Screenshots
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+`scripts/capture-screenshots.mjs` drives a local Chrome/Edge with `puppeteer-core` and saves the Evaluation view
+and selected Case Explorer traces. The backend and `npm run dev` must be running, and the cases must already be
+cached by `scripts/run_case_explorer_cache.py`.
+
+```bash
+node scripts/capture-screenshots.mjs --out ../eval-dashboard-screenshots/2026-10 --cases 1900,2102,2009,1998
+# options: --url (default http://localhost:5173), --browser <path to chrome.exe>
+```

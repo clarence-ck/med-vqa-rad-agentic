@@ -1,5 +1,9 @@
  import { useEffect, useMemo, useRef, useState } from 'react';
  
+function formatPercent1(value) {
+  return `${((value || 0) * 100).toFixed(1)}%`;
+}
+
 function formatPercent(value) {
   return `${Math.round((value || 0) * 100)}%`;
 }
@@ -59,12 +63,25 @@ const DIFFICULTY_ORDER = ['easy', 'medium', 'hard', 'unknown'];
 
 function BreakdownAccuracyCell({ value, color }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+      <span style={{ fontSize: '11px', fontWeight: 600 }}>{formatPercent(value)}</span>
       <div style={{ width: '40px', backgroundColor: 'var(--color-border)', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>
         <div style={{ width: `${value * 100}%`, height: '100%', backgroundColor: color, borderRadius: '3px' }}></div>
       </div>
-      <span style={{ fontSize: '11px', fontWeight: 600 }}>{formatPercent(value)}</span>
     </div>
+  );
+}
+
+function JudgeTag({ verdict }) {
+  if (verdict !== 'correct') return null;
+  return (
+    <span
+      className="tag tag-green"
+      style={{ fontSize: '9px', padding: '1px 5px', marginLeft: '4px' }}
+      data-tooltip="The strict scorer rejected this wording, but the blinded LLM judge rated it as meaning the same as the ground truth; it counts toward LLM-judged accuracy."
+    >
+      LLM-judged ✓
+    </span>
   );
 }
 
@@ -72,7 +89,7 @@ function formatLabel(value) {
   return String(value || 'unknown').replace(/_/g, ' ');
 }
 
-function SystemPerformanceCard({ title, icon, accuracy, judgedAccuracy, avgDuration, totalDuration }) {
+function SystemPerformanceCard({ title, icon, accuracy, judgedAccuracy, avgDuration, medianDuration }) {
   return (
     <div className="card evaluation-system-card">
       <div className="card-header">
@@ -81,30 +98,36 @@ function SystemPerformanceCard({ title, icon, accuracy, judgedAccuracy, avgDurat
       <div className="evaluation-system-stats">
         <div className="evaluation-system-stat">
           <div className="evaluation-list-subtitle">Overall accuracy (strict scorer)</div>
-          <div className="evaluation-metric-value">{formatPercent(accuracy)}</div>
+          <div className="evaluation-metric-value">{formatPercent1(accuracy)}</div>
           {judgedAccuracy !== null && judgedAccuracy !== undefined && (
             <div
               className="evaluation-list-subtitle"
               data-tooltip="Upper bound: open-ended answers the strict scorer rejected but a blinded LLM judge (gpt-6.1-sol) rated as meaning the same as the ground truth also count as correct."
               data-tooltip-align="left"
             >
-              LLM-judged: {formatPercent(judgedAccuracy)}
+              LLM-judged: {formatPercent1(judgedAccuracy)}
             </div>
           )}
         </div>
         <div className="evaluation-system-stat">
-          <div className="evaluation-list-subtitle">Avg runtime</div>
+          <div
+            className="evaluation-list-subtitle"
+            data-tooltip="Mean latency per case, measured while several cases ran concurrently."
+            data-tooltip-align="left"
+          >
+            Mean time / case
+          </div>
           <div className="evaluation-system-runtime">{fmtMs(avgDuration)}</div>
         </div>
         <div className="evaluation-system-stat">
           <div
             className="evaluation-list-subtitle"
-            data-tooltip="Sum of every case’s latency, as if the cases had run one after another. Not wall-clock time: the evaluation runs several cases and all systems in parallel."
+            data-tooltip="Median latency per case: the typical case. The mean is pulled up by a few long cases (e.g. focused re-looks)."
             data-tooltip-align="left"
           >
-            Sum of per-case times
+            Median time / case
           </div>
-          <div className="evaluation-system-runtime" style={{ color: 'var(--color-text-muted)' }}>{fmtMs(totalDuration)}</div>
+          <div className="evaluation-system-runtime">{fmtMs(medianDuration)}</div>
         </div>
       </div>
     </div>
@@ -114,11 +137,11 @@ function SystemPerformanceCard({ title, icon, accuracy, judgedAccuracy, avgDurat
 function AccuracyMetricStack({ baseline, workflow, agentic, pipeline }) {
   return (
     <div className="evaluation-metric-stack">
-      <span className="tag tag-amber">Baseline {formatPercent(baseline)}</span>
-      <span className="tag tag-blue">Workflow {formatPercent(workflow)}</span>
-      <span className="tag tag-green">Agentic {formatPercent(agentic)}</span>
+      <span className="tag tag-amber">Baseline {formatPercent1(baseline)}</span>
+      <span className="tag tag-blue">Workflow {formatPercent1(workflow)}</span>
+      <span className="tag tag-green">Agentic {formatPercent1(agentic)}</span>
       {pipeline !== null && pipeline !== undefined && (
-        <span className="tag tag-gray">Pipeline (ablation) {formatPercent(pipeline)}</span>
+        <span className="tag tag-gray">Pipeline (ablation) {formatPercent1(pipeline)}</span>
       )}
     </div>
   );
@@ -237,7 +260,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
               icon="⚡"
               accuracy={summary.baseline_accuracy}
               avgDuration={summary.avg_baseline_duration_ms}
-              totalDuration={summary.total_baseline_duration_ms}
+              medianDuration={summary.median_baseline_duration_ms}
             />
             <SystemPerformanceCard
               title="Workflow"
@@ -245,7 +268,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
               icon="🧭"
               accuracy={summary.workflow_accuracy}
               avgDuration={summary.avg_workflow_duration_ms}
-              totalDuration={summary.total_workflow_duration_ms}
+              medianDuration={summary.median_workflow_duration_ms}
             />
             <SystemPerformanceCard
               title="Agentic (controller loop)"
@@ -253,7 +276,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
               icon="🔗"
               accuracy={summary.agentic_accuracy}
               avgDuration={summary.avg_agentic_duration_ms}
-              totalDuration={summary.total_agentic_duration_ms}
+              medianDuration={summary.median_agentic_duration_ms}
             />
             {hasPipeline && (
               <SystemPerformanceCard
@@ -262,7 +285,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 accuracy={summary.pipeline_accuracy}
                 judgedAccuracy={summary.pipeline_judged_accuracy}
                 avgDuration={summary.avg_pipeline_duration_ms}
-                totalDuration={summary.total_pipeline_duration_ms}
+                medianDuration={summary.median_pipeline_duration_ms}
               />
             )}
           </section>
@@ -544,20 +567,20 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '12px', maxWidth: '300px' }}>
                             <div>
                               <span className="tag tag-amber" style={{ fontSize: '9px', padding: '1px 5px', minWidth: '55px', justifyContent: 'center', marginRight: '6px' }}>Baseline</span>
-                              <span style={{ color: row.baseline_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.baseline_correct && row.baseline_answer ? 'line-through' : 'none' }}>{row.baseline_answer || '—'}</span>
+                              <span style={{ color: row.baseline_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.baseline_correct && row.baseline_answer ? 'line-through' : 'none' }}>{row.baseline_answer || '—'}</span>{' '}<JudgeTag verdict={row.baseline_judge_verdict} />
                             </div>
                             <div>
                               <span className="tag tag-blue" style={{ fontSize: '9px', padding: '1px 5px', minWidth: '55px', justifyContent: 'center', marginRight: '6px' }}>Workflow</span>
-                              <span style={{ color: row.workflow_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.workflow_correct && row.workflow_answer ? 'line-through' : 'none' }}>{row.workflow_answer || '—'}</span>
+                              <span style={{ color: row.workflow_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.workflow_correct && row.workflow_answer ? 'line-through' : 'none' }}>{row.workflow_answer || '—'}</span>{' '}<JudgeTag verdict={row.workflow_judge_verdict} />
                             </div>
                             <div>
                               <span className="tag tag-green" style={{ fontSize: '9px', padding: '1px 5px', minWidth: '55px', justifyContent: 'center', marginRight: '6px' }}>Agentic</span>
-                              <span style={{ color: row.agentic_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.agentic_correct && row.agentic_answer ? 'line-through' : 'none' }}>{row.agentic_answer || '—'}</span>
+                              <span style={{ color: row.agentic_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.agentic_correct && row.agentic_answer ? 'line-through' : 'none' }}>{row.agentic_answer || '—'}</span>{' '}<JudgeTag verdict={row.agentic_judge_verdict} />
                             </div>
                             {row.pipeline_answer !== null && row.pipeline_answer !== undefined && (
                               <div>
                                 <span className="tag tag-gray" style={{ fontSize: '9px', padding: '1px 5px', minWidth: '55px', justifyContent: 'center', marginRight: '6px' }}>Pipeline</span>
-                                <span style={{ color: row.pipeline_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.pipeline_correct && row.pipeline_answer ? 'line-through' : 'none' }}>{row.pipeline_answer || '—'}</span>
+                                <span style={{ color: row.pipeline_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.pipeline_correct && row.pipeline_answer ? 'line-through' : 'none' }}>{row.pipeline_answer || '—'}</span>{' '}<JudgeTag verdict={row.pipeline_judge_verdict} />
                               </div>
                             )}
                           </div>

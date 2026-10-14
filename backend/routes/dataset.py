@@ -1,4 +1,5 @@
 import asyncio
+import statistics
 import base64
 import json
 import os
@@ -301,6 +302,15 @@ def _build_accuracy_breakdown(rows: list[dict], group_key: str, preferred_order:
     ]
 
 
+def _median_durations(rows: list[dict]) -> dict:
+    """Median per-case latency per system (typical case; the mean is pulled up by a few long re-look cases)."""
+    medians = {}
+    for system in _JUDGED_SYSTEMS:
+        values = [row[f"{system}_duration_ms"] for row in rows if row.get(f"{system}_duration_ms") is not None]
+        medians[f"median_{system}_duration_ms"] = int(statistics.median(values)) if values else None
+    return medians
+
+
 def _judged_summary(rows: list[dict]) -> dict:
     """Accuracy when LLM-judged paraphrases count as correct (upper bound to the strict scorer)."""
     if not any(row.get("judged") for row in rows):
@@ -407,6 +417,7 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
         "pipeline_close_ended_accuracy": pipeline_subset(close_ended_rows),
         "pipeline_open_ended_accuracy": pipeline_subset(open_ended_rows),
         "avg_pipeline_duration_ms": int(sum(pipeline_ms) / len(pipeline_ms)) if pipeline_ms else None,
+        **_median_durations(rows),
         "total_pipeline_duration_ms": sum(pipeline_ms) if pipeline_ms else None,
     }
 

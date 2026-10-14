@@ -198,21 +198,22 @@ only as a strict fallback. Because strict scoring rejects correct paraphrases, a
 (\texttt{gpt-6.1-sol}, answers shuffled and anonymised) re-assesses strict-wrong open-ended answers; a 30-verdict
 spot check agreed on 29/30 credit decisions. Paired comparisons use the exact McNemar test; 95\% intervals are about
 $\pm$6.7 points. The baseline and agentic loop were re-run on 50 cases to measure stability. API cost of the
-evaluation (runs, repeats and judge): \$4.06.
+evaluation: \$4.08 (\$3.43 runs, \$0.54 repeats, \$0.11 judge). Actual wall-clock time: 40\,min for the
+main run (four cases at a time), 35\,min for the 50 sequential repeats and 6\,min for the judge.
 
 \begin{table}[t]
   \centering
-  \caption{Accuracy (\%) on 200 random VQA-RAD test questions (same answering model for all systems). Time is the mean per-case latency, measured with four cases running concurrently (agentic median 29.3\,s); the whole 200-case run of all four systems took about 40 minutes. Cost is the mean API cost per case.}
+  \caption{Accuracy (\%) on 200 random VQA-RAD test questions (same answering model for all systems). Open-ended accuracy is strict/judged. Time is per-case latency in seconds (mean/median), measured with four cases running concurrently; the whole 200-case run of all four systems took 40 minutes of wall-clock time. Cost is the mean API cost per case.}
   \label{tab:main}
   \small
   \begin{tabular}{lcccccc}
     \toprule
-    System & Strict & Judged & Close (111) & Open (89) strict/judged & Time & Cost \\
+    System & Strict & Judged & Close (111) & Open (89) & Time (s) & Cost \\
     \midrule
-    Single-shot baseline      & 63.5 & 70.0 & 76.6 & 47.2 / 61.8 & 4.4\,s  & \$0.0002 \\
-    Workflow baseline         & 28.0 & 31.0 & 42.3 & 10.1 / 16.9 & 9.0\,s  & \$0.0005 \\
-    \textbf{Agentic loop}     & \textbf{64.5} & \textbf{72.0} & 76.6 & 49.4 / 66.3 & 37.2\,s & \$0.0094 \\
-    Fixed pipeline (ablation) & 57.0 & 61.5 & 68.5 & 42.7 / 52.8 & 38.1\,s & \$0.0070 \\
+    Single-shot baseline      & 63.5 & 70.0 & 76.6 & 47.2 / 61.8 & 4.4 / 3.6  & \$0.0002 \\
+    Workflow baseline         & 28.0 & 31.0 & 42.3 & 10.1 / 16.9 & 9.0 / 8.7  & \$0.0005 \\
+    \textbf{Agentic loop}     & \textbf{64.5} & \textbf{72.0} & 76.6 & 49.4 / 66.3 & 37.2 / 29.3 & \$0.0094 \\
+    Fixed pipeline (ablation) & 57.0 & 61.5 & 68.5 & 42.7 / 52.8 & 38.1 / 29.4 & \$0.0070 \\
     \bottomrule
   \end{tabular}
 \end{table}
