@@ -77,7 +77,7 @@ function MethodologyLabels() {
           <span style={{ color: 'var(--color-accent)', fontWeight: 'bold' }}>🔗 Agentic Pipeline</span>
         </div>
         <p style={{ color: 'var(--color-text-secondary)', lineHeight: '1.4' }}>
-          Decomposes queries into visual interpretation, question analysis, difficulty routing, and reasoning with a final verification loop.
+          A controller agent looks at the image with the question in mind, answers, checks the answer against the image, and decides whether to re-examine a region, revise, abstain or finish.
         </p>
       </div>
       <div>
