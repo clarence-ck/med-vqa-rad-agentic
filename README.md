@@ -1,1001 +1,411 @@
-# MedVisionQuery — Agentic Multimodal Medical VQA System
+# MedVisionQuery — an agentic multimodal system for medical visual question answering
 
-MedVisionQuery is an **agentic multimodal system** for medical visual question answering (VQA) over radiology images. It decomposes the task into 6 specialized agent stages — image interpretation, question understanding, difficulty routing, knowledge support, reasoning, and verification — orchestrated by a **Haystack Agent** with LLM-driven tool selection. The knowledge stage now uses an **Advanced RAG pipeline** backed by an English-only **SLAKE concept KB** with metadata-aware hybrid retrieval, FAISS/BM25 fusion, reranking, and confidence gating. Results are exposed through a demo UI with **Dashboard**, **Case Explorer**, and **Evaluation** views.
+MedVisionQuery answers natural-language questions about radiology images (X-ray, CT, MRI). Its agentic system is a
+**Haystack Agent controller** that decides, case by case, how to look at the image, answer, check the answer *against
+the image*, and whether to re-examine a region, revise, abstain or finish. It is evaluated against a single-prompt
+baseline, a hand-designed workflow and a fixed-pipeline ablation on 200 random VQA-RAD test questions.
 
-> ⚠️ **For educational and research purposes only. Not for clinical use.**
+> ⚠️ **For education and research only. Not for clinical use.**
 
-> **Update (October 2026):** SLAKE-based retrieval (Advanced RAG) has been removed, the evaluation scorer and
-> question classifier have been fixed, and models are now configured per role (see `.env.example`). The
-> architecture, results, log-analysis and reflection sections below still describe the April 2026 version and
-> will be rewritten after the redesigned agent is re-evaluated.
-
----
-
-## Quick Links
-
-**Getting Started**
-- **🚀 [Quick Start](#quick-start)** — Get up and running in 5 minutes
-- **💻 [UI](#ui)** — Dashboard, Case Explorer, and Evaluation views
-
-**Understanding the System**
-- **🏗️ [Agent Architecture](#agent-architecture)** — System design and agents
-- **📚 [Dataset](#dataset)** — VQA-RAD information
-
-**Evaluation & Results**
-- **🎯 [Evaluation Design](#evaluation-design)** — How evaluation works
-- **📊 [Results Discussion](#results-discussion)** — Performance comparison
-- **🔍 [Log Analysis](#log-analysis)** — Execution traces and failure modes
-
-**Technical Reference**
-- **🔧 [API Reference](#api-reference)** — Backend endpoints
+Built for SUTD 51.511 Multimodal Generative AI (Template 1: Agentic Multimodal System).
 
 ---
 
-## Problem Definition
+## Contents
 
-**Task:** medical visual question answering with explanation
-
-| Input | Type |
-|---|---|
-| Medical image | User-uploaded medical image (JPEG / PNG); analyzed by the agentic pipeline |
-| Natural language question | Any question about the image |
-
-**Output:** structured JSON with answer, explanation, evidence, verification status, confidence, failure signals, and per-stage agent trace.
-
-The task is decomposed rather than single-prompted because the system must separately solve:
-
-1. **Perception** — what is in the image?
-2. **Question interpretation** — what is being asked?
-3. **Medical context** — what background knowledge applies?
-4. **Synthesis** — what is the best-grounded answer?
-5. **Verification** — is the answer actually supported?
-
----
-
-## Three Methods Compared
-
-All three methods use the same medical image and question as input, but they differ in how much structure they impose before producing an answer.
-
-### 1) Single-shot baseline
-
-- Sends the image and question directly to a multimodal model in one prompt
-- Produces the answer, explanation, and confidence in a single pass
-- Does **not** explicitly separate perception, question analysis, retrieval, or verification
-- Best viewed as the simplest lower-bound baseline: fast and easy to run, but least interpretable
-
-### 2) Workflow baseline
-
-- Uses a hand-designed, non-agentic sequence of steps
-- First interprets the image, then analyzes the question, then applies fixed branching rules
-- Chooses an answer path based on question type, such as:
-  - modality identification
-  - anatomy identification
-  - yes/no or presence-absence questions
-  - location questions
-  - counting questions
-  - abnormality description
-  - a fallback path for other question types
-- Builds the explanation from structured image and question outputs
-- Serves as the required hand-designed workflow baseline: more transparent than the single-shot baseline, but still fixed and non-adaptive
-
-### 3) Agentic pipeline
-
-- Uses a Haystack Agent to coordinate six specialized tools
-- Runs image interpretation, question analysis, difficulty routing, optional retrieval, reasoning, and verification as separate stages
-- Lets the Difficulty Router decide whether retrieval is needed and how strict verification should be
-- Can add disclaimers, flag cases for review, and retry when the first pass is not strong enough
-- Is the most expressive and best aligned with the project’s agentic design, but it is also the slowest and most expensive method
+- [Results at a glance](#results-at-a-glance)
+- [Problem and task decomposition](#problem-and-task-decomposition)
+- [Agent architecture](#agent-architecture)
+- [Multimodal grounding](#multimodal-grounding)
+- [Control and failure handling](#control-and-failure-handling)
+- [Evaluation design](#evaluation-design)
+- [Results](#results)
+- [Failure analysis](#failure-analysis)
+- [Reflection and limitations](#reflection-and-limitations)
+- [What changed since the April 2026 version](#what-changed-since-the-april-2026-version)
+- [User interface](#user-interface)
+- [Quick start](#quick-start)
+- [Reproducing the evaluation](#reproducing-the-evaluation)
+- [Project structure](#project-structure)
+- [API reference](#api-reference)
 
 ---
 
-## Agentic System Design
+## Results at a glance
 
-| Property | Implementation |
-|---|---|
-| Problem decomposition | 6 distinct agent stages with explicit roles |
-| Agent architecture | Named agents wrapped as Haystack Tools; the controller decides tool use over shared state |
-| Multimodal grounding | The image is interpreted once, then downstream stages consume structured visual state; OpenAI-backed generators power the agentic stages while Advanced RAG runs locally for retrieval |
-| Dynamic tool selection | `retrieve_knowledge` is optional and skipped when the Difficulty Router sets `needs_retrieval=false` |
-| Control & failure handling | Verification, guardrails, disclaimers, review flags, failure categories, and automatic retry |
-| Evaluation | Against two baselines with normalized answer-match accuracy, token F1, close/open-ended accuracy, and disagreement analysis |
+200 seeded-random VQA-RAD test questions (111 close-ended, 89 open-ended), all systems on the same model
+(`gpt-6-luna`), 0 API failures. "Strict" uses the rule-based scorer; "judged" also accepts open-ended paraphrases
+confirmed by a blinded LLM judge (see [Evaluation design](#evaluation-design)).
+
+| System | Strict accuracy | Judged accuracy | Avg time / case | Cost / case |
+|---|---|---|---|---|
+| Single-shot baseline | 63.5% | 70.0% | 4.4 s | $0.0002 |
+| Workflow baseline (hand-designed) | 28.0% | 31.0% | 9.0 s | $0.0005 |
+| **Agentic controller loop** | **64.5%** | **72.0%** | 37.2 s | $0.0094 |
+| Fixed pipeline (ablation) | 57.0% | 61.5% | 38.1 s | $0.0070 |
+
+- **Agentic vs single-shot: a tie** (exact McNemar p = 0.86 strict, 0.61 judged).
+- **Agentic vs fixed pipeline: the controller's decisions help** (+7.5 points strict, p = 0.02; +10.5 judged, p = 0.002).
+- **The agentic system's value is reliability, not raw accuracy:** its verification and self-consistency signals
+  predict errors, it abstains on hard cases, and it is far more stable across re-runs (2% of answers flip vs 12% for
+  the single prompt).
+
+![Evaluation dashboard](eval-dashboard-screenshots/2026-10/01-eval-kpi-cards.png)
 
 ---
 
-## Agent Architecture
+## Problem and task decomposition
 
-### System Diagram
+**Input:** a radiology image (JPEG/PNG) and a free-text question. **Output:** an answer, an explanation grounded in
+visible evidence, a verification status, uncertainty signals, and a trace of every decision.
 
-The diagram below shows the **agentic pipeline** only.
+A single model call conflates steps that fail in different ways. The system separates them:
 
-```mermaid
-flowchart LR
-    UI[MedVisionQuery React UI]
-    DASH[Dashboard]
-    EXP[Case Explorer]
-    EVAL[Evaluation]
+| Sub-task | Question it answers | Component |
+|---|---|---|
+| Question understanding | What kind of answer is expected (yes/no, location, modality…)? | `analyze_question` |
+| Perception | What does the image show *that bears on this question*? | `look(focus)` |
+| Synthesis | What is the best answer given the image and observations? | `answer(guidance)` |
+| Verification | Does the image itself support this answer? What should happen next? | `check` |
+| Planning / control | Re-examine a region, revise, abstain or finish? | Controller (Haystack Agent) |
 
-    UI --> DASH
-    UI --> EXP
-    UI --> EVAL
+---
 
-    DASH --> API[FastAPI Backend]
-    EXP --> API
-    EVAL --> API
+## Agent architecture
 
-    API --> ORCH[Haystack Agent Controller\nOpenAI chat model]
+![System diagram](system_diagram.png)
 
-    ORCH -->|tool call| T1[Tool: interpret_image\nImageInterpreter]
-    ORCH -->|tool call| T2[Tool: analyze_question\nQuestionAnalyzer]
-    ORCH -->|tool call| T3[Tool: route_difficulty\nDifficultyRouter]
-    ORCH -->|tool call| T4[Tool: retrieve_knowledge\nKnowledgeRetriever]
-    ORCH -->|tool call| T5[Tool: reason_answer\nReasoningAgent]
-    ORCH -->|tool call| T6[Tool: verify_answer\nVerificationAgent]
+### Controller loop
 
-    T1 -->|auto-block| ERR[Error\nnon-radiology image]
+A fresh Haystack `Agent` is created per request (`backend/agents/agentic_loop.py`). Its tools are bound to a
+per-request working memory that holds the image, the question analysis, every look, every answer and every check.
+The controller sees only short text results from each tool and chooses the next call:
 
-    T1 -->|outputs_to_state| STATE[(Shared Agent State\n16 typed fields)]
-    T2 -->|outputs_to_state| STATE
-    T3 -->|outputs_to_state| STATE
-    T4 -->|outputs_to_state| STATE
-    T5 -->|outputs_to_state| STATE
-    T6 -->|outputs_to_state| STATE
-
-    STATE -->|inputs_from_state| T2
-    STATE -->|inputs_from_state| T3
-    STATE -->|inputs_from_state| T4
-    STATE -->|inputs_from_state| T5
-    STATE -->|inputs_from_state| T6
-
-    T6 --> GUARD[Guardrail\nverification + failures]
-    GUARD --> VER[Verified]
-    GUARD --> PART[Partially Verified]
-    GUARD --> LOW[Low Confidence]
-    GUARD --> REV[Review]
-    GUARD --> ERR
-
-    T4 --> RAG[Advanced RAG Engine\nFAISS/BM25 + rerank + confidence gating]
-    RAG --> KB[(SLAKE English-only KB\ntrain split concept corpus)]
-
-    EXP --> DATA[Dataset Analysis\n/api/dataset/sample/sample_id/analysis]
-    DATA --> CACHE[Case Analysis Cache\n.case_explorer_cache/]
-    CACHE --> EVAL
-
-    T1 --> LLM[OpenAI API\nOPENAI_MODEL]
-    T2 --> LLM
-    T3 --> LLM
-    T4 --> LLM
-    T5 --> LLM
-    ORCH --> LLM
-```
-
-![System Diagram](system_diagram.png)
-
-### Agent Roles
-
-| Component | File | Role | Model |
+| Tool | Role | Model (default) | Notes |
 |---|---|---|---|
-| `ImageInterpreter` | `image_interpreter.py` | Agent 1: Perception — multimodal image interpretation with auto-block for non-radiology images | OpenAI |
-| `QuestionAnalyzer` | `question_analyzer.py` | Agent 2: Task understanding — question classification and intent analysis | OpenAI |
-| `DifficultyRouter` | `difficulty_router.py` | Agent 3: Planning — sets routing metadata in shared state | OpenAI |
-| `KnowledgeRetriever` | `knowledge_retriever.py` | Agent 4: Context — optional Advanced RAG retrieval over the SLAKE English-only concept KB + answer-focused evidence synthesis | OpenAI + local retrieval stack |
-| `ReasoningAgent` | `reasoning_agent.py` | Agent 5: Synthesis — generates answer and explanation from all prior context | OpenAI |
-| `VerificationAgent` | `verification_agent.py` | Agent 6: Evaluator — grounded consistency / safety checks with 5 structured checks | OpenAI |
-| Agent Controller | `orchestrator.py` | Haystack `Agent` — routes tool calls, manages shared state, guardrails, retry | OpenAI |
-| Workflow Baseline | `workflow_baseline.py` | Deterministic answer derivation over image/question analysis outputs | Rules + OpenAI intermediates |
-| Single-shot Baseline | `baseline.py` | Direct image+question prompt with no decomposition | OpenAI |
+| `analyze_question()` | Task understanding | gpt-6-luna | Question type and expected answer format; keyword rules use whole-word matching |
+| `look(focus)` | Perception (executor) | gpt-6-luna, vision | Looks *with the question in mind*; with `focus`, re-examines a named region. The first look also rejects non-radiology images |
+| `answer(guidance)` | Synthesis (executor) | gpt-6-luna, vision | Receives the image plus all observations; `guidance` carries what the verifier asked to fix |
+| `check()` | Evaluator | gpt-6.1-sol, vision | Verifies against the image and recommends `accept`, `relook` (with a focus), `reanswer` (with guidance) or `abstain` |
+| `finish(abstain)` | Decision | — | Ends the episode; refused while the latest answer is unchecked |
 
-### Tool-calling and Shared State
+Budgets: at most 2 focused re-looks, 3 answers and 16 agent steps. If the controller stalls, a safety net answers
+and/or checks before finishing. Paths observed on the 200-case evaluation:
 
-The orchestrator uses Haystack's `Agent` + `Tool` architecture:
+| Path | Cases | Tool sequence |
+|---|---|---|
+| direct | 141 | analyze → look → answer → check → finish |
+| relook | 19 | … → check → look(focus) → answer(guided) → check → finish |
+| reanswer | 29 | … → check → answer(guided) → check → finish |
+| abstained | 11 | … → check → finish(abstain) |
 
-- **6 agents** wrapped as `Tool` with `inputs_from_state` / `outputs_to_state` bindings:
-  1. `interpret_image` — ImageInterpreter (multimodal)
-  2. `analyze_question` — QuestionAnalyzer
-  3. `route_difficulty` — DifficultyRouter (sets routing metadata in shared state)
-  4. `retrieve_knowledge` — KnowledgeRetriever (conditional, based on `routing_decision.needs_retrieval`)
-  5. `reason_answer` — ReasoningAgent
-  6. `verify_answer` — VerificationAgent
-- The controller LLM decides which tools to invoke and in what order based on prior outputs in state
-- **Routing metadata**: DifficultyRouter stores `verification_policy` + `fallback_policy` in `routing_decision`; downstream payloads and UI surfaces read these fields from shared state
-- **Auto-block**: ImageInterpreter validates radiology images; non-radiology images abort pipeline early → Error state
-- 16 state fields: `image_bytes_b64`, `mime_type`, `question`, `image_interpretation`, `question_analysis`, `routing_decision`, `knowledge`, `answer_data`, `verification_result`, 5 duration fields, `retry_context`
-- Exit condition: `verify_answer` finalizes the session
-- A fresh `Agent` is created per request to prevent shared mutable state under concurrency
+### Why these models and tools
 
-### Dynamic Tool Selection
+- **Haystack `Agent` + `Tool`** gives a tool-calling loop with typed tools and exit conditions. Keeping the image in
+  per-request memory (not in the controller's context) keeps the controller cheap.
+- **One model family (OpenAI), roles sized by need.** The controller and question analysis are simple decisions, so
+  they use `gpt-6-luna` with low or no reasoning effort. Answering uses `gpt-6-luna` with medium effort: a 20-case
+  pilot showed that giving the answerer the image mattered far more than model size (50% → 70%).
+- **A different model verifies.** `check` (and the evaluation judge) use `gpt-6.1-sol`, so the model that answered
+  does not verify its own answer.
+- All roles are configurable (`MODEL_<ROLE>`, `REASONING_EFFORT_<ROLE>` in `.env`); every call's tokens and cost are
+  recorded.
 
-The `DifficultyRouter` determines the pipeline configuration from question and image context. Policies are strictly mapped by difficulty level:
+### Baselines and ablation
 
-| Difficulty | `needs_retrieval` | `verification_policy` | `fallback_policy` |
+| System | File | What it does |
+|---|---|---|
+| Single-shot baseline | `backend/agents/baseline.py` | One vision prompt; asked for a concise answer that starts with yes/no where applicable |
+| Workflow baseline | `backend/agents/workflow_baseline.py` | Fixed chain: question-agnostic image description → question analysis → hand-written rules per question type |
+| Fixed pipeline (ablation) | `backend/agents/orchestrator.py` | The original six stages (interpret → analyze → filter → route → reason → verify, with retry) in a fixed order, with the reasoner given the image; isolates what the controller's decisions add |
+
+---
+
+## Multimodal grounding
+
+The two modalities are the image and the text question. They interact at every step that matters:
+
+| Step | Image | Text |
+|---|---|---|
+| `look(focus)` | ✓ sent at high detail | the question (and focus) decide what is examined |
+| `answer(guidance)` | ✓ sent directly | question analysis, all observations, verifier guidance |
+| `check()` | ✓ sent directly | answer, explanation, observations |
+| Controller | ✗ | short tool results only |
+
+The April version described the image once, *without the question*, and every later stage worked from that text. A
+20-case pilot showed this was the main cause of errors: all four failures of the text-only reasoner were "cannot be
+determined from the image description"; with the image, all four were answered correctly.
+
+---
+
+## Control and failure handling
+
+| Mechanism | What it does |
+|---|---|
+| Image-grounded verification | `check` judges the answer against the image: 5 checks, a status (`verified`, `partially_verified`, `low_confidence`, `unsupported`) and a recommended next action |
+| Targeted recovery | The controller re-examines a region (`look(focus)`) or revises (`answer(guidance)`) instead of re-running everything |
+| Best-verified answer | A later answer replaces an earlier one only if its check is strictly better (re-looks can over-read) |
+| Self-consistency | After finishing, the answerer is re-asked independently (2×); low agreement adds `self_inconsistent` and flags the case for review |
+| Abstention | The controller may abstain; abstentions are reported as such (never normalised into "no") |
+| Guardrail | Failure categories (`unsupported_claim`, `low_confidence`, `visual_contradiction`, `partially_verified`, `question_answer_mismatch`, `reasoning_generation_unstable`, `parser_failure`, `self_inconsistent`), a disclaimer and a review flag |
+| Input rejection | Non-radiology images are rejected on the first look. Unreadable images fall back to the raw bytes; if the first look still fails, the system stops instead of answering blind |
+
+---
+
+## Evaluation design
+
+- **Data:** the VQA-RAD test split (451 questions); a seeded random sample of 200 (`EVAL_SAMPLE_SEED=42`), excluding
+  one known-bad item. The sample follows the natural mix (56% yes/no), so per-type numbers for small categories are
+  noisy.
+- **Systems:** single-shot baseline, workflow baseline, agentic loop and fixed-pipeline ablation, all on the same cases
+  and the same answering model.
+- **Strict scorer** (`backend/utils/scoring.py`):
+  - yes/no ground truth: the answer must start with the correct word;
+  - binary terms (normal/abnormal, present/absent, …): the correct term and not its opposite;
+  - counting: the numbers must match;
+  - open-ended: every content word of the ground truth must appear (aliases such as CT = computed tomography; plurals
+    folded), or at least 60% of them for ground truths longer than 3 words. Left/right conflicts, and answers starting
+    with "no" when the ground truth does not, are wrong. S-PubMedBert-MS-MARCO similarity is only a strict fallback
+    (≥ 0.95 short, ≥ 0.90 long).
+- **LLM judge** (`scripts/judge_open_ended.py`): for open-ended answers the strict scorer rejected, `gpt-6.1-sol`
+  judges meaning equivalence, blinded to the system (answers shuffled and anonymised). A 30-verdict spot check agreed
+  on 29/30 credit decisions (AI-assisted review, `experiments/judge/review_sample.md`).
+- **Statistics:** 95% intervals are about ±6.7 points at n = 200; paired comparisons use the exact McNemar test.
+- **Variance:** the baseline and agentic loop were re-run on 50 of the evaluated cases.
+- **Cost:** every OpenAI call is recorded (`backend/utils/usage.py`): evaluation $3.41, repeats $0.54, judge $0.11.
+
+---
+
+## Results
+
+### Overall
+
+| System | Strict | Judged | Close-ended (111) | Open-ended (89), strict → judged |
+|---|---|---|---|---|
+| Single-shot baseline | 63.5% | 70.0% | 76.6% | 47.2% → 61.8% |
+| Workflow baseline | 28.0% | 31.0% | 42.3% | 10.1% → 16.9% |
+| **Agentic loop** | **64.5%** | **72.0%** | 76.6% | 49.4% → 66.3% |
+| Fixed pipeline (ablation) | 57.0% | 61.5% | 68.5% | 42.7% → 52.8% |
+
+Paired comparisons (cases where exactly one of the two systems is right):
+
+| Comparison | Strict | Judged |
+|---|---|---|
+| Agentic vs single-shot | 17 vs 15, p = 0.86 | 19 vs 15, p = 0.61 |
+| Agentic vs fixed pipeline | 26 vs 11, p = 0.02 | 32 vs 11, p = 0.002 |
+
+### By controller path
+
+The controller re-looks or revises exactly where questions are hard, and does better than the other systems there.
+
+| Path | Cases | Agentic | Single-shot | Fixed pipeline |
+|---|---|---|---|---|
+| direct | 141 | 74% | 72% | 67% |
+| relook | 19 | **47%** | 37% | 37% |
+| reanswer | 29 | **55%** | 45% | 31% |
+| abstained | 11 | — (abstained) | 45% | 36% |
+
+![Accuracy by controller path](eval-dashboard-screenshots/2026-10/03-accuracy-by-controller-path.png)
+
+### Uncertainty signals predict errors
+
+| Signal | Levels | Agentic accuracy |
+|---|---|---|
+| Verification | verified (169) / partially verified (25) / unsupported or low confidence (6) | 70% / 40% / 0% |
+| Self-consistency | high (162) / medium or low (27) | 72% / 40–53% |
+| Abstention | 11 cases, on which the single-shot baseline is wrong 55% of the time | — |
+
+On the 189 cases it answered, the agentic loop is 68% correct (strict).
+
+### Stability across runs (same 50 cases)
+
+| System | Run 1 | Run 2 | Answers that flipped right ↔ wrong |
 |---|---|---|---|
-| `easy` | false | standard | none |
-| `medium` | true | standard | add_disclaimer |
-| `hard` | true | strict | flag_for_review |
+| Single-shot baseline | 33/50 | 33/50 | 6 (12%) |
+| Agentic loop | 35/50 | 34/50 | 1 (2%) |
 
-These are routing outcomes, not fixed question-type rules; the actual `DifficultyRouter` also considers image context and question clarity. Typical examples by question type are:
+### Development pilots (20 cases, seed 42)
 
-| Question type | Typical difficulty |
+| System | Correct |
 |---|---|
-| `modality_identification`, `anatomy_identification`, `yes_no`, `counting`, `location` | easy |
-| `presence_absence`, `abnormality_description` | medium |
-| `explanation_request` (complex clinical reasoning) | hard |
-
-### Model Configuration
-
-The current runtime uses OpenAI for all LLM-driven stages. The Advanced RAG retrieval stack additionally uses local SentenceTransformers, a CrossEncoder reranker, FAISS, and BM25 models. The retrieval stack is configured for the English-only SLAKE KB with `NeuML/pubmedbert-base-embeddings` and `cross-encoder/ms-marco-MiniLM-L-6-v2`. The evaluation scorer uses `S-PubMedBert-MS-MARCO` (`pritamdeka/S-PubMedBert-MS-MARCO`) for semantic similarity on open-ended answers.
-
-| Env vars | Used by |
-|---|---|
-| `OPENAI_API_KEY` | All agents, Haystack controller, `baseline.py` |
-| `VISION_MODEL` | `ImageInterpreter`, `baseline.py` |
-| `OPENAI_MODEL` | `QuestionAnalyzer`, `KnowledgeRetriever`, `ReasoningAgent`, `VerificationAgent`, Haystack controller |
-| `EVALUATION_DEVICE` | Semantic similarity model device selection (`cpu`, `cuda`, or `auto`) |
-
-Hugging Face is used to download the raw datasets via scripts. The retrieval stack itself is local, while the agentic generation steps use OpenAI. Evaluation uses a cached `S-PubMedBert-MS-MARCO` semantic scorer on the backend, prefix-based normalization for yes/no answers, and exact matching for other binary medical assessments such as normal/abnormal and present/absent.
-
-### Other Technology Choices
-
-- **Haystack `Agent` + `Tool`** — controller-managed tool calls with `inputs_from_state` / `outputs_to_state` bindings and per-tool timing
-- **FastAPI** — async backend; blocking LLM calls run in `asyncio.to_thread()` to avoid event-loop blocking
-- **React 19 + Vite** — frontend UI with Dashboard, Case Explorer, and Evaluation views
-- **FAISS (`faiss-cpu`)** — dense vector index for fast semantic retrieval in Advanced RAG
-- **SentenceTransformers + CrossEncoder** — dense embeddings and cross-encoder reranking
-- **BM25 (`rank-bm25`)** — sparse lexical retrieval for hybrid search
-- **Hugging Face `datasets`** — used by `scripts/download_dataset.py` to materialize the local VQA-RAD dataset
-- **Matplotlib** — `scripts/system_diagram.py` regenerates `system_diagram.png`
+| Fixed pipeline, text-only reasoner (April design) | 10/20 |
+| Fixed pipeline, reasoner sees the image | 14/20 |
+| Agentic loop | 14/20 |
+| Single-shot baseline (three runs) | 14, 15, 14 |
+| Workflow baseline | 8/20 |
 
 ---
 
-## Multimodal Grounding
+## Failure analysis
 
-The system uses **two modalities**: **image** (medical radiology images) and **text** (natural language questions). These modalities interact through a structured pipeline where the image is processed once and its extracted features are consumed by downstream text-based reasoning stages.
+The four analyses Template 1 asks for are built into every agentic run and summarised on the dashboard.
 
-- **Image** — converted to base64 PNG and passed as an `ImageContent` block (base64 image + MIME type) to the Haystack vision generator
-- **Text** — user's natural language question
+- **Self-consistency checks:** 2 independent re-answers per case; low agreement flags the case (example: case 1998
+  "lesions?" — final answer "yes", both re-answers "no" → flagged for review; here the final answer was right).
+  Low consistency marks uncertainty, not certain error: 53% of low-consistency answers were still correct.
+- **Cross-modal agreement:** the verifier sees the image, so "explanation grounded in evidence" and "no
+  contradictions" are checked against the image itself, not only a text description.
+- **Verifier model:** a different, larger model (`gpt-6.1-sol`) verifies `gpt-6-luna`'s answers and steers the loop.
+- **Disagreement analysis:** the three systems disagree on 65% of cases under the same matching rules; wins (only one
+  system right): agentic 16, single-shot 12, workflow 7.
 
-### How modalities interact across stages
+Representative traces (in `eval-dashboard-screenshots/2026-10/`):
 
-| Stage | Image used? | Text used? |
+| Case | What happened |
+|---|---|
+| 1900 "acute infarction?" | A focused re-look found it; the single prompt said no |
+| 2102 "normal or abnormal?" | A re-look caught subtle haziness; the single prompt missed it |
+| 2009 "free air?" | Two focused re-looks over-read bowel gas as free air: perception and verifier wrong together |
+| 1998 "lesions?" | Correct, flagged by low self-consistency; the single prompt was wrong |
+
+**Systematic failure patterns**
+
+1. **Shared perception blind spot:** when the looker and the verifier misread the image the same way, no check catches
+   it; self-consistency flags some of these cases.
+2. **Over-reading on re-looks:** a focused look can talk the system into a finding (case 2009); keeping the
+   best-verified answer limits the damage.
+3. **Benchmark quirks:** some questions don't match their image (e.g. a "right upper quadrant mass" asked of a chest
+   film); every system fails them.
+4. **Workflow rigidity:** fixed rules answer "Brain" or "X-ray" where a specific finding is needed (28%).
+
+---
+
+## Reflection and limitations
+
+**When is agentic behaviour beneficial?** Not for raw accuracy on this benchmark: a strong single prompt on the same
+model is equally accurate. The agentic system earns its cost when answers must be *trustworthy*. It knows when it is
+unsure (verification and consistency signals predict errors), it can abstain, it recovers on hard cases by
+re-examining specific regions, it is far more stable across runs, and every decision is auditable. Against a fixed
+multi-stage pipeline with the same models, letting a controller decide is clearly better.
+
+**Limitations**
+
+- About 45× the cost and 8× the latency of a single prompt for equal accuracy.
+- The verifier shares the perception weaknesses of vision models; agreement is not correctness.
+- 200 cases give ±6.7-point intervals; per-type results for small categories are noisy.
+- The strict scorer under-credits paraphrases; the LLM judge is an upper bound, spot-checked but not human-annotated.
+- For non-abstained answers, the yes/no normaliser maps "cannot determine" to "no" (no measurable effect in this run).
+- The workflow baseline uses a question-agnostic image description by design.
+- Retrieval over SLAKE was removed: it returned other patients' question–answer pairs, which did not help
+  perception-bound questions (see below).
+
+---
+
+## What changed since the April 2026 version
+
+The April report's numbers (80% / 65% / 75%, screenshots at the top level of `eval-dashboard-screenshots/`) came from
+a pipeline and a scorer with defects found in a later review. Re-scoring the cached April answers with the fixed
+scorer gives roughly 62% / 30% / 50%. The main changes:
+
+| Area | April 2026 | Now |
 |---|---|---|
-| Image Interpretation | Base64 vision prompt | Extraction instructions |
-| Question Understanding | No | Question + visual summary from stage 1 |
-| Knowledge Support | No | `body_region` + `modality` + `visual_cues` from stages 1–2 |
-| Reasoning & Answer | No | All prior structured outputs |
-| Verification | No | Answer + image analysis + question analysis |
-
-The image is consumed only once (stage 1); all downstream stages operate on the **structured visual summary** extracted from it.
-
----
-
-## Control and Failure Handling
-
-### Mechanisms for detecting errors or uncertainty
-
-The system detects errors and uncertainty through multiple mechanisms:
-
-1. **VerificationAgent (Agent 6)** — performs 5 structured checks:
-   - `answer_matches_question_type`: whether answer format matches expected type
-   - `format_appropriate`: whether answer is properly formatted
-   - `explanation_grounded_in_evidence`: whether explanation references visible evidence
-   - `answer_strength_appropriate`: whether answer strength is appropriate for the question
-   - `no_contradictions`: whether answer contains self-contradictory statements
-
-> **Critical limitation**: Verification checks **internal consistency**, not correctness. The VerificationAgent only checks whether the answer is consistent with what the ImageInterpreter saw — it does NOT know the actual ground truth. For example:
-> - ImageInterpreter says: "No mass visible"
-> - ReasoningAgent answers: "no mass present"
-> - VerificationAgent: ✅ **verified** (answer matches image interpretation)
-> - Ground truth: **"yes, there is a mass"**
->
-> Because the verification only checks if stages agree with each other, it will pass even when all stages are wrong together. Sample 1857 in Log Analysis shows this exact case: verification passed as "verified" but the answer was wrong. The system cannot catch errors in the original image interpretation.
->
-> **Sample 1822** demonstrates the opposite problem: the VerificationAgent penalized the correct answer "lateral ventricles" because the ImageInterpreter incorrectly described normal ventricles as a "focal lesion with mass effect." The retry mechanism selected a more conservative "ventricular system" answer that better matched the flawed image interpretation — improving verification metrics while degrading semantic accuracy.
-
-2. **Automatic failure categorization** — detects specific failure modes:
-   - `knowledge_retrieval_failed`: RAG retrieval returned no relevant chunks
-   - `reasoning_generation_unstable`: answer generation was unstable
-   - `unsupported_claim`: answer not grounded in visual evidence
-   - `low_confidence`: insufficient evidence for confident answer
-   - `partially_verified`: most checks passed with minor uncertainty
-   - `visual_contradiction`: answer contradicts image interpretation
-   - `question_answer_mismatch`: answer does not address the question
-   - `parser_failure`: JSON parsing error in agent output
-
-3. **Analysis signals** — computed from verification results:
-   - **Self-consistency signal** — ratio of passed verification checks (high/medium/low)
-   - **Cross-modal agreement** — derived from `explanation_grounded_in_evidence` and `no_contradictions` checks
-
-### Retry, self-critique, and fallback strategies
-
-#### Retry with self-critique
-- `run_pipeline()` evaluates the first result with `_should_retry_pipeline()`
-- Retry triggers on: `low_confidence`, `unsupported`, `should_flag_for_review`, or any high-severity failure
-- Second run receives `retry_context` in state (previous status, confidence, failure categories)
-- `ReasoningAgent` uses retry context to self-correct its answer generation
-- Best result selected by `_payload_score()`: verification rank → confidence rank → severity count → review flag
-
-#### Fallback policies (set by DifficultyRouter)
-- **easy** cases: `fallback_policy="none"` — no fallback needed
-- **medium** cases: `fallback_policy="add_disclaimer"` — add disclaimer to answer
-- **hard** cases: `fallback_policy="flag_for_review"` — flag case for manual review
-
-#### Guardrail logic
-The Guardrail combines `verification_status` + `failure_categories` to produce 5 final answer states:
-
-1. **Verified** (`verification_status == "verified"`) — answer shown directly
-2. **Partially Verified** (`verification_status == "partially_verified"`) — answer with minor uncertainty
-3. **Low Confidence** (`verification_status in {"low_confidence", "unsupported"}`) — guarded answer + disclaimer
-4. **Review** (`should_flag_for_review == true` or high-severity failures) — review recommended
-5. **Error** (ImageInterpreter auto-block) — non-radiology image rejected
-
-### Verification status levels
-| Status | Meaning | Final State |
-|---|---|---|
-| `verified` | All 5 checks passed | **Verified** — answer shown directly |
-| `partially_verified` | Most checks passed with minor uncertainty | **Partially Verified** — some uncertainty noted |
-| `low_confidence` | Insufficient evidence for a confident answer | **Low Confidence** — guarded answer + disclaimer |
-| `unsupported` | Answer is not grounded in visible evidence | **Low Confidence** — guarded answer + disclaimer |
-| `rejected` (image abort) | Non-radiology image detected | **Error** — invalid image type |
-
-- Disclaimer auto-inserted when verifier does not provide one
-- `flag_for_review` triggered by high-severity failure categories
-
-### Failure categories (automatically detected)
-| Code | Severity |
-|---|---|
-| `knowledge_retrieval_failed` | medium |
-| `reasoning_generation_unstable` | high |
-| `unsupported_claim` | high |
-| `low_confidence` | high |
-| `partially_verified` | medium |
-| `visual_contradiction` | high |
-| `question_answer_mismatch` | medium |
-| `parser_failure` | high |
-
-### Automatic retry
-- `run_pipeline()` evaluates the first result with `_should_retry_pipeline()`
-- Retry triggers on: `low_confidence`, `unsupported`, `should_flag_for_review`, or any high-severity failure
-- Second run receives `retry_context` in state (status, confidence, failure categories) so `ReasoningAgent` can self-correct
-- Best result selected by `_payload_score()`: verification rank → confidence rank → severity count → review flag
+| Scorer | Embedding similarity ≥ 0.85 accepted "left lung" for "right lung" | Rule-based strict scorer + blinded LLM judge |
+| Question classifier | Substring `"ct"` matched "fra**ct**ure", forcing 72/451 questions to *modality* | Whole-word matching |
+| Agent | Fixed six-stage sequence; the controller never decided anything | Controller loop with look / answer / check / finish |
+| Image use | Image described once, without the question | Question-aware looks; answerer and verifier see the image |
+| Verifier | Same model, text only; crashed on counting questions | Different model, sees the image, recommends the next action |
+| Retrieval | SLAKE hybrid RAG | Removed (no measurable benefit; contradictory look-alike cases) |
+| Self-consistency | Ratio of verifier checks passed | Independent re-answers |
+| Evaluation | 200 hand-ordered cases, grouped by the agent's own labels | 200 seeded-random cases, dataset labels, ablation, variance repeats |
 
 ---
 
-## Evaluation Design
+## User interface
 
-### Task-specific success criteria
-
-The system evaluates success using task-specific criteria that account for the different answer types in medical VQA:
-
-- **Close-ended questions** (yes/no and binary medical assessments): Exact match after normalization
-  - Yes/no answers: normalized by trimming punctuation, responses starting with "yes" or "no" count as matches
-  - Binary medical assessments (normal/abnormal, present/absent, positive/negative, etc.): exact match only
-
-- **Open-ended questions** (non-binary ground truth): Semantic similarity threshold
-  - Uses `S-PubMedBert-MS-MARCO` embeddings for biomedical semantic similarity
-  - Threshold ≥ 0.85 cosine similarity for a match
-  - Lexical overlap (Token F1) computed as diagnostic metric but not used for accuracy
-
-- **Overall accuracy**: Combines close-ended (exact yes/no) and open-ended (semantic similarity ≥ 0.85) correctness per system
-
-### Metrics computed per cached case
-- **Normalized answer match** — evaluation method depends on ground truth answer style:
-  - **Close-ended** (yes/no and other binary medical assessments such as normal/abnormal, present/absent, positive/negative): yes/no answers are normalized by trimming punctuation and matching responses that start with `yes` or `no`; other binary medical assessments use exact match only
-  - **Open-ended** (non-binary ground truth): `S-PubMedBert-MS-MARCO` semantic similarity ≥ 0.85
-- **Yes/no normalization** — responses beginning with `yes` or `no` count as `yes` / `no` after punctuation trimming
-- **Semantic similarity** — cosine similarity between answer embeddings using `S-PubMedBert-MS-MARCO`
-- **Lexical Overlap (Token F1)** — unigram overlap between predicted and ground-truth answer; diagnostic metric only, NOT used for accuracy
-- **Winner** — `baseline` / `workflow` / `agentic` / `tie: ...` / `tie_all_wrong`
-- **Disagreement** — whether any two systems produced semantically different answers (`S-PubMedBert-MS-MARCO` similarity < 0.85)
-
-### Aggregate evaluation summary
-- Overall accuracy per system (baseline / workflow / agentic) — combines close-ended (exact yes/no) and open-ended (`S-PubMedBert-MS-MARCO`) correctness
-- Close-ended and open-ended accuracy per system
-- 3-System Disagreement rate — percentage of cases where systems produce semantically different answers
-- Win counts, average duration (ms), and per-question-type accuracy breakdown
-- Recent-case rows including verification status, self-consistency, and cross-modal agreement
-
-### Cache and evaluation workflow
-1. Selecting a sample in Case Explorer runs all 3 systems concurrently via `asyncio.gather` and writes results to `backend/.case_explorer_cache/sample_{id}_{question_hash}.json`
-2. Subsequent opens serve from cache — use the **Refresh** button to force a re-run
-3. The Evaluation tab reads all cache files and computes the aggregate summary live
-4. `scripts/run_case_explorer_cache.py` can warm or inspect the curated Case Explorer cache (`--refresh`, `--all`, `--dry-run`, `--status`)
-
-### Failure case analysis
-
-The system performs failure case analysis using multiple complementary methods:
-
-- **Self-consistency checks** — The VerificationAgent performs 5 structured checks (answer_matches_question_type, format_appropriate, explanation_grounded_in_evidence, answer_strength_appropriate, no_contradictions). The self-consistency signal is computed in `orchestrator.py` (`_build_self_consistency_signal`, lines 475-497) as the ratio of passed checks (high/medium/low) and is displayed in the Evaluation UI.
-
-- **Cross-modal agreement checks** — The system evaluates agreement between the visual interpretation (image modality) and the final answer (text modality). This is computed in `orchestrator.py` (`_build_cross_modal_agreement_signal`, lines 500-517) using VerificationAgent's `explanation_grounded_in_evidence` and `no_contradictions` checks, producing a cross-modal agreement level (high/medium/low) displayed in the Evaluation UI.
-
-- **Verifier models** — Agent 6 (VerificationAgent) serves as the dedicated verifier model, running an OpenAI-backed LLM to perform structured verification of the final answer against the image evidence. The verifier outputs a verification status (verified/partially_verified/low_confidence/unsupported) and identifies specific failure categories.
-
-- **Disagreement analysis** — The system compares outputs across all three methods (baseline, workflow, agentic) using `S-PubMedBert-MS-MARCO` semantic similarity. This is computed in `backend/routes/dataset.py` (`_has_semantic_disagreement`, lines 338-357) with a 0.85 threshold. A 3-system disagreement rate is computed as the percentage of cases where systems produce semantically different answers (similarity < 0.85). The Evaluation UI shows a "Winner" tag (baseline/workflow/agentic/tie) and disagreement status for each case.
-
-These failure analysis signals are displayed in the "Recent Evaluated Cases" table of the Evaluation UI, with columns for verification status, self-consistency level, cross-modal agreement level, and disagreement status.
-
-### Systems compared
-| System | File | Approach |
-|---|---|---|
-| Single-shot baseline | `baseline.py` | Direct multimodal prompting with no explicit decomposition; returns answer, explanation, and confidence in one pass |
-| Workflow baseline | `workflow_baseline.py` | Hand-designed non-agentic workflow that interprets the image, analyzes the question, and applies fixed branching rules to derive the answer |
-| Agentic pipeline | `orchestrator.py` | 6-tool Haystack Agent with routing, optional retrieval, verification, guardrails, and retry |
+- **Dashboard:** upload an image, ask a question, and compare the agentic loop with both baselines. The agentic view
+  shows the answer, explanation, verification checks, failure categories and the full trace.
+- **Case Explorer:** browse the 200 evaluation cases; cached cases open instantly, others run live.
+- **Evaluation:** strict and LLM-judged accuracy for all four systems, close- and open-ended accuracy, accuracy by
+  question type and by controller path, disagreement, and a filterable table of every case.
 
 ---
 
-## Results Discussion
+## Quick start
 
-Based on comprehensive evaluation across **200 VQA-RAD test-split samples**, this section analyzes the efficacy of our agentic retrieval-augmented pipeline against two baseline approaches: a single-prompt LLM baseline and a hand-designed workflow baseline.
-
-> **Note**: The evaluation uses the VQA-RAD test split (451 total test samples, 200 evaluated). The SLAKE dataset is used only as the knowledge base corpus (train split) for the Advanced RAG retrieval pipeline.
-
-### Overall System Performance
-
-The evaluation reveals a **performance-cost tradeoff unfavorable to the agentic approach**. While the agentic pipeline achieves 75% overall accuracy, it trails the simple baseline by 5 percentage points (80%) despite requiring **11× longer inference time** (20.1s vs. 1.8s average latency, 67m vs. 6m total runtime). The workflow baseline exhibits severe degradation at 65% accuracy, indicating implementation defects rather than architectural limitations.
-
-| System | Overall Accuracy | Avg. Runtime | Total Runtime | Close-Ended (n=71) | Open-Ended (n=129) |
-|--------|------------------|--------------|---------------|-------------------|-------------------|
-| Baseline | **80%** | 1.8s | 6m | **65%** | **88%** |
-| Workflow | 65% | 4.3s | 14m | 42% | 78% |
-| Agentic | 75% | 20.1s | 67m | 63% | 81% |
-
-The **43% three-system disagreement rate** indicates qualitatively different error patterns. Win analysis shows the baseline wins on 15 cases (7.5%), agentic on 13 (6.5%), and workflow on 8 (4%), with 164 ties (82%). This suggests the agentic pipeline often overcomplicates questions where direct visual reasoning suffices.
-
-### Question-Type-Specific Analysis
-
-Performance varies dramatically by question category. The agentic pipeline excels on **anatomy identification** (+4% over baseline, 88% vs. 84%) and **"other" complex questions** (+9%, 91% vs. 82%), where retrieved exemplars provide useful answer templates. However, it **severely underperforms on spatial and binary reasoning tasks**:
-
-| Question Type | Cases | Baseline | Agentic | Δ | Primary Issue |
-|--------------|-------|----------|---------|---|---------------|
-| anatomy identification | 25 | 84% | **88%** | **+4%** ✅ | Retrieval helps |
-| other | 11 | 82% | **91%** | **+9%** ✅ | Complex reasoning |
-| explanation request | 8 | 75% | **88%** | **+13%** ✅ | Template benefit |
-| location | 47 | **87%** | 74% | **-13%** ❌ | Retrieval noise |
-| presence absence | 10 | **80%** | 50% | **-30%** ❌ | Binary confusion |
-| abnormality description | 29 | **79%** | 69% | **-10%** ❌ | Context dilution |
-
-**Location questions** (47 cases, 23.5% of dataset) show a 13% accuracy drop when retrieval is enabled. Retrieved "similar" cases often describe different anatomical regions, confusing spatial reasoning that should rely solely on image features. **Presence/absence detection** (10 cases) drops from 80% to 50%, indicating retrieved exemplars with opposite binary labels create contradictory context that the `VerificationAgent` cannot resolve.
-
-### Difficulty-Based Routing Analysis
-
-The `DifficultyRouter` classified 77.5% of questions as "easy," 21.5% as "medium," and only 1% as "hard," suggesting **overly conservative difficulty thresholding**. Performance by difficulty tier reveals a critical pattern: **retrieval harms "easy" questions that should bypass the knowledge base**.
-
-**Easy Questions (n=155):**
-- Overall: Agentic 78% vs. Baseline 81% (-3%)
-- Anatomy identification: 95% (+11% with retrieval) ✅
-- Location: 78% vs. 94% **(-16%)** ❌
-- Presence/absence: 56% vs. 78% **(-22%)** ❌
-- Yes/no: 72% vs. 70% (neutral)
-
-**Medium Questions (n=43):**
-- Overall: Agentic 65% vs. Baseline 77% (-12%)
-- Yes/no: **17%** vs. 50% **(-33%)** — catastrophic failure when retrieval is activated for binary questions
-- Anatomy identification: 67% vs. 83% (-16%)
-- Abnormality description: 70% vs. 80% (-10%)
-
-**Hard Questions (n=2):**
-- Insufficient sample size (tied at 50%, 0%, and 100% across categories)
-
-The catastrophic **17% accuracy on medium yes/no questions** demonstrates that binary detection questions are fundamentally incompatible with retrieval-augmented generation. Retrieved similar cases often contain opposite binary answers, and the `ReasoningAgent` lacks mechanisms to ignore contradictory retrieved context when image evidence alone is dispositive.
-
-**Why Question-Type-Based Routing Outperforms Difficulty-Based Routing:**
-
-The failure occurs because difficulty classification conflates two independent dimensions: perceived complexity versus retrieval compatibility. The data reveals three critical patterns:
-
-1. **Binary questions are retrieval-incompatible regardless of difficulty**: Yes/no and presence/absence questions require definitive answers based solely on image evidence. Retrieved "similar" cases inevitably include examples with opposite labels (mass present vs. absent, fracture visible vs. not visible). When the ReasoningAgent receives these contradictory exemplars, it cannot resolve the conflict — the semantic similarity that identifies "similar" questions does not distinguish between affirmative and negative instances.
-
-2. **Spatial questions suffer from retrieval noise**: Location questions ("Where is the abnormality?") require precise spatial reasoning on the specific image. Retrieved cases describing different anatomical regions introduce spatial confusion. A query about lung nodule location retrieves cases discussing heart borders or rib fractures — anatomically related but spatially irrelevant.
-
-3. **Template-driven questions benefit from retrieval regardless of difficulty**: Anatomy identification and explanation questions improve with retrieved exemplars because they provide answer formatting templates rather than factual claims. These benefits occur across all difficulty levels, not just "hard" questions.
-
-The DifficultyRouter's policy of enabling retrieval for "medium" questions (21.5% of cases) triggered catastrophic failures on yes/no questions that should never retrieve. Question-type-aware routing would disable retrieval unconditionally for binary and spatial questions, enabling it only for template-driven categories (anatomy identification, explanation requests) where exemplars provide formatting value without factual conflicts.
-
-### Baseline Comparison Anomalies
-
-The workflow baseline exhibits **critical implementation failures** independent of architectural merit:
-
-| Question Type | Baseline | Workflow | Defect Pattern |
-|--------------|----------|----------|----------------|
-| medium presence/absence | 100% | **0%** | Complete failure |
-| medium anatomy identification | 83% | **33%** | -50% gap |
-| easy counting | 67% | **33%** | Halved performance |
-| easy abnormality description | 78% | **44%** | -34% gap |
-
-These patterns indicate logical errors in `backend/agents/workflow_baseline.py` rather than inherent workflow baseline limitations. The 0% score on presence/absence questions suggests broken conditional logic in the hand-designed pipeline, underscoring the brittleness of non-agentic approaches that lack dynamic error recovery.
-
-**Specific Bug: `_derive_presence_answer` (line 69)**
-
-The presence/absence detection logic contains a critical flaw: it answers "Yes" to any abnormality question whenever *any* notable finding exists in the image — regardless of whether that finding matches what was asked about.
-
-```python
-# workflow_baseline.py:69
-return ("Yes", "medium") if notable_findings else ("No", ...)
-```
-
-**Real examples from test logs:**
-
-**Example 1 — Sample 2074:**
-- **Question:** "Are the clavicles fractured?"
-- **Image shows:** Chest X-ray with lung findings, no clavicle fracture
-- **Matched findings:** `[]` (empty — no fracture found)
-- **Workflow answer:** **"Yes"**
-- **Ground truth:** "no"
-- **What happened:** The workflow saw unrelated findings (cardiac silhouette, lung markings) and answered "Yes" because something notable was present, even though nothing matched the fracture question.
-
-**Example 2 — Sample 2119:**
-- **Question:** "Are the hepatic lesions ring enhancing?"
-- **Image shows:** CT with liver lesions, but no ring enhancement mentioned
-- **Matched findings:** `[]` (empty — no enhancement pattern found)
-- **Workflow answer:** **"Yes"**
-- **Ground truth:** "no"
-- **What happened:** The workflow detected liver lesions in the findings and said "Yes" to the enhancement question, even though the specific enhancement pattern was not present.
-
-**Example 3 — Sample 1807:**
-- **Question:** "Are the temporal bones fractured?"
-- **Image shows:** Brain CT with a frontal cyst, no temporal bone injury
-- **Matched findings:** `[]` (empty — no fracture found)
-- **Workflow answer:** **"Yes"**
-- **Ground truth:** "no"
-- **What happened:** The workflow found a brain lesion and answered "Yes" to the bone fracture question, confusing any abnormality with the specific target.
-
-**The bug:** The code checks if the question contains abnormality keywords like "fracture", "mass", or "lesion". If it finds these words, it returns "Yes" whenever *any* notable finding exists in the image — without checking if that finding actually matches what was asked about. This produces false positives on presence/absence questions, making the 65% workflow accuracy a contaminated baseline that cannot fairly compare agentic versus workflow performance.
-
-### Failure Mode Analysis
-
-**Lexical overlap metrics** reveal the agentic system produces more semantically diverse outputs (37% lexical overlap vs. 20% for baselines), but this diversity does not correlate with accuracy. The post-hoc evaluation's semantic similarity threshold (0.85 using PubMedBERT) measures answer-ground truth alignment during evaluation scoring; it is not used by the VerificationAgent or any other agent during inference. A more subtle failure mode is that retrieved chunks with high semantic similarity to the question may nonetheless mislead the reasoning process—retrieved content can describe similar-looking but different pathologies, creating plausible-sounding but incorrect answers that pass the VerificationAgent's checks.
-
-The discrepancy between **close-ended accuracy** (baseline 65% vs. agentic 63%) and **open-ended semantic similarity** (baseline 88% vs. agentic 81%) suggests the agentic pipeline struggles more with answer formatting than content correctness, potentially due to retrieval-induced answer style drift.
-
-### Implications for Agentic System Design
-
-These results yield three key insights for retrieval-augmented medical VQA systems:
-
-1. **Question-type-aware routing is essential**: The `DifficultyRouter` must disable retrieval for binary detection (yes/no, presence/absence) and unambiguous spatial localization questions. Difficulty classification alone is insufficient—question semantics determine retrieval utility.
-
-2. **Retrieval confidence gating**: The system should bypass retrieval when top-k similarity scores fall below a calibrated threshold, falling back to direct visual reasoning rather than injecting low-relevance noise.
-
-3. **Workflow baseline debugging**: The 65% workflow accuracy results from implementation defects, not architectural inferiority. Proper workflow baselines remain essential for isolating the value of agentic components from simple pipeline composition.
-
----
-
-## Log Analysis
-
-Detailed execution traces from `medvqa_20260410` logs (**200 sample log files**) reveal runtime characteristics and failure modes not visible in aggregate evaluation metrics:
-
-### Latency Characteristics
-
-| Metric | Baseline | Agentic (no retry) | Agentic (with retry) |
-|--------|----------|-------------------|---------------------|
-| Observed range | 1.4-2.1s | 13-31s | 28-41s |
-| Slowdown vs baseline | — | 7-20× | 17-24× |
-
-The 6-stage pipeline (ImageInterpreter → QuestionAnalyzer → DifficultyRouter → KnowledgeRetriever → ReasoningAgent → VerificationAgent) incurs sequential LLM call overhead. When retry triggers, latency approximately doubles as the ReasoningAgent receives `retry_context` with previous status, confidence, and failure categories to self-correct.
-
-### Retry Effectiveness
-
-Comprehensive log analysis of 200 sample traces found **36 retry cases (retries=1)** out of all processed samples (18.0% retry rate). Retry outcomes show **mixed effectiveness (27.8% improvement rate)**:
-
-| Outcome | Count | Percentage | Examples |
-|---------|-------|------------|----------|
-| **Improved result** | 10 | 27.8% | Sample 1821, 2141, 1822, 2088, 2163, 2015, and others — attempt 2 achieved higher payload score |
-| **No improvement** | 26 | 72.2% | Sample 2177, 2187, 1998, 1871, 1899, and others — kept original answer despite retry |
-| **Incomplete logs** | 0 | 0% | No incomplete logs found in retry cases |
-
-Retry triggers when verification indicates `low_confidence`, `unsupported`, or `partially_verified` with fixable issues, or any high-severity failure category. The retry mechanism re-runs the full 6-stage pipeline with `is_retry=True`, providing `retry_context` (previous status, confidence, failure categories) to the ReasoningAgent for self-correction. The best result is selected by `_payload_score()` comparing verification rank, confidence rank, high-severity failure count, and review flag.
-
-### Retrieval Pipeline Observations
-
-When retrieval activates (medium/hard difficulty):
-- **Typical retrieval**: 3 similar cases with 4-5 key facts in 3.8-5 seconds
-- **Retrieval failures**: Some queries return 0 candidates due to strict confidence thresholds (top1_softmax ≥ 0.30, softmax_margin ≥ 0.08, dense_top1 ≥ 0.35)
-- **Quality issues**: Some retrieved cases show low or negative rerank scores, indicating poor relevance that still enters the reasoning context
-- **False failure detection**: The `knowledge_retrieval_failed` failure category triggers even when routing explicitly set `needs_retrieval=False`, indicating overly sensitive failure detection logic
-
-### Per-Case Failure Examples
-
-| Sample | Issue | Systems Affected | Retry Triggered |
-|--------|-------|-----------------|-----------------|
-| 1821 | Retry improved: Low confidence → partially verified | Agentic | ✅ Yes (34s total) |
-| 2141 | Retry improved: Low confidence → partially verified, correct answer | Agentic | ✅ Yes (35s total) |
-| 1822 | Retry succeeded by system metrics but answer became more generic — changed from specific "lateral ventricles" to "ventricular system" due to ImageInterpreter misidentifying normal ventricles as a focal lesion | Agentic | ✅ Yes (41s total) |
-| **1857** | **Critical**: Agentic "no" vs ground truth "yes" — **no retry triggered** because verification incorrectly passed as "verified" | Agentic | ❌ **No (retries=0)** |
-| Various | Workflow baseline generic answers: "brain", "abdomen", "chest" vs specific anatomy — systematic fallback to `body_region` when no specific finding matches | Workflow | N/A |
-
-**Workflow Baseline Generic Answers:** The "Various" entry shows a design flaw in the workflow baseline. When it cannot find a specific answer, it simply returns the body region ("brain", "chest", or "abdomen"). For example, if you ask "which lung field shows consolidation?" on a chest X-ray, it answers "chest" — technically true but completely unhelpful. This happens on all anatomy identification questions and any location questions where no specific finding is matched. It is a systematic problem built into the workflow, not a one-off bug.
-
-These examples show that verification checks are imperfect and may miss errors. To debug multi-stage failures properly, you need to examine the full agent traces, not just the final answers.
-
-**Why you need the full trace:** Looking at just the final answer is like reading a discharge form that says "patient cleared to leave." It tells you the outcome, but not where things went wrong. Did the doctor miss something? Did the nurse write it down wrong? Did the discharge clerk just check boxes without reading?
-
-The 6 agents work like a hospital team:
-
-| Agent | Role | Common Mistake |
-|-------|------|---------------|
-| **ImageInterpreter** | Radiologist who reads the scan | Misses a small lesion or calls normal tissue abnormal |
-| **QuestionAnalyzer** | Triage nurse who sorts cases | Labels a yes/no question as "counting" or expects a paragraph when a word will do |
-| **DifficultyRouter** | Doctor who decides how deep to investigate | Orders extra tests for simple cases, skips them for hard ones |
-| **KnowledgeRetriever** | Librarian who pulls old cases | Brings back a case that looks similar but is actually different |
-| **ReasoningAgent** | Doctor who makes the final call | Trusts the radiologist's bad read or follows a bad precedent from the librarian |
-| **VerificationAgent** | Clerk who signs off on discharge | Approves the file because all boxes are checked, even if the diagnosis is wrong |
-
-In Sample 1857, the clerk (VerificationAgent) stamped "verified" on "no mass" — but the radiologist (ImageInterpreter) had already missed the mass. You cannot find the real error by looking at the final stamp. You need to check each step.
-
----
-
-## Reflection and Limitations
-
-### Interpreting the Results
-
-The empirical findings reveal a fundamental tension in agentic medical VQA: **the overhead of multi-stage orchestration is only justified when retrieval genuinely augments reasoning**. The 5% overall accuracy deficit combined with 11× latency cost suggests the current implementation fails to achieve this threshold for the majority of cases.
-
-Three patterns emerge from the data:
-
-1. **Retrieval helps template-driven answers**: Anatomy identification (+4%) and explanation requests (+13%) benefit from retrieved exemplars that provide answer frameworks without introducing factual conflicts.
-
-2. **Retrieval harms deterministic decisions**: Binary questions (yes/no, presence/absence) and spatial localization suffer when retrieved cases contain contradictory labels or describe different anatomical regions. The catastrophic 17% yes/no accuracy demonstrates that **semantic similarity-based retrieval is poorly suited for binary detection tasks**.
-
-3. **The workflow baseline implementation is defective**: Its 65% accuracy reflects implementation bugs (0% on presence/absence) rather than inherent workflow limitations, contaminating the baseline comparison.
-
-### When Agentic Behavior is Beneficial
-
-The agentic approach provides value when:
-
-- **Complex reasoning requires external context**: Explanation requests and ambiguous questions benefit from the SLAKE knowledge base when image evidence alone is insufficient.
-
-- **Answer templates improve consistency**: Anatomy identification and "other" complex questions show gains from retrieved exemplars that provide structured answer formats.
-
-- **Self-correction recovers from initial failures**: The retry mechanism addresses cases where initial reasoning produces low-confidence or unsupported claims.
-
-- **Quality transparency is required**: Self-consistency and cross-modal agreement signals provide interpretable confidence indicators for clinical decision support.
-
-However, the data suggests these benefits are **question-type-specific**, not difficulty-based. The DifficultyRouter's policy of enabling retrieval for "medium" questions triggers the worst failures (17% yes/no accuracy), indicating that **question semantics—not perceived difficulty—should govern routing decisions**.
-
-### System Limitations
-
-The current implementation faces several structural constraints:
-
-**Evaluation and Dataset Constraints**
-- The SLAKE distribution contains few genuinely "hard" questions (1%), limiting assessment of the agentic pipeline's intended sweet spot
-- The 200-sample evaluation provides statistical power for overall comparisons but sparse data for rare question categories
-- The knowledge base's chunking strategy prioritizes question-text similarity over image-grounded metadata, limiting spatial reasoning support
-
-**Architectural Trade-offs**
-- **Latency overhead**: 13-31 seconds per query (up to 41 seconds with retry) vs. 1.8s baseline makes real-time clinical use impractical
-- **Cost scaling**: 6+ LLM API calls per query increases operational expense without proportional accuracy gains
-- **Routing brittleness**: The system depends on accurate difficulty classification; misrouting can enable retrieval when harmful or disable it when beneficial
-
-**RAG Pipeline Constraints**
-- Small corpus size (366 chunks) limits coverage for diverse medical queries
-- Strict confidence thresholds (top1_softmax ≥ 0.30, softmax_margin ≥ 0.08) trigger unnecessary retrieval failures
-- Retrieved cases sometimes have negative rerank scores, indicating low relevance that still contaminates reasoning
-- The failure detection logic triggers "knowledge_retrieval_failed" even when routing explicitly disabled retrieval
-
-### Future Directions
-
-To recover the 5% accuracy gap while preserving the agentic benefits for complex cases:
-
-1. **Implement question-type-aware routing**: Disable retrieval unconditionally for yes/no, presence/absence, and location questions; enable only for explanation requests and complex anatomy identification
-
-2. **Add retrieval confidence gating**: Bypass retrieval when top-k similarity scores fall below a calibrated threshold, falling back to direct visual reasoning
-
-3. **Debug and repair the workflow baseline**: Its current 65% accuracy reflects implementation defects, not architectural inferiority
-
-4. **Expand the knowledge base**: Increase corpus coverage and prioritize image-grounded metadata over question-text heuristics
-
----
-
-## UI
-
-### Dashboard
-Purpose: **ad-hoc analysis of any uploaded image**.
-
-Three-panel layout:
-
-- **Case Input (left)** — Image upload via drag-drop or click, question text area, Clear and Analyze buttons, educational disclaimer
-- **Image Workspace (center)** — Image display with predicted modality/body-region tags; comparison toggle appears here when results exist
-- **AI Analysis (right)** — Results panel showing one of three comparison views:
-  - **Agentic Pipeline** — `AnswerCard`, `ExplanationCard`, `AgentTrace` (stage timeline), `RoutingCard` (difficulty/retrieval), `VerificationPanel` (5-check verification), `FailureModeDrawer`
-  - **Single-shot Baseline** — Simplified result card with answer, explanation, confidence tag, and educational note
-  - **Workflow Baseline** — Simplified result card with answer, explanation, confidence tag, and workflow note
-
-All 3 systems run in parallel; results populate as each completes. Toggle between views using the comparison toggle in the Image Workspace header.
-
-### Case Explorer
-Purpose: **systematic browsing and analysis of the VQA-RAD dataset**.
-
-Three-panel layout:
-
-- **Sample Cases (left)** — Dropdown grouped by question-type category (anatomy identification, modality identification, yes/no, counting, location, abnormality description, other); selected case card shows ID, question, ground truth answer, and question type; Refresh and Clear buttons
-- **Case Preview (center)** — Methodology labels (3-column summary of Agentic/Workflow/Baseline approaches); image display; **Case Summary** card with:
-  - **Overview** — selected sample ID, current view, duration per system
-  - **Agentic Quality** (agentic view only) — confidence, verification status, self-consistency, cross-modal agreement, review flag, issue count
-  - **Routing & Retrieval** (agentic view only) — difficulty (easy/medium/hard), knowledge retriever trigger status, verification policy, fallback policy, key facts count, routing rationale
-- **Case Analysis (right)** — Same component set as Dashboard (`AnswerCard`, `ExplanationCard`, `AgentTrace`, `VerificationPanel`, `FailureModeDrawer`) with agentic details, or simplified cards for baseline/workflow views
-
-Features:
-- Browse **test-split only** samples (default 200, balanced across question types) grouped by question type with deterministic ordering
-- Comparison toggle with per-system timing badges (agentic/workflow/baseline durations)
-- Sample IDs visible in dropdown options for easy reference
-- Cache-aware analysis with Refresh button to force re-run
-
-### Evaluation
-Purpose: **aggregate performance comparison across all cached analyses**.
-
-Reads all cached Case Explorer results automatically and displays:
-
-- **System Performance Cards** — Overall accuracy (Exact yes/no + `S-PubMedBert-MS-MARCO`), average runtime, and total runtime for Baseline, Workflow, and Agentic
-- **Metrics Grid** — Total cases, 3-system disagreement rate, lexical overlap (Token F1), win counts per system, close-ended accuracy (exact yes/no), semantic similarity accuracy (open-ended, threshold ≥ 0.85)
-- **Breakdown Table** — Dropdown selector for two modes:
-  - **Question Type** — Flat list with accuracy bars per question category
-  - **Difficulty Type** — Expandable parent rows (easy/medium/hard) with nested question-type breakdowns; reflects Difficulty Router policy (retrieval trigger, verification strictness, fallback)
-- **Recent Evaluated Cases** — Filterable table with columns:
-  - Sample ID, question, ground truth, and question type tags (original vs agentic-reclassified)
-  - All three system answers
-  - Winner tag (baseline/workflow/agentic/tie)
-  - **Routing** — Difficulty badge, knowledge retriever trigger, verification policy
-  - Agentic retriever status, verification status
-  - Agentic signals (self-consistency level, cross-modal agreement)
-  - Runtime per system
-  - Sample ID multi-select filter (up to 5 IDs)
-
-Hit **Refresh Metrics** to re-aggregate after running new cases in Case Explorer.
-
----
-
-## Dataset
-
-**VQA-RAD** — a publicly available radiology VQA benchmark from [flaviagiammarino/vqa-rad](https://huggingface.co/datasets/flaviagiammarino/vqa-rad) on Hugging Face.
-
-| Field | Value |
-|---|---|
-| QA pairs in local manifest | 2,244 total |
-| Split breakdown | 1,793 train / 451 test |
-| Generated image files | 2,244 PNGs under `data/vqa-rad/images/` |
-| Image types | Radiology images |
-| Question styles | Yes/no (close-ended) and open-ended |
-
-VQA-RAD is used for the app's Case Explorer browsing and evaluation cache. The scorer rules live in `backend/utils/scoring.py`.
-
-The download script flattens the Hugging Face dataset into a local manifest with split labels, and local image filenames are saved as `{split}_{index:04d}.png`.
-
----
-
-## Quick Start
-
-### Prerequisites
-
-- Python 3.12
-- Node.js 18+
-- OpenAI API key with access to the models set in `.env` (see `.env.example`)
-
-### 1. Clone and configure
+**Prerequisites:** Python 3.12, Node.js 18+, and an OpenAI API key with access to the models in `.env`.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/Medical-VQA-Explanation-Agent.git
-cd Medical-VQA-Explanation-Agent
-cp .env.example .env
-```
+git clone https://github.com/clarence-ck/med-vqa-rad-agentic.git
+cd med-vqa-rad-agentic
+cp .env.example .env            # set OPENAI_API_KEY; per-role models are documented in the file
 
-Edit `.env`: set `OPENAI_API_KEY`, and optionally change the per-role models (`MODEL_<ROLE>`) and
-reasoning efforts (`REASONING_EFFORT_<ROLE>`). `.env.example` documents every setting.
-
-Optional: create `frontend/.env` if the frontend should point to a non-default backend URL.
-```env
-VITE_API_BASE=http://localhost:8000
-```
-
-Note: For local browser access, `BACKEND_CORS_ORIGINS` should include the frontend origin (for example, `http://localhost:5173`). `HF_TOKEN` is optional but can help avoid Hugging Face Hub rate-limit warnings during dataset/model downloads.
-
-### 2. Install Python dependencies
-
-**Option A — conda (recommended)**
-```bash
-conda env create -f environment.yml
+conda env create -f environment.yml   # recommended (native deps on Windows)
 conda activate medvisionquery
+# or: pip install -r backend/requirements.txt
+
+python scripts/download_dataset.py    # VQA-RAD → data/vqa-rad/
+
+cd backend && uvicorn main:app --port 8000      # terminal 1
+cd frontend && npm install && npm run dev       # terminal 2
 ```
 
-This path installs native ML dependencies (`numpy`, `pytorch`) from conda first, then installs Python-level packages with pip. This is the recommended setup to avoid OpenMP runtime conflicts on Windows.
+Open http://localhost:5173. Each new question costs roughly $0.01 with the default models.
 
-**Option B — pip (fallback, more fragile for native deps on Windows)**
-```bash
-pip install -r backend/requirements.txt
-```
-
-If you use the pip fallback, install native packages from conda first in the same environment:
-```bash
-conda install -c conda-forge numpy pytorch
-pip install -r backend/requirements.txt
-```
-
-### 3. Download the dataset
-
-```bash
-python scripts/download_dataset.py
-```
-
-Downloads VQA-RAD from Hugging Face into `data/vqa-rad/`.
-
-### 4. Start the backend
-
-```bash
-cd backend
-uvicorn main:app --reload --port 8000
-```
-
-### 5. Start the frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-### 6. Open the app
-
-Navigate to `http://localhost:5173`.
+Run the tests from `backend/`: `python -m unittest discover tests` (no API calls).
 
 ---
 
-## Project Structure
+## Reproducing the evaluation
+
+```bash
+# 200 cases × 3 systems + fixed-pipeline ablation (≈ $3.40, ~45 min)
+python scripts/run_case_explorer_cache.py --limit 200 --ablation --concurrency 4 --max-cost 4.0
+# run-to-run variance on 50 of the evaluated cases (≈ $0.55)
+python scripts/pilot.py --systems baseline,agentic_loop --from-eval-sample 200 --n 50 --name variance_repeat
+# blinded LLM judge for open-ended answers (≈ $0.11)
+python scripts/judge_open_ended.py
+# dashboard screenshots (backend and frontend running; puppeteer-core drives local Chrome)
+cd frontend && node scripts/capture-screenshots.mjs --out ../eval-dashboard-screenshots/2026-10 --cases 1900,2102,2009,1998
+# system diagram (needs matplotlib)
+python scripts/system_diagram.py
+```
+
+Every cached result records the git commit, models, reasoning efforts and token usage. Failed API calls are never
+cached; the runner retries them and counts their cost toward `--max-cost`.
+
+---
+
+## Project structure
 
 ```text
-Medical-VQA-Explanation-Agent/
-├── .env.example                     # env template (OpenAI credentials and CORS)
-├── environment.yml                  # conda environment (Python 3.12 + pip dependencies)
-├── backend/
-│   ├── main.py                      # FastAPI app, CORS middleware, router registration
-│   ├── config.py                    # loads .env: OPENAI_API_KEY, OPENAI_MODEL, VISION_MODEL, HF_TOKEN, DATA_DIR, CORS
-│   ├── logger.py                    # structured logging: get_logger(), per-sample file handler, log rotation
-│   ├── requirements.txt             # pip dependencies
-│   ├── agents/
-│   │   ├── orchestrator.py          # Haystack Agent controller, tool routing, retry logic, guardrails
-│   │   ├── image_interpreter.py     # Agent 1: multimodal image interpretation (OpenAI-backed vision model)
-│   │   ├── question_analyzer.py     # Agent 2: question classification and intent analysis (OpenAI)
-│   │   ├── difficulty_router.py     # Agent 3: planning — sets difficulty, verification policy, fallback policy
-│   │   ├── reasoning_agent.py       # Agent 5: answer synthesis with retry context support (OpenAI)
-│   │   ├── verification_agent.py    # Agent 6: structured verification and fallback recommendations (OpenAI)
-│   │   ├── baseline.py              # Single-shot multimodal baseline (OpenAI)
-│   │   └── workflow_baseline.py     # Deterministic answer derivation over image/question analysis outputs
-│   ├── routes/
-│   │   ├── analyze.py               # POST /api/analyze, /baseline, /workflow
-│   │   └── dataset.py               # GET /api/dataset/* — samples, analysis, evaluation, cache
-│   └── utils/
-│       ├── data_loader.py           # VQA-RAD JSON loader, sample bucketing, question classification
-│       └── json_utils.py            # strip_json_fences() — removes markdown code fences from LLM output
-├── frontend/
-│   ├── package.json                 # React 19 + Vite app
-│   └── src/
-│       ├── main.jsx                 # React entry point
-│       ├── App.jsx                  # root component, tab routing (Dashboard / Case Explorer / Evaluation)
-│       ├── config.js                # API base URL (`VITE_API_BASE` override)
-│       ├── index.css                # custom CSS (no framework)
-│       ├── components/
-│       │   ├── AgentTrace.jsx       # stage timeline, status badges, expandable outputs
-│       │   ├── AnswerCard.jsx       # final answer, guarded answer, confidence, disclaimer
-│       │   ├── CaseExplorer.jsx     # dataset browser and cached 3-system case comparison
-│       │   ├── CaseHeader.jsx       # case metadata summary bar
-│       │   ├── CaseInput.jsx        # image upload + question input (Dashboard)
-│       │   ├── ComparisonToggle.jsx # switch between agentic / workflow / baseline result views
-│       │   ├── ConfidenceBadge.jsx  # High / Medium / Low confidence badge
-│       │   ├── EvaluationView.jsx   # aggregate metrics, close/open-ended accuracy, recent cases
-│       │   ├── ExplanationCard.jsx  # explanation text, evidence used, reasoning trace
-│       │   ├── FailureModeDrawer.jsx# collapsible failure category list and failure hints
-│       │   ├── ImageViewer.jsx      # image display with zoom and predicted tags
-│       │   ├── RoutingCard.jsx      # difficulty badge, verification policy, fallback policy
-│       │   └── VerificationPanel.jsx# verification checks, notes, fallback, review flag
-│       └── hooks/
-│           ├── useAnalysis.js       # analyze / analyzeBaseline / analyzeWorkflow API calls
-│           ├── useDataset.js        # sample listing + fetchSampleAnalysis
-│           └── useEvaluation.js     # evaluation summary fetch
-├── scripts/
-│   ├── download_dataset.py          # downloads VQA-RAD from Hugging Face, writes JSON + images
-│   ├── run_case_explorer_cache.py   # warms/inspects the curated Case Explorer cache
-│   ├── system_diagram.py            # regenerates the architecture figure
-├── system_diagram.png               # rendered system diagram asset
-├── eval-dashboard-screenshots/      # UI screenshots of the evaluation dashboard
-└── data/
-    └── vqa-rad/                     # gitignored — created by download_dataset.py
-        ├── vqa_rad.json             # flattened QA manifest with split labels and image filenames
-        └── images/                  # PNG images named {split}_{index:04d}.png
+backend/
+  main.py                      FastAPI app
+  config.py                    per-role models and reasoning effort, AGENT_MODE, timeouts, code version
+  agents/
+    agentic_loop.py            controller loop (the agentic system)
+    look_agent.py              question-aware perception, focused re-looks, radiology check
+    question_analyzer.py       question type and expected answer format
+    reasoning_agent.py         answer synthesis (image + observations + guidance)
+    verification_agent.py      image-grounded verification and next-action recommendation
+    orchestrator.py            fixed six-stage pipeline (ablation)
+    image_interpreter.py       question-agnostic description (workflow baseline, ablation)
+    difficulty_router.py       difficulty routing (ablation only)
+    baseline.py                single-shot baseline
+    workflow_baseline.py       hand-designed workflow baseline
+  routes/                      /api/analyze*, /api/dataset/* (samples, analysis, evaluation)
+  utils/                       scoring, answer normalisation, usage tracking, data loading
+  tests/                       unit tests (no API calls)
+  .case_explorer_cache/        200-case evaluation results (one JSON per case)
+frontend/                      React 19 + Vite UI; scripts/capture-screenshots.mjs
+scripts/                       evaluation runner, pilots, LLM judge, dataset download, diagram
+experiments/                   pilot, variance and judge results
+eval-dashboard-screenshots/    2026-10/ = current; top level = April 2026 (superseded)
 ```
 
 ---
 
-## Appendix: Agent Outputs (Representative JSON Payloads)
-
-The following shapes describe the main inner `result` payload returned by each Haystack component. In the actual implementation, each agent returns `{"result": ...}` and may also include `status`, `error`, or extra wrapper metadata on success/failure.
-
-### ImageInterpreter
-```json
-{
-  "status": "success | error",
-  "is_radiology_image": true,
-  "modality": "X-ray",
-  "body_region": "chest",
-  "visible_structures": ["lungs", "ribs", "heart"],
-  "visual_summary": "...",
-  "image_quality": "good | fair | poor",
-  "notable_findings": ["..."]
-}
-```
-
-### QuestionAnalyzer
-```json
-{
-  "status": "success | error",
-  "question_type": "anatomy_identification | modality_identification | presence_absence | location | counting | abnormality_description | explanation_request | yes_no | other",
-  "target_entity": "...",
-  "reasoning_type": "visual_recognition | spatial_reasoning | medical_knowledge | comparison | descriptive",
-  "expected_answer_format": "single_word | short_phrase | yes_no | sentence | paragraph",
-  "requires_medical_knowledge": true,
-  "question_clarity": "clear | ambiguous | unclear",
-  "rephrased_question": "..."
-}
-```
-
-### DifficultyRouter
-```json
-{
-  "status": "success | error",
-  "difficulty": "easy | medium | hard",
-  "verification_policy": "standard | strict",
-  "fallback_policy": "none | add_disclaimer | flag_for_review",
-  "routing_rationale": "..."
-}
-```
-
-### ReasoningAgent
-```json
-{
-  "status": "success | error",
-  "answer": "...",
-  "explanation": "...",
-  "reasoning_trace": "...",
-  "evidence_used": ["..."],
-  "answer_confidence": "high | medium | low",
-  "limitations": "..."
-}
-```
-
-### VerificationAgent — 5 explicit checks
-```json
-{
-  "status": "success | error",
-  "verification_status": "verified | partially_verified | low_confidence | unsupported",
-  "confidence_label": "High | Medium | Low",
-  "checks": {
-    "answer_matches_question_type": true,
-    "explanation_grounded_in_evidence": true,
-    "answer_strength_appropriate": true,
-    "no_contradictions": true,
-    "format_appropriate": true
-  },
-  "issues_found": ["..."],
-  "fallback_recommendation": "none | rephrase_answer | add_disclaimer | flag_for_review",
-  "verification_notes": "...",
-  "suggested_disclaimer": "..."
-}
-```
-
----
-
-## API Reference
-
-All endpoints served at `http://localhost:8000`.
+## API reference
 
 | Method | Path | Description |
 |---|---|---|
-| `GET` | `/` | Health check, lists all endpoints |
-| `POST` | `/api/analyze` | Run full agentic pipeline |
-| `POST` | `/api/analyze/baseline` | Run single-shot baseline |
-| `POST` | `/api/analyze/workflow` | Run workflow baseline |
-| `GET` | `/api/dataset/samples` | List **test-split only** dataset samples (balanced across question-type categories) |
-| `GET` | `/api/dataset/sample/{id}` | Get sample with base64-encoded image |
-| `GET` | `/api/dataset/sample/{id}/analysis?refresh=false` | Run all 3 systems on a sample, cache result |
-| `GET` | `/api/dataset/evaluation` | Aggregate evaluation metrics from all cached analyses |
-
-`POST /api/analyze*` endpoints accept `multipart/form-data` with fields `image` (file) and `question` (string).
-
----
+| GET | `/` | Health check and endpoint list |
+| POST | `/api/analyze` | Agentic system (`AGENT_MODE=loop` by default, `pipeline` for the ablation); multipart `image`, `question` |
+| POST | `/api/analyze/baseline` | Single-shot baseline |
+| POST | `/api/analyze/workflow` | Workflow baseline |
+| GET | `/api/dataset/samples` | The 200 evaluation cases |
+| GET | `/api/dataset/sample/{id}` | One case with its image |
+| GET | `/api/dataset/sample/{id}/analysis?refresh=&ablation=` | Run (or load cached) all systems on a case |
+| GET | `/api/dataset/evaluation` | Aggregate metrics and per-case rows from the cache |
 
 ## License
 
