@@ -1,11 +1,15 @@
 import json
 import os
+import random
 from config import DATA_DIR
 
 
 # Excluded sample IDs (problematic test cases)
 # 2070: Problematic question and answer pair (ground truth issue)
 EXCLUDED_SAMPLE_IDS = {2070}
+
+# Seed for the evaluation sample drawn from the test split.
+SAMPLE_SEED = int(os.getenv("EVAL_SAMPLE_SEED", "42"))
 
 
 QUESTION_TYPE_ORDER = [
@@ -72,26 +76,15 @@ def get_sample_cases(limit: int = 200) -> list:
     if not buckets:
         return []
 
-    for question_type, samples_for_type in buckets.items():
-        samples_for_type.sort(key=lambda sample: (sample.get("question") or "").lower())
-
-    samples = []
-    bucket_order = [question_type for question_type in QUESTION_TYPE_ORDER if buckets.get(question_type)]
-    unknown_order = sorted(
-        [question_type for question_type in buckets.keys() if question_type not in QUESTION_TYPE_ORDER]
-    )
-    bucket_order.extend(unknown_order)
-
-    while len(samples) < limit and any(buckets.get(question_type) for question_type in bucket_order):
-        for question_type in bucket_order:
-            bucket = buckets.get(question_type) or []
-            if not bucket:
-                continue
-            samples.append(bucket.pop(0))
-            if len(samples) >= limit:
-                break
-
-    return samples
+    # Seeded random sample of the test split, so evaluation results are not biased
+    # by which questions sort first. The dropdown still groups by question type.
+    pool = [sample for bucket in buckets.values() for sample in bucket]
+    pool.sort(key=lambda sample: sample["id"])
+    chosen = random.Random(SAMPLE_SEED).sample(pool, min(limit, len(pool)))
+    type_rank = {question_type: index for index, question_type in enumerate(QUESTION_TYPE_ORDER)}
+    chosen.sort(key=lambda sample: (type_rank.get(sample["question_type"], len(type_rank)),
+                                    (sample.get("question") or "").lower()))
+    return chosen
 
 
 def get_sample_by_id(sample_id: int) -> dict | None:

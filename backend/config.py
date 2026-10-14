@@ -1,5 +1,6 @@
 import logging
 import os
+import subprocess
 from dotenv import load_dotenv
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
@@ -77,6 +78,20 @@ def generation_kwargs(role: str, max_completion_tokens: int | None = None) -> di
     if effort:
         kwargs["reasoning_effort"] = effort
     return kwargs
+
+
+def _git_commit() -> str:
+    try:
+        return subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"], cwd=os.path.dirname(__file__),
+            capture_output=True, text=True, timeout=5, check=True,
+        ).stdout.strip()
+    except Exception:
+        return "unknown"
+
+
+# Code version recorded with cached results, so every number can be traced to the code that produced it.
+CODE_VERSION = os.getenv("CODE_VERSION") or _git_commit()
 
 
 def model_manifest() -> dict:

@@ -19,7 +19,7 @@ from agents.agentic_loop import run_agentic
 from agents.workflow_baseline import workflow_answer
 from utils.data_loader import get_sample_cases, get_sample_by_id, get_image_bytes, EXCLUDED_SAMPLE_IDS
 from utils import scoring
-from config import model_manifest
+from config import AGENT_MODE, CODE_VERSION, model_manifest
 from utils.usage import track_usage, summarize as summarize_usage
 from logger import get_logger, sample_id_var
 
@@ -440,6 +440,8 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
             "workflow_duration_ms": workflow_ms,
             "agentic_duration_ms": agentic_ms,
             "models": model_manifest(),
+            "code_version": CODE_VERSION,
+            "agent_mode": AGENT_MODE,
             "usage": {
                 "baseline": baseline_usage,
                 "workflow": workflow_usage,

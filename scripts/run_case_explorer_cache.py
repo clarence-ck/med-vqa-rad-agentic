@@ -63,7 +63,7 @@ def _show_cache_status(selected_samples: list) -> None:
 
 
 async def warm_cache(skip: int, limit: int, refresh: bool, dry_run: bool = False, status_only: bool = False,
-                     max_cost: float | None = None) -> None:
+                     max_cost: float | None = None, concurrency: int = 1) -> None:
     if skip < 0:
         raise ValueError("skip must be >= 0")
     if limit < 0:
@@ -116,39 +116,41 @@ async def warm_cache(skip: int, limit: int, refresh: bool, dry_run: bool = False
             print(f"  [{index}] sample_id={sample_id} question_type={q_type}")
         return
 
-    # Process samples
-    completed = 0
-    errors = 0
-    total_cost = 0.0
-    for index, sample in enumerate(samples, start=1):
-        sample_id = int(sample["id"])
-        question = str(sample.get("question", ""))
-        question_type = sample.get("question_type", "unknown")
-        cache_path = _cache_path_for(sample_id, question)
+    # Process samples, up to `concurrency` cases at a time. The spend cap is checked
+    # before each case starts, so the final spend can exceed it by the cases in flight.
+    stats = {"completed": 0, "errors": 0, "cost": 0.0, "stopped": False}
+    semaphore = asyncio.Semaphore(max(1, concurrency))
+    pending = [
+        (index, sample) for index, sample in enumerate(samples, start=1)
+        if refresh or not _cache_path_for(int(sample["id"]), str(sample.get("question", ""))).exists()
+    ]
 
-        if cache_path.exists() and not refresh:
-            continue  # Skip silently (already counted in preview)
+    async def process(index: int, sample: dict) -> None:
+        async with semaphore:
+            if max_cost is not None and stats["cost"] >= max_cost:
+                if not stats["stopped"]:
+                    print(f"Stopping: estimated spend ${stats['cost']:.4f} reached --max-cost ${max_cost:.2f}")
+                    stats["stopped"] = True
+                return
+            sample_id = int(sample["id"])
+            question_type = sample.get("question_type", "unknown")
+            payload = await analyze_sample_case(sample_id, refresh=refresh)
+            if not isinstance(payload, dict) or payload.get("error"):
+                message = payload.get("error") if isinstance(payload, dict) else getattr(payload, "status_code", payload)
+                print(f"[{index}/{len(samples)}] sample_id={sample_id}  -> ERROR: {message}", flush=True)
+                stats["errors"] += 1
+                return
+            usage = payload.get("usage") or {}
+            costs = {system: (usage.get(system) or {}).get("cost_usd", 0.0) for system in ("baseline", "workflow", "agentic")}
+            case_cost = sum(costs.values())
+            stats["cost"] += case_cost
+            stats["completed"] += 1
+            cost_note = "  ".join(f"{system}=${cost:.4f}" for system, cost in costs.items())
+            print(f"[{index}/{len(samples)}] sample_id={sample_id}  {question_type}  case=${case_cost:.4f}  "
+                  f"({cost_note})  total=${stats['cost']:.4f}", flush=True)
 
-        if max_cost is not None and total_cost >= max_cost:
-            print(f"Stopping: estimated spend ${total_cost:.4f} reached --max-cost ${max_cost:.2f}")
-            break
-
-        print(f"[{index}/{len(samples)}] sample_id={sample_id}  question_type={question_type}")
-        payload = await analyze_sample_case(sample_id, refresh=refresh)
-        if not isinstance(payload, dict) or payload.get("error"):
-            message = payload.get("error") if isinstance(payload, dict) else getattr(payload, "status_code", payload)
-            print(f"  -> ERROR: {message}")
-            errors += 1
-            continue
-
-        usage = payload.get("usage") or {}
-        case_cost = sum((usage.get(system) or {}).get("cost_usd", 0.0) for system in ("baseline", "workflow", "agentic"))
-        total_cost += case_cost
-        cost_note = "  ".join(
-            f"{system}=${(usage.get(system) or {}).get('cost_usd', 0.0):.4f}" for system in ("baseline", "workflow", "agentic")
-        )
-        print(f"  -> stored in cache  case=${case_cost:.4f}  ({cost_note})  running total=${total_cost:.4f}")
-        completed += 1
+    await asyncio.gather(*(process(index, sample) for index, sample in pending))
+    completed, errors, total_cost = stats["completed"], stats["errors"], stats["cost"]
 
     print()
     print(f"Done. Successfully cached: {completed} | Errors: {errors}")
@@ -183,6 +185,12 @@ def parse_args() -> argparse.Namespace:
         help="Preview which cases would be processed without running analysis.",
     )
     parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=1,
+        help="Number of cases to run at the same time (default: 1).",
+    )
+    parser.add_argument(
         "--max-cost",
         type=float,
         default=None,
@@ -206,6 +214,7 @@ def main() -> None:
         dry_run=args.dry_run,
         status_only=args.status,
         max_cost=args.max_cost,
+        concurrency=args.concurrency,
     ))
 
 
