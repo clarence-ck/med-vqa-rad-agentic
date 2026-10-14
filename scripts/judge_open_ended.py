@@ -12,7 +12,7 @@ answers stay rule-based.
 - Verdicts: correct / partially_correct / incorrect. Only "correct" adds credit.
 
 Output: experiments/runs/<run_id>/judgments.json (read by the Evaluation dashboard). A case is re-judged
-whenever its strict-wrong answers differ from the ones already judged, so re-runs never reuse a
+whenever its answers differ from the ones already judged, so re-runs never reuse a
 verdict for a different answer; --fresh discards all earlier verdicts.
 
 Usage (run from repo root):

@@ -198,7 +198,8 @@ non-radiology or unreadable images are rejected before any answer is produced.
 % ============================================================================
 \section{Evaluation}
 % ============================================================================
-\paragraph{Setup.} \NCases{} VQA-RAD test questions drawn at random (seed 42; \NClose{} close-ended, \NOpen{} open-ended); all four
+\paragraph{Setup.} \NCases{} VQA-RAD test questions drawn at random, keeping the split's close/open-ended mix (seed 42;
+\NClose{} close-ended, \NOpen{} open-ended); all four
 systems run on the same cases with the same answering model. \emph{Strict scoring}: yes/no answers must start with
 the correct word; binary terms must name the correct term and not its opposite; counts must match; open-ended answers
 must contain every content word of the reference (aliases and plurals folded; $\geq$60\% for references longer than
@@ -207,7 +208,7 @@ only as a strict fallback. Because word matching both rejects correct paraphrase
 contain the reference word, a \emph{blinded LLM judge} (\texttt{gpt-6-astra}, a model that neither answers nor
 verifies in any system; answers shuffled and anonymised) scores every open-ended answer as a second, independent
 measure. Paired comparisons use the exact McNemar test; 95\% intervals are about
-$\pm$6.7 points. The baseline and agentic loop were re-run on \VarCases{} cases to measure stability. API cost of the
+$\pm$\CIHalf{} points. The baseline and agentic loop were re-run on \VarCases{} cases to measure stability. API cost of the
 evaluation: \$\CostTotal{} (\$\CostRun{} runs, \$\CostRepeats{} repeats, \$\CostJudge{} judge). Wall-clock time:
 \MinEval\,min for the main run (four cases at a time), \MinRepeats\,min for the sequential repeats and
 \MinJudge\,min for the judge.
@@ -289,8 +290,8 @@ controller decide is clearly better---the benefit comes from \emph{adaptive cont
 
 \paragraph{Limitations.} About \CostRatio$\times$ the cost and \LatRatio$\times$ the median latency of a single prompt for
 similar accuracy.
-The verifier shares the perception weaknesses of vision models, so agreement is not correctness. Two hundred cases
-give $\pm$6.7-point intervals and noisy per-type estimates; the LLM judge is itself a model, spot-checked but not
+The verifier shares the perception weaknesses of vision models, so agreement is not correctness. \NCases{} questions
+give $\pm$\CIHalf-point intervals and noisy per-type estimates; the LLM judge is itself a model, spot-checked but not
 human-annotated. A retrieval stage did not help perception-bound questions and was removed; retrieval may still
 help questions that need knowledge not visible in the image, which VQA-RAD rarely contains.
 

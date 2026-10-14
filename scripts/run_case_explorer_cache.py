@@ -195,8 +195,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--limit",
         type=int,
-        default=200,
-        help="Number of curated UI test cases to run after skipping (default: 200).",
+        default=1000,
+        help="Number of evaluation questions to run after skipping (default: all of experiments/eval_set.json).",
     )
     parser.add_argument(
         "--run-id",

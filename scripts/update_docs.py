@@ -348,6 +348,8 @@ def latex_macros(m: dict, d: dict) -> str:
         "MinEval": d["stage_minutes"].get("eval", 0), "MinRepeats": d["stage_minutes"].get("variance", 0),
         "MinJudge": d["stage_minutes"].get("judge", 0),
         "RunId": m["run"]["run_id"].replace("_", "\\_"),
+        # 95% interval half-width for an accuracy near the agentic loop's, in points
+        "CIHalf": f"{196 * (s['agentic']['strict'] / 100 * (1 - s['agentic']['strict'] / 100) / m['cases']) ** 0.5:.1f}",
         "BlindStrict": (m.get("blind_reading") or {}).get("strict", "--"),
         "BlindAgP": p_value((m.get("blind_reading") or {}).get("agentic_vs_blind", {}).get("p", 1.0)).replace("< ", "<"),
         "ZoomN": (m.get("zoom") or {}).get("cases") or 0,

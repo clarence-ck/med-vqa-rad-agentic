@@ -3,7 +3,7 @@
 MedVisionQuery answers natural-language questions about radiology images (X-ray, CT, MRI). Its agentic system is a
 **Haystack Agent controller** that decides, case by case, how to look at the image, answer, check the answer *against
 the image*, and whether to re-examine a region, revise, abstain or finish. It is evaluated against a single-prompt
-baseline, a hand-designed workflow and a fixed-pipeline ablation on 200 random VQA-RAD test questions.
+baseline, a hand-designed workflow and a fixed-pipeline ablation on 300 VQA-RAD test questions.
 
 > ⚠️ **For education and research only. Not for clinical use.**
 
@@ -97,7 +97,7 @@ controller decides whether to follow it, which is what separates the loop from t
 | `finish(abstain)` | Decision | — | Ends the episode; refused while the latest answer is unchecked |
 
 Budgets: at most 2 focused re-looks, 3 answers and 16 agent steps. If the controller stalls, a safety net answers
-and/or checks before finishing. Paths observed on the 200-case evaluation:
+and/or checks before finishing. Paths observed in the current run:
 
 <!-- generated:paths -->
 | Path | Cases | Tool sequence |
@@ -169,9 +169,9 @@ them all. Every number in this README and the report comes from the current (lat
 `scripts/final_metrics.py` and `scripts/update_docs.py`; text between `<!-- generated -->` markers is not edited by
 hand.
 
-- **Data:** the VQA-RAD test split (451 questions); a seeded random sample of 200 (`EVAL_SAMPLE_SEED=42`), excluding
-  one known-bad item. The sample follows the natural mix (56% yes/no), so per-type numbers for small categories are
-  noisy.
+- **Data:** 300 of the VQA-RAD test split's 450 usable questions (one known-bad item excluded), drawn at random
+  with seed 42 while keeping the split's mix of 56% yes/no (169 close-ended, 131 open-ended). The list is
+  `experiments/eval_set.json` (`scripts/make_eval_set.py`); per-type numbers for small categories are noisy.
 - **Systems:** single-shot baseline, workflow baseline, agentic loop and fixed-pipeline ablation, all on the same cases
   and the same answering model.
 - **Strict scorer** (`backend/utils/scoring.py`):
@@ -187,8 +187,8 @@ hand.
   shuffled and anonymised). Its verdict is the "judged" score for open-ended answers; yes/no answers stay rule-based.
   Astra neither answers (`gpt-6-luna`) nor verifies (`gpt-6.1-sol`) in any system, so it favours none. A 30-verdict
   spot check is recorded in `judge_review_sample.md` in the run folder (AI-assisted review, not human annotation).
-- **Statistics:** 95% intervals are about ±6.7 points at n = 200; paired comparisons use the exact McNemar test.
-- **Variance:** the baseline and agentic loop were re-run on 50 of the evaluated cases.
+- **Statistics:** 95% intervals are about ±5.5 points at n = 300; paired comparisons use the exact McNemar test.
+- **Variance:** the baseline and agentic loop are run again on 100 of the evaluated questions.
 <!-- generated:cost -->
 - **Cost:** every OpenAI call is recorded (`backend/utils/usage.py`): evaluation $3.43, repeats
   $0.54, judge $0.11 ($4.08 in total).
@@ -310,7 +310,7 @@ multi-stage pipeline with the same models, letting a controller decide is clearl
 - About 41× the cost and 8× the (median) latency of a single prompt for similar accuracy.
 <!-- /generated:limit-cost -->
 - The verifier shares the perception weaknesses of vision models; agreement is not correctness.
-- 200 cases give ±6.7-point intervals; per-type results for small categories are noisy.
+- 300 questions give about ±5.5-point intervals; per-type results for small categories are noisy.
 - The strict scorer under-credits paraphrases and over-credits vague answers that contain the reference word; the
   LLM judge corrects both, but it is a model, spot-checked rather than human-annotated.
 - For non-abstained answers, the yes/no normaliser maps "cannot determine" to "no" (no measurable effect in this run).
@@ -336,7 +336,7 @@ scorer gives roughly 62% / 30% / 50%. The main changes:
 | Verifier | Same model, text only; crashed on counting questions | Different model, sees the image, recommends the next action |
 | Retrieval | SLAKE hybrid RAG | Removed (no measurable benefit; contradictory look-alike cases) |
 | Self-consistency | Ratio of verifier checks passed | Independent re-answers |
-| Evaluation | 200 hand-ordered cases, grouped by the agent's own labels | 200 seeded-random cases, dataset labels, ablation, variance repeats |
+| Evaluation | 200 hand-ordered cases, grouped by the agent's own labels | 300 seeded, stratified test questions, dataset labels, ablation, LLM judge, variance repeats |
 
 ---
 
@@ -344,7 +344,7 @@ scorer gives roughly 62% / 30% / 50%. The main changes:
 
 - **Dashboard:** upload an image, ask a question, and compare the agentic loop with both baselines. The agentic view
   shows the answer, explanation, verification checks, failure categories and the full trace.
-- **Case Explorer:** browse the 200 evaluation cases; cached cases open instantly, others run live.
+- **Case Explorer:** browse the evaluation questions; ones in the current run open instantly, others run live.
 - **Evaluation:** strict and LLM-judged accuracy for all four systems, close- and open-ended accuracy, accuracy by
   question type and by controller path, disagreement, and a filterable table of every case.
 
@@ -451,7 +451,7 @@ eval-dashboard-screenshots/    dashboard screenshots (regenerated by scripts/run
 | POST | `/api/analyze` | Agentic system (`AGENT_MODE=loop` by default, `pipeline` for the ablation); multipart `image`, `question` |
 | POST | `/api/analyze/baseline` | Single-shot baseline |
 | POST | `/api/analyze/workflow` | Workflow baseline |
-| GET | `/api/dataset/samples` | The 200 evaluation cases |
+| GET | `/api/dataset/samples` | The evaluation questions (`experiments/eval_set.json`) |
 | GET | `/api/dataset/sample/{id}` | One case with its image |
 | GET | `/api/dataset/sample/{id}/analysis?refresh=&ablation=` | Run (or load cached) all systems on a case |
 | GET | `/api/dataset/evaluation?run=` | Aggregate metrics and per-case rows of a run (default: the current run) |

@@ -6,7 +6,7 @@ run never changes an earlier one; an interrupted run is continued with --resume.
 Stages, in order (each can be run on its own with --stages):
   data         download VQA-RAD if data/vqa-rad/ is missing                          free
   eval         every question in experiments/eval_set.json x 4 systems               paid
-  judge        blinded LLM judge for strict-wrong open-ended answers                   paid
+  judge        blinded LLM judge (gpt-6-astra) for every open-ended answer              paid
   variance     baseline + agentic loop again on 100 of the questions (--repeats)       paid
   metrics      final_metrics.json + cases.csv in the run folder                        free
   docs         README number blocks, docs/report/results.tex, experiments/runs/README.md free
