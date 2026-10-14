@@ -11,7 +11,7 @@ Results go to experiments/<name>/results.json (not the Case Explorer cache); see
 
 Usage (run from repo root):
     python scripts/pilot.py --systems baseline,agentic_loop --n 20 --max-cost 0.75 --name pilots/5-my-pilot
-    python scripts/pilot.py --systems baseline,agentic_loop --from-eval-sample 200 --n 50 --out experiments/runs/<run_id>/variance.json
+    python scripts/pilot.py --systems baseline,agentic_loop --from-eval-sample 250 --n 50 --out experiments/runs/<run_id>/variance.json
 """
 from __future__ import annotations
 
@@ -75,8 +75,8 @@ def main() -> None:
     parser.add_argument("--out", default=None,
                         help="Results file (overrides --name); an existing file is resumed, skipping finished cases")
     parser.add_argument("--from-eval-sample", type=int, default=0, metavar="N",
-                        help="Draw the --n cases from the first N evaluation cases (the Case Explorer sample), "
-                             "e.g. 200, so repeats cover cases from the main run")
+                        help="Draw the --n cases from the first N evaluation questions (experiments/eval_set.json), "
+                             "so repeats cover questions from the main run")
     args = parser.parse_args()
     systems = tuple(name.strip() for name in args.systems.split(",") if name.strip())
     unknown = set(systems) - set(ALL_SYSTEMS)

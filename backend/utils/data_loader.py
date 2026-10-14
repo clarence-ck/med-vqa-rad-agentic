@@ -1,6 +1,7 @@
 import json
 import os
 import random
+from pathlib import Path
 from config import DATA_DIR
 
 
@@ -8,8 +9,18 @@ from config import DATA_DIR
 # 2070: Problematic question and answer pair (ground truth issue)
 EXCLUDED_SAMPLE_IDS = {2070}
 
-# Seed for the evaluation sample drawn from the test split.
+# Seed for the evaluation sample drawn from the test split (used only when there is no eval_set.json).
 SAMPLE_SEED = int(os.getenv("EVAL_SAMPLE_SEED", "42"))
+
+# The evaluation questions, as an explicit list (written by scripts/make_eval_set.py).
+EVAL_SET_PATH = Path(__file__).resolve().parents[2] / "experiments" / "eval_set.json"
+
+
+def eval_set_ids() -> list[int] | None:
+    try:
+        return [int(i) for i in json.loads(EVAL_SET_PATH.read_text(encoding="utf-8"))["ids"]]
+    except (OSError, ValueError, KeyError):
+        return None
 
 
 QUESTION_TYPE_ORDER = [
@@ -48,7 +59,7 @@ def _resolve_split(item: dict, image_name: str) -> str:
     return (item.get("split") or infer_split(image_name) or "unknown").lower()
 
 
-def get_sample_cases(limit: int = 200) -> list:
+def get_sample_cases(limit: int = 1000) -> list:
     """Return a curated set of sample cases for the UI dropdown."""
     data = load_dataset()
     if not data:
@@ -76,11 +87,16 @@ def get_sample_cases(limit: int = 200) -> list:
     if not buckets:
         return []
 
-    # Seeded random sample of the test split, so evaluation results are not biased
-    # by which questions sort first. The dropdown still groups by question type.
     pool = [sample for bucket in buckets.values() for sample in bucket]
     pool.sort(key=lambda sample: sample["id"])
-    chosen = random.Random(SAMPLE_SEED).sample(pool, min(limit, len(pool)))
+    listed = eval_set_ids()
+    if listed is not None:
+        # The explicit evaluation set (experiments/eval_set.json), in its stored order.
+        by_id = {sample["id"]: sample for sample in pool}
+        chosen = [by_id[i] for i in listed if i in by_id][:limit]
+    else:
+        # Seeded random sample of the test split, so results are not biased by which questions sort first.
+        chosen = random.Random(SAMPLE_SEED).sample(pool, min(limit, len(pool)))
     type_rank = {question_type: index for index, question_type in enumerate(QUESTION_TYPE_ORDER)}
     chosen.sort(key=lambda sample: (type_rank.get(sample["question_type"], len(type_rank)),
                                     (sample.get("question") or "").lower()))

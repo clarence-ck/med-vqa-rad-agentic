@@ -5,7 +5,7 @@ run never changes an earlier one; an interrupted run is continued with --resume.
 
 Stages, in order (each can be run on its own with --stages):
   data         download VQA-RAD if data/vqa-rad/ is missing                          free
-  eval         200 cases x 4 systems (baseline, workflow, agentic loop, ablation)      paid
+  eval         every question in experiments/eval_set.json x 4 systems               paid
   judge        blinded LLM judge for strict-wrong open-ended answers                   paid
   variance     baseline + agentic loop again on 50 of the cases                        paid
   metrics      final_metrics.json + cases.csv in the run folder                        free
@@ -20,7 +20,7 @@ the run is complete, so the README and report never show a half-finished run.
 
 Usage (run from repo root):
     python scripts/run_all.py --dry-run                   # plan + cost estimate, spends nothing
-    python scripts/run_all.py --budget 4.3                # a new run, then all outputs
+    python scripts/run_all.py --budget 10                 # a new run, then all outputs
     python scripts/run_all.py --resume                    # continue the latest unfinished run
     python scripts/run_all.py --stages metrics,docs,diagram,screenshots,report   # rebuild outputs (free)
 """
@@ -43,6 +43,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
 from utils import runs  # noqa: E402
+from utils.data_loader import eval_set_ids  # noqa: E402
 
 SCRIPTS = ROOT / "scripts"
 REPORT_DIR = ROOT / "docs" / "report"
@@ -51,8 +52,11 @@ REPORT_PDF = REPORT_DIR / "MGAI_Final_Report_Group9_revised.pdf"
 STAGES = ("data", "eval", "judge", "variance", "metrics", "docs", "diagram", "screenshots", "report")
 PAID = ("eval", "judge", "variance")
 OUTPUTS = ("metrics", "docs", "diagram", "screenshots", "report")
-DEFAULT_ESTIMATE = {"eval": 3.45, "judge": 0.12, "variance": 0.55}  # USD, used before any run has finished
-EVAL_CASES, VARIANCE_CASES, CONCURRENCY = 200, 50, 4
+# USD for 300 questions with the blind check and zoom (per-call costs of the 14 Oct run, plus one blind reading
+# per case and more re-looks); replaced by the last comparable run's actual cost once there is one.
+DEFAULT_ESTIMATE = {"eval": 6.70, "judge": 0.18, "variance": 0.75}
+EVAL_CASES = len(eval_set_ids() or []) or 200   # experiments/eval_set.json (scripts/make_eval_set.py)
+VARIANCE_CASES, CONCURRENCY = 50, 4
 
 
 def run(cmd: list, cwd: Path = ROOT) -> None:
@@ -72,10 +76,16 @@ def load_json(path: Path) -> dict:
 
 
 def estimates() -> dict:
-    """Cost of each paid stage in the latest completed run, or a default."""
-    done = [r for r in runs.list_runs() if r.get("status") == "completed"]
-    stages = done[-1].get("stages", {}) if done else {}
-    return {s: round((stages.get(s) or {}).get("cost_usd") or DEFAULT_ESTIMATE[s], 2) for s in PAID}
+    """Cost of each paid stage, scaled from the latest completed run of the same system (one with the blind check),
+    or the default estimate."""
+    for run_info in reversed([r for r in runs.list_runs() if r.get("status") == "completed"]):
+        metrics = load_json(runs.run_dir(run_info["run_id"]) / "final_metrics.json")
+        if metrics.get("blind_reading") and metrics.get("cases"):
+            scale = EVAL_CASES / metrics["cases"]
+            stages = run_info.get("stages", {})
+            return {s: round(((stages.get(s) or {}).get("cost_usd") or DEFAULT_ESTIMATE[s]) * (scale if s != "variance" else 1), 2)
+                    for s in PAID}
+    return dict(DEFAULT_ESTIMATE)
 
 
 # ---------------------------------------------------------------------------- what a run has spent / finished
@@ -234,7 +244,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0],
                                      formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__)
     parser.add_argument("--stages", default=",".join(STAGES), help=f"Comma-separated subset of: {', '.join(STAGES)}")
-    parser.add_argument("--budget", type=float, default=5.0, help="USD cap for the whole run, across sessions (default 5.0)")
+    parser.add_argument("--budget", type=float, default=10.0, help="USD cap for the whole run, across sessions (default 10.0)")
     parser.add_argument("--resume", action="store_true", help="Continue the latest unfinished run (or --run-id)")
     parser.add_argument("--run-id", default=None, help="Run to resume or rebuild (default: new run / current run)")
     parser.add_argument("--yes", action="store_true", help="Do not ask before running paid stages")
@@ -271,7 +281,7 @@ def main() -> None:
     print(f"Run {run_id} ({'new' if new_run else 'existing'}):", " -> ".join(selected))
     if paid:
         total = sum(est[s] for s in paid)
-        print("Estimated OpenAI cost (last completed run): " + ", ".join(f"{s} ${est[s]:.2f}" for s in paid)
+        print("Estimated OpenAI cost: " + ", ".join(f"{s} ${est[s]:.2f}" for s in paid)
               + f" = ${total:.2f}; budget ${args.budget:.2f}" + (f", already spent ${spent:.2f}" if spent else ""))
         if not new_run:
             print(f"Resuming: {eval_complete(run_id)}/{EVAL_CASES} evaluation cases done; finished cases are kept.")
