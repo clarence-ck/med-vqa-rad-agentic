@@ -23,10 +23,16 @@ from routes import dataset as ds  # noqa: E402
 
 SYSTEMS = ("baseline", "workflow", "agentic", "pipeline")
 OUTPUT = ROOT_DIR / "experiments" / "final_metrics.json"
+RUN_LOG = ROOT_DIR / "experiments" / "run_log.json"
 
 
-def pct(x):
-    return None if x is None else round(100 * x, 1)
+def pct(x, digits=1):
+    return None if x is None else round(100 * x, digits)
+
+
+def pct2(x):
+    """Two decimals, for values the docs round again to whole percents (avoids double rounding)."""
+    return pct(x, 2)
 
 
 def mcnemar(rows, a, b):
@@ -34,6 +40,37 @@ def mcnemar(rows, a, b):
     only_b = sum(1 for r in rows if r[b] and r[a] is False)
     return {"only_first": only_a, "only_second": only_b,
             "p": round(binomtest(only_a, only_a + only_b, 0.5).pvalue, 3)}
+
+
+def showcase_cases(rows):
+    """Four representative cases for the README trace table and the screenshots, chosen by fixed rules."""
+    used = set()
+
+    def first(predicate):
+        row = next((r for r in sorted(rows, key=lambda r: r["sample_id"]) if r["sample_id"] not in used and predicate(r)), None)
+        if row:
+            used.add(row["sample_id"])
+        return row
+
+    picks = [
+        ("relook_win", "A focused re-look got it right; the single prompt did not",
+         lambda r: r["controller_path"] == "relook" and r["agentic_correct"] and not r["baseline_correct"]),
+        ("reanswer_win", "The verifier's guidance fixed the answer; the single prompt was wrong",
+         lambda r: r["controller_path"] == "reanswer" and r["agentic_correct"] and not r["baseline_correct"]),
+        ("recovery_failure", "The loop re-examined or revised and still ended wrong, while the single prompt was right",
+         lambda r: r["controller_path"] in ("relook", "reanswer") and not r["agentic_correct"] and r["baseline_correct"]),
+        ("flagged_correct", "Low self-consistency flagged the case for review, though the final answer was right",
+         lambda r: r["self_consistency_level"] == "low" and r["agentic_correct"]),
+    ]
+    out = []
+    for kind, story, predicate in picks:
+        row = first(predicate)
+        if row:
+            out.append({"kind": kind, "story": story, "sample_id": row["sample_id"], "question": row["question"],
+                        "ground_truth": row["ground_truth_answer"], "agentic_answer": row["agentic_answer"],
+                        "baseline_answer": row["baseline_answer"], "controller_path": row["controller_path"],
+                        "verification_status": row["verification_status"]})
+    return out
 
 
 def main() -> None:
@@ -64,10 +101,10 @@ def main() -> None:
         "agentic_vs_pipeline_judged": mcnemar(rows, "agentic_judged_correct", "pipeline_judged_correct"),
     }
     metrics["wins"] = {"baseline": s["baseline_wins"], "workflow": s["workflow_wins"], "agentic": s["agentic_wins"], "ties": s["ties"]}
-    metrics["disagreement_pct"] = pct(s["disagreement_rate"])
+    metrics["disagreement_pct"] = pct2(s["disagreement_rate"])
     metrics["controller_paths"] = {
-        b["label"]: {"cases": b["count"], "agentic": pct(b["agentic_accuracy"]), "baseline": pct(b["baseline_accuracy"]),
-                     "workflow": pct(b["workflow_accuracy"]), "pipeline": pct(b["pipeline_accuracy"])}
+        b["label"]: {"cases": b["count"], "agentic": pct2(b["agentic_accuracy"]), "baseline": pct2(b["baseline_accuracy"]),
+                     "workflow": pct2(b["workflow_accuracy"]), "pipeline": pct2(b["pipeline_accuracy"])}
         for b in s["by_controller_path"]
     }
 
@@ -75,14 +112,14 @@ def main() -> None:
         out = {}
         for label, values in groups.items():
             subset = [r for r in rows if r[key] in values]
-            out[label] = {"cases": len(subset), "agentic": pct(sum(r["agentic_correct"] for r in subset) / len(subset)) if subset else None}
+            out[label] = {"cases": len(subset), "agentic": pct2(sum(r["agentic_correct"] for r in subset) / len(subset)) if subset else None}
         return out
     metrics["verification_signal"] = signal("verification_status", {
         "verified": {"verified"}, "partially_verified": {"partially_verified"}, "unsupported_or_low": {"unsupported", "low_confidence"}})
     metrics["self_consistency_signal"] = signal("self_consistency_level", {
         "high": {"high"}, "medium": {"medium"}, "low": {"low"}, "not_run": {"not_run"}})
     answered = [r for r in rows if r["controller_path"] != "abstained"]
-    metrics["agentic_answered"] = {"cases": len(answered), "strict": pct(sum(r["agentic_correct"] for r in answered) / len(answered))}
+    metrics["agentic_answered"] = {"cases": len(answered), "strict": pct2(sum(r["agentic_correct"] for r in answered) / len(answered))}
 
     variance_file = ROOT_DIR / "experiments" / "variance_repeat" / "results.json"
     if variance_file.exists():
@@ -103,12 +140,10 @@ def main() -> None:
         "variance_repeats": round(json.load(open(variance_file, encoding="utf-8")).get("total_cost_usd", 0), 2) if variance_file.exists() else None,
         "judge": round(json.load(open(judge_file, encoding="utf-8")).get("cost_usd", 0), 2) if judge_file.exists() else None,
     }
-    # Wall-clock times of the final runs (14 Oct 2026), copied from the runner logs; not stored in the result files.
-    metrics["run_timings"] = {
-        "main_evaluation": {"start": "13:30:51", "end": "14:10:55", "wall_clock_s": 2404, "cases": 199, "concurrency": 4},
-        "variance_repeats": {"start": "14:10:55", "end": "14:45:36", "wall_clock_s": 2081, "cases": 50, "concurrency": 1},
-        "judge": {"start": "15:20:09", "end": "15:26:28", "wall_clock_s": 379, "cases": 82},
-    }
+    # Wall-clock times of each stage, recorded by scripts/run_all.py.
+    metrics["run_timings"] = (json.loads(RUN_LOG.read_text(encoding="utf-8")).get("stages", {})
+                              if RUN_LOG.exists() else {})
+    metrics["showcase"] = showcase_cases(rows)
     agentic, baseline = metrics["systems"]["agentic"], metrics["systems"]["baseline"]
     baseline_cost = statistics.mean(p["usage"]["baseline"]["cost_usd"] for p in cache)
     agentic_cost = statistics.mean(p["usage"]["agentic"]["cost_usd"] for p in cache)
@@ -120,7 +155,8 @@ def main() -> None:
     metrics["case_wall_time_mean_s"] = round(statistics.mean(p["duration_ms"] for p in cache) / 1000, 1)
 
     OUTPUT.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
-    print(json.dumps(metrics, indent=2))
+    print(f"Wrote {OUTPUT.relative_to(ROOT_DIR)}: " + ", ".join(
+        f"{k} {v['strict']}% strict / {v['judged']}% judged" for k, v in metrics["systems"].items()))
 
 
 if __name__ == "__main__":

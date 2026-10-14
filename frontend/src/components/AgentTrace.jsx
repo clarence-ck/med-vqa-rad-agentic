@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 const STEP_META = {
   'Image Interpretation': { stage: 'Perception', subtitle: 'visual grounding', className: 'perception' },
-  'Question Understanding': { stage: 'Perception', subtitle: 'intent + format', className: 'perception' },
+  'Question Understanding': { stage: 'Understanding', subtitle: 'question type + answer format', className: 'routing' },
   'Image Context Filter': { stage: 'Perception', subtitle: 'question-relevant findings', className: 'perception' },
   'Difficulty Routing': { stage: 'Planning', subtitle: 'difficulty + verification policy', className: 'routing' },
   'Reasoning & Answer': { stage: 'Reasoning', subtitle: 'final synthesis', className: 'reasoning' },
@@ -45,7 +45,7 @@ export default function AgentTrace({ agentTrace, loading }) {
   return (
     <div className="card animate-fade-in" style={{ animationDelay: '0.2s' }}>
       <div className="card-header">
-        <span className="card-title">🔗 Agent Pipeline</span>
+        <span className="card-title">🔗 Agent Trace</span>
         {agentTrace && (
           <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
             {agentTrace.length} steps

@@ -21,9 +21,10 @@ function App() {
   const {
     samples: explorerSamples,
     loading: samplesLoading,
+    error: samplesError,
     fetchSampleAnalysis,
   } = useDataset();
-  const { loading: evaluationLoading, data: evaluationData, fetchEvaluation } = useEvaluation();
+  const { loading: evaluationLoading, data: evaluationData, error: evaluationError, fetchEvaluation } = useEvaluation();
   const [imageSrc, setImageSrc] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [comparisonMode, setComparisonMode] = useState('agentic');
@@ -253,8 +254,8 @@ function App() {
                       </div>
                       <div className="baseline-note">
                         <div className="baseline-note-text">
-                          ℹ️ This is a single-shot result without agent decomposition, routing, or verification.
-                          Switch to <strong>Agentic Pipeline</strong> to see the full analysis.
+                          ℹ️ This is a single-shot result without the controller loop or verification.
+                          Switch to <strong>Agentic Loop</strong> to see the full analysis.
                         </div>
                       </div>
                     </div>
@@ -295,7 +296,7 @@ function App() {
                       <div className="baseline-note">
                         <div className="baseline-note-text">
                           ℹ️ This is a workflow baseline result with a fixed sequence of analysis steps without agentic self-correction.
-                          Switch to <strong>Agentic Pipeline</strong> to see the full analysis with step-by-step reasoning.
+                          Switch to <strong>Agentic Loop</strong> to see the full analysis with step-by-step reasoning.
                         </div>
                       </div>
                     </div>
@@ -317,6 +318,7 @@ function App() {
         <CaseExplorer
           samples={explorerSamples}
           loading={samplesLoading}
+          samplesError={samplesError}
           selectedSampleId={selectedExplorerSampleId}
           onSelectSample={handleExplorerSelect}
           analysisLoading={caseAnalysisLoading}
@@ -328,6 +330,7 @@ function App() {
         <EvaluationView
           loading={evaluationLoading}
           evaluationData={evaluationData}
+          error={evaluationError}
           onRefresh={() => fetchEvaluation()}
         />
       )}

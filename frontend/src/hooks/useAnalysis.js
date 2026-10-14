@@ -126,9 +126,6 @@ export function useAnalysis() {
   return {
     loading,
     loadingMessage,
-    agenticLoading,
-    baselineLoading,
-    workflowLoading,
     result,
     baselineResult,
     workflowResult,

@@ -169,7 +169,7 @@ function AccuracyBar({ label, value, color }) {
   );
 }
 
-export default function EvaluationView({ loading, evaluationData, onRefresh }) {
+export default function EvaluationView({ loading, evaluationData, error, onRefresh }) {
   const summary = evaluationData?.summary;
   const rows = useMemo(() => evaluationData?.rows || [], [evaluationData]);
   const [selectedSampleIds, setSelectedSampleIds] = useState([]);
@@ -239,8 +239,12 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
       {!summary && !loading && (
         <div className="empty-state" style={{ flex: 1 }}>
           <span className="icon">📊</span>
-          <div className="empty-state-title">No Evaluation Data Yet</div>
-          <div className="empty-state-text">Run a few cases in Case Explorer first, then come back here for aggregated results.</div>
+          <div className="empty-state-title">{error ? 'Could not load evaluation results' : 'No Evaluation Data Yet'}</div>
+          <div className="empty-state-text">
+            {error
+              ? `${error} — is the backend running on port 8000?`
+              : 'Run python scripts/run_all.py (or open cases in Case Explorer), then refresh.'}
+          </div>
         </div>
       )}
 

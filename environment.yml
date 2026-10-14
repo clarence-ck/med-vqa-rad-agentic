@@ -7,6 +7,7 @@ dependencies:
   - pip
   - numpy
   - pytorch
+  - tectonic      # builds the LaTeX report (scripts/run_all.py --stages report)
   - pip:
       - fastapi
       - uvicorn
@@ -14,8 +15,9 @@ dependencies:
       - openai
       - Pillow
       - python-multipart
-      - httpx
       - datasets
       - haystack-ai
       - sentence-transformers
       - scikit-learn
+      - scipy
+      - matplotlib

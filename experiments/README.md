@@ -5,10 +5,11 @@ Raw results behind the numbers in the [README](../README.md) and the report. The
 
 | Path | What it is | Produced by |
 |---|---|---|
-| `final_metrics.json` | Every headline number (accuracy, McNemar tests, signals, variance, costs, run timings) | `scripts/final_metrics.py` |
-| `judge/judgments.json` | Blinded `gpt-6.1-sol` verdicts on the 82 strict-wrong open-ended cases | `scripts/judge_open_ended.py` |
+| `final_metrics.json` | Every headline number (accuracy, McNemar tests, signals, variance, costs, timings, showcase cases) | `scripts/final_metrics.py` |
+| `run_log.json` | Start, finish and wall-clock time of each paid stage | `scripts/run_all.py` |
+| `judge/judgments.json` | Blinded `gpt-6.1-sol` verdicts on the strict-wrong open-ended answers | `scripts/run_all.py --stages judge` |
 | `judge/review_sample.md` | 30-verdict spot check of the judge (29/30 agreed) | manual review |
-| `variance_repeat/results.json` | Baseline and agentic loop re-run on 50 evaluated cases | `scripts/pilot.py --from-eval-sample 200 --n 50 --name variance_repeat` |
+| `variance_repeat/results.json` | Baseline and agentic loop re-run on 50 evaluated cases | `scripts/run_all.py --stages variance` |
 | `pilots/` | 20-case development pilots (seed 42), in the order they were run | `scripts/pilot.py` |
 
 ## Pilots

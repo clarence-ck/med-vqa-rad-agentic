@@ -1,11 +1,15 @@
 // Capture Evaluation and Case Explorer screenshots for the report.
 //
 // Prerequisites: backend on :8000 and frontend (npm run dev) on :5173, and an evaluation
-// cache already filled by scripts/run_case_explorer_cache.py. Only pass --cases IDs that are
-// cached: opening an uncached case in Case Explorer runs all systems live (and costs money).
+// cache already filled by scripts/run_case_explorer_cache.py. scripts/run_all.py --stages screenshots
+// starts both servers and runs this for you.
+//
+// Cases default to the showcase cases in experiments/final_metrics.json. Only pass --cases IDs that
+// are cached: opening an uncached case in Case Explorer runs all systems live (and costs money).
 //
 // Usage (from frontend/):
-//   node scripts/capture-screenshots.mjs --out ../eval-dashboard-screenshots/2026-10 --cases 1805,2009
+//   node scripts/capture-screenshots.mjs                       # -> ../eval-dashboard-screenshots
+//   node scripts/capture-screenshots.mjs --cases 1900,2102 --out ../some/dir
 import fs from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer-core';
@@ -16,8 +20,20 @@ function arg(name, fallback) {
 }
 
 const BASE_URL = arg('url', 'http://localhost:5173');
-const OUT_DIR = path.resolve(arg('out', '../eval-dashboard-screenshots/latest'));
-const CASE_IDS = (arg('cases', '') || '').split(',').map((id) => id.trim()).filter(Boolean);
+const OUT_DIR = path.resolve(arg('out', '../eval-dashboard-screenshots'));
+
+function showcaseCaseIds() {
+  try {
+    const metrics = JSON.parse(fs.readFileSync(path.resolve('../experiments/final_metrics.json'), 'utf-8'));
+    return (metrics.showcase || []).map((item) => String(item.sample_id));
+  } catch {
+    return [];
+  }
+}
+
+const CASE_IDS = arg('cases', '')
+  ? arg('cases', '').split(',').map((id) => id.trim()).filter(Boolean)
+  : showcaseCaseIds();
 const BROWSER = arg('browser', [
   'C:/Program Files/Google/Chrome/Application/chrome.exe',
   'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
@@ -50,6 +66,10 @@ async function shotElement(page, file, element) {
 async function main() {
   if (!BROWSER) throw new Error('No Chrome/Edge found; pass --browser <path>');
   fs.mkdirSync(OUT_DIR, { recursive: true });
+  // Case screenshots from an earlier run may show other cases: remove them so only current ones remain.
+  for (const file of fs.readdirSync(OUT_DIR)) {
+    if (/^\d\d-case-\d+-.*\.png$/.test(file)) fs.unlinkSync(path.join(OUT_DIR, file));
+  }
   const browser = await puppeteer.launch({ executablePath: BROWSER, headless: true, args: ['--hide-scrollbars'] });
   const page = await browser.newPage();
   await page.setViewport({ width: 1680, height: 1050, deviceScaleFactor: 1.5 });

@@ -396,8 +396,3 @@ Return ONLY the JSON object, no additional text."""
                 "count_confidence": "unknown",
                 "count_method": "none",
             }}
-
-# Wrapper function to maintain compatibility if called alone, though Pipeline is preferred.
-def interpret_image(image_bytes: bytes, mime_type: str = "image/png") -> dict:
-    interpreter = ImageInterpreter()
-    return interpreter.run(image_bytes=image_bytes, mime_type=mime_type)["result"]

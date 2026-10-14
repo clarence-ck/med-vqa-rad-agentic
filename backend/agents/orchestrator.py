@@ -12,7 +12,7 @@ from agents.question_analyzer import QuestionAnalyzer
 from agents.difficulty_router import DifficultyRouter
 from agents.reasoning_agent import ReasoningAgent
 from agents.verification_agent import VerificationAgent
-from config import OPENAI_API_KEY, MODELS, REASONER_SEES_IMAGE, generation_kwargs
+from config import OPENAI_API_KEY, MODELS, generation_kwargs
 from logger import get_logger
 from utils.answer_utils import leading_yes_no
 from utils.usage import record_usage
@@ -890,9 +890,8 @@ def _payload_score(payload: dict) -> tuple[int, int, int, int, int]:
 
 
 def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png",
-                 reasoner_sees_image: bool | None = None) -> dict:
-    if reasoner_sees_image is None:
-        reasoner_sees_image = REASONER_SEES_IMAGE
+                 reasoner_sees_image: bool = True) -> dict:
+    """Fixed six-stage pipeline (the ablation). reasoner_sees_image=False reproduces the April text-only design."""
     pipeline_start = time.time()
     _log.info(
         "=== Agentic pipeline START  question=%r  mime_type=%s  size=%d bytes ===",

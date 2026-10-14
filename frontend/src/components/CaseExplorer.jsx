@@ -24,7 +24,7 @@ const QUESTION_TYPE_ORDER = [
 function getModeLabel(mode) {
   if (mode === 'baseline') return 'Single-shot Baseline';
   if (mode === 'workflow') return 'Workflow Baseline';
-  return 'Agentic Pipeline';
+  return 'Agentic Loop';
 }
 
 function getSelectedResult(mode, analysisData) {
@@ -74,7 +74,7 @@ function MethodologyLabels() {
     }}>
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
-          <span style={{ color: 'var(--color-accent)', fontWeight: 'bold' }}>🔗 Agentic Pipeline</span>
+          <span style={{ color: 'var(--color-accent)', fontWeight: 'bold' }}>🔗 Agentic Loop</span>
         </div>
         <p style={{ color: 'var(--color-text-secondary)', lineHeight: '1.4' }}>
           A controller agent looks at the image with the question in mind, answers, checks the answer against the image, and decides whether to re-examine a region, revise, abstain or finish.
@@ -103,6 +103,7 @@ function MethodologyLabels() {
 export default function CaseExplorer({
   samples,
   loading,
+  samplesError,
   selectedSampleId,
   onSelectSample,
   analysisLoading,
@@ -339,7 +340,7 @@ export default function CaseExplorer({
                   <div style={{ overflowY: 'auto', flex: 1, maxHeight: '240px' }}>
                     {filteredGroups.length === 0 ? (
                       <div style={{ padding: '12px', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
-                        No samples found
+                        {samplesError ? `Could not load cases: ${samplesError}` : 'No samples found'}
                       </div>
                     ) : (
                       filteredGroups.map((group, groupIdx) => (
@@ -562,7 +563,7 @@ export default function CaseExplorer({
 
                       <div className="summary-summary-text">
                         {showAgenticDetails
-                          ? 'Agentic mode includes question understanding, routing, and verification metadata.'
+                          ? 'Agentic mode includes the controller\'s tool calls, verification and uncertainty signals.'
                           : 'This view shows the selected baseline answer path for direct comparison.'}
                       </div>
                     </div>
@@ -716,7 +717,7 @@ export default function CaseExplorer({
                     {comparisonMode === 'workflow'
                       ? 'Workflow Baseline: a deterministic sequence of analysis steps without agentic self-correction.'
                       : 'Single-shot Baseline: a direct, single-prompt approach without intermediate decomposition.'}
-                    {' '}Switch to Agentic Pipeline to inspect step-by-step reasoning, routing, and verification details.
+                    {' '}Switch to Agentic Loop to inspect the controller's steps and verification details.
                   </p>
                 </div>
               </div>

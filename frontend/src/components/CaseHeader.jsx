@@ -80,7 +80,7 @@ export default function CaseHeader({ result, baselineResult, workflowResult }) {
         </div>
       )}
 
-      {/* Agent Pipeline Breakdown */}
+      {/* Agent trace breakdown */}
       {agentTimings.length > 0 && (
         <div className="case-header-item timing-section">
           <span className="case-header-label">Pipeline Steps</span>

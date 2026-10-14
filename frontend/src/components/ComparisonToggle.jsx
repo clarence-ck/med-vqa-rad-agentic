@@ -11,7 +11,7 @@ export default function ComparisonToggle({ mode, onToggle, baselineMs, workflowM
           className={`comparison-toggle-btn ${mode === 'agentic' ? 'active' : ''}`}
           onClick={() => onToggle('agentic')}
         >
-          🔗 Agentic Pipeline
+          🔗 Agentic Loop
           {agenticMs != null && (
             <span style={{ display: 'block', fontSize: '10px', opacity: 0.7, marginTop: '2px' }}>
               {fmt(agenticMs)}

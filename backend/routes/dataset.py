@@ -49,7 +49,10 @@ def _apply_judgments(row: dict, judgments: dict) -> None:
         if strict is None:
             row[f"{system}_judged_correct"] = None
             continue
-        verdict = (verdicts.get(system) or {}).get("verdict")
+        judged_answer = verdicts.get(system) or {}
+        # A verdict only counts for the exact answer it judged (a re-run can change the answer).
+        same_answer = str(judged_answer.get("answer", "")) == str(row.get(f"{system}_answer") or "")
+        verdict = judged_answer.get("verdict") if same_answer else None
         row[f"{system}_judged_correct"] = bool(strict) or verdict == "correct"
         row[f"{system}_judge_verdict"] = verdict
 _log = get_logger("routes.dataset")
@@ -511,7 +514,7 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
         def run_ablation(image: bytes, text: str, mime: str) -> dict:
             # Fixed six-stage pipeline with the image passed to the reasoner: isolates what
             # the controller loop adds over a fixed chain with the same image access.
-            return run_pipeline(image, text, mime, reasoner_sees_image=True)
+            return run_pipeline(image, text, mime)
 
         if cached_payload is not None:
             # Cached three-system result exists; only the ablation is missing.
@@ -719,17 +722,6 @@ def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
     # Group by the dataset-side label, which is independent of the system under test.
     agentic_question_type = agentic_result.get("question_analysis", {}).get("question_type")
     question_type = original_question_type
-    question_type_source = "dataset"
-    routing_decision = agentic_result.get("routing_decision", {}) or {}
-    routing_difficulty = routing_decision.get("difficulty", "unknown")
-    routing_verification_policy = routing_decision.get("verification_policy", "standard")
-    routing_fallback_policy = routing_decision.get("fallback_policy", "none")
-    routing_rationale = routing_decision.get("routing_rationale", "")
-
-    # Use batch embeddings for semantic scores
-    baseline_semantic = _compute_semantic_similarity_batch(embeddings_map, baseline_normalized, ground_truth_normalized)
-    workflow_semantic = _compute_semantic_similarity_batch(embeddings_map, workflow_normalized, ground_truth_normalized)
-    agentic_semantic = _compute_semantic_similarity_batch(embeddings_map, agentic_normalized, ground_truth_normalized)
 
     return {
         "sample_id": sample.get("id"),
@@ -737,7 +729,6 @@ def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
         "question_type": question_type,
         "original_question_type": original_question_type,
         "agentic_question_type": agentic_question_type,
-        "question_type_source": question_type_source,
         "split": sample.get("split", "unknown"),
         "answer_style": answer_style,
         "ground_truth_answer": ground_truth,
@@ -760,9 +751,6 @@ def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
         "baseline_token_f1": round(_token_f1(baseline_normalized, ground_truth_normalized), 4),
         "workflow_token_f1": round(_token_f1(workflow_normalized, ground_truth_normalized), 4),
         "agentic_token_f1": round(_token_f1(agentic_normalized, ground_truth_normalized), 4),
-        "baseline_semantic": round(baseline_semantic, 4),
-        "workflow_semantic": round(workflow_semantic, 4),
-        "agentic_semantic": round(agentic_semantic, 4),
         "winner": winner,
         "disagreement": not all(
             scoring.answers_agree(first, second, is_close_ended, original_question_type, similarity)
@@ -774,13 +762,8 @@ def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
         ),
         "verification_status": agentic_result.get("verification_status", "unknown"),
         "confidence": agentic_result.get("confidence", "Low"),
-        "issues_found": agentic_result.get("issues_found", []),
         "self_consistency_level": agentic_result.get("self_consistency_signal", {}).get("level", "low"),
         "cross_modal_agreement_level": agentic_result.get("cross_modal_agreement", {}).get("level", "medium"),
-        "routing_difficulty": routing_difficulty,
-        "routing_verification_policy": routing_verification_policy,
-        "routing_fallback_policy": routing_fallback_policy,
-        "routing_rationale": routing_rationale,
         "duration_ms": payload.get("duration_ms", 0),
         "baseline_duration_ms": payload.get("baseline_duration_ms"),
         "workflow_duration_ms": payload.get("workflow_duration_ms"),

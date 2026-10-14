@@ -9,10 +9,13 @@ model whether each strict-wrong open-ended answer means the same as the ground t
   judge does not know which system produced which answer.
 - Verdicts: correct / partially_correct / incorrect. Only "correct" adds credit.
 
-Output: experiments/judge/judgments.json (read by the Evaluation dashboard).
+Output: experiments/judge/judgments.json (read by the Evaluation dashboard). A case is re-judged
+whenever its strict-wrong answers differ from the ones already judged, so re-runs never reuse a
+verdict for a different answer; --fresh discards all earlier verdicts.
 
 Usage (run from repo root):
     python scripts/judge_open_ended.py --max-cost 0.6
+    python scripts/judge_open_ended.py --fresh       # after a full re-run
 """
 from __future__ import annotations
 
@@ -92,12 +95,20 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--max-cost", type=float, default=0.6)
     parser.add_argument("--seed", type=int, default=7, help="Seed for shuffling candidate labels")
+    parser.add_argument("--fresh", action="store_true", help="Discard earlier verdicts and judge every case again")
     args = parser.parse_args()
 
     rows = asyncio.run(ds.get_evaluation_summary())["rows"]
     todo = [row for row in rows if row["answer_style"] == "open_ended" and strict_wrong_candidates(row)]
-    existing = json.loads(OUTPUT.read_text(encoding="utf-8")) if OUTPUT.exists() else {}
-    judgments = existing.get("judgments", {})
+    existing = {} if args.fresh or not OUTPUT.exists() else json.loads(OUTPUT.read_text(encoding="utf-8"))
+    # Keep only verdicts that judged exactly the answers in the current results.
+    judgments = {
+        str(row["sample_id"]): existing["judgments"][str(row["sample_id"])]
+        for row in todo
+        if str(row["sample_id"]) in existing.get("judgments", {})
+        and {s: v["answer"] for s, v in existing["judgments"][str(row["sample_id"])]["verdicts"].items()}
+        == strict_wrong_candidates(row)
+    }
     print(f"{len(todo)} open-ended cases with strict-wrong answers; {len(judgments)} already judged; judge={MODELS['judge']}")
 
     generator = OpenAIChatGenerator(api_key=Secret.from_token(OPENAI_API_KEY), model=MODELS["judge"])

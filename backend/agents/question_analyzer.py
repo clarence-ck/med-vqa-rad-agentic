@@ -379,9 +379,3 @@ Return ONLY the JSON object, no additional text."""
                 "question_clarity": "unclear",
                 "rephrased_question": question
             }}
-
-# Wrapper function for compatibility if called directly
-def analyze_question(question: str, visual_summary: str = "") -> dict:
-    analyzer = QuestionAnalyzer()
-    simulated_input = {"visual_summary": visual_summary} if visual_summary else None
-    return analyzer.run(question=question, image_interpretation=simulated_input)["result"]

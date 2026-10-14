@@ -48,6 +48,5 @@ export function useDataset() {
     loading,
     error,
     fetchSampleAnalysis,
-    refetch: fetchSamples,
   };
 }

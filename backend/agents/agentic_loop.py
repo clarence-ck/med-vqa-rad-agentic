@@ -128,9 +128,7 @@ class LoopContext:
         self.checks: list[dict] = []          # checks[i] verifies answers[i]
         self.trace: list[dict] = []
         self.actions: list[str] = []
-        self.finished = False
         self.abstained = False
-        self.finish_reason = ""
 
     # -- helpers -------------------------------------------------------------
     def _record(self, agent: str, status: str, summary: str, output: dict, started: float) -> None:
@@ -300,9 +298,7 @@ class LoopContext:
         self.actions.append("finish(abstain)" if abstain else "finish")
         if self.answers and len(self.checks) < len(self.answers) and not abstain:
             return "The latest answer has not been checked. Call check before finishing."
-        self.finished = True
         self.abstained = bool(abstain)
-        self.finish_reason = reason
         self._record("Finish", "pass", f"{'Abstained' if abstain else 'Accepted latest answer'}"
                      f"{': ' + reason if reason else ''}", {"abstain": bool(abstain), "reason": reason}, time.time())
         return "Finished."

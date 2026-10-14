@@ -151,6 +151,15 @@ class ConsistencyLevelTests(unittest.TestCase):
         self.assertEqual(consistency_level(0, 2), "low")
         self.assertEqual(consistency_level(0, 0), "not_run")
 
+class ImportTests(unittest.TestCase):
+    def test_every_module_imports(self):
+        """Catches removed or renamed functions that another module still imports."""
+        import importlib
+        for module in ("agents.agentic_loop", "agents.orchestrator", "agents.workflow_baseline", "agents.baseline",
+                       "routes.analyze", "routes.dataset", "main"):
+            importlib.import_module(module)
+
 
 if __name__ == "__main__":
     unittest.main()
+

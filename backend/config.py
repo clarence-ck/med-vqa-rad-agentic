@@ -38,7 +38,7 @@ _ROLE_DEFAULTS = {
     # Budget profile: Luna everywhere except the verifier and judge, which use a
     # different model (Sol) so checking is not done by the model that answered.
     "controller": ("gpt-6-luna",   "none"),   # Haystack Agent controller (chat-completions tool calls reject other efforts)
-    "look":       ("gpt-6-luna",   "medium"), # ImageInterpreter
+    "look":       ("gpt-6-luna",   "medium"), # LookAgent, ImageInterpreter
     "analyze":    ("gpt-6-luna",   "low"),    # QuestionAnalyzer, DifficultyRouter
     "answer":     ("gpt-6-luna",   "medium"), # ReasoningAgent
     "check":      ("gpt-6.1-sol",  "low"),    # VerificationAgent
@@ -49,9 +49,6 @@ _ROLE_DEFAULTS = {
 # Agentic system: "loop" = controller decides look/answer/check/finish (default);
 # "pipeline" = the original fixed six-stage pipeline (kept as an ablation).
 AGENT_MODE = os.getenv("AGENT_MODE", "loop").strip().lower()
-
-# Send the image to the reasoning agent as well as the stage-1 summary (experiment flag).
-REASONER_SEES_IMAGE = os.getenv("REASONER_SEES_IMAGE", "false").strip().lower() in {"1", "true", "yes"}
 
 # Agentic loop: independent re-answers used to measure self-consistency (0 disables).
 SELF_CONSISTENCY_SAMPLES = int(os.getenv("SELF_CONSISTENCY_SAMPLES", "2"))
@@ -67,10 +64,6 @@ REASONING_EFFORTS = {
     role: os.getenv(f"REASONING_EFFORT_{role.upper()}", effort).strip().lower()
     for role, (_, effort) in _ROLE_DEFAULTS.items()
 }
-
-for _legacy in ("VISION_MODEL", "OPENAI_MODEL"):
-    if os.getenv(_legacy):
-        _cfg_log.warning("%s is no longer used; set MODEL_<ROLE> variables instead (see .env.example)", _legacy)
 
 
 def generation_kwargs(role: str, max_completion_tokens: int | None = None) -> dict:

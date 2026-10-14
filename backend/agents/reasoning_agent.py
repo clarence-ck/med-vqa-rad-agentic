@@ -216,7 +216,7 @@ class ReasoningAgent:
                 "nervous system", "central nervous system", "respiratory system", "circulatory system",
                 "musculoskeletal system", "digestive system", "urinary system", "reproductive system",
             }
-            if body_region and (normalize := normalized.get("answer", "").strip().lower()) in generic_labels:
+            if body_region and normalized.get("answer", "").strip().lower() in generic_labels:
                 normalized["answer"] = body_region
 
         return normalized
@@ -471,16 +471,3 @@ Return ONLY the JSON object, no additional text."""
                 "answer_confidence": "low",
                 "limitations": str(e)
             }}
-
-# Wrapper function for compatibility
-def generate_answer(visual_summary: dict, question_analysis: dict,
-                    original_question: str, retry_context: dict = None,
-                    filtered_image_context: dict = None) -> dict:
-    agent = ReasoningAgent()
-    return agent.run(
-        image_interpretation={"result": visual_summary},
-        question_analysis={"result": question_analysis},
-        original_question=original_question,
-        retry_context=retry_context,
-        filtered_image_context={"result": filtered_image_context} if filtered_image_context is not None else None,
-    )["result"]

@@ -1,0 +1,22 @@
+{
+  "stages": {
+    "eval": {
+      "started": "2026-10-14T13:30:51",
+      "finished": "2026-10-14T14:10:55",
+      "wall_clock_s": 2404,
+      "note": "199 cases (1 cached earlier), 4 at a time"
+    },
+    "variance": {
+      "started": "2026-10-14T14:10:55",
+      "finished": "2026-10-14T14:45:36",
+      "wall_clock_s": 2081,
+      "note": "50 cases, one at a time"
+    },
+    "judge": {
+      "started": "2026-10-14T15:20:09",
+      "finished": "2026-10-14T15:26:28",
+      "wall_clock_s": 379,
+      "note": "82 open-ended cases"
+    }
+  }
+}

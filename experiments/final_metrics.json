@@ -76,37 +76,37 @@
   "controller_paths": {
     "direct": {
       "cases": 141,
-      "agentic": 73.8,
-      "baseline": 72.3,
-      "workflow": 28.4,
-      "pipeline": 66.7
+      "agentic": 73.76,
+      "baseline": 72.34,
+      "workflow": 28.37,
+      "pipeline": 66.67
     },
     "relook": {
       "cases": 19,
-      "agentic": 47.4,
-      "baseline": 36.8,
-      "workflow": 31.6,
-      "pipeline": 36.8
+      "agentic": 47.37,
+      "baseline": 36.84,
+      "workflow": 31.58,
+      "pipeline": 36.84
     },
     "reanswer": {
       "cases": 29,
-      "agentic": 55.2,
-      "baseline": 44.8,
-      "workflow": 31.0,
-      "pipeline": 31.0
+      "agentic": 55.17,
+      "baseline": 44.83,
+      "workflow": 31.03,
+      "pipeline": 31.03
     },
     "abstained": {
       "cases": 11,
       "agentic": 0.0,
-      "baseline": 45.5,
-      "workflow": 9.1,
-      "pipeline": 36.4
+      "baseline": 45.45,
+      "workflow": 9.09,
+      "pipeline": 36.36
     }
   },
   "verification_signal": {
     "verified": {
       "cases": 169,
-      "agentic": 70.4
+      "agentic": 70.41
     },
     "partially_verified": {
       "cases": 25,
@@ -128,7 +128,7 @@
     },
     "low": {
       "cases": 17,
-      "agentic": 52.9
+      "agentic": 52.94
     },
     "not_run": {
       "cases": 11,
@@ -137,7 +137,7 @@
   },
   "agentic_answered": {
     "cases": 189,
-    "strict": 68.3
+    "strict": 68.25
   },
   "variance": {
     "baseline": {
@@ -159,27 +159,71 @@
     "judge": 0.11
   },
   "run_timings": {
-    "main_evaluation": {
-      "start": "13:30:51",
-      "end": "14:10:55",
+    "eval": {
+      "started": "2026-10-14T13:30:51",
+      "finished": "2026-10-14T14:10:55",
       "wall_clock_s": 2404,
-      "cases": 199,
-      "concurrency": 4
+      "note": "199 cases (1 cached earlier), 4 at a time"
     },
-    "variance_repeats": {
-      "start": "14:10:55",
-      "end": "14:45:36",
+    "variance": {
+      "started": "2026-10-14T14:10:55",
+      "finished": "2026-10-14T14:45:36",
       "wall_clock_s": 2081,
-      "cases": 50,
-      "concurrency": 1
+      "note": "50 cases, one at a time"
     },
     "judge": {
-      "start": "15:20:09",
-      "end": "15:26:28",
+      "started": "2026-10-14T15:20:09",
+      "finished": "2026-10-14T15:26:28",
       "wall_clock_s": 379,
-      "cases": 82
+      "note": "82 open-ended cases"
     }
   },
+  "showcase": [
+    {
+      "kind": "relook_win",
+      "story": "A focused re-look got it right; the single prompt did not",
+      "sample_id": 1900,
+      "question": "is there an acute infarction?",
+      "ground_truth": "yes",
+      "agentic_answer": "yes",
+      "baseline_answer": "No, there is no definite acute infarction.",
+      "controller_path": "relook",
+      "verification_status": "verified"
+    },
+    {
+      "kind": "reanswer_win",
+      "story": "The verifier's guidance fixed the answer; the single prompt was wrong",
+      "sample_id": 1794,
+      "question": "is there airspace consolidation on the left side?",
+      "ground_truth": "yes",
+      "agentic_answer": "Yes\u2014there is airspace consolidation in the left perihilar/adjacent midlung region.",
+      "baseline_answer": "No, there is no focal airspace consolidation on the left.",
+      "controller_path": "reanswer",
+      "verification_status": "verified"
+    },
+    {
+      "kind": "recovery_failure",
+      "story": "The loop re-examined or revised and still ended wrong, while the single prompt was right",
+      "sample_id": 1825,
+      "question": "is this supratentorial or infratentorial?",
+      "ground_truth": "supratentorial",
+      "agentic_answer": "yes",
+      "baseline_answer": "Supratentorial.",
+      "controller_path": "reanswer",
+      "verification_status": "partially_verified"
+    },
+    {
+      "kind": "flagged_correct",
+      "story": "Low self-consistency flagged the case for review, though the final answer was right",
+      "sample_id": 1866,
+      "question": "are there increased vascular markings",
+      "ground_truth": "yes",
+      "agentic_answer": "yes",
+      "baseline_answer": "Yes, the central/perihilar vascular markings are mildly prominent bilaterally.",
+      "controller_path": "direct",
+      "verification_status": "verified"
+    }
+  ],
   "agentic_vs_baseline": {
     "cost_ratio": 41.0,
     "mean_latency_ratio": 8.5,

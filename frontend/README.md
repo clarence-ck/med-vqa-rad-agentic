@@ -24,10 +24,10 @@ npm run build
 ## Screenshots
 
 `scripts/capture-screenshots.mjs` drives a local Chrome/Edge with `puppeteer-core` and saves the Evaluation view
-and selected Case Explorer traces. The backend and `npm run dev` must be running, and the cases must already be
-cached by `scripts/run_case_explorer_cache.py`.
+and the Case Explorer traces of the showcase cases listed in `experiments/final_metrics.json`. The easiest way to run
+it is `python scripts/run_all.py --stages screenshots` from the repo root, which starts and stops both servers.
 
 ```bash
-node scripts/capture-screenshots.mjs --out ../eval-dashboard-screenshots/2026-10 --cases 1900,2102,2009,1998
-# options: --url (default http://localhost:5173), --browser <path to chrome.exe>
+node scripts/capture-screenshots.mjs                 # backend and npm run dev already running
+# options: --cases 1900,2102 (cached cases only), --out <dir>, --url, --browser <path to chrome.exe>
 ```

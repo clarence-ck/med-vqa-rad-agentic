@@ -1,7 +1,7 @@
 import re
 import time
-from agents.image_interpreter import interpret_image
-from agents.question_analyzer import analyze_question
+from agents.image_interpreter import ImageInterpreter
+from agents.question_analyzer import QuestionAnalyzer
 from logger import get_logger
 
 _log = get_logger("agents.workflow_baseline")
@@ -158,7 +158,7 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
     """
     started = time.perf_counter()
     try:
-        image_result = precomputed_image_result if precomputed_image_result is not None else interpret_image(image_bytes, mime_type)
+        image_result = precomputed_image_result if precomputed_image_result is not None else ImageInterpreter().run(image_bytes=image_bytes, mime_type=mime_type)["result"]
     except Exception as e:
         _log.error("Image interpretation failed in workflow: %s", e)
         return {
@@ -169,7 +169,7 @@ def workflow_answer(image_bytes: bytes, question: str, mime_type: str = "image/p
             "workflow_trace": {},
         }
     try:
-        question_result = analyze_question(question, image_result.get("visual_summary", ""))
+        question_result = QuestionAnalyzer().run(question=question, image_interpretation=image_result)["result"]
     except Exception as e:
         _log.error("Question analysis failed in workflow: %s", e)
         return {

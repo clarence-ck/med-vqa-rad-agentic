@@ -317,16 +317,3 @@ analysis above: the text analysis can be incomplete or wrong. Then recommend the
                 "verification_notes": "Verification failed due to an error.",
                 "suggested_disclaimer": "This answer has not been verified."
             }}
-
-# Wrapper function for compatibility
-def verify_answer(answer_data: dict, visual_summary: dict,
-                  question_analysis: dict, original_question: str,
-                  filtered_image_context: dict = None) -> dict:
-    agent = VerificationAgent()
-    return agent.run(
-        answer_data={"result": answer_data},
-        image_interpretation={"result": visual_summary},
-        question_analysis={"result": question_analysis},
-        filtered_image_context={"result": filtered_image_context} if filtered_image_context is not None else None,
-        original_question=original_question
-    )["result"]
