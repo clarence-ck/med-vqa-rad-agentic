@@ -1,17 +1,12 @@
-"""Pilot comparisons on a seeded random sample of VQA-RAD test cases (spend-capped).
+"""Run chosen systems again on a seeded subset of the evaluation questions (the variance repeats).
 
-Runs any subset of the systems below on the same seeded sample and scores them with
-backend/utils/scoring.py:
-  - baseline            single-shot baseline
-  - workflow            hand-designed workflow baseline
-  - agentic_text_only   fixed pipeline, reasoner sees only the stage-1 text summary
-  - agentic_with_image  fixed pipeline, reasoner also sees the image
-  - agentic_loop        agentic controller loop
-Results go to experiments/<name>/results.json (not the Case Explorer cache); see experiments/README.md.
+Answers are scored with backend/utils/scoring.py and saved after every case to --out, so an interrupted run resumes
+where it stopped. scripts/run_all.py uses it to measure how often answers change between runs.
+
+Systems: baseline, workflow, agentic_loop, pipeline.
 
 Usage (run from repo root):
-    python scripts/pilot.py --systems baseline,agentic_loop --n 20 --max-cost 0.75 --name pilots/5-my-pilot
-    python scripts/pilot.py --systems baseline,agentic_loop --from-eval-sample 250 --n 50 --out experiments/runs/<run_id>/variance.json
+    python scripts/repeat_cases.py --from-eval-sample 300 --n 50 --out experiments/runs/<run_id>/variance.json
 """
 from __future__ import annotations
 
@@ -38,8 +33,7 @@ from utils import scoring  # noqa: E402
 from utils.data_loader import EXCLUDED_SAMPLE_IDS, get_image_bytes, get_sample_by_id, get_sample_cases, load_dataset  # noqa: E402
 from utils.usage import summarize, track_usage  # noqa: E402
 
-OUTPUT_DIR = ROOT_DIR / "experiments"
-ALL_SYSTEMS = ("baseline", "workflow", "agentic_text_only", "agentic_with_image", "agentic_loop")
+ALL_SYSTEMS = ("baseline", "workflow", "agentic_loop", "pipeline")
 
 
 def similarity(first: str, second: str) -> float:
@@ -59,21 +53,19 @@ def run_system(name: str, image_bytes: bytes, question: str):
         elif name == "agentic_loop":
             result = run_agentic_loop(image_bytes, question, "image/png")
         else:
-            result = run_pipeline(image_bytes, question, "image/png",
-                                  reasoner_sees_image=(name == "agentic_with_image"))
+            result = run_pipeline(image_bytes, question, "image/png")
     return result, int((time.time() - started) * 1000), summarize(records)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--n", type=int, default=20)
+    parser.add_argument("--n", type=int, default=50)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--max-cost", type=float, default=1.0, help="Stop before starting a case once spend reaches this (USD).")
-    parser.add_argument("--systems", default="baseline,agentic_text_only,agentic_with_image",
+    parser.add_argument("--systems", default="baseline,agentic_loop",
                         help=f"Comma-separated subset of {', '.join(ALL_SYSTEMS)}")
-    parser.add_argument("--name", default="pilots/new-pilot", help="Results folder under experiments/")
-    parser.add_argument("--out", default=None,
-                        help="Results file (overrides --name); an existing file is resumed, skipping finished cases")
+    parser.add_argument("--out", required=True,
+                        help="Results file; an existing one is resumed, skipping finished cases")
     parser.add_argument("--from-eval-sample", type=int, default=0, metavar="N",
                         help="Draw the --n cases from the first N evaluation questions (experiments/eval_set.json), "
                              "so repeats cover questions from the main run")
@@ -82,7 +74,7 @@ def main() -> None:
     unknown = set(systems) - set(ALL_SYSTEMS)
     if unknown:
         parser.error(f"unknown systems: {sorted(unknown)}")
-    output = Path(args.out).resolve() if args.out else OUTPUT_DIR / args.name / "results.json"
+    output = Path(args.out).resolve()
 
     if args.from_eval_sample:
         test_ids = sorted(sample["id"] for sample in get_sample_cases(limit=args.from_eval_sample))
@@ -91,7 +83,7 @@ def main() -> None:
                     if item.get("split") == "test" and item["id"] not in EXCLUDED_SAMPLE_IDS]
     sample_ids = random.Random(args.seed).sample(test_ids, args.n)
 
-    previous = json.loads(output.read_text(encoding="utf-8")) if args.out and output.exists() else {}
+    previous = json.loads(output.read_text(encoding="utf-8")) if output.exists() else {}
     rows = previous.get("rows", [])
     total_cost, new_cost = float(previous.get("total_cost_usd", 0.0)), 0.0
     done_ids = {row["sample_id"] for row in rows}

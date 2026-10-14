@@ -134,7 +134,7 @@ def stage_judge(run_id, budget_left):
 
 
 def stage_variance(run_id, budget_left):
-    python("pilot.py", "--systems", "baseline,agentic_loop", "--from-eval-sample", EVAL_CASES, "--n", VARIANCE_CASES,
+    python("repeat_cases.py", "--systems", "baseline,agentic_loop", "--from-eval-sample", EVAL_CASES, "--n", VARIANCE_CASES,
            "--out", runs.run_dir(run_id) / "variance.json", "--max-cost", f"{budget_left:.2f}")
 
 

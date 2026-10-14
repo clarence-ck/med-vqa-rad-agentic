@@ -153,8 +153,8 @@ focus, \emph{reanswer} with guidance, or \emph{abstain}.
 
 \paragraph{Model and tool choices.} All roles use OpenAI models, sized by need and configurable per role. The
 controller and question analysis make simple decisions (\texttt{gpt-6-luna}, no/low reasoning effort); perception
-and answering use \texttt{gpt-6-luna} with medium effort, and the answerer always sees the image: in a 20-case
-pilot that alone raised accuracy from 50\% to 70\%. Verification uses a different, larger model
+and answering use \texttt{gpt-6-luna} with medium effort, and the answerer always sees the image, because a
+text description loses the visual detail many questions depend on. Verification uses a different, larger model
 (\texttt{gpt-6.1-sol}) so that the answering model does not verify itself. Haystack's \texttt{Agent}/\texttt{Tool}
 abstraction provides the tool-calling loop and exit conditions; keeping the image in per-request memory rather than
 in the controller's context keeps the controller cheap. An earlier retrieval stage over SLAKE~\cite{liu2021slake} was
@@ -173,9 +173,9 @@ what the controller's decisions add. A demo UI (Section~\ref{sec:ui}) exposes al
 The system uses two modalities, the radiology image and the text question, and they interact at every step that
 determines the answer: the question (and any focus) steers what \texttt{look} examines; \texttt{answer} and
 \texttt{check} receive the image directly alongside the text observations; only the controller works purely in
-text. Our earlier design described the image once, \emph{without} the question, and passed only that text downstream;
-in a 20-case pilot, giving the reasoner the image raised accuracy from 10/20 to 14/20, and typical text-only
-failures were ``cannot be determined from the provided image description''. Because the verifier sees the image, its
+text. Our earlier design described the image once, \emph{without} the question, and passed only that text downstream,
+so many answers came back as ``cannot be determined from the image description''; every model that answers or
+judges now sees the image itself. Because the verifier sees the image, its
 ``explanation grounded in evidence'' and ``no contradictions'' checks are genuine cross-modal agreement checks.
 
 % ============================================================================

@@ -274,7 +274,7 @@ python scripts/run_all.py --stages metrics,docs,diagram,report   # rebuild outpu
 | Stage | What it runs | Last cost | Last wall clock |
 |---|---|---|---|
 | `eval` | `run_case_explorer_cache.py --ablation --concurrency 4` ({m['cases']} questions × 4 systems) | ${c['evaluation_run']:.2f} | ~{mins.get('eval', '?')} min |
-| `variance` | `pilot.py --from-eval-sample {m['cases']} --n 50` (baseline + agentic loop again) | ${c['variance_repeats']:.2f} | ~{mins.get('variance', '?')} min |
+| `variance` | `repeat_cases.py --from-eval-sample {m['cases']} --n 50` (baseline + agentic loop again) | ${c['variance_repeats']:.2f} | ~{mins.get('variance', '?')} min |
 | `judge` | `judge_open_ended.py` | ${c['judge']:.2f} | ~{mins.get('judge', '?')} min |
 | `metrics` | `final_metrics.py` → `final_metrics.json` and `cases.csv` in the run folder | free | seconds |
 | `docs` | `update_docs.py` → README blocks and `docs/report/results.tex` | free | seconds |
