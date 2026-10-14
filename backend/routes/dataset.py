@@ -15,7 +15,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 
 from agents.baseline import baseline_answer
-from agents.agentic_loop import controller_path, run_agentic
+from agents.agentic_loop import ABSTAIN_ANSWER, controller_path, run_agentic
 from agents.orchestrator import run_pipeline
 from agents.workflow_baseline import workflow_answer
 from utils.data_loader import get_sample_cases, get_sample_by_id, get_image_bytes, EXCLUDED_SAMPLE_IDS
@@ -626,6 +626,9 @@ def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
     baseline_answer_text = baseline_result.get("answer", "")
     workflow_answer_text = workflow_result.get("answer", "")
     agentic_answer_text = agentic_result.get("answer", "")
+    if agentic_result.get("abstained"):
+        # Results cached before the abstention fix stored a normalised "no" for abstained yes/no questions.
+        agentic_answer_text = ABSTAIN_ANSWER
     baseline_normalized = _normalize_answer(baseline_answer_text)
     workflow_normalized = _normalize_answer(workflow_answer_text)
     agentic_normalized = _normalize_answer(agentic_answer_text)

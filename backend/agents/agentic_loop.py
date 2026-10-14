@@ -393,8 +393,10 @@ def run_agentic_loop(image_bytes: bytes, question: str, mime_type: str = "image/
     answer_result = dict(ctx.answers[best])
     verification_result = ctx.checks[best]
     if ctx.abstained:
-        answer_result["answer"] = ABSTAIN_ANSWER
-    answer_text = _normalize_final_answer(answer_result.get("answer", ""), ctx.question_analysis, _image_analysis(ctx))
+        # Never normalise an abstention: the yes/no normaliser would turn "unable to determine" into "no".
+        answer_text = ABSTAIN_ANSWER
+    else:
+        answer_text = _normalize_final_answer(answer_result.get("answer", ""), ctx.question_analysis, _image_analysis(ctx))
     answer_result["answer"] = answer_text
 
     self_consistency = ctx.self_consistency(answer_text, SELF_CONSISTENCY_SAMPLES)
@@ -419,7 +421,7 @@ def run_agentic_loop(image_bytes: bytes, question: str, mime_type: str = "image/
     qa = ctx.question_analysis
     payload = {
         "answer": answer_text,
-        "guarded_answer": _normalize_final_answer(guardrail["guarded_answer"], qa, _image_analysis(ctx)),
+        "guarded_answer": ABSTAIN_ANSWER if ctx.abstained else _normalize_final_answer(guardrail["guarded_answer"], qa, _image_analysis(ctx)),
         "explanation": answer_result.get("explanation", ""),
         "reasoning_trace": answer_result.get("reasoning_trace", ""),
         "evidence_used": answer_result.get("evidence_used", []),
