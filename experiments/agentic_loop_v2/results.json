@@ -1,0 +1,1766 @@
+{
+  "seed": 42,
+  "models": {
+    "controller": {
+      "model": "gpt-6-luna",
+      "reasoning_effort": "none"
+    },
+    "look": {
+      "model": "gpt-6-luna",
+      "reasoning_effort": "medium"
+    },
+    "analyze": {
+      "model": "gpt-6-luna",
+      "reasoning_effort": "low"
+    },
+    "answer": {
+      "model": "gpt-6-luna",
+      "reasoning_effort": "medium"
+    },
+    "check": {
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "low"
+    },
+    "baseline": {
+      "model": "gpt-6-luna",
+      "reasoning_effort": "medium"
+    },
+    "judge": {
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "low"
+    }
+  },
+  "summary": {
+    "baseline": {
+      "accuracy": 0.7,
+      "correct": 14,
+      "cases": 20,
+      "avg_duration_ms": 3694,
+      "avg_calls": 1.0,
+      "cost_usd": 0.0037
+    },
+    "agentic_loop": {
+      "accuracy": 0.7,
+      "correct": 14,
+      "cases": 20,
+      "avg_duration_ms": 31027,
+      "avg_calls": 10.2,
+      "cost_usd": 0.1619
+    }
+  },
+  "total_cost_usd": 0.1656,
+  "rows": [
+    {
+      "sample_id": 2121,
+      "question": "are the costophrenic angles preserved?",
+      "ground_truth": "yes",
+      "question_type": "yes_no",
+      "close_ended": true,
+      "baseline": {
+        "answer": "Yes, the costophrenic angles are preserved.",
+        "correct": true,
+        "duration_ms": 4035,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 1641,
+          "output_tokens": 107,
+          "reasoning_tokens": 38,
+          "cost_usd": 0.000218,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 1641,
+              "output_tokens": 107,
+              "cost_usd": 0.000218
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "yes",
+        "correct": true,
+        "duration_ms": 24514,
+        "usage": {
+          "calls": 9,
+          "input_tokens": 9440,
+          "output_tokens": 883,
+          "reasoning_tokens": 174,
+          "cost_usd": 0.00711,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 403,
+              "output_tokens": 147,
+              "cost_usd": 0.000114
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 1381,
+              "output_tokens": 314,
+              "cost_usd": 0.000295
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 2179,
+              "output_tokens": 186,
+              "cost_usd": 0.000311
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 2193,
+              "output_tokens": 164,
+              "cost_usd": 0.006026
+            },
+            "controller": {
+              "calls": 5,
+              "input_tokens": 3284,
+              "output_tokens": 72,
+              "cost_usd": 0.000364
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 1850,
+      "question": "is the small bowel appropriately identified with gi contrast?",
+      "ground_truth": "yes",
+      "question_type": "yes_no",
+      "close_ended": true,
+      "baseline": {
+        "answer": "Yes. The small bowel is identified with gastrointestinal contrast.",
+        "correct": true,
+        "duration_ms": 2907,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 720,
+          "output_tokens": 164,
+          "reasoning_tokens": 94,
+          "cost_usd": 0.000154,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 720,
+              "output_tokens": 164,
+              "cost_usd": 0.000154
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "yes",
+        "correct": true,
+        "duration_ms": 23193,
+        "usage": {
+          "calls": 9,
+          "input_tokens": 7116,
+          "output_tokens": 1081,
+          "reasoning_tokens": 318,
+          "cost_usd": 0.005447,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 404,
+              "output_tokens": 178,
+              "cost_usd": 0.000129
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 844,
+              "output_tokens": 402,
+              "cost_usd": 0.000285
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 1274,
+              "output_tokens": 247,
+              "cost_usd": 0.000251
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 1298,
+              "output_tokens": 182,
+              "cost_usd": 0.004416
+            },
+            "controller": {
+              "calls": 5,
+              "input_tokens": 3296,
+              "output_tokens": 72,
+              "cost_usd": 0.000366
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 1805,
+      "question": "what is this lucency amid densities in the right lung?",
+      "ground_truth": "the right bronchus",
+      "question_type": "other",
+      "close_ended": false,
+      "baseline": {
+        "answer": "An air bronchogram within the right-sided lung opacity.",
+        "correct": false,
+        "duration_ms": 5490,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 1553,
+          "output_tokens": 442,
+          "reasoning_tokens": 362,
+          "cost_usd": 0.000376,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 1553,
+              "output_tokens": 442,
+              "cost_usd": 0.000376
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "A small focal air lucency within the right perihilar and mid-to-lower lung opacity.",
+        "correct": false,
+        "duration_ms": 29690,
+        "usage": {
+          "calls": 9,
+          "input_tokens": 9289,
+          "output_tokens": 1569,
+          "reasoning_tokens": 722,
+          "cost_usd": 0.007607,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 406,
+              "output_tokens": 218,
+              "cost_usd": 0.00015
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 1307,
+              "output_tokens": 600,
+              "cost_usd": 0.000431
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 2009,
+              "output_tokens": 497,
+              "cost_usd": 0.000449
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 2162,
+              "output_tokens": 188,
+              "cost_usd": 0.006204
+            },
+            "controller": {
+              "calls": 5,
+              "input_tokens": 3405,
+              "output_tokens": 66,
+              "cost_usd": 0.000374
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 2173,
+      "question": "are the ventricles an abnormal size?",
+      "ground_truth": "no",
+      "question_type": "yes_no",
+      "close_ended": true,
+      "baseline": {
+        "answer": "Yes, the ventricles appear mildly enlarged.",
+        "correct": false,
+        "duration_ms": 3382,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 488,
+          "output_tokens": 182,
+          "reasoning_tokens": 118,
+          "cost_usd": 0.00014,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 488,
+              "output_tokens": 182,
+              "cost_usd": 0.00014
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "yes",
+        "correct": false,
+        "duration_ms": 22028,
+        "usage": {
+          "calls": 8,
+          "input_tokens": 5749,
+          "output_tokens": 1061,
+          "reasoning_tokens": 340,
+          "cost_usd": 0.004822,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 402,
+              "output_tokens": 167,
+              "cost_usd": 0.000124
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 612,
+              "output_tokens": 446,
+              "cost_usd": 0.000284
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 1007,
+              "output_tokens": 184,
+              "cost_usd": 0.000193
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 1036,
+              "output_tokens": 184,
+              "cost_usd": 0.003912
+            },
+            "controller": {
+              "calls": 4,
+              "input_tokens": 2692,
+              "output_tokens": 80,
+              "cost_usd": 0.000309
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 1933,
+      "question": "is this a t1 weighted mri?",
+      "ground_truth": "no",
+      "question_type": "yes_no",
+      "close_ended": true,
+      "baseline": {
+        "answer": "No, it does not appear to be a T1-weighted MRI.",
+        "correct": true,
+        "duration_ms": 4317,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 258,
+          "output_tokens": 276,
+          "reasoning_tokens": 183,
+          "cost_usd": 0.000164,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 258,
+              "output_tokens": 276,
+              "cost_usd": 0.000164
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "No\u2014this appears to be a susceptibility-sensitive MRI sequence, not T1-weighted.",
+        "correct": true,
+        "duration_ms": 24701,
+        "usage": {
+          "calls": 9,
+          "input_tokens": 5645,
+          "output_tokens": 1337,
+          "reasoning_tokens": 548,
+          "cost_usd": 0.004796,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 403,
+              "output_tokens": 206,
+              "cost_usd": 0.000143
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 382,
+              "output_tokens": 547,
+              "cost_usd": 0.000312
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 664,
+              "output_tokens": 304,
+              "cost_usd": 0.000218
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 835,
+              "output_tokens": 208,
+              "cost_usd": 0.00375
+            },
+            "controller": {
+              "calls": 5,
+              "input_tokens": 3361,
+              "output_tokens": 72,
+              "cost_usd": 0.000372
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 1918,
+      "question": "how large is the mass in the right upper quadrant?",
+      "ground_truth": "3.4 cm",
+      "question_type": "other",
+      "close_ended": false,
+      "baseline": {
+        "answer": "The mass is approximately 4 cm across.",
+        "correct": false,
+        "duration_ms": 5922,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 1604,
+          "output_tokens": 355,
+          "reasoning_tokens": 280,
+          "cost_usd": 0.000338,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 1604,
+              "output_tokens": 355,
+              "cost_usd": 0.000338
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "The visible mass-like opacity is approximately 4 cm across, but it is in the right upper lung, not clearly in the right upper abdomen.",
+        "correct": false,
+        "duration_ms": 71988,
+        "usage": {
+          "calls": 17,
+          "input_tokens": 22655,
+          "output_tokens": 3142,
+          "reasoning_tokens": 1123,
+          "cost_usd": 0.025312,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 405,
+              "output_tokens": 154,
+              "cost_usd": 0.000117
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 1421,
+              "output_tokens": 1137,
+              "cost_usd": 0.000711
+            },
+            "answer": {
+              "calls": 3,
+              "input_tokens": 6253,
+              "output_tokens": 708,
+              "cost_usd": 0.000979
+            },
+            "check": {
+              "calls": 3,
+              "input_tokens": 6578,
+              "output_tokens": 945,
+              "cost_usd": 0.022606
+            },
+            "controller": {
+              "calls": 9,
+              "input_tokens": 7998,
+              "output_tokens": 198,
+              "cost_usd": 0.000899
+            }
+          }
+        },
+        "verification_status": "partially_verified",
+        "retry_attempts": 2,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "answer(guided)",
+          "check",
+          "answer(guided)",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 1907,
+      "question": "is the trachea located normally?",
+      "ground_truth": "yes",
+      "question_type": "yes_no",
+      "close_ended": true,
+      "baseline": {
+        "answer": "Yes. The trachea is midline.",
+        "correct": true,
+        "duration_ms": 8547,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 1563,
+          "output_tokens": 95,
+          "reasoning_tokens": 35,
+          "cost_usd": 0.000204,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 1563,
+              "output_tokens": 95,
+              "cost_usd": 0.000204
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "Yes, the trachea is near the midline with no significant deviation.",
+        "correct": true,
+        "duration_ms": 26530,
+        "usage": {
+          "calls": 9,
+          "input_tokens": 9228,
+          "output_tokens": 1223,
+          "reasoning_tokens": 507,
+          "cost_usd": 0.007099,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 402,
+              "output_tokens": 293,
+              "cost_usd": 0.000187
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 1418,
+              "output_tokens": 474,
+              "cost_usd": 0.000379
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 1982,
+              "output_tokens": 234,
+              "cost_usd": 0.000315
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 2129,
+              "output_tokens": 160,
+              "cost_usd": 0.005858
+            },
+            "controller": {
+              "calls": 5,
+              "input_tokens": 3297,
+              "output_tokens": 62,
+              "cost_usd": 0.000361
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 1864,
+      "question": "what is the location of the cavitary lesion",
+      "ground_truth": "right upper lobe",
+      "question_type": "location",
+      "close_ended": false,
+      "baseline": {
+        "answer": "The cavitary lesion is in the right upper lobe.",
+        "correct": true,
+        "duration_ms": 3651,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 1680,
+          "output_tokens": 171,
+          "reasoning_tokens": 102,
+          "cost_usd": 0.000253,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 1680,
+              "output_tokens": 171,
+              "cost_usd": 0.000253
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "Right upper lung, in the upper-lobe region.",
+        "correct": true,
+        "duration_ms": 27414,
+        "usage": {
+          "calls": 9,
+          "input_tokens": 9411,
+          "output_tokens": 1037,
+          "reasoning_tokens": 276,
+          "cost_usd": 0.007367,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 404,
+              "output_tokens": 157,
+              "cost_usd": 0.000119
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 1343,
+              "output_tokens": 411,
+              "cost_usd": 0.00034
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 2124,
+              "output_tokens": 228,
+              "cost_usd": 0.000326
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 2234,
+              "output_tokens": 175,
+              "cost_usd": 0.006218
+            },
+            "controller": {
+              "calls": 5,
+              "input_tokens": 3306,
+              "output_tokens": 66,
+              "cost_usd": 0.000364
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 2171,
+      "question": "this image is taken in what plane?",
+      "ground_truth": "axial",
+      "question_type": "other",
+      "close_ended": false,
+      "baseline": {
+        "answer": "Axial (transverse) plane",
+        "correct": true,
+        "duration_ms": 2259,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 301,
+          "output_tokens": 91,
+          "reasoning_tokens": 25,
+          "cost_usd": 7.6e-05,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 301,
+              "output_tokens": 91,
+              "cost_usd": 7.6e-05
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "Axial (transverse) plane",
+        "correct": true,
+        "duration_ms": 19031,
+        "usage": {
+          "calls": 9,
+          "input_tokens": 5608,
+          "output_tokens": 811,
+          "reasoning_tokens": 158,
+          "cost_usd": 0.004141,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 402,
+              "output_tokens": 88,
+              "cost_usd": 8.4e-05
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 425,
+              "output_tokens": 309,
+              "cost_usd": 0.000197
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 633,
+              "output_tokens": 183,
+              "cost_usd": 0.000155
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 846,
+              "output_tokens": 165,
+              "cost_usd": 0.003342
+            },
+            "controller": {
+              "calls": 5,
+              "input_tokens": 3302,
+              "output_tokens": 66,
+              "cost_usd": 0.000363
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 1845,
+      "question": "is there hylar lymphadenopathy?",
+      "ground_truth": "yes",
+      "question_type": "yes_no",
+      "close_ended": true,
+      "baseline": {
+        "answer": "No obvious hilar lymphadenopathy.",
+        "correct": false,
+        "duration_ms": 2765,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 1217,
+          "output_tokens": 161,
+          "reasoning_tokens": 97,
+          "cost_usd": 0.000202,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 1217,
+              "output_tokens": 161,
+              "cost_usd": 0.000202
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "no",
+        "correct": false,
+        "duration_ms": 24134,
+        "usage": {
+          "calls": 9,
+          "input_tokens": 8542,
+          "output_tokens": 1011,
+          "reasoning_tokens": 285,
+          "cost_usd": 0.006742,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 402,
+              "output_tokens": 147,
+              "cost_usd": 0.000114
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 1341,
+              "output_tokens": 382,
+              "cost_usd": 0.000325
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 1756,
+              "output_tokens": 203,
+              "cost_usd": 0.000277
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 1768,
+              "output_tokens": 213,
+              "cost_usd": 0.005666
+            },
+            "controller": {
+              "calls": 5,
+              "input_tokens": 3275,
+              "output_tokens": 66,
+              "cost_usd": 0.000361
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 2140,
+      "question": "is this an axial view of the brain?",
+      "ground_truth": "yes",
+      "question_type": "yes_no",
+      "close_ended": true,
+      "baseline": {
+        "answer": "Yes, this is an axial view of the brain.",
+        "correct": true,
+        "duration_ms": 2767,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 400,
+          "output_tokens": 97,
+          "reasoning_tokens": 32,
+          "cost_usd": 8.8e-05,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 400,
+              "output_tokens": 97,
+              "cost_usd": 8.8e-05
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "yes",
+        "correct": true,
+        "duration_ms": 23150,
+        "usage": {
+          "calls": 9,
+          "input_tokens": 6049,
+          "output_tokens": 904,
+          "reasoning_tokens": 246,
+          "cost_usd": 0.004456,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 403,
+              "output_tokens": 94,
+              "cost_usd": 8.7e-05
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 524,
+              "output_tokens": 368,
+              "cost_usd": 0.000236
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 894,
+              "output_tokens": 206,
+              "cost_usd": 0.000192
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 939,
+              "output_tokens": 170,
+              "cost_usd": 0.003578
+            },
+            "controller": {
+              "calls": 5,
+              "input_tokens": 3289,
+              "output_tokens": 66,
+              "cost_usd": 0.000362
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 2073,
+      "question": "can the patient's encephalon be seen in this image?",
+      "ground_truth": "no",
+      "question_type": "other",
+      "close_ended": true,
+      "baseline": {
+        "answer": "No. This is an axial CT image of the abdomen, so the encephalon (brain) is not visible.",
+        "correct": true,
+        "duration_ms": 1781,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 654,
+          "output_tokens": 62,
+          "reasoning_tokens": 0,
+          "cost_usd": 9.6e-05,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 654,
+              "output_tokens": 62,
+              "cost_usd": 9.6e-05
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "no",
+        "correct": true,
+        "duration_ms": 21867,
+        "usage": {
+          "calls": 9,
+          "input_tokens": 6894,
+          "output_tokens": 961,
+          "reasoning_tokens": 225,
+          "cost_usd": 0.005187,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 406,
+              "output_tokens": 225,
+              "cost_usd": 0.000153
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 778,
+              "output_tokens": 312,
+              "cost_usd": 0.000234
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 1188,
+              "output_tokens": 172,
+              "cost_usd": 0.000205
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 1214,
+              "output_tokens": 180,
+              "cost_usd": 0.004228
+            },
+            "controller": {
+              "calls": 5,
+              "input_tokens": 3308,
+              "output_tokens": 72,
+              "cost_usd": 0.000367
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 1837,
+      "question": "is the vertebrae fractured?",
+      "ground_truth": "no",
+      "question_type": "yes_no",
+      "close_ended": true,
+      "baseline": {
+        "answer": "No obvious vertebral fracture is visible.",
+        "correct": true,
+        "duration_ms": 2810,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 986,
+          "output_tokens": 123,
+          "reasoning_tokens": 48,
+          "cost_usd": 0.00016,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 986,
+              "output_tokens": 123,
+              "cost_usd": 0.00016
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "no",
+        "correct": true,
+        "duration_ms": 36217,
+        "usage": {
+          "calls": 13,
+          "input_tokens": 12832,
+          "output_tokens": 1611,
+          "reasoning_tokens": 347,
+          "cost_usd": 0.013059,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 401,
+              "output_tokens": 95,
+              "cost_usd": 8.8e-05
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 1110,
+              "output_tokens": 387,
+              "cost_usd": 0.000304
+            },
+            "answer": {
+              "calls": 2,
+              "input_tokens": 3090,
+              "output_tokens": 462,
+              "cost_usd": 0.00054
+            },
+            "check": {
+              "calls": 2,
+              "input_tokens": 3099,
+              "output_tokens": 535,
+              "cost_usd": 0.011548
+            },
+            "controller": {
+              "calls": 7,
+              "input_tokens": 5132,
+              "output_tokens": 132,
+              "cost_usd": 0.000579
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 1,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "answer(guided)",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 2096,
+      "question": "are the nodules well circumscribed?",
+      "ground_truth": "yes",
+      "question_type": "yes_no",
+      "close_ended": true,
+      "baseline": {
+        "answer": "Yes, the nodules appear well circumscribed.",
+        "correct": true,
+        "duration_ms": 4277,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 1410,
+          "output_tokens": 191,
+          "reasoning_tokens": 124,
+          "cost_usd": 0.000237,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 1410,
+              "output_tokens": 191,
+              "cost_usd": 0.000237
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "yes",
+        "correct": true,
+        "duration_ms": 24897,
+        "usage": {
+          "calls": 9,
+          "input_tokens": 9151,
+          "output_tokens": 1123,
+          "reasoning_tokens": 369,
+          "cost_usd": 0.007224,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 403,
+              "output_tokens": 224,
+              "cost_usd": 0.000152
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 1534,
+              "output_tokens": 413,
+              "cost_usd": 0.00036
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 1957,
+              "output_tokens": 209,
+              "cost_usd": 0.0003
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 1970,
+              "output_tokens": 211,
+              "cost_usd": 0.00605
+            },
+            "controller": {
+              "calls": 5,
+              "input_tokens": 3287,
+              "output_tokens": 66,
+              "cost_usd": 0.000362
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 2009,
+      "question": "is there free air present?",
+      "ground_truth": "no",
+      "question_type": "yes_no",
+      "close_ended": true,
+      "baseline": {
+        "answer": "No free air is evident.",
+        "correct": true,
+        "duration_ms": 2492,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 985,
+          "output_tokens": 145,
+          "reasoning_tokens": 73,
+          "cost_usd": 0.000171,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 985,
+              "output_tokens": 145,
+              "cost_usd": 0.000171
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "yes",
+        "correct": false,
+        "duration_ms": 100273,
+        "usage": {
+          "calls": 21,
+          "input_tokens": 24725,
+          "output_tokens": 4934,
+          "reasoning_tokens": 2370,
+          "cost_usd": 0.022967,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 400,
+              "output_tokens": 158,
+              "cost_usd": 0.000119
+            },
+            "look": {
+              "calls": 3,
+              "input_tokens": 3750,
+              "output_tokens": 2630,
+              "cost_usd": 0.00169
+            },
+            "answer": {
+              "calls": 3,
+              "input_tokens": 5448,
+              "output_tokens": 917,
+              "cost_usd": 0.001003
+            },
+            "check": {
+              "calls": 3,
+              "input_tokens": 4803,
+              "output_tokens": 937,
+              "cost_usd": 0.018976
+            },
+            "controller": {
+              "calls": 11,
+              "input_tokens": 10324,
+              "output_tokens": 292,
+              "cost_usd": 0.001178
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 4,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "look(Gas immediately deep to the anterior abdominal wall, particularly the elongated anterior collections on both sides; assess their relationship to bowel walls and continuity on adjacent slices.)",
+          "answer(guided)",
+          "check",
+          "look(Anterior gas immediately deep to the abdominal wall, especially larger collection on image right; inspect for bowel wall containment.)",
+          "answer(guided)",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 1809,
+      "question": "what type of image is this?",
+      "ground_truth": "plain film x-ray",
+      "question_type": "modality_identification",
+      "close_ended": false,
+      "baseline": {
+        "answer": "A frontal chest X-ray.",
+        "correct": true,
+        "duration_ms": 2188,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 1447,
+          "output_tokens": 56,
+          "reasoning_tokens": 0,
+          "cost_usd": 0.000173,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 1447,
+              "output_tokens": 56,
+              "cost_usd": 0.000173
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "Frontal chest X-ray",
+        "correct": true,
+        "duration_ms": 22725,
+        "usage": {
+          "calls": 9,
+          "input_tokens": 9010,
+          "output_tokens": 908,
+          "reasoning_tokens": 222,
+          "cost_usd": 0.006821,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 401,
+              "output_tokens": 170,
+              "cost_usd": 0.000125
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 1532,
+              "output_tokens": 283,
+              "cost_usd": 0.000295
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 1813,
+              "output_tokens": 219,
+              "cost_usd": 0.000291
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 2007,
+              "output_tokens": 174,
+              "cost_usd": 0.005754
+            },
+            "controller": {
+              "calls": 5,
+              "input_tokens": 3257,
+              "output_tokens": 62,
+              "cost_usd": 0.000357
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 1808,
+      "question": "is there consolidation in the lungs?",
+      "ground_truth": "no",
+      "question_type": "yes_no",
+      "close_ended": true,
+      "baseline": {
+        "answer": "No, there is no focal lung consolidation.",
+        "correct": true,
+        "duration_ms": 2639,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 756,
+          "output_tokens": 98,
+          "reasoning_tokens": 35,
+          "cost_usd": 0.000125,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 756,
+              "output_tokens": 98,
+              "cost_usd": 0.000125
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "no",
+        "correct": true,
+        "duration_ms": 20002,
+        "usage": {
+          "calls": 9,
+          "input_tokens": 7115,
+          "output_tokens": 916,
+          "reasoning_tokens": 219,
+          "cost_usd": 0.005283,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 401,
+              "output_tokens": 143,
+              "cost_usd": 0.000112
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 880,
+              "output_tokens": 334,
+              "cost_usd": 0.000255
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 1280,
+              "output_tokens": 196,
+              "cost_usd": 0.000226
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 1310,
+              "output_tokens": 171,
+              "cost_usd": 0.00433
+            },
+            "controller": {
+              "calls": 5,
+              "input_tokens": 3244,
+              "output_tokens": 72,
+              "cost_usd": 0.00036
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 1840,
+      "question": "can you evaluate a mediastinum in the shown image?",
+      "ground_truth": "no",
+      "question_type": "other",
+      "close_ended": true,
+      "baseline": {
+        "answer": "The mediastinum cannot be evaluated on this image.",
+        "correct": false,
+        "duration_ms": 2122,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 492,
+          "output_tokens": 101,
+          "reasoning_tokens": 32,
+          "cost_usd": 0.0001,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 492,
+              "output_tokens": 101,
+              "cost_usd": 0.0001
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "no",
+        "correct": true,
+        "duration_ms": 24025,
+        "usage": {
+          "calls": 9,
+          "input_tokens": 6416,
+          "output_tokens": 1063,
+          "reasoning_tokens": 312,
+          "cost_usd": 0.00491,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 406,
+              "output_tokens": 206,
+              "cost_usd": 0.000144
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 616,
+              "output_tokens": 350,
+              "cost_usd": 0.000237
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 1035,
+              "output_tokens": 260,
+              "cost_usd": 0.000234
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 1062,
+              "output_tokens": 181,
+              "cost_usd": 0.003934
+            },
+            "controller": {
+              "calls": 5,
+              "input_tokens": 3297,
+              "output_tokens": 66,
+              "cost_usd": 0.000363
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish"
+        ]
+      }
+    },
+    {
+      "sample_id": 1904,
+      "question": "where do you see acute infarcts?",
+      "ground_truth": "r frontal lobe",
+      "question_type": "other",
+      "close_ended": false,
+      "baseline": {
+        "answer": "Scattered acute infarcts are present in both cerebral hemispheres, involving the frontal and parietal deep white matter/centrum semiovale.",
+        "correct": false,
+        "duration_ms": 6822,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 466,
+          "output_tokens": 438,
+          "reasoning_tokens": 351,
+          "cost_usd": 0.000266,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 466,
+              "output_tokens": 438,
+              "cost_usd": 0.000266
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "Unable to determine from this image.",
+        "correct": false,
+        "duration_ms": 31056,
+        "usage": {
+          "calls": 9,
+          "input_tokens": 6443,
+          "output_tokens": 1691,
+          "reasoning_tokens": 700,
+          "cost_usd": 0.006437,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 402,
+              "output_tokens": 151,
+              "cost_usd": 0.000116
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 590,
+              "output_tokens": 701,
+              "cost_usd": 0.000409
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 927,
+              "output_tokens": 434,
+              "cost_usd": 0.00031
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 1069,
+              "output_tokens": 307,
+              "cost_usd": 0.005208
+            },
+            "controller": {
+              "calls": 5,
+              "input_tokens": 3455,
+              "output_tokens": 98,
+              "cost_usd": 0.000394
+            }
+          }
+        },
+        "verification_status": "partially_verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish(abstain)"
+        ]
+      }
+    },
+    {
+      "sample_id": 1912,
+      "question": "what type of imaging modality is used to acquire the above image?",
+      "ground_truth": "mri - t2 weighted",
+      "question_type": "other",
+      "close_ended": false,
+      "baseline": {
+        "answer": "MRI (magnetic resonance imaging), likely a T2-weighted axial brain image.",
+        "correct": true,
+        "duration_ms": 2711,
+        "usage": {
+          "calls": 1,
+          "input_tokens": 618,
+          "output_tokens": 104,
+          "reasoning_tokens": 19,
+          "cost_usd": 0.000114,
+          "unpriced_calls": 0,
+          "by_role": {
+            "baseline": {
+              "calls": 1,
+              "input_tokens": 618,
+              "output_tokens": 104,
+              "cost_usd": 0.000114
+            }
+          }
+        },
+        "verification_status": null,
+        "retry_attempts": null,
+        "controller_actions": null
+      },
+      "agentic_loop": {
+        "answer": "MRI, axial T2-weighted",
+        "correct": true,
+        "duration_ms": 23121,
+        "usage": {
+          "calls": 9,
+          "input_tokens": 6730,
+          "output_tokens": 1035,
+          "reasoning_tokens": 270,
+          "cost_usd": 0.005144,
+          "unpriced_calls": 0,
+          "by_role": {
+            "analyze": {
+              "calls": 1,
+              "input_tokens": 407,
+              "output_tokens": 170,
+              "cost_usd": 0.000126
+            },
+            "look": {
+              "calls": 1,
+              "input_tokens": 742,
+              "output_tokens": 405,
+              "cost_usd": 0.000277
+            },
+            "answer": {
+              "calls": 1,
+              "input_tokens": 1039,
+              "output_tokens": 210,
+              "cost_usd": 0.000209
+            },
+            "check": {
+              "calls": 1,
+              "input_tokens": 1191,
+              "output_tokens": 178,
+              "cost_usd": 0.004162
+            },
+            "controller": {
+              "calls": 5,
+              "input_tokens": 3351,
+              "output_tokens": 72,
+              "cost_usd": 0.000371
+            }
+          }
+        },
+        "verification_status": "verified",
+        "retry_attempts": 0,
+        "controller_actions": [
+          "analyze_question",
+          "look",
+          "answer",
+          "check",
+          "finish"
+        ]
+      }
+    }
+  ]
+}

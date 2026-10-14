@@ -26,6 +26,7 @@ sys.path.insert(0, str(ROOT_DIR / "backend"))
 from sklearn.metrics.pairwise import cosine_similarity  # noqa: E402
 
 from agents.baseline import baseline_answer  # noqa: E402
+from agents.workflow_baseline import workflow_answer  # noqa: E402
 from agents.agentic_loop import run_agentic_loop  # noqa: E402
 from agents.orchestrator import run_pipeline  # noqa: E402
 from config import model_manifest  # noqa: E402
@@ -35,7 +36,7 @@ from utils.data_loader import EXCLUDED_SAMPLE_IDS, get_image_bytes, get_sample_b
 from utils.usage import summarize, track_usage  # noqa: E402
 
 OUTPUT_DIR = ROOT_DIR / "experiments"
-ALL_SYSTEMS = ("baseline", "agentic_text_only", "agentic_with_image", "agentic_loop")
+ALL_SYSTEMS = ("baseline", "workflow", "agentic_text_only", "agentic_with_image", "agentic_loop")
 
 
 def similarity(first: str, second: str) -> float:
@@ -50,6 +51,8 @@ def run_system(name: str, image_bytes: bytes, question: str):
     with track_usage() as records:
         if name == "baseline":
             result = baseline_answer(image_bytes, question, "image/png")
+        elif name == "workflow":
+            result = workflow_answer(image_bytes, question, "image/png")
         elif name == "agentic_loop":
             result = run_agentic_loop(image_bytes, question, "image/png")
         else:
