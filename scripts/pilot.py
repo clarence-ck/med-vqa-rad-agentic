@@ -1,14 +1,17 @@
 """Pilot comparisons on a seeded random sample of VQA-RAD test cases (spend-capped).
 
-Runs, on a seeded random sample of VQA-RAD test cases:
-  - single-shot baseline
-  - agentic pipeline, reasoner sees only the stage-1 text summary (control)
-  - agentic pipeline, reasoner also sees the image (treatment)
-and scores them with backend/utils/scoring.py. Results are written to
-experiments/reasoner_sees_image/results.json (not the Case Explorer cache).
+Runs any subset of the systems below on the same seeded sample and scores them with
+backend/utils/scoring.py:
+  - baseline            single-shot baseline
+  - workflow            hand-designed workflow baseline
+  - agentic_text_only   fixed pipeline, reasoner sees only the stage-1 text summary
+  - agentic_with_image  fixed pipeline, reasoner also sees the image
+  - agentic_loop        agentic controller loop
+Results go to experiments/<name>/results.json (not the Case Explorer cache); see experiments/README.md.
 
 Usage (run from repo root):
-    python scripts/pilot_reasoner_image.py --n 20 --max-cost 1.0
+    python scripts/pilot.py --systems baseline,agentic_loop --n 20 --max-cost 0.75 --name pilots/5-my-pilot
+    python scripts/pilot.py --systems baseline,agentic_loop --from-eval-sample 200 --n 50 --name variance_repeat
 """
 from __future__ import annotations
 
@@ -68,7 +71,7 @@ def main() -> None:
     parser.add_argument("--max-cost", type=float, default=1.0, help="Stop before starting a case once spend reaches this (USD).")
     parser.add_argument("--systems", default="baseline,agentic_text_only,agentic_with_image",
                         help=f"Comma-separated subset of {', '.join(ALL_SYSTEMS)}")
-    parser.add_argument("--name", default="reasoner_sees_image", help="Results folder under experiments/")
+    parser.add_argument("--name", default="pilots/new-pilot", help="Results folder under experiments/")
     parser.add_argument("--from-eval-sample", type=int, default=0, metavar="N",
                         help="Draw the --n cases from the first N evaluation cases (the Case Explorer sample), "
                              "e.g. 200, so repeats cover cases from the main run")

@@ -246,13 +246,14 @@ On the 189 cases it answered, the agentic loop is 68% correct (strict).
 
 ### Development pilots (20 cases, seed 42)
 
-| System | Correct |
-|---|---|
-| Fixed pipeline, text-only reasoner (April design) | 10/20 |
-| Fixed pipeline, reasoner sees the image | 14/20 |
-| Agentic loop | 14/20 |
-| Single-shot baseline (three runs) | 14, 15, 14 |
-| Workflow baseline | 8/20 |
+Small runs that guided the design, in order (`experiments/pilots/`, described in `experiments/README.md`):
+
+| Pilot folder | What it tested | Result | Single-shot baseline, same run |
+|---|---|---|---|
+| `1-reasoner-sees-image` | Fixed pipeline: text-only reasoner (April design) vs reasoner that sees the image | 10/20 → 14/20 | 14/20 |
+| `2-loop-initial` | First agentic controller loop | 14/20 | 15/20 |
+| `3-loop-best-verified` | Loop after keeping the best-verified answer | 14/20 | 14/20 |
+| `4-workflow-baseline` | Rewritten hand-designed workflow baseline | 8/20 | – |
 
 ---
 
@@ -411,7 +412,7 @@ backend/
   .case_explorer_cache/        200-case evaluation results (one JSON per case)
 frontend/                      React 19 + Vite UI; scripts/capture-screenshots.mjs
 scripts/                       evaluation runner, pilots, LLM judge, final metrics, dataset download, diagram
-experiments/                   pilot, variance and judge results; final_metrics.json (all headline numbers)
+experiments/                   final_metrics.json (all headline numbers), judge, variance repeats, pilots/
 eval-dashboard-screenshots/    dashboard screenshots of the final evaluation (2026-10/)
 ```
 

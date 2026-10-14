@@ -133,8 +133,10 @@ finished directly in 141 cases, re-examined a region in 19, revised its answer i
 cap the loop at two focused re-looks, three answers and 16 steps, with a safety net that checks the latest answer
 if the controller stalls.
 
-\paragraph{Roles.}
-\textbf{\texttt{analyze\_question}} (planner input) classifies the question type and expected answer format.
+\paragraph{Roles.} The \emph{controller} is the planner: it chooses every next step from the results so far.
+The per-request \emph{working memory} (image, question analysis, looks, answers, checks) is the memory; the tools
+read from and write to it.
+\textbf{\texttt{analyze\_question}} (task understanding) classifies the question type and expected answer format.
 \textbf{\texttt{look(focus)}} (perception) examines the image \emph{with the question in mind}; with a focus, it
 re-examines a named region; the first look rejects non-radiology images.
 \textbf{\texttt{answer(guidance)}} (executor) answers from the image plus all observations, applying the
