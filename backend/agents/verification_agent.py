@@ -317,3 +317,40 @@ analysis above: the text analysis can be incomplete or wrong. Then recommend the
                 "verification_notes": "Verification failed due to an error.",
                 "suggested_disclaimer": "This answer has not been verified."
             }}
+
+
+def blind_read(image_bytes_b64: str, mime_type: str, question: str, question_analysis: dict) -> dict:
+    """Blind step of the agentic loop's check: the verifier model answers from the image alone.
+
+    It never sees the proposed answer or the looker's observations, so it cannot be anchored by them.
+    Returns {"status", "answer", "explanation"}.
+    """
+    qa = question_analysis or {}
+    expected = qa.get("expected_answer_format", "short_phrase")
+    prompt = f"""You are a radiologist. Answer this question about the attached medical image from the image alone.
+
+QUESTION: "{question}"
+Expected answer format: {expected} (for yes/no questions, start with "yes" or "no").
+The patient's left appears on the image's right on standard radiological views.
+
+Return ONLY a JSON object: {{"answer": "<concise answer>", "explanation": "<one sentence: the visible evidence>"}}"""
+    started = time.perf_counter()
+    try:
+        generator = OpenAIChatGenerator(api_key=Secret.from_token(OPENAI_API_KEY), model=MODELS["check"])
+        response = generator.run(
+            messages=[ChatMessage.from_user(content_parts=[
+                TextContent(text=prompt),
+                ImageContent(base64_image=image_bytes_b64, mime_type=mime_type, detail="high"),
+            ])],
+            generation_kwargs=generation_kwargs("check"),
+        )
+        record_usage("check", MODELS["check"], response["replies"][0].meta.get("usage"))
+        result = json.loads(strip_json_fences(response["replies"][0].text or ""))
+        answer = str(result.get("answer", "")).strip()
+        if not answer:
+            raise ValueError("empty blind answer")
+        _log.info("Blind reading  answer=%r  duration=%dms", answer[:60], int((time.perf_counter() - started) * 1000))
+        return {"status": "success", "answer": answer, "explanation": str(result.get("explanation", ""))}
+    except Exception as e:
+        _log.error("Blind reading failed: %s: %s", type(e).__name__, e)
+        return {"status": "error", "answer": "", "explanation": "", "error": str(e)}

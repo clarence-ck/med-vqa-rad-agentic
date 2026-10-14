@@ -131,6 +131,18 @@ def main() -> None:
         "verified": {"verified"}, "partially_verified": {"partially_verified"}, "unsupported_or_low": {"unsupported", "low_confidence"}})
     metrics["self_consistency_signal"] = signal("self_consistency_level", {
         "high": {"high"}, "medium": {"medium"}, "low": {"low"}, "not_run": {"not_run"}})
+    blind_rows = [r for r in rows if r.get("blind_correct") is not None]
+    if blind_rows:  # runs with the blind check
+        metrics["blind_reading"] = {
+            "cases": len(blind_rows),
+            "strict": pct(sum(r["blind_correct"] for r in blind_rows) / len(blind_rows)),
+            "agentic_vs_blind": mcnemar(blind_rows, "agentic_correct", "blind_correct"),
+            "blind_vs_baseline": mcnemar(blind_rows, "blind_correct", "baseline_correct"),
+        }
+    zoomed = [r for r in rows if r.get("zoomed_looks")]
+    metrics["zoom"] = {"cases": len(zoomed),
+                       "agentic": pct(sum(r["agentic_correct"] for r in zoomed) / len(zoomed)) if zoomed else None,
+                       "baseline": pct(sum(r["baseline_correct"] for r in zoomed) / len(zoomed)) if zoomed else None}
     answered = [r for r in rows if r["controller_path"] != "abstained"]
     metrics["agentic_answered"] = {"cases": len(answered), "strict": pct2(sum(r["agentic_correct"] for r in answered) / len(answered))}
 

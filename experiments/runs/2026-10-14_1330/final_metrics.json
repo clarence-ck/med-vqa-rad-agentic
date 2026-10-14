@@ -135,6 +135,11 @@
       "agentic": 0.0
     }
   },
+  "zoom": {
+    "cases": 0,
+    "agentic": null,
+    "baseline": null
+  },
   "agentic_answered": {
     "cases": 189,
     "strict": 68.25

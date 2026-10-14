@@ -91,9 +91,9 @@ controller decides whether to follow it, which is what separates the loop from t
 | Tool | Role | Model (default) | Notes |
 |---|---|---|---|
 | `analyze_question()` | Task understanding | gpt-6-luna | Question type and expected answer format; keyword rules use whole-word matching |
-| `look(focus)` | Perception (executor) | gpt-6-luna, vision | Looks *with the question in mind*; with `focus`, re-examines a named region. The first look also rejects non-radiology images |
+| `look(focus)` | Perception (executor) | gpt-6-luna, vision | Looks *with the question in mind*; with `focus` it **zooms**: the named region is located, cropped and enlarged, and examined next to the full image. The first look also rejects non-radiology images |
 | `answer(guidance)` | Synthesis (executor) | gpt-6-luna, vision | Receives the image plus all observations; `guidance` carries what the verifier asked to fix |
-| `check()` | Evaluator | gpt-6.1-sol, vision | Verifies against the image and recommends `accept`, `relook` (with a focus), `reanswer` (with guidance) or `abstain` |
+| `check()` | Evaluator | gpt-6.1-sol, vision | **Blind reading first:** the verifier answers from the image and question alone, without seeing the proposed answer or the looker's notes (once per episode). Then an answer-aware review checks grounding and format. The answer is only *verified* if both agree; the controller is told that the readings disagree, never the blind answer itself. Recommends `accept`, `relook` (with a focus), `reanswer` (with guidance) or `abstain` |
 | `finish(abstain)` | Decision | — | Ends the episode; refused while the latest answer is unchecked |
 
 Budgets: at most 2 focused re-looks, 3 answers and 16 agent steps. If the controller stalls, a safety net answers
@@ -136,9 +136,9 @@ The two modalities are the image and the text question. They interact at every s
 
 | Step | Image | Text |
 |---|---|---|
-| `look(focus)` | ✓ sent at high detail | the question (and focus) decide what is examined |
+| `look(focus)` | ✓ sent at high detail, plus an enlarged crop of the focus region | the question (and focus) decide what is examined |
 | `answer(guidance)` | ✓ sent directly | question analysis, all observations, verifier guidance |
-| `check()` | ✓ sent directly | answer, explanation, observations |
+| `check()` | ✓ sent directly (blind reading: image + question only) | answer, explanation, observations (review step only) |
 | Controller | ✗ | short tool results only |
 
 The April version described the image once, *without the question*, and every later stage worked from that text. In a
@@ -151,8 +151,8 @@ The April version described the image once, *without the question*, and every la
 
 | Mechanism | What it does |
 |---|---|
-| Image-grounded verification | `check` judges the answer against the image: 5 checks, a status (`verified`, `partially_verified`, `low_confidence`, `unsupported`) and a recommended next action |
-| Targeted recovery | The controller re-examines a region (`look(focus)`) or revises (`answer(guidance)`) instead of re-running everything |
+| Image-grounded verification | `check` compares the answer with an independent blind reading of the image, then judges it against the image: 5 checks, a status (`verified`, `partially_verified`, `low_confidence`, `unsupported`) and a recommended next action. Added after the 14 Oct run, where 30% of answers the answer-aware check called verified were wrong |
+| Targeted recovery | The controller zooms into a region (`look(focus)`) or revises (`answer(guidance)`) instead of re-running everything |
 | Best-verified answer | A later answer replaces an earlier one only if its check is strictly better (re-looks can over-read) |
 | Self-consistency | After finishing, the answerer is re-asked independently (2×); low agreement adds `self_inconsistent` and flags the case for review |
 | Abstention | The controller may abstain; abstentions are reported as such (never normalised into "no") |

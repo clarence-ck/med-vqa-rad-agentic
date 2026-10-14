@@ -140,10 +140,13 @@ The per-request \emph{working memory} (image, question analysis, looks, answers,
 read from and write to it.
 \textbf{\texttt{analyze\_question}} (task understanding) classifies the question type and expected answer format.
 \textbf{\texttt{look(focus)}} (perception) examines the image \emph{with the question in mind}; with a focus, it
-re-examines a named region; the first look rejects non-radiology images.
+zooms: the named region is located, cropped and enlarged, and examined beside the full image; the first look rejects
+non-radiology images.
 \textbf{\texttt{answer(guidance)}} (executor) answers from the image plus all observations, applying the
 verifier's guidance on revisions.
-\textbf{\texttt{check}} (evaluator) verifies the answer against the image with five checks, returns a status
+\textbf{\texttt{check}} (evaluator) first reads the image \emph{blind}---the verifier answers from the image and
+question alone, without the proposed answer or the looker's notes---then verifies the answer against the image with
+five checks; an answer is only verified if the blind reading agrees. It returns a status
 (verified, partially verified, low confidence, unsupported) and recommends \emph{accept}, \emph{relook} with a
 focus, \emph{reanswer} with guidance, or \emph{abstain}.
 \textbf{\texttt{finish(abstain)}} ends the episode and is refused while the latest answer is unchecked.
@@ -182,8 +185,9 @@ failures were ``cannot be determined from the provided image description''. Beca
 (\emph{unsupported claim}, \emph{low confidence}, \emph{visual contradiction}, \emph{partially verified},
 \emph{question--answer mismatch}, \emph{generation unstable}, \emph{parser failure}) and an eighth,
 \emph{self-inconsistent}, from resampling.
-\textbf{Recovery.} Instead of re-running the whole pipeline, the controller re-examines the region the verifier
-names or revises the answer with the verifier's guidance. A later answer replaces an earlier one only if its check
+\textbf{Recovery.} Instead of re-running the whole pipeline, the controller zooms into the region the verifier
+names or revises the answer with the verifier's guidance. When the blind reading disagrees, the controller is told
+only \emph{that} it disagrees, never the blind answer, so the loop must resolve it with its own model. A later answer replaces an earlier one only if its check
 is strictly better, because focused re-looks can over-read.
 \textbf{Self-critique.} After finishing, the answerer is re-asked independently twice; low agreement adds a failure
 category and flags the case for review.

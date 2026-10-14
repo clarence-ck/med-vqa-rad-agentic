@@ -3,9 +3,9 @@ Agentic loop: a Haystack Agent controller that decides what to do next.
 
 Tools (bound to one per-request LoopContext):
   analyze_question()        classify the question (type, expected format)
-  look(focus="")            question-aware look at the image; with `focus`, a targeted re-examination
+  look(focus="")            question-aware look at the image; with `focus`, a zoomed re-examination of that region
   answer(guidance="")       answer from the image + all observations so far
-  check()                   verify the latest answer against the image; recommends the next action
+  check()                   blind reading of the image (once), then verify the latest answer; recommends the next action
   finish(abstain, reason)   end the episode
 
 Unlike the fixed pipeline (orchestrator.run_pipeline), the tool sequence depends on what
@@ -34,7 +34,7 @@ from agents.orchestrator import (
 )
 from agents.question_analyzer import QuestionAnalyzer
 from agents.reasoning_agent import ReasoningAgent
-from agents.verification_agent import VerificationAgent
+from agents.verification_agent import VerificationAgent, blind_read
 from config import AGENT_MODE, MODELS, OPENAI_API_KEY, SELF_CONSISTENCY_SAMPLES, generation_kwargs
 from logger import get_logger
 from utils import scoring
@@ -65,6 +65,36 @@ def controller_path(actions: list[str], abstained: bool = False) -> str:
     if any(action.startswith("answer(guided") for action in actions):
         return "reanswer"
     return "direct"
+
+
+BLIND_DISAGREEMENT = "an independent blind reading of the image disagrees with this answer"
+
+
+def apply_blind_agreement(check: dict, answer: str, blind: dict, question_analysis: dict) -> dict:
+    """Combine the answer-aware check with the blind reading (in place).
+
+    The check only stays "verified" if an independent reading of the image, made without seeing the answer,
+    agrees with it. On disagreement the status drops to at most partially_verified and an "accept" becomes a
+    focused re-look. The blind answer itself is stored but never put in the text the controller sees.
+    """
+    if not blind or blind.get("status") != "success":
+        check["blind_agreement"] = None
+        return check
+    qa = question_analysis or {}
+    close_ended = qa.get("expected_answer_format") == "yes_no" or qa.get("question_type") in {"yes_no", "presence_absence"}
+    agree = scoring.answers_agree(str(blind.get("answer", "")), str(answer or ""), close_ended, qa.get("question_type"))
+    check["blind_agreement"] = agree
+    if agree:
+        return check
+    if check.get("verification_status") == "verified":
+        check["verification_status"] = "partially_verified"
+    if check.get("confidence_label") == "High":
+        check["confidence_label"] = "Medium"
+    check["issues_found"] = list(check.get("issues_found") or []) + [BLIND_DISAGREEMENT]
+    if check.get("recommended_action", "accept") == "accept":
+        check["recommended_action"] = "relook"
+        check["relook_focus"] = check.get("relook_focus") or qa.get("target_entity") or "the finding the question asks about"
+    return check
 
 
 def consistency_level(agreeing: int, total: int) -> str:
@@ -99,10 +129,12 @@ Goal: give a correct, image-grounded answer to the user's question about a radio
 Tools:
 - analyze_question: classify the question and its expected answer format.
 - look(focus): examine the image with the question in mind. Leave focus empty for the first look; on later looks,
-  name the region or structure to re-examine (e.g. "left costophrenic angle").
+  name the region or structure to re-examine (e.g. "left costophrenic angle"): that region is located, cropped and
+  enlarged, so the re-look sees it in more detail.
 - answer(guidance): produce an answer from the image and all observations so far. Use guidance to say what the new
   answer must fix.
-- check: verify the latest answer against the image. It returns a verdict and a recommended next action.
+- check: verify the latest answer against the image. An independent reader first answers from the image alone,
+  without seeing yours; if it disagrees, the answer is not verified. Returns a verdict and a recommended next action.
 - finish(abstain, reason): end the episode. The best-verified checked answer is kept, or abstain.
 
 How to work:
@@ -129,6 +161,7 @@ class LoopContext:
         self.trace: list[dict] = []
         self.actions: list[str] = []
         self.abstained = False
+        self.blind: dict | None = None        # blind reading, made once per episode
 
     # -- helpers -------------------------------------------------------------
     def _record(self, agent: str, status: str, summary: str, output: dict, started: float) -> None:
@@ -200,7 +233,8 @@ class LoopContext:
         self._record(label, "pass" if result.get("status") == "success" else "warning",
                      observed or result.get("visual_summary", "No observation produced."),
                      {k: result.get(k) for k in ("modality", "body_region", "view_or_sequence", "focus_observation",
-                                                 "question_relevant_observations", "uncertainties", "image_quality")},
+                                                 "question_relevant_observations", "uncertainties", "image_quality",
+                                                 "zoom_box")},
                      started)
         if result.get("status") != "success":
             return f"Look failed: {result.get('error', 'unknown error')}"
@@ -245,6 +279,7 @@ class LoopContext:
             image_bytes_b64=self.image_b64,
             mime_type=self.mime_type,
         )["result"]
+        apply_blind_agreement(result, self.answers[-1].get("answer", ""), self.blind_reading(), self.question_analysis)
         self.checks.append(result)
         status = result.get("verification_status", "unknown")
         action = result.get("recommended_action", "accept" if status == "verified" else "reanswer")
@@ -259,6 +294,25 @@ class LoopContext:
         return (f"verification_status={status}; recommended_action={action}; "
                 f"relook_focus={result.get('relook_focus', '')!r}; reanswer_guidance={result.get('reanswer_guidance', '')!r}; "
                 f"issues={issues!r}")[:900]
+
+    def blind_reading(self) -> dict:
+        """The verifier model's own answer from the image and question alone, read once per episode.
+
+        Kept out of everything the controller and the answerer see, so the loop has to resolve a
+        disagreement by looking again with its own model, not by copying the verifier's answer.
+        """
+        if self.blind is None:
+            if not self.question_analysis:
+                self.analyze_question()
+            started = time.time()
+            self.blind = blind_read(self.image_b64, self.mime_type, self.question, self.question_analysis)
+            ok = self.blind.get("status") == "success"
+            self._record("Blind Reading", "pass" if ok else "warning",
+                         f"Independent answer from the image alone: {self.blind.get('answer')!r}" if ok
+                         else "Blind reading failed; the check falls back to the answer-aware review only",
+                         {"answer": self.blind.get("answer", ""), "explanation": self.blind.get("explanation", "")},
+                         started)
+        return self.blind
 
     def self_consistency(self, final_answer: str, samples: int) -> dict:
         """Re-ask the reasoner `samples` times independently and measure agreement with the final answer."""
@@ -309,13 +363,13 @@ def _tools(ctx: LoopContext) -> list[Tool]:
     return [
         Tool(name="analyze_question", description="Classify the question type and expected answer format.",
              parameters=no_params, function=ctx.analyze_question),
-        Tool(name="look", description="Examine the image with the question in mind. Pass focus to re-examine a specific region or structure.",
+        Tool(name="look", description="Examine the image with the question in mind. Pass focus to zoom into and re-examine a specific region or structure.",
              parameters={"type": "object", "properties": {"focus": {"type": "string", "description": "Region or structure to re-examine; empty for the first look."}}, "required": []},
              function=ctx.look),
         Tool(name="answer", description="Answer the question from the image and all observations so far.",
              parameters={"type": "object", "properties": {"guidance": {"type": "string", "description": "What the new answer must fix (from the check result); empty for the first answer."}}, "required": []},
              function=ctx.answer),
-        Tool(name="check", description="Verify the latest answer against the image; returns a verdict and a recommended next action.",
+        Tool(name="check", description="Verify the latest answer against the image (blind reading first, then an answer-aware review); returns a verdict and a recommended next action.",
              parameters=no_params, function=ctx.check),
         Tool(name="finish", description="End the episode with the latest checked answer, or abstain.",
              parameters={"type": "object", "properties": {"abstain": {"type": "boolean"}, "reason": {"type": "string"}}, "required": []},
@@ -445,6 +499,9 @@ def run_agentic_loop(image_bytes: bytes, question: str, mime_type: str = "image/
         "agent_trace": ctx.trace,
         "agent_mode": "loop",
         "controller_actions": ctx.actions,
+        "blind_reading": {"answer": (ctx.blind or {}).get("answer", ""),
+                          "agrees_with_final": verification_result.get("blind_agreement")},
+        "zoomed_looks": sum(1 for look in ctx.looks if look.get("zoom_box")),
         "abstained": ctx.abstained,
         "controller_path": controller_path(ctx.actions, ctx.abstained),
         "api_errors": sum(

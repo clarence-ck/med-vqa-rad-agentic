@@ -178,6 +178,136 @@ class RunSelectionTests(unittest.TestCase):
             self.assertEqual(runs.current_run_id(), "2026-02-01_0900")
 
 
+def _png(width=400, height=300):
+    from io import BytesIO
+    from PIL import Image
+    out = BytesIO()
+    Image.new("L", (width, height), 128).save(out, format="PNG")
+    return out.getvalue()
+
+
+class ZoomTests(unittest.TestCase):
+    def test_parse_box(self):
+        from utils.image_zoom import parse_box
+        self.assertEqual(parse_box([0.1, 0.2, 0.5, 0.6]), (0.1, 0.2, 0.5, 0.6))
+        self.assertEqual(parse_box([10, 20, 50, 60]), (0.1, 0.2, 0.5, 0.6))  # percent
+        for bad in (None, [0.5, 0.5, 0.2, 0.9], [1, 2, 3], "box", [0, 0, 500, 500]):
+            self.assertIsNone(parse_box(bad), bad)
+
+    def test_crop_is_enlarged_and_kept_inside_the_image(self):
+        from io import BytesIO
+        from PIL import Image
+        from utils.image_zoom import zoom, OUT_LONG_SIDE, MIN_SIDE
+        png, box = zoom(_png(), [0.9, 0.9, 0.95, 0.95])  # tiny box in the corner
+        x0, y0, x1, y1 = box
+        self.assertTrue(0 <= x0 < x1 <= 1 and 0 <= y0 < y1 <= 1)
+        self.assertGreaterEqual(round(x1 - x0, 3), MIN_SIDE)
+        self.assertEqual(max(Image.open(BytesIO(png)).size), OUT_LONG_SIDE)
+        self.assertIsNone(zoom(b"not an image", [0.1, 0.1, 0.5, 0.5]))
+
+
+class BlindCheckTests(unittest.TestCase):
+    def _check(self, status="verified", action="accept"):
+        return {"verification_status": status, "confidence_label": "High", "recommended_action": action,
+                "issues_found": [], "relook_focus": ""}
+
+    def test_agreement_keeps_the_verdict(self):
+        from agents.agentic_loop import apply_blind_agreement
+        check = apply_blind_agreement(self._check(), "Yes, there is a fracture.", {"status": "success", "answer": "yes"},
+                                      {"question_type": "yes_no", "expected_answer_format": "yes_no"})
+        self.assertEqual((check["verification_status"], check["blind_agreement"]), ("verified", True))
+
+    def test_disagreement_blocks_verified_and_hides_the_blind_answer(self):
+        from agents.agentic_loop import apply_blind_agreement
+        check = apply_blind_agreement(self._check(), "no", {"status": "success", "answer": "Yes, a left rib fracture"},
+                                      {"question_type": "yes_no", "expected_answer_format": "yes_no",
+                                       "target_entity": "ribs"})
+        self.assertEqual(check["verification_status"], "partially_verified")
+        self.assertEqual((check["recommended_action"], check["relook_focus"]), ("relook", "ribs"))
+        self.assertFalse(check["blind_agreement"])
+        self.assertNotIn("rib fracture", " ".join(check["issues_found"]))  # controller never sees the blind answer
+
+    def test_failed_blind_reading_changes_nothing(self):
+        from agents.agentic_loop import apply_blind_agreement
+        check = apply_blind_agreement(self._check(), "no", {"status": "error", "answer": ""}, {})
+        self.assertEqual((check["verification_status"], check["blind_agreement"]), ("verified", None))
+
+
+class LookZoomTests(unittest.TestCase):
+    def _run(self, locate_reply):
+        from unittest import mock
+        from agents import look_agent
+        replies = [locate_reply, '{"is_radiology_image": true, "modality": "X-ray", "visual_summary": "s"}']
+        calls = []
+
+        def run(messages, generation_kwargs):
+            calls.append(messages[0])
+            return {"replies": [mock.Mock(text=replies[len(calls) - 1], meta={})]}
+
+        with mock.patch.object(look_agent, "OpenAIChatGenerator", mock.Mock(return_value=mock.Mock(run=run))), \
+                mock.patch.object(look_agent, "Secret", mock.Mock()):
+            result = look_agent.LookAgent().run(image_bytes=_png(), question="fracture?", focus="left ribs")["result"]
+        return result, calls
+
+    def test_located_region_is_sent_as_an_extra_zoomed_image(self):
+        result, calls = self._run('{"found": true, "box": [0.6, 0.3, 0.9, 0.7]}')
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(len(calls[1].images), 2)  # full image + enlarged crop
+        self.assertIsNotNone(result["zoom_box"])
+
+    def test_unlocated_region_falls_back_to_a_plain_relook(self):
+        result, calls = self._run('{"found": false}')
+        self.assertEqual(len(calls[1].images), 1)
+        self.assertIsNone(result["zoom_box"])
+
+
+
+class LoopBlindReadingTests(unittest.TestCase):
+    """One faked episode through the real loop: answer 'no', blind reader says 'yes'."""
+
+    def test_disagreement_is_recorded_but_never_shown_to_the_controller(self):
+        from unittest import mock
+        from agents import agentic_loop as loop
+        seen = {}
+
+        class FakeAgent:
+            def __init__(self, tools, **_):
+                self.tools = {t.name: t.function for t in tools}
+
+            def run(self, messages):
+                for name in ("analyze_question", "look", "answer"):
+                    self.tools[name]()
+                seen["first_check"] = self.tools["check"]()
+                self.tools["answer"](guidance="re-examine")
+                seen["second_check"] = self.tools["check"]()
+                self.tools["finish"]()
+                return {"messages": []}
+
+        def fake(result):
+            return mock.Mock(return_value=mock.Mock(run=mock.Mock(return_value={"result": result})))
+
+        blind = mock.Mock(return_value={"status": "success", "answer": "Yes, clearly visible", "explanation": "e"})
+        with mock.patch.object(loop, "Agent", FakeAgent), \
+                mock.patch.object(loop, "OpenAIChatGenerator", mock.Mock()), \
+                mock.patch.object(loop, "Secret", mock.Mock()), \
+                mock.patch.object(loop, "SELF_CONSISTENCY_SAMPLES", 0), \
+                mock.patch.object(loop, "blind_read", blind), \
+                mock.patch.object(loop, "QuestionAnalyzer", fake({"status": "success", "question_type": "yes_no",
+                                                                 "expected_answer_format": "yes_no"})), \
+                mock.patch.object(loop, "LookAgent", fake({"status": "success", "modality": "CT", "visual_summary": "v"})), \
+                mock.patch.object(loop, "ReasoningAgent", fake({"status": "success", "answer": "no", "explanation": "e"})), \
+                mock.patch.object(loop, "VerificationAgent", fake({"verification_status": "verified", "confidence_label": "High",
+                                                                  "recommended_action": "accept", "checks": {}})):
+            result = loop.run_agentic_loop(b"img", "is there a fracture?")
+        blind.assert_called_once()  # one blind reading per episode, reused by every check
+        for text in seen.values():
+            self.assertIn("verification_status=partially_verified", text)
+            self.assertNotIn("clearly visible", text)
+        self.assertEqual(result["verification_status"], "partially_verified")
+        self.assertEqual(result["blind_reading"], {"answer": "Yes, clearly visible", "agrees_with_final": False})
+        self.assertIn("Blind Reading", [step["agent"] for step in result["agent_trace"]])
+
+
 if __name__ == "__main__":
     unittest.main()
 

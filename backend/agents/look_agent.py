@@ -11,6 +11,7 @@ from haystack.utils import Secret
 
 from config import OPENAI_API_KEY, MODELS, generation_kwargs
 from logger import get_logger
+from utils import image_zoom
 from utils.json_utils import strip_json_fences
 from utils.usage import record_usage
 
@@ -44,6 +45,33 @@ class LookAgent:
         _log.warning("Image converter could not read the image; sending original bytes")
         return ImageContent(base64_image=base64.b64encode(image_bytes).decode("utf-8"),
                             mime_type=mime_type, detail="high")
+
+    def _locate_and_zoom(self, image_bytes: bytes, mime_type: str, question: str, focus: str):
+        """Zoom tool: find where `focus` is, then crop and enlarge it. None if it cannot be located or cropped."""
+        prompt = f"""Locate "{focus}" on the attached radiology image (the question being answered is "{question}").
+
+Return ONLY a JSON object: {{"found": true, "box": [x0, y0, x1, y1]}}, where the box encloses that region as
+fractions (0-1) of the image width and height, measured from the top-left corner of the image as displayed.
+The patient's left appears on the image's right on standard radiological views. Use "found": false if the
+region is not in the image."""
+        try:
+            response = self.generator.run(
+                messages=[ChatMessage.from_user(content_parts=[TextContent(text=prompt),
+                                                               self._image_content(image_bytes, mime_type)])],
+                generation_kwargs=generation_kwargs("look"),
+            )
+            record_usage("look", MODELS["look"], response["replies"][0].meta.get("usage"))
+            located = json.loads(strip_json_fences(response["replies"][0].text or ""))
+        except Exception as e:
+            _log.warning("Zoom: could not locate %r: %s", focus, e)
+            return None
+        if not located.get("found", True):
+            _log.info("Zoom: %r not found on the image; plain re-look", focus)
+            return None
+        zoomed = image_zoom.zoom(image_bytes, located.get("box"))
+        if zoomed:
+            _log.info("Zoom: %r located at %s", focus, zoomed[1])
+        return zoomed
 
     @component.output_types(result=Dict[str, Any])
     def run(self, image_bytes: bytes, question: str, mime_type: str = "image/png",
@@ -85,10 +113,20 @@ Return ONLY the JSON object, no additional text."""
 
         started = time.perf_counter()
         _log.info("Look  focus=%r  question=%r", focus, question[:80])
+        zoomed = self._locate_and_zoom(image_bytes, mime_type, question, focus) if focus else None
+        if zoomed:
+            prompt += f"""
+
+TWO IMAGES are attached: (1) the full image; (2) an ENLARGED CROP of the region where "{focus}" was located
+(box {list(zoomed[1])}, as fractions of the full image's width and height from its top-left corner). Use the crop
+for fine detail and the full image for context and laterality."""
         try:
-            image_content = self._image_content(image_bytes, mime_type)
+            parts = [TextContent(text=prompt), self._image_content(image_bytes, mime_type)]
+            if zoomed:
+                parts.append(ImageContent(base64_image=base64.b64encode(zoomed[0]).decode("utf-8"),
+                                          mime_type="image/png", detail="high"))
             response = self.generator.run(
-                messages=[ChatMessage.from_user(content_parts=[TextContent(text=prompt), image_content])],
+                messages=[ChatMessage.from_user(content_parts=parts)],
                 generation_kwargs=generation_kwargs("look"),
             )
             record_usage("look", MODELS["look"], response["replies"][0].meta.get("usage"))
@@ -111,6 +149,7 @@ Return ONLY the JSON object, no additional text."""
 
         result["status"] = "success"
         result["focus"] = focus
+        result["zoom_box"] = list(zoomed[1]) if zoomed else None
         result["quality_warning"] = result.get("image_quality") == "poor"
         _log.info(
             "Look done  focus=%r  modality=%s  region=%s  relevant=%d  duration=%dms",

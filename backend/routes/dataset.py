@@ -766,6 +766,14 @@ def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
             else ("pipeline" if agentic_result.get("agent_mode") == "pipeline" else "unknown")
         ),
         "controller_actions": agentic_result.get("controller_actions", []),
+        # The verifier model's blind reading (answers from the image alone): a reference, not a system under test.
+        "blind_answer": (agentic_result.get("blind_reading") or {}).get("answer") or None,
+        "blind_correct": (
+            scoring.answers_match(_normalize_answer(agentic_result["blind_reading"]["answer"]), ground_truth_normalized,
+                                  is_close_ended, original_question_type, similarity)
+            if (agentic_result.get("blind_reading") or {}).get("answer") else None
+        ),
+        "zoomed_looks": agentic_result.get("zoomed_looks", 0),
         "agentic_attempts": agentic_result.get("attempts"),
         "baseline_token_f1": round(_token_f1(baseline_normalized, ground_truth_normalized), 4),
         "workflow_token_f1": round(_token_f1(workflow_normalized, ground_truth_normalized), 4),

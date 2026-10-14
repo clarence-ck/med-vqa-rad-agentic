@@ -95,9 +95,9 @@ def main():
             fontsize=9.5, color=TEXT, weight="bold", zorder=4)
     tools = [
         ("analyze_question()", "question type + expected answer format · gpt-6-luna", BLUE_SOFT, BLUE),
-        ("look(focus)", "examine the image, or re-examine one region · gpt-6-luna", BLUE_SOFT, BLUE),
+        ("look(focus)", "examine the image, or zoom into one region · gpt-6-luna", BLUE_SOFT, BLUE),
         ("answer(guidance)", "answer from image + all observations · gpt-6-luna", BLUE_SOFT, BLUE),
-        ("check() · gpt-6.1-sol", "verifies vs image; suggests accept / relook / reanswer / abstain", AMBER_SOFT, AMBER),
+        ("check() · gpt-6.1-sol", "blind reading first, then review; suggests the next step", AMBER_SOFT, AMBER),
         ("finish(abstain)", "end with the latest checked answer, or abstain", PURPLE_SOFT, PURPLE),
     ]
     for i, (title, sub, fc, ec) in enumerate(tools):
