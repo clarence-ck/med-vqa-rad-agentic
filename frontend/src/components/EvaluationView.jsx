@@ -72,15 +72,19 @@ function BreakdownAccuracyCell({ value, color }) {
   );
 }
 
-function JudgeTag({ verdict }) {
-  if (verdict !== 'correct') return null;
+function JudgeTag({ verdict, strict }) {
+  // Only shown where the LLM judge disagrees with the strict scorer.
+  if (!verdict || (verdict === 'correct') === Boolean(strict)) return null;
+  const rescued = verdict === 'correct';
   return (
     <span
-      className="tag tag-green"
+      className={`tag ${rescued ? 'tag-green' : 'tag-red'}`}
       style={{ fontSize: '9px', padding: '1px 5px', marginLeft: '4px' }}
-      data-tooltip="The strict scorer rejected this wording, but the blinded LLM judge rated it as meaning the same as the ground truth; it counts toward LLM-judged accuracy."
+      data-tooltip={rescued
+        ? 'The strict scorer rejected this wording, but the blinded LLM judge rated it as meaning the same as the ground truth.'
+        : 'The strict scorer accepted this answer (it contains the reference words), but the blinded LLM judge rated it as not giving the same answer.'}
     >
-      LLM-judged ✓
+      {rescued ? 'LLM-judged ✓' : 'LLM-judged ✗'}
     </span>
   );
 }
@@ -576,20 +580,20 @@ export default function EvaluationView({ loading, evaluationData, error, onRefre
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '12px', maxWidth: '300px' }}>
                             <div>
                               <span className="tag tag-amber" style={{ fontSize: '9px', padding: '1px 5px', minWidth: '55px', justifyContent: 'center', marginRight: '6px' }}>Baseline</span>
-                              <span style={{ color: row.baseline_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.baseline_correct && row.baseline_answer ? 'line-through' : 'none' }}>{row.baseline_answer || '—'}</span>{' '}<JudgeTag verdict={row.baseline_judge_verdict} />
+                              <span style={{ color: row.baseline_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.baseline_correct && row.baseline_answer ? 'line-through' : 'none' }}>{row.baseline_answer || '—'}</span>{' '}<JudgeTag verdict={row.baseline_judge_verdict} strict={row.baseline_correct} />
                             </div>
                             <div>
                               <span className="tag tag-blue" style={{ fontSize: '9px', padding: '1px 5px', minWidth: '55px', justifyContent: 'center', marginRight: '6px' }}>Workflow</span>
-                              <span style={{ color: row.workflow_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.workflow_correct && row.workflow_answer ? 'line-through' : 'none' }}>{row.workflow_answer || '—'}</span>{' '}<JudgeTag verdict={row.workflow_judge_verdict} />
+                              <span style={{ color: row.workflow_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.workflow_correct && row.workflow_answer ? 'line-through' : 'none' }}>{row.workflow_answer || '—'}</span>{' '}<JudgeTag verdict={row.workflow_judge_verdict} strict={row.workflow_correct} />
                             </div>
                             <div>
                               <span className="tag tag-green" style={{ fontSize: '9px', padding: '1px 5px', minWidth: '55px', justifyContent: 'center', marginRight: '6px' }}>Agentic</span>
-                              <span style={{ color: row.agentic_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.agentic_correct && row.agentic_answer ? 'line-through' : 'none' }}>{row.agentic_answer || '—'}</span>{' '}<JudgeTag verdict={row.agentic_judge_verdict} />
+                              <span style={{ color: row.agentic_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.agentic_correct && row.agentic_answer ? 'line-through' : 'none' }}>{row.agentic_answer || '—'}</span>{' '}<JudgeTag verdict={row.agentic_judge_verdict} strict={row.agentic_correct} />
                             </div>
                             {row.pipeline_answer !== null && row.pipeline_answer !== undefined && (
                               <div>
                                 <span className="tag tag-gray" style={{ fontSize: '9px', padding: '1px 5px', minWidth: '55px', justifyContent: 'center', marginRight: '6px' }}>Pipeline</span>
-                                <span style={{ color: row.pipeline_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.pipeline_correct && row.pipeline_answer ? 'line-through' : 'none' }}>{row.pipeline_answer || '—'}</span>{' '}<JudgeTag verdict={row.pipeline_judge_verdict} />
+                                <span style={{ color: row.pipeline_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.pipeline_correct && row.pipeline_answer ? 'line-through' : 'none' }}>{row.pipeline_answer || '—'}</span>{' '}<JudgeTag verdict={row.pipeline_judge_verdict} strict={row.pipeline_correct} />
                               </div>
                             )}
                           </div>

@@ -41,7 +41,8 @@ def _load_judgments(run_id: str | None) -> dict:
 
 
 def _apply_judgments(row: dict, judgments: dict) -> None:
-    """Judged correctness = strict-correct, or judged 'correct' by the LLM judge (open-ended only)."""
+    """Judged correctness: the LLM judge's verdict for open-ended answers it judged; otherwise the strict score
+    (close-ended answers, and any answer the judge has not seen)."""
     verdicts = (judgments.get(str(row.get("sample_id"))) or {}).get("verdicts", {})
     row["judged"] = bool(verdicts)
     for system in _JUDGED_SYSTEMS:
@@ -53,7 +54,7 @@ def _apply_judgments(row: dict, judgments: dict) -> None:
         # A verdict only counts for the exact answer it judged (a re-run can change the answer).
         same_answer = str(judged_answer.get("answer", "")) == str(row.get(f"{system}_answer") or "")
         verdict = judged_answer.get("verdict") if same_answer else None
-        row[f"{system}_judged_correct"] = bool(strict) or verdict == "correct"
+        row[f"{system}_judged_correct"] = (verdict == "correct") if verdict else bool(strict)
         row[f"{system}_judge_verdict"] = verdict
 _log = get_logger("routes.dataset")
 

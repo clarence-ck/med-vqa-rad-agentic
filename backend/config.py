@@ -35,15 +35,15 @@ if not OPENAI_API_KEY:
 # ---------------------------------------------------------------------------
 _ROLE_DEFAULTS = {
     #  role        model            effort    used by
-    # Budget profile: Luna everywhere except the verifier and judge, which use a
-    # different model (Sol) so checking is not done by the model that answered.
+    # Budget profile: Luna answers everywhere; the verifier uses a different model (Sol) so checking is not
+    # done by the model that answered; the judge uses a third (Astra) so it favours no system.
     "controller": ("gpt-6-luna",   "none"),   # Haystack Agent controller (chat-completions tool calls reject other efforts)
     "look":       ("gpt-6-luna",   "medium"), # LookAgent, ImageInterpreter
     "analyze":    ("gpt-6-luna",   "low"),    # QuestionAnalyzer, DifficultyRouter
     "answer":     ("gpt-6-luna",   "medium"), # ReasoningAgent
     "check":      ("gpt-6.1-sol",  "low"),    # VerificationAgent
     "baseline":   ("gpt-6-luna",   "medium"), # single-shot baseline
-    "judge":      ("gpt-6.1-sol",  "low"),    # evaluation judge for borderline answers
+    "judge":      ("gpt-6-astra",  "low"),    # evaluation judge: neither answers nor verifies in any system
 }
 
 # Agentic system: "loop" = controller decides look/answer/check/finish (default);

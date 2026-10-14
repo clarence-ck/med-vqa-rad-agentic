@@ -1,10 +1,12 @@
-"""LLM judge for open-ended answers the strict scorer marked wrong.
+"""LLM judge for every open-ended answer: a second score, independent of the strict scorer.
 
-The strict scorer (backend/utils/scoring.py) is a lower bound: it rejects correct
-paraphrases ("frontal radiograph" for "posterior-anterior"). This script asks a judge
-model whether each strict-wrong open-ended answer means the same as the ground truth.
+The strict scorer (backend/utils/scoring.py) checks words: it rejects correct paraphrases ("frontal radiograph"
+for "posterior-anterior") and accepts vague answers that happen to contain the reference word ("the central
+nervous system, specifically the brain"). The judge reads every open-ended answer of every system, right or
+wrong by the strict rules, and decides whether it means the same as the ground truth. Close-ended (yes/no)
+answers stay rule-based.
 
-- Only open-ended cases; only answers the strict scorer marked wrong.
+- The judge model (gpt-6-astra by default) neither answers nor verifies in any system, so it favours none.
 - One call per case; candidate answers are shuffled and labelled A, B, C... so the
   judge does not know which system produced which answer.
 - Verdicts: correct / partially_correct / incorrect. Only "correct" adds credit.
@@ -61,18 +63,13 @@ Rules:
 Return ONLY a JSON object mapping each candidate label to {{"verdict": "...", "reason": "<one short sentence>"}}."""
 
 
-def strict_wrong_candidates(row: dict) -> dict[str, str]:
-    candidates = {}
-    for system in SYSTEMS:
-        correct = row.get(f"{system}_correct")
-        answer = row.get(f"{system}_answer")
-        if correct is False and answer:
-            candidates[system] = str(answer)
-    return candidates
+def candidates_for(row: dict) -> dict[str, str]:
+    """Every system's answer to an open-ended question."""
+    return {system: str(row[f"{system}_answer"]) for system in SYSTEMS if row.get(f"{system}_answer")}
 
 
 def judge_case(generator: OpenAIChatGenerator, row: dict, seed: int) -> dict:
-    candidates = strict_wrong_candidates(row)
+    candidates = candidates_for(row)
     systems = list(candidates)
     random.Random(f"{seed}-{row['sample_id']}").shuffle(systems)
     labels = {chr(ord("A") + i): system for i, system in enumerate(systems)}
@@ -104,7 +101,7 @@ def main() -> None:
         sys.exit("No run yet: start one with python scripts/run_all.py")
     OUTPUT = runs.run_dir(run_id) / "judgments.json"
     rows = asyncio.run(ds.get_evaluation_summary(run=run_id))["rows"]
-    todo = [row for row in rows if row["answer_style"] == "open_ended" and strict_wrong_candidates(row)]
+    todo = [row for row in rows if row["answer_style"] == "open_ended" and candidates_for(row)]
     existing = {} if args.fresh or not OUTPUT.exists() else json.loads(OUTPUT.read_text(encoding="utf-8"))
     # Keep only verdicts that judged exactly the answers in the current results.
     judgments = {
@@ -112,9 +109,9 @@ def main() -> None:
         for row in todo
         if str(row["sample_id"]) in existing.get("judgments", {})
         and {s: v["answer"] for s, v in existing["judgments"][str(row["sample_id"])]["verdicts"].items()}
-        == strict_wrong_candidates(row)
+        == candidates_for(row)
     }
-    print(f"{len(todo)} open-ended cases with strict-wrong answers; {len(judgments)} already judged; judge={MODELS['judge']}")
+    print(f"{len(todo)} open-ended cases; {len(judgments)} already judged; judge={MODELS['judge']}")
 
     generator = OpenAIChatGenerator(api_key=Secret.from_token(OPENAI_API_KEY), model=MODELS["judge"])
 

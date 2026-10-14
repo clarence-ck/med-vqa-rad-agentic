@@ -39,8 +39,8 @@ Built for SUTD 51.511 Multimodal Generative AI (Template 1: Agentic Multimodal S
 Run `2026-10-14_1330`: 200 seeded-random VQA-RAD test questions (111 close-ended, 89 open-ended), all systems on the same answering model
 (`gpt-6-luna`; the agentic loop and the fixed pipeline also use `gpt-6.1-sol` as verifier). Per-case times were
 measured with four cases running at once; the mean is pulled up by a few long re-look cases (actual run times are in
-[Run timings](#run-timings)). "Strict" uses the rule-based scorer; "judged" also accepts open-ended paraphrases
-confirmed by a blinded LLM judge (see [Evaluation design](#evaluation-design)).
+[Run timings](#run-timings)). "Strict" uses the rule-based scorer; "judged" scores open-ended answers with a blinded LLM
+judge, `gpt-6-astra` (see [Evaluation design](#evaluation-design)).
 
 | System | Strict accuracy | Judged accuracy | Time / case (mean · median) | Cost / case |
 |---|---|---|---|---|
@@ -115,7 +115,7 @@ and/or checks before finishing. Paths observed on the 200-case evaluation:
 - **One model family (OpenAI), roles sized by need.** The controller and question analysis are simple decisions, so
   they use `gpt-6-luna` with low or no reasoning effort. Answering uses `gpt-6-luna` with medium effort, and the answerer always sees
   the image: a text description of the image loses the visual detail many questions depend on.
-- **A different model verifies.** `check` (and the evaluation judge) use `gpt-6.1-sol`, so the model that answered
+- **A different model verifies, a third judges.** `check` uses `gpt-6.1-sol`, so the model that answered
   does not verify its own answer.
 - All roles are configurable (`MODEL_<ROLE>`, `REASONING_EFFORT_<ROLE>` in `.env`); every call's tokens and cost are
   recorded.
@@ -182,9 +182,11 @@ hand.
     folded), or at least 60% of them for ground truths longer than 3 words. Left/right conflicts, and answers starting
     with "no" when the ground truth does not, are wrong. S-PubMedBert-MS-MARCO similarity is only a strict fallback
     (≥ 0.95 short, ≥ 0.90 long).
-- **LLM judge** (`scripts/judge_open_ended.py`): for open-ended answers the strict scorer rejected, `gpt-6.1-sol`
-  judges meaning equivalence, blinded to the system (answers shuffled and anonymised). A 30-verdict spot check agreed
-  on 29/30 credit decisions (AI-assisted review, `judge_review_sample.md` in the run folder).
+- **LLM judge** (`scripts/judge_open_ended.py`): `gpt-6-astra` judges **every** open-ended answer of every system,
+  right or wrong by the strict rules, for meaning equivalence with the ground truth, blinded to the system (answers
+  shuffled and anonymised). Its verdict is the "judged" score for open-ended answers; yes/no answers stay rule-based.
+  Astra neither answers (`gpt-6-luna`) nor verifies (`gpt-6.1-sol`) in any system, so it favours none. A 30-verdict
+  spot check is recorded in `judge_review_sample.md` in the run folder (AI-assisted review, not human annotation).
 - **Statistics:** 95% intervals are about ±6.7 points at n = 200; paired comparisons use the exact McNemar test.
 - **Variance:** the baseline and agentic loop were re-run on 50 of the evaluated cases.
 <!-- generated:cost -->
@@ -309,7 +311,8 @@ multi-stage pipeline with the same models, letting a controller decide is clearl
 <!-- /generated:limit-cost -->
 - The verifier shares the perception weaknesses of vision models; agreement is not correctness.
 - 200 cases give ±6.7-point intervals; per-type results for small categories are noisy.
-- The strict scorer under-credits paraphrases; the LLM judge is an upper bound, spot-checked but not human-annotated.
+- The strict scorer under-credits paraphrases and over-credits vague answers that contain the reference word; the
+  LLM judge corrects both, but it is a model, spot-checked rather than human-annotated.
 - For non-abstained answers, the yes/no normaliser maps "cannot determine" to "no" (no measurable effect in this run).
 - The workflow baseline uses a question-agnostic image description by design.
 - Retrieval over SLAKE was removed: it returned other patients' question–answer pairs, which did not help
@@ -397,7 +400,7 @@ python scripts/run_all.py --stages metrics,docs,diagram,report   # rebuild outpu
 | `report` | `tectonic main.tex` → `docs/report/MGAI_Final_Report_Group9_revised.pdf` | free | ~1 min |
 <!-- /generated:reproduce -->
 
-- Paid stages ask for confirmation (or `--yes`) and share one spend cap per run, `--budget` (default $5). The judge
+- Paid stages ask for confirmation (or `--yes`) and share one spend cap per run, `--budget` (default $10). The judge
   runs before the variance repeats, so if money runs short only the repeats are cut.
 - An interrupted run (crash, closed laptop, budget reached) continues with `python scripts/run_all.py --resume`:
   finished cases are kept, and the README and report are only rebuilt once the run is complete.

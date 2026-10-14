@@ -97,8 +97,8 @@ def block_glance(m: dict, d: dict) -> str:
     return f"""Run `{m['run']['run_id']}`: {m['cases']} seeded-random VQA-RAD test questions ({m['close_ended_cases']} close-ended, {m['open_ended_cases']} open-ended), all systems on the same answering model
 (`gpt-6-luna`; the agentic loop and the fixed pipeline also use `gpt-6.1-sol` as verifier). Per-case times were
 measured with four cases running at once; the mean is pulled up by a few long re-look cases (actual run times are in
-[Run timings](#run-timings)). "Strict" uses the rule-based scorer; "judged" also accepts open-ended paraphrases
-confirmed by a blinded LLM judge (see [Evaluation design](#evaluation-design)).
+[Run timings](#run-timings)). "Strict" uses the rule-based scorer; "judged" scores open-ended answers with a blinded LLM
+judge, `gpt-6-astra` (see [Evaluation design](#evaluation-design)).
 
 | System | Strict accuracy | Judged accuracy | Time / case (mean · median) | Cost / case |
 |---|---|---|---|---|
@@ -127,7 +127,7 @@ def block_cost(m: dict, d: dict) -> str:
     c = m["costs_usd"]
     stages = m.get("run_timings", {})
     names = {"eval": "Main evaluation (4 systems)", "variance": "Variance repeats (baseline + agentic)",
-             "judge": "LLM judge (`gpt-6.1-sol`)"}
+             "judge": "LLM judge (`gpt-6-astra`)"}
     cost_of = {"eval": c.get("evaluation_run"), "variance": c.get("variance_repeats"), "judge": c.get("judge")}
     rows = "\n".join(
         f"| {names.get(k, k)} | {v['started'].replace('T', ' ')} | {v['finished'][11:]} | {minutes(v['wall_clock_s'])} | "

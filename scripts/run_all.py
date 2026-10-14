@@ -52,9 +52,9 @@ REPORT_PDF = REPORT_DIR / "MGAI_Final_Report_Group9_revised.pdf"
 STAGES = ("data", "eval", "judge", "variance", "metrics", "docs", "diagram", "screenshots", "report")
 PAID = ("eval", "judge", "variance")
 OUTPUTS = ("metrics", "docs", "diagram", "screenshots", "report")
-# USD for 300 questions with the blind check and zoom (per-call costs of the 14 Oct run, plus one blind reading
-# per case and more re-looks); replaced by the last comparable run's actual cost once there is one.
-DEFAULT_ESTIMATE = {"eval": 6.70, "judge": 0.18, "variance": 1.50}  # variance: 100 repeats
+# USD for 300 questions with the blind check and zoom (cost per question measured on 42 questions of a stopped
+# run); replaced by the last comparable run's actual cost once there is one.
+DEFAULT_ESTIMATE = {"eval": 5.80, "judge": 1.40, "variance": 1.15}  # measured on 42 questions; 100 repeats; Astra judge
 EVAL_CASES = len(eval_set_ids() or []) or 200   # experiments/eval_set.json (scripts/make_eval_set.py)
 VARIANCE_CASES, CONCURRENCY = 100, 4   # VARIANCE_CASES can be changed with --repeats
 

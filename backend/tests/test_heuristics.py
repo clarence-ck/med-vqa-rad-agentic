@@ -308,6 +308,36 @@ class LoopBlindReadingTests(unittest.TestCase):
         self.assertIn("Blind Reading", [step["agent"] for step in result["agent_trace"]])
 
 
+
+class JudgedScoreTests(unittest.TestCase):
+    """The judge's verdict is the judged score for answers it saw; otherwise the strict score stands."""
+
+    def test_judge_overrides_strict_both_ways_but_only_for_the_answer_it_saw(self):
+        from routes.dataset import _apply_judgments
+        row = {"sample_id": 7,
+               "baseline_answer": "The central nervous system, specifically the brain.", "baseline_correct": True,
+               "agentic_answer": "Cerebrum", "agentic_correct": False,
+               "workflow_answer": "Brain", "workflow_correct": True,
+               "pipeline_answer": None, "pipeline_correct": None}
+        judgments = {"7": {"verdicts": {
+            "baseline": {"answer": "The central nervous system, specifically the brain.", "verdict": "incorrect"},
+            "agentic": {"answer": "Cerebrum", "verdict": "correct"},
+            "workflow": {"answer": "an older answer", "verdict": "incorrect"},
+        }}}
+        _apply_judgments(row, judgments)
+        self.assertFalse(row["baseline_judged_correct"])   # strict-right, judged wrong
+        self.assertTrue(row["agentic_judged_correct"])     # strict-wrong, judged right
+        self.assertTrue(row["workflow_judged_correct"])    # verdict was for a different answer: strict stands
+        self.assertIsNone(row["pipeline_judged_correct"])  # system not run
+
+    def test_unjudged_answers_keep_the_strict_score(self):
+        from routes.dataset import _apply_judgments
+        row = {"sample_id": 8, "baseline_answer": "yes", "baseline_correct": True,
+               "agentic_answer": "no", "agentic_correct": False}
+        _apply_judgments(row, {})
+        self.assertEqual((row["baseline_judged_correct"], row["agentic_judged_correct"]), (True, False))
+
+
 if __name__ == "__main__":
     unittest.main()
 

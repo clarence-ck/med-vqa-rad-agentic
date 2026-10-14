@@ -203,9 +203,10 @@ systems run on the same cases with the same answering model. \emph{Strict scorin
 the correct word; binary terms must name the correct term and not its opposite; counts must match; open-ended answers
 must contain every content word of the reference (aliases and plurals folded; $\geq$60\% for references longer than
 three words), with left/right conflicts and denials counted wrong and embedding similarity~\cite{deka2022spubmed}
-only as a strict fallback. Because strict scoring rejects correct paraphrases, a \emph{blinded LLM judge}
-(\texttt{gpt-6.1-sol}, answers shuffled and anonymised) re-assesses strict-wrong open-ended answers; a 30-verdict
-spot check agreed on 29/30 credit decisions. Paired comparisons use the exact McNemar test; 95\% intervals are about
+only as a strict fallback. Because word matching both rejects correct paraphrases and accepts vague answers that
+contain the reference word, a \emph{blinded LLM judge} (\texttt{gpt-6-astra}, a model that neither answers nor
+verifies in any system; answers shuffled and anonymised) scores every open-ended answer as a second, independent
+measure. Paired comparisons use the exact McNemar test; 95\% intervals are about
 $\pm$6.7 points. The baseline and agentic loop were re-run on \VarCases{} cases to measure stability. API cost of the
 evaluation: \$\CostTotal{} (\$\CostRun{} runs, \$\CostRepeats{} repeats, \$\CostJudge{} judge). Wall-clock time:
 \MinEval\,min for the main run (four cases at a time), \MinRepeats\,min for the sequential repeats and
@@ -289,7 +290,7 @@ controller decide is clearly better---the benefit comes from \emph{adaptive cont
 \paragraph{Limitations.} About \CostRatio$\times$ the cost and \LatRatio$\times$ the median latency of a single prompt for
 similar accuracy.
 The verifier shares the perception weaknesses of vision models, so agreement is not correctness. Two hundred cases
-give $\pm$6.7-point intervals and noisy per-type estimates; the LLM judge is an upper bound, spot-checked but not
+give $\pm$6.7-point intervals and noisy per-type estimates; the LLM judge is itself a model, spot-checked but not
 human-annotated. A retrieval stage did not help perception-bound questions and was removed; retrieval may still
 help questions that need knowledge not visible in the image, which VQA-RAD rarely contains.
 
