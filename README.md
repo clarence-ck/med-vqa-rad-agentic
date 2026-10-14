@@ -7,7 +7,9 @@ baseline, a hand-designed workflow and a fixed-pipeline ablation on 200 random V
 
 > ⚠️ **For education and research only. Not for clinical use.**
 
-Built for SUTD 51.511 Multimodal Generative AI (Template 1: Agentic Multimodal System).
+Built for SUTD 51.511 Multimodal Generative AI (Template 1: Agentic Multimodal System). Report:
+[`docs/report/MGAI_Final_Report_Group9_revised.pdf`](docs/report/MGAI_Final_Report_Group9_revised.pdf)
+(LaTeX source in `docs/report/`; build with `tectonic main.tex`).
 
 ---
 
@@ -34,7 +36,8 @@ Built for SUTD 51.511 Multimodal Generative AI (Template 1: Agentic Multimodal S
 ## Results at a glance
 
 200 seeded-random VQA-RAD test questions (111 close-ended, 89 open-ended), all systems on the same model
-(`gpt-6-luna`), 0 API failures. "Strict" uses the rule-based scorer; "judged" also accepts open-ended paraphrases
+(`gpt-6-luna`), 0 API failures. Times are mean per-case latency measured with four cases running at once (agentic median
+29.3 s); the full run of all four systems took about 40 minutes of wall-clock time. "Strict" uses the rule-based scorer; "judged" also accepts open-ended paraphrases
 confirmed by a blinded LLM judge (see [Evaluation design](#evaluation-design)).
 
 | System | Strict accuracy | Judged accuracy | Avg time / case | Cost / case |

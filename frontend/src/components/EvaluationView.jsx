@@ -97,7 +97,13 @@ function SystemPerformanceCard({ title, icon, accuracy, judgedAccuracy, avgDurat
           <div className="evaluation-system-runtime">{fmtMs(avgDuration)}</div>
         </div>
         <div className="evaluation-system-stat">
-          <div className="evaluation-list-subtitle">Total runtime</div>
+          <div
+            className="evaluation-list-subtitle"
+            data-tooltip="Sum of every case’s latency, as if the cases had run one after another. Not wall-clock time: the evaluation runs several cases and all systems in parallel."
+            data-tooltip-align="left"
+          >
+            Sum of per-case times
+          </div>
           <div className="evaluation-system-runtime" style={{ color: 'var(--color-text-muted)' }}>{fmtMs(totalDuration)}</div>
         </div>
       </div>
