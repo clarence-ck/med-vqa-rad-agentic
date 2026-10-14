@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import './index.css';
 import CaseHeader from './components/CaseHeader';
 import CaseInput from './components/CaseInput';
@@ -77,10 +77,16 @@ function App() {
     reset();
   }, [reset]);
 
+  // Only the most recent case request may update the view: a slow response for a
+  // previously selected sample must not overwrite the newly selected one.
+  const latestCaseRequest = useRef(0);
+
   const handleLoadCaseAnalysis = useCallback(async (sampleId, refresh = false) => {
     if (!sampleId) return;
+    const requestId = ++latestCaseRequest.current;
     setCaseAnalysisLoading(true);
     const data = await fetchSampleAnalysis(sampleId, refresh);
+    if (requestId !== latestCaseRequest.current) return;
     setCaseAnalysisData(data);
     setCaseAnalysisLoading(false);
   }, [fetchSampleAnalysis]);
@@ -90,13 +96,17 @@ function App() {
     if (sampleId) {
       handleLoadCaseAnalysis(sampleId, false);
     } else {
+      latestCaseRequest.current += 1;
       setCaseAnalysisData(null);
+      setCaseAnalysisLoading(false);
     }
   }, [handleLoadCaseAnalysis]);
 
   const handleExplorerClear = useCallback(() => {
+    latestCaseRequest.current += 1;
     setSelectedExplorerSampleId('');
     setCaseAnalysisData(null);
+    setCaseAnalysisLoading(false);
   }, []);
 
   const handleTabChange = useCallback(async (tab) => {

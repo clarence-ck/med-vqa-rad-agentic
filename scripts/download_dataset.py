@@ -11,6 +11,12 @@ import sys
 
 def main():
     try:
+        # Pick up HF_TOKEN (optional) from the project .env for authenticated downloads.
+        from dotenv import load_dotenv
+        load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+    except ImportError:
+        pass
+    try:
         from datasets import load_dataset
     except ImportError:
         print("Error: 'datasets' package not installed. Run: pip install datasets")

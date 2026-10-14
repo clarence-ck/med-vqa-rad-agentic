@@ -179,7 +179,7 @@ function formatLabel(value) {
   return String(value || 'unknown').replace(/_/g, ' ');
 }
 
-function SystemPerformanceCard({ title, icon, accuracy, avgDuration, totalDuration, toneClass }) {
+function SystemPerformanceCard({ title, icon, accuracy, avgDuration, totalDuration }) {
   return (
     <div className="card evaluation-system-card">
       <div className="card-header">
@@ -237,7 +237,7 @@ function AccuracyBar({ label, value, color }) {
 
 export default function EvaluationView({ loading, evaluationData, onRefresh }) {
   const summary = evaluationData?.summary;
-  const rows = evaluationData?.rows || [];
+  const rows = useMemo(() => evaluationData?.rows || [], [evaluationData]);
   const [selectedSampleIds, setSelectedSampleIds] = useState([]);
   const [isSampleDropdownOpen, setIsSampleDropdownOpen] = useState(false);
   const [breakdownMode, setBreakdownMode] = useState('question_type');
@@ -336,7 +336,6 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
               accuracy={summary.baseline_accuracy}
               avgDuration={summary.avg_baseline_duration_ms}
               totalDuration={summary.total_baseline_duration_ms}
-              toneClass="tag-amber"
             />
             <SystemPerformanceCard
               title="Workflow"
@@ -344,7 +343,6 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
               accuracy={summary.workflow_accuracy}
               avgDuration={summary.avg_workflow_duration_ms}
               totalDuration={summary.total_workflow_duration_ms}
-              toneClass="tag-blue"
             />
             <SystemPerformanceCard
               title="Agentic"
@@ -352,7 +350,6 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
               accuracy={summary.agentic_accuracy}
               avgDuration={summary.avg_agentic_duration_ms}
               totalDuration={summary.total_agentic_duration_ms}
-              toneClass="tag-green"
             />
           </section>
 

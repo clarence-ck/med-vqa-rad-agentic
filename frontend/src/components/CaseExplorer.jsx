@@ -21,12 +21,6 @@ const QUESTION_TYPE_ORDER = [
   'other',
 ];
 
-function getStatusTagClass(status) {
-  if (status === 'verified') return 'tag-green';
-  if (status === 'partially_verified') return 'tag-amber';
-  return 'tag-red';
-}
-
 function getModeLabel(mode) {
   if (mode === 'baseline') return 'Single-shot Baseline';
   if (mode === 'workflow') return 'Workflow Baseline';
@@ -136,17 +130,11 @@ export default function CaseExplorer({
   const overallVerification = analysisData?.agentic_result?.verification_status || 'unknown';
   const selfConsistencyLevel = analysisData?.agentic_result?.self_consistency_signal?.level || 'low';
   const showAgenticDetails = comparisonMode === 'agentic';
-  const questionAnalysis = analysisData?.agentic_result?.question_analysis || {};
-  const questionType = questionAnalysis.question_type?.replace(/_/g, ' ') || '—';
-  const questionClarity = questionAnalysis.question_clarity || 'unknown';
-  const reasoningType = questionAnalysis.reasoning_type?.replace(/_/g, ' ') || '—';
-  const expectedAnswerFormat = questionAnalysis.expected_answer_format || '—';
   const reviewRecommended = Boolean(analysisData?.agentic_result?.should_flag_for_review);
   const issueCount = analysisData?.agentic_result?.issues_found?.length || 0;
   const crossModalAgreement = analysisData?.agentic_result?.cross_modal_agreement?.level || 'unknown';
   const routingDecision = analysisData?.agentic_result?.routing_decision || {};
   const routingDifficulty = routingDecision.difficulty || 'unknown';
-  const routingVerificationPolicy = routingDecision.verification_policy || 'standard';
   const routingFallbackPolicy = routingDecision.fallback_policy || 'none';
   const routingRationale = routingDecision.routing_rationale || '';
 
@@ -240,7 +228,6 @@ export default function CaseExplorer({
 
   useEffect(() => {
     if (isDropdownOpen) {
-      setHighlightedIndex(0);
       inputRef.current?.focus();
     }
   }, [isDropdownOpen]);
@@ -288,7 +275,11 @@ export default function CaseExplorer({
               <button
                 type="button"
                 className="form-select"
-                onClick={() => !sampleSelectDisabled && setIsDropdownOpen(!isDropdownOpen)}
+                onClick={() => {
+                  if (sampleSelectDisabled) return;
+                  if (!isDropdownOpen) setHighlightedIndex(0);
+                  setIsDropdownOpen(!isDropdownOpen);
+                }}
                 disabled={sampleSelectDisabled}
                 style={{
                   textAlign: 'left',
@@ -374,7 +365,7 @@ export default function CaseExplorer({
                               {group.items.length}
                             </span>
                           </div>
-                          {group.items.map((sample, idx) => {
+                          {group.items.map((sample) => {
                             const globalIndex = filteredSamples.findIndex((s) => s.id === sample.id);
                             const isHighlighted = globalIndex === highlightedIndex;
                             const isSelected = String(sample.id) === String(selectedSampleId);
