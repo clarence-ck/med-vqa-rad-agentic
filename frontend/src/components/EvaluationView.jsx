@@ -42,7 +42,7 @@ function getBreakdownTooltip(mode) {
     return 'Breakdown by what the agentic controller did: direct (look → answer → check → finish), relook (a focused re-examination of a region), reanswer (answer revised after a failed check) or abstained. The pipeline column is the fixed six-stage ablation on the same cases.';
   }
 
-  return 'Breakdown by question type. Close-ended questions use exact match for yes/no and binary medical assessments (normal/abnormal, present/absent, positive/negative, etc.). Grouped by the dataset question type. Open-ended: content-word match (aliases, plurals folded); left/right conflicts and answers starting with “no” are wrong; S-PubMedBert-MS-MARCO similarity only as a strict fallback (≥ 0.95 short, ≥ 0.90 long).';
+  return 'Breakdown by the dataset question type (independent of the agent’s own classification), using the same scoring rules as the summary above.';
 }
 
 const QUESTION_TYPE_ORDER = [
@@ -189,7 +189,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
       <section className="evaluation-header-strip">
         <div>
           <h1 className="evaluation-title">Evaluation Dashboard</h1>
-          <p className="evaluation-subtitle">Aggregate accuracy metrics from cached Case Explorer runs. Close-ended: exact match for yes/no and binary medical terms (normal/abnormal, present/absent, etc.). Open-ended: content-word match (aliases, plurals folded); left/right conflicts and answers starting with “no” are wrong; S-PubMedBert-MS-MARCO similarity only as a strict fallback (≥ 0.95 short, ≥ 0.90 long).</p>
+          <p className="evaluation-subtitle">Accuracy over cached Case Explorer runs, scored by backend/utils/scoring.py. Close-ended: yes/no answers must start with the correct word; binary terms (normal/abnormal, present/absent, …) must name the correct term and not its opposite. Counting: the numbers must match. Open-ended: every content word of the ground truth must appear (aliases and plurals folded), or at least 60% of them when the ground truth is longer than 3 words; left/right conflicts, and answers starting with “no” when the ground truth does not, are wrong; S-PubMedBert-MS-MARCO similarity is only a strict fallback (≥ 0.95 short, ≥ 0.90 long).</p>
         </div>
         <div className="evaluation-actions">
           <button className="btn btn-secondary" onClick={onRefresh} disabled={loading}>
@@ -288,7 +288,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 <span className="card-title">Close-ended Accuracy</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.close_ended_cases} cases</span>
-                  <span className="tag tag-gray" data-tooltip="Yes/no answers are normalized by trimming punctuation and matching responses that start with yes or no. Other binary medical answers (normal/abnormal, present/absent, positive/negative, benign/malignant, acute/chronic, diffuse/focal) still require exact match." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="Yes/no ground truth: the answer must start with the correct word (“No, there is…” counts as no). Binary ground truth (normal/abnormal, present/absent, positive/negative, benign/malignant, acute/chronic, diffuse/focal): the answer must contain the correct term and not its opposite." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <AccuracyMetricStack
@@ -303,7 +303,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 <span className="card-title">Open-ended Accuracy</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.open_ended_cases} cases</span>
-                  <span className="tag tag-gray" data-tooltip="Open-ended Accuracy: Open-ended: content-word match (aliases, plurals folded); left/right conflicts and answers starting with “no” are wrong; S-PubMedBert-MS-MARCO similarity only as a strict fallback (≥ 0.95 short, ≥ 0.90 long)." data-tooltip-align="left">info</span>
+                  <span className="tag tag-gray" data-tooltip="Every content word of the ground truth must appear in the answer (aliases such as CT = computed tomography; plurals folded), or at least 60% of them when the ground truth is longer than 3 words. Answers naming the opposite side (left vs right), or starting with “no” when the ground truth does not, are wrong. S-PubMedBert-MS-MARCO similarity is only a strict fallback (≥ 0.95 short, ≥ 0.90 long). Counting questions compare the numbers." data-tooltip-align="left">info</span>
                 </div>
               </div>
               <AccuracyMetricStack
