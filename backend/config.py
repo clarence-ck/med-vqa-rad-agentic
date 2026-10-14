@@ -6,6 +6,9 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# Haystack generators default to a 30 s timeout; image + reasoning calls under concurrent load can
+# exceed that and get retried (paid twice). Allow 90 s unless overridden.
+os.environ.setdefault("OPENAI_TIMEOUT", "90")
 DEFAULT_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data', 'vqa-rad')
 DATA_DIR = DEFAULT_DATA_DIR
 BACKEND_CORS_ORIGINS = [

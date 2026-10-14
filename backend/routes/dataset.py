@@ -468,7 +468,8 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
             failed = _api_failures({"pipeline": pipeline_result})
             if failed:
                 _log.warning("Sample %d ablation had API failures (%s); not caching", sample_id, failed)
-                return JSONResponse(status_code=503, content={"error": "API failure", "failed_systems": failed})
+                return JSONResponse(status_code=503, content={"error": "API failure", "failed_systems": failed,
+                                                              "cost_usd": pipeline_usage["cost_usd"]})
             cached_payload.update({
                 "pipeline_result": pipeline_result,
                 "pipeline_duration_ms": pipeline_ms,
@@ -503,7 +504,9 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
         })
         if failed:
             _log.warning("Sample %d had API failures (%s); not caching so it can be re-run", sample_id, failed)
-            return JSONResponse(status_code=503, content={"error": "API failure", "failed_systems": failed})
+            spent = sum(outcome[2]["cost_usd"] for outcome in outcomes)  # failed attempts still cost money
+            return JSONResponse(status_code=503, content={"error": "API failure", "failed_systems": failed,
+                                                          "cost_usd": spent})
 
         _log.info(
             "Sample %d usage  baseline=$%.4f (%d calls)  workflow=$%.4f (%d calls)  agentic=$%.4f (%d calls)",

@@ -32,7 +32,7 @@ from agents.orchestrator import run_pipeline  # noqa: E402
 from config import model_manifest  # noqa: E402
 from routes.dataset import _get_cached_embedding, _normalize_answer  # noqa: E402
 from utils import scoring  # noqa: E402
-from utils.data_loader import EXCLUDED_SAMPLE_IDS, get_image_bytes, get_sample_by_id, load_dataset  # noqa: E402
+from utils.data_loader import EXCLUDED_SAMPLE_IDS, get_image_bytes, get_sample_by_id, get_sample_cases, load_dataset  # noqa: E402
 from utils.usage import summarize, track_usage  # noqa: E402
 
 OUTPUT_DIR = ROOT_DIR / "experiments"
@@ -69,6 +69,9 @@ def main() -> None:
     parser.add_argument("--systems", default="baseline,agentic_text_only,agentic_with_image",
                         help=f"Comma-separated subset of {', '.join(ALL_SYSTEMS)}")
     parser.add_argument("--name", default="reasoner_sees_image", help="Results folder under experiments/")
+    parser.add_argument("--from-eval-sample", type=int, default=0, metavar="N",
+                        help="Draw the --n cases from the first N evaluation cases (the Case Explorer sample), "
+                             "e.g. 200, so repeats cover cases from the main run")
     args = parser.parse_args()
     systems = tuple(name.strip() for name in args.systems.split(",") if name.strip())
     unknown = set(systems) - set(ALL_SYSTEMS)
@@ -76,8 +79,11 @@ def main() -> None:
         parser.error(f"unknown systems: {sorted(unknown)}")
     output = OUTPUT_DIR / args.name / "results.json"
 
-    test_ids = [item["id"] for item in load_dataset()
-                if item.get("split") == "test" and item["id"] not in EXCLUDED_SAMPLE_IDS]
+    if args.from_eval_sample:
+        test_ids = sorted(sample["id"] for sample in get_sample_cases(limit=args.from_eval_sample))
+    else:
+        test_ids = [item["id"] for item in load_dataset()
+                    if item.get("split") == "test" and item["id"] not in EXCLUDED_SAMPLE_IDS]
     sample_ids = random.Random(args.seed).sample(test_ids, args.n)
 
     rows, total_cost = [], 0.0
