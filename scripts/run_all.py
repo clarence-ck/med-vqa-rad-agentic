@@ -7,7 +7,7 @@ Stages, in order (each can be run on its own with --stages):
   data         download VQA-RAD if data/vqa-rad/ is missing                          free
   eval         every question in experiments/eval_set.json x 4 systems               paid
   judge        blinded LLM judge for strict-wrong open-ended answers                   paid
-  variance     baseline + agentic loop again on 50 of the cases                        paid
+  variance     baseline + agentic loop again on 100 of the questions (--repeats)       paid
   metrics      final_metrics.json + cases.csv in the run folder                        free
   docs         README number blocks, docs/report/results.tex, experiments/runs/README.md free
   diagram      system_diagram.png (+ the report's copy)                                free
@@ -20,7 +20,7 @@ the run is complete, so the README and report never show a half-finished run.
 
 Usage (run from repo root):
     python scripts/run_all.py --dry-run                   # plan + cost estimate, spends nothing
-    python scripts/run_all.py --budget 10                 # a new run, then all outputs
+    python scripts/run_all.py --budget 9                  # a new run, then all outputs
     python scripts/run_all.py --resume                    # continue the latest unfinished run
     python scripts/run_all.py --stages metrics,docs,diagram,screenshots,report   # rebuild outputs (free)
 """
@@ -54,9 +54,9 @@ PAID = ("eval", "judge", "variance")
 OUTPUTS = ("metrics", "docs", "diagram", "screenshots", "report")
 # USD for 300 questions with the blind check and zoom (per-call costs of the 14 Oct run, plus one blind reading
 # per case and more re-looks); replaced by the last comparable run's actual cost once there is one.
-DEFAULT_ESTIMATE = {"eval": 6.70, "judge": 0.18, "variance": 0.75}
+DEFAULT_ESTIMATE = {"eval": 6.70, "judge": 0.18, "variance": 1.50}  # variance: 100 repeats
 EVAL_CASES = len(eval_set_ids() or []) or 200   # experiments/eval_set.json (scripts/make_eval_set.py)
-VARIANCE_CASES, CONCURRENCY = 50, 4
+VARIANCE_CASES, CONCURRENCY = 100, 4   # VARIANCE_CASES can be changed with --repeats
 
 
 def run(cmd: list, cwd: Path = ROOT) -> None:
@@ -131,6 +131,12 @@ def stage_eval(run_id, budget_left):
 
 def stage_judge(run_id, budget_left):
     python("judge_open_ended.py", "--run-id", run_id, "--max-cost", f"{budget_left:.2f}")
+
+
+def set_repeats(n: int) -> None:
+    global VARIANCE_CASES
+    DEFAULT_ESTIMATE["variance"] = round(DEFAULT_ESTIMATE["variance"] * n / VARIANCE_CASES, 2)
+    VARIANCE_CASES = n
 
 
 def stage_variance(run_id, budget_left):
@@ -248,8 +254,10 @@ def main() -> None:
     parser.add_argument("--resume", action="store_true", help="Continue the latest unfinished run (or --run-id)")
     parser.add_argument("--run-id", default=None, help="Run to resume or rebuild (default: new run / current run)")
     parser.add_argument("--yes", action="store_true", help="Do not ask before running paid stages")
+    parser.add_argument("--repeats", type=int, default=VARIANCE_CASES, help="Questions in the variance repeats (default 100)")
     parser.add_argument("--dry-run", action="store_true", help="Print the plan and cost estimate, then exit")
     args = parser.parse_args()
+    set_repeats(args.repeats)
 
     selected = [s.strip() for s in args.stages.split(",") if s.strip()]
     unknown = set(selected) - set(STAGES)
