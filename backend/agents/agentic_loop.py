@@ -11,6 +11,10 @@ Tools (bound to one per-request LoopContext):
 Unlike the fixed pipeline (orchestrator.run_pipeline), the tool sequence depends on what
 `check` finds: accept -> finish; relook -> look(focus) -> answer -> check; reanswer ->
 answer(guidance) -> check. Budgets cap re-looks and answers.
+
+Decision stage: the best-verified answer is kept. If it is not verified, or the controller
+abstained, one independent single-shot answer (a second opinion) is used instead and the case is
+flagged for review (SECOND_OPINION in config.py).
 """
 import base64
 import contextvars
@@ -23,6 +27,7 @@ from haystack.dataclasses import ChatMessage
 from haystack.tools import Tool
 from haystack.utils import Secret
 
+from agents.baseline import baseline_answer
 from agents.look_agent import LookAgent, NonRadiologyImageError
 from agents.orchestrator import (
     ImageBlockerAbort,
@@ -35,7 +40,7 @@ from agents.orchestrator import (
 from agents.question_analyzer import QuestionAnalyzer
 from agents.reasoning_agent import ReasoningAgent
 from agents.verification_agent import VerificationAgent
-from config import AGENT_MODE, MODELS, OPENAI_API_KEY, SELF_CONSISTENCY_SAMPLES, generation_kwargs
+from config import AGENT_MODE, MODELS, OPENAI_API_KEY, SECOND_OPINION, SELF_CONSISTENCY_SAMPLES, generation_kwargs
 from logger import get_logger
 from utils import scoring
 from utils.usage import record_usage
@@ -65,6 +70,15 @@ def controller_path(actions: list[str], abstained: bool = False) -> str:
     if any(action.startswith("answer(guided") for action in actions):
         return "reanswer"
     return "direct"
+
+
+def needs_second_opinion(verification_status: str, abstained: bool) -> bool:
+    """Use an independent answer when the loop could not verify its own (or gave up).
+
+    On the 14 Oct run, verified loop answers were right more often than the single prompt (119 vs 109 of 168);
+    on partially verified and abstained cases the single prompt was better (18 vs 10 of 32).
+    """
+    return abstained or verification_status != "verified"
 
 
 def consistency_level(agreeing: int, total: int) -> str:
@@ -294,6 +308,17 @@ class LoopContext:
         return {"level": level, "method": "resampling", "agreeing_samples": agreeing,
                 "total_samples": len(answers), "samples": answers}
 
+    def second_opinion(self, status: str) -> dict:
+        """One independent single-shot answer (same prompt as the baseline) for an unverified or abstained episode."""
+        started = time.time()
+        result = baseline_answer(self.image_bytes, self.question, self.mime_type)
+        ok = result.get("status") != "error" and bool(str(result.get("answer", "")).strip())
+        reason = "the controller abstained" if self.abstained else f"the best answer was only {status}"
+        self._record("Second Opinion", "warning" if ok else "fail",
+                     f"{'Using' if ok else 'Failed to get'} an independent single-shot answer: {reason}",
+                     {"answer": result.get("answer", ""), "reason": reason}, started)
+        return result if ok else {}
+
     def finish(self, abstain: bool = False, reason: str = "") -> str:
         self.actions.append("finish(abstain)" if abstain else "finish")
         if self.answers and len(self.checks) < len(self.answers) and not abstain:
@@ -388,7 +413,18 @@ def run_agentic_loop(image_bytes: bytes, question: str, mime_type: str = "image/
         _log.info("Keeping answer %d of %d (better verified than the latest)", best + 1, len(ctx.answers))
     answer_result = dict(ctx.answers[best])
     verification_result = ctx.checks[best]
-    if ctx.abstained:
+    loop_status = verification_result.get("verification_status", "low_confidence")
+    # The loop's own answer, kept so evaluations can score the loop with and without the second opinion.
+    loop_answer = ABSTAIN_ANSWER if ctx.abstained else _normalize_final_answer(
+        answer_result.get("answer", ""), ctx.question_analysis, _image_analysis(ctx))
+    second = {}
+    if SECOND_OPINION and needs_second_opinion(loop_status, ctx.abstained):
+        second = ctx.second_opinion(loop_status)
+    if second:
+        answer_result.update(answer=second.get("answer", ""), explanation=second.get("explanation", ""),
+                             reasoning_trace="", evidence_used=[])
+    withheld = ctx.abstained and not second  # an abstention stands only if no second opinion was available
+    if withheld:
         # Never normalise an abstention: the yes/no normaliser would turn "unable to determine" into "no".
         answer_text = ABSTAIN_ANSWER
     else:
@@ -398,6 +434,13 @@ def run_agentic_loop(image_bytes: bytes, question: str, mime_type: str = "image/
     self_consistency = ctx.self_consistency(answer_text, SELF_CONSISTENCY_SAMPLES)
 
     failure_categories = _categorize_failure_modes(answer_result=answer_result, verification_result=verification_result)
+    if second:
+        failure_categories.append({
+            "code": "second_opinion",
+            "label": "Second opinion used",
+            "description": "The agent could not verify its own answer; an independent single-shot answer is shown.",
+            "severity": "medium",
+        })
     if self_consistency["level"] == "low":
         failure_categories.append({
             "code": "self_inconsistent",
@@ -412,16 +455,23 @@ def run_agentic_loop(image_bytes: bytes, question: str, mime_type: str = "image/
         guardrail["suggested_disclaimer"] = guardrail["suggested_disclaimer"] or (
             "Repeated answers to this question were inconsistent. Please review with a qualified medical professional."
         )
+    if second:
+        guardrail["should_flag_for_review"] = True
+        guardrail["suggested_disclaimer"] = (
+            "The agent could not verify its own answer; this is an independent second opinion. "
+            "Please review with a qualified medical professional."
+        )
     relooks = sum(1 for look in ctx.looks if look.get("focus"))
     reanswers = max(0, len(ctx.answers) - 1)
     qa = ctx.question_analysis
     payload = {
         "answer": answer_text,
-        "guarded_answer": ABSTAIN_ANSWER if ctx.abstained else _normalize_final_answer(guardrail["guarded_answer"], qa, _image_analysis(ctx)),
+        "guarded_answer": (ABSTAIN_ANSWER if withheld else answer_text if second
+                           else _normalize_final_answer(guardrail["guarded_answer"], qa, _image_analysis(ctx))),
         "explanation": answer_result.get("explanation", ""),
         "reasoning_trace": answer_result.get("reasoning_trace", ""),
         "evidence_used": answer_result.get("evidence_used", []),
-        "confidence": verification_result.get("confidence_label", "Low"),
+        "confidence": "Low" if second else verification_result.get("confidence_label", "Low"),
         "verification_status": verification_result.get("verification_status", "low_confidence"),
         "checks": verification_result.get("checks", {}),
         "verification_notes": verification_result.get("verification_notes", ""),
@@ -445,7 +495,10 @@ def run_agentic_loop(image_bytes: bytes, question: str, mime_type: str = "image/
         "agent_trace": ctx.trace,
         "agent_mode": "loop",
         "controller_actions": ctx.actions,
-        "abstained": ctx.abstained,
+        "abstained": withheld,                      # no answer given
+        "controller_abstained": ctx.abstained,      # the controller chose to abstain
+        "answer_source": "second_opinion" if second else ("abstained" if withheld else "loop"),
+        "loop_answer": loop_answer,
         "controller_path": controller_path(ctx.actions, ctx.abstained),
         "api_errors": sum(
             1 for result in [ctx.question_analysis, *ctx.looks, *ctx.answers, *ctx.checks]

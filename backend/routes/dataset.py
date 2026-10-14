@@ -761,11 +761,20 @@ def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
         "pipeline_correct": pipeline_correct,
         "pipeline_duration_ms": payload.get("pipeline_duration_ms"),
         "controller_path": (
-            controller_path(agentic_result.get("controller_actions") or [], bool(agentic_result.get("abstained")))
+            controller_path(agentic_result.get("controller_actions") or [],
+                            bool(agentic_result.get("controller_abstained", agentic_result.get("abstained"))))
             if agentic_result.get("agent_mode") == "loop"
             else ("pipeline" if agentic_result.get("agent_mode") == "pipeline" else "unknown")
         ),
         "controller_actions": agentic_result.get("controller_actions", []),
+        "agentic_answer_source": agentic_result.get("answer_source", "abstained" if agentic_result.get("abstained") else "loop"),
+        # The loop on its own (before any second opinion); equals the agentic answer for runs without one.
+        "loop_only_correct": (
+            scoring.answers_match(_normalize_answer(agentic_result["loop_answer"]), ground_truth_normalized,
+                                  is_close_ended, original_question_type, similarity)
+            if agentic_result.get("loop_answer") and agentic_result["loop_answer"] != ABSTAIN_ANSWER
+            else (False if agentic_result.get("loop_answer") == ABSTAIN_ANSWER else agentic_correct)
+        ),
         "agentic_attempts": agentic_result.get("attempts"),
         "baseline_token_f1": round(_token_f1(baseline_normalized, ground_truth_normalized), 4),
         "workflow_token_f1": round(_token_f1(workflow_normalized, ground_truth_normalized), 4),

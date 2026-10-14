@@ -178,6 +178,67 @@ class RunSelectionTests(unittest.TestCase):
             self.assertEqual(runs.current_run_id(), "2026-02-01_0900")
 
 
+class SecondOpinionTests(unittest.TestCase):
+    """Decision stage of the agentic loop, with every model call faked (no API)."""
+
+    def _run(self, status, abstain=False, second_opinion=True, baseline_ok=True):
+        from unittest import mock
+        from agents import agentic_loop as loop
+
+        class FakeAgent:
+            def __init__(self, tools, **_):
+                self.tools = {t.name: t.function for t in tools}
+
+            def run(self, messages):
+                for name in ("analyze_question", "look", "answer", "check"):
+                    self.tools[name]()
+                self.tools["finish"](abstain=abstain)
+                return {"messages": []}
+
+        def fake(result):
+            return mock.Mock(return_value=mock.Mock(run=mock.Mock(return_value={"result": result})))
+
+        baseline = {"status": "success", "answer": "Yes, there is.", "explanation": "b"} if baseline_ok else \
+            {"status": "error", "answer": "Baseline error.", "explanation": ""}
+        with mock.patch.object(loop, "Agent", FakeAgent), \
+                mock.patch.object(loop, "OpenAIChatGenerator", mock.Mock()), \
+                mock.patch.object(loop, "Secret", mock.Mock()), \
+                mock.patch.object(loop, "SELF_CONSISTENCY_SAMPLES", 0), \
+                mock.patch.object(loop, "SECOND_OPINION", second_opinion), \
+                mock.patch.object(loop, "QuestionAnalyzer", fake({"status": "success", "question_type": "yes_no",
+                                                                 "expected_answer_format": "yes_no"})), \
+                mock.patch.object(loop, "LookAgent", fake({"status": "success", "modality": "CT", "visual_summary": "v"})), \
+                mock.patch.object(loop, "ReasoningAgent", fake({"status": "success", "answer": "no", "explanation": "e"})), \
+                mock.patch.object(loop, "VerificationAgent", fake({"verification_status": status, "confidence_label": "Medium",
+                                                                  "recommended_action": "accept", "checks": {}})), \
+                mock.patch.object(loop, "baseline_answer", mock.Mock(return_value=baseline)) as single_shot:
+            return loop.run_agentic_loop(b"img", "is there a fracture?"), single_shot
+
+    def test_verified_answer_is_kept(self):
+        result, single_shot = self._run("verified")
+        self.assertEqual((result["answer"], result["answer_source"]), ("no", "loop"))
+        single_shot.assert_not_called()
+
+    def test_unverified_answer_is_replaced_and_flagged(self):
+        result, _ = self._run("partially_verified")
+        self.assertEqual((result["answer"], result["answer_source"]), ("yes", "second_opinion"))
+        self.assertTrue(result["should_flag_for_review"])
+
+    def test_abstention_gets_a_second_opinion_but_keeps_its_path(self):
+        result, _ = self._run("verified", abstain=True)
+        self.assertEqual(result["answer"], "yes")
+        self.assertFalse(result["abstained"])
+        self.assertTrue(result["controller_abstained"])
+        self.assertEqual(result["controller_path"], "abstained")
+
+    def test_disabled_or_failed_second_opinion(self):
+        from agents.agentic_loop import ABSTAIN_ANSWER
+        result, _ = self._run("verified", abstain=True, second_opinion=False)
+        self.assertEqual((result["answer"], result["abstained"]), (ABSTAIN_ANSWER, True))
+        result, _ = self._run("partially_verified", baseline_ok=False)
+        self.assertEqual((result["answer"], result["answer_source"]), ("no", "loop"))
+
+
 if __name__ == "__main__":
     unittest.main()
 

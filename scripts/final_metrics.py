@@ -131,6 +131,15 @@ def main() -> None:
         "verified": {"verified"}, "partially_verified": {"partially_verified"}, "unsupported_or_low": {"unsupported", "low_confidence"}})
     metrics["self_consistency_signal"] = signal("self_consistency_level", {
         "high": {"high"}, "medium": {"medium"}, "low": {"low"}, "not_run": {"not_run"}})
+    second = [r for r in rows if r.get("agentic_answer_source") == "second_opinion"]
+    metrics["second_opinion"] = {
+        "cases": len(second),
+        "correct": sum(bool(r["agentic_correct"]) for r in second),
+        "loop_alone_correct": sum(bool(r["loop_only_correct"]) for r in second),
+        "baseline_correct": sum(bool(r["baseline_correct"]) for r in second),
+        "loop_alone_strict": pct(sum(bool(r["loop_only_correct"]) for r in rows) / len(rows)),
+        "loop_alone_vs_baseline": mcnemar(rows, "loop_only_correct", "baseline_correct"),
+    }
     answered = [r for r in rows if r["controller_path"] != "abstained"]
     metrics["agentic_answered"] = {"cases": len(answered), "strict": pct2(sum(r["agentic_correct"] for r in answered) / len(answered))}
 
