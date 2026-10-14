@@ -1,4 +1,4 @@
- import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+ import { useEffect, useMemo, useRef, useState } from 'react';
  
 function formatPercent(value) {
   return `${Math.round((value || 0) * 100)}%`;
@@ -30,39 +30,16 @@ function getLevelTagClass(level) {
   return 'tag-gray';
 }
 
-function getDifficultyTagClass(difficulty) {
-  const normalized = String(difficulty || 'unknown').toLowerCase();
-  if (normalized === 'easy') return 'tag-green';
-  if (normalized === 'medium') return 'tag-amber';
-  if (normalized === 'hard') return 'tag-red';
+function getControllerPathTagClass(path) {
+  if (path === 'direct') return 'tag-green';
+  if (path === 'relook' || path === 'reanswer') return 'tag-amber';
+  if (path === 'abstained') return 'tag-red';
   return 'tag-gray';
 }
 
-function getVerificationPolicyTagClass(policy) {
-  return String(policy || 'standard').toLowerCase() === 'strict' ? 'tag-amber' : 'tag-gray';
-}
-
-function getRoutingProcedureTooltip(difficulty) {
-  const normalized = String(difficulty || 'unknown').toLowerCase();
-
-  if (normalized === 'easy') {
-    return 'Procedure: interpret image → analyze question → standard verification → finalize.';
-  }
-
-  if (normalized === 'medium') {
-    return 'Procedure: interpret image → analyze question → standard verification → add disclaimer if needed.';
-  }
-
-  if (normalized === 'hard') {
-    return 'Procedure: interpret image → analyze question → strict verification → flag for review if needed.';
-  }
-
-  return 'Procedure: interpret image → analyze question → route difficulty → verify the final answer.';
-}
-
 function getBreakdownTooltip(mode) {
-  if (mode === 'difficulty_type') {
-    return 'Breakdown by Difficulty Router output. Parent rows show overall difficulty accuracy, and expanding a difficulty row reveals question-type accuracy within that bucket. easy uses standard verification; medium uses standard verification and can add a disclaimer; hard uses strict verification and can flag the case for review.';
+  if (mode === 'controller_path') {
+    return 'Breakdown by what the agentic controller did: direct (look → answer → check → finish), relook (a focused re-examination of a region), reanswer (answer revised after a failed check) or abstained. The pipeline column is the fixed six-stage ablation on the same cases.';
   }
 
   return 'Breakdown by question type. Close-ended questions use exact match for yes/no and binary medical assessments (normal/abnormal, present/absent, positive/negative, etc.). Grouped by the dataset question type. Open-ended: content-word match (aliases, plurals folded); left/right conflicts and answers starting with “no” are wrong; S-PubMedBert-MS-MARCO similarity only as a strict fallback (≥ 0.95 short, ≥ 0.90 long).';
@@ -79,90 +56,6 @@ const QUESTION_TYPE_ORDER = [
 ];
 
 const DIFFICULTY_ORDER = ['easy', 'medium', 'hard', 'unknown'];
-
-function normalizeBreakdownLabel(value) {
-  return String(value || 'unknown').trim().toLowerCase() || 'unknown';
-}
-
-function createBreakdownBucket(label) {
-  return {
-    label,
-    count: 0,
-    baseline_correct: 0,
-    workflow_correct: 0,
-    agentic_correct: 0,
-    disagreement_count: 0,
-  };
-}
-
-function accumulateBreakdownBucket(bucket, row) {
-  bucket.count += 1;
-  bucket.baseline_correct += row.baseline_correct ? 1 : 0;
-  bucket.workflow_correct += row.workflow_correct ? 1 : 0;
-  bucket.agentic_correct += row.agentic_correct ? 1 : 0;
-  bucket.disagreement_count += row.disagreement ? 1 : 0;
-}
-
-function finalizeBreakdownBucket(bucket) {
-  return {
-    label: bucket.label,
-    count: bucket.count,
-    baseline_accuracy: bucket.count ? bucket.baseline_correct / bucket.count : 0,
-    workflow_accuracy: bucket.count ? bucket.workflow_correct / bucket.count : 0,
-    agentic_accuracy: bucket.count ? bucket.agentic_correct / bucket.count : 0,
-    disagreement_rate: bucket.count ? bucket.disagreement_count / bucket.count : 0,
-  };
-}
-
-function compareLabels(left, right, preferredOrder = []) {
-  const leftIndex = preferredOrder.indexOf(left);
-  const rightIndex = preferredOrder.indexOf(right);
-
-  if (leftIndex !== -1 || rightIndex !== -1) {
-    if (leftIndex === -1) return 1;
-    if (rightIndex === -1) return -1;
-    if (leftIndex !== rightIndex) return leftIndex - rightIndex;
-  }
-
-  return left.localeCompare(right);
-}
-
-function buildDifficultyBreakdown(rows) {
-  const difficultyBuckets = new Map();
-  const questionTypeBucketsByDifficulty = new Map();
-
-  rows.forEach((row) => {
-    const difficulty = normalizeBreakdownLabel(row.routing_difficulty);
-    const questionType = normalizeBreakdownLabel(row.question_type || row.original_question_type);
-
-    if (!difficultyBuckets.has(difficulty)) {
-      difficultyBuckets.set(difficulty, createBreakdownBucket(difficulty));
-      questionTypeBucketsByDifficulty.set(difficulty, new Map());
-    }
-
-    accumulateBreakdownBucket(difficultyBuckets.get(difficulty), row);
-
-    const questionTypeBuckets = questionTypeBucketsByDifficulty.get(difficulty);
-    if (!questionTypeBuckets.has(questionType)) {
-      questionTypeBuckets.set(questionType, createBreakdownBucket(questionType));
-    }
-
-    accumulateBreakdownBucket(questionTypeBuckets.get(questionType), row);
-  });
-
-  return Array.from(difficultyBuckets.values())
-    .sort((left, right) => compareLabels(left.label, right.label, DIFFICULTY_ORDER))
-    .map((bucket) => {
-      const questionTypeBuckets = Array.from(questionTypeBucketsByDifficulty.get(bucket.label)?.values() || [])
-        .sort((left, right) => compareLabels(left.label, right.label, QUESTION_TYPE_ORDER))
-        .map(finalizeBreakdownBucket);
-
-      return {
-        ...finalizeBreakdownBucket(bucket),
-        question_type_breakdown: questionTypeBuckets,
-      };
-    });
-}
 
 function BreakdownAccuracyCell({ value, color }) {
   return (
@@ -187,7 +80,7 @@ function SystemPerformanceCard({ title, icon, accuracy, avgDuration, totalDurati
       </div>
       <div className="evaluation-system-stats">
         <div className="evaluation-system-stat">
-          <div className="evaluation-list-subtitle">Overall Accuracy (Exact match + S-PubMedBert-MS-MARCO)</div>
+          <div className="evaluation-list-subtitle">Overall accuracy (strict scorer)</div>
           <div className="evaluation-metric-value">{formatPercent(accuracy)}</div>
         </div>
         <div className="evaluation-system-stat">
@@ -203,12 +96,15 @@ function SystemPerformanceCard({ title, icon, accuracy, avgDuration, totalDurati
   );
 }
 
-function AccuracyMetricStack({ baseline, workflow, agentic }) {
+function AccuracyMetricStack({ baseline, workflow, agentic, pipeline }) {
   return (
     <div className="evaluation-metric-stack">
       <span className="tag tag-amber">Baseline {formatPercent(baseline)}</span>
       <span className="tag tag-blue">Workflow {formatPercent(workflow)}</span>
       <span className="tag tag-green">Agentic {formatPercent(agentic)}</span>
+      {pipeline !== null && pipeline !== undefined && (
+        <span className="tag tag-gray">Pipeline (ablation) {formatPercent(pipeline)}</span>
+      )}
     </div>
   );
 }
@@ -241,7 +137,6 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
   const [selectedSampleIds, setSelectedSampleIds] = useState([]);
   const [isSampleDropdownOpen, setIsSampleDropdownOpen] = useState(false);
   const [breakdownMode, setBreakdownMode] = useState('question_type');
-  const [collapsedDifficultyGroups, setCollapsedDifficultyGroups] = useState([]);
   const sampleDropdownRef = useRef(null);
 
   useEffect(() => {
@@ -260,13 +155,12 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
   const avgAgenticF1 = rows.length ? rows.reduce((acc, r) => acc + (r.agentic_token_f1 || 0), 0) / rows.length : 0;
   const availableSampleIds = [...new Set(rows.map((row) => String(row.sample_id ?? '')).filter(Boolean))]
     .sort((left, right) => Number(left) - Number(right));
-  const isDifficultyMode = breakdownMode === 'difficulty_type';
-  const questionBreakdownRows = summary?.by_question_type || [];
-  const difficultyBreakdownRows = useMemo(() => buildDifficultyBreakdown(rows), [rows]);
-  const breakdownRows = isDifficultyMode ? difficultyBreakdownRows : questionBreakdownRows;
-  const breakdownTitle = isDifficultyMode ? 'Accuracy by Difficulty Type' : 'Accuracy by Question Type';
-  const breakdownPrimaryLabel = isDifficultyMode ? 'Difficulty / Question Type' : 'Question Type';
-  const breakdownContextTag = isDifficultyMode ? 'Routing' : 'Semantic Similarity';
+  const hasPipeline = Boolean(summary?.pipeline_cases);
+  const isControllerMode = breakdownMode === 'controller_path';
+  const breakdownRows = (isControllerMode ? summary?.by_controller_path : summary?.by_question_type) || [];
+  const breakdownTitle = isControllerMode ? 'Accuracy by Controller Path' : 'Accuracy by Question Type';
+  const breakdownPrimaryLabel = isControllerMode ? 'Controller Path' : 'Question Type';
+  const breakdownContextTag = isControllerMode ? 'Agentic decisions' : 'Dataset labels';
   const breakdownTooltip = getBreakdownTooltip(breakdownMode);
   const filteredRows = selectedSampleIds.length
     ? rows.filter((row) => selectedSampleIds.includes(String(row.sample_id ?? '')))
@@ -288,14 +182,6 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
 
   const clearSampleIdFilter = () => {
     setSelectedSampleIds([]);
-  };
-
-  const toggleDifficultyGroup = (groupLabel) => {
-    setCollapsedDifficultyGroups((current) => (
-      current.includes(groupLabel)
-        ? current.filter((label) => label !== groupLabel)
-        : [...current, groupLabel]
-    ));
   };
 
   return (
@@ -345,12 +231,21 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
               totalDuration={summary.total_workflow_duration_ms}
             />
             <SystemPerformanceCard
-              title="Agentic"
+              title="Agentic (controller loop)"
               icon="🔗"
               accuracy={summary.agentic_accuracy}
               avgDuration={summary.avg_agentic_duration_ms}
               totalDuration={summary.total_agentic_duration_ms}
             />
+            {hasPipeline && (
+              <SystemPerformanceCard
+                title={`Fixed Pipeline — ablation (${summary.pipeline_cases} cases)`}
+                icon="🧱"
+                accuracy={summary.pipeline_accuracy}
+                avgDuration={summary.avg_pipeline_duration_ms}
+                totalDuration={summary.total_pipeline_duration_ms}
+              />
+            )}
           </section>
 
           <section className="evaluation-metric-grid animate-fade-in">
@@ -400,11 +295,12 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 baseline={summary.baseline_close_ended_accuracy}
                 workflow={summary.workflow_close_ended_accuracy}
                 agentic={summary.agentic_close_ended_accuracy}
+                pipeline={hasPipeline ? summary.pipeline_close_ended_accuracy : null}
               />
             </div>
             <div className="card">
               <div className="card-header">
-                <span className="card-title">Semantic Similarity Accuracy (Open-ended)</span>
+                <span className="card-title">Open-ended Accuracy</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.open_ended_cases} cases</span>
                   <span className="tag tag-gray" data-tooltip="Open-ended Accuracy: Open-ended: content-word match (aliases, plurals folded); left/right conflicts and answers starting with “no” are wrong; S-PubMedBert-MS-MARCO similarity only as a strict fallback (≥ 0.95 short, ≥ 0.90 long)." data-tooltip-align="left">info</span>
@@ -414,6 +310,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 baseline={summary.baseline_open_ended_accuracy}
                 workflow={summary.workflow_open_ended_accuracy}
                 agentic={summary.agentic_open_ended_accuracy}
+                pipeline={hasPipeline ? summary.pipeline_open_ended_accuracy : null}
               />
             </div>
           </section>
@@ -431,9 +328,9 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                     style={{ minWidth: '190px', cursor: 'pointer' }}
                   >
                     <option value="question_type">Question Type</option>
-                    <option value="difficulty_type">Difficulty Type</option>
+                    <option value="controller_path">Controller Path</option>
                   </select>
-                  <span className={`tag ${isDifficultyMode ? 'tag-green' : 'tag-gray'}`}>{breakdownContextTag}</span>
+                  <span className={`tag ${isControllerMode ? 'tag-green' : 'tag-gray'}`}>{breakdownContextTag}</span>
                   <span className="tag tag-gray" data-tooltip={breakdownTooltip} data-tooltip-align="left">info</span>
                 </div>
               </div>
@@ -446,10 +343,11 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                       <th>Baseline</th>
                       <th>Workflow</th>
                       <th>Agentic</th>
+                      {hasPipeline && <th>Pipeline (ablation)</th>}
                     </tr>
                   </thead>
                   <tbody>
-                    {!isDifficultyMode && breakdownRows.map((item) => (
+                    {breakdownRows.map((item) => (
                       <tr key={item.question_type || item.label}>
                         <td style={{ fontWeight: 500, color: 'var(--color-text-primary)' }}>
                           {formatLabel(item.question_type || item.label)}
@@ -458,67 +356,18 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                         <td><BreakdownAccuracyCell value={item.baseline_accuracy} color="var(--color-warning)" /></td>
                         <td><BreakdownAccuracyCell value={item.workflow_accuracy} color="var(--color-accent)" /></td>
                         <td><BreakdownAccuracyCell value={item.agentic_accuracy} color="var(--color-success)" /></td>
+                        {hasPipeline && (
+                          <td>
+                            {item.pipeline_accuracy === null || item.pipeline_accuracy === undefined
+                              ? <span className="tag tag-gray">—</span>
+                              : <BreakdownAccuracyCell value={item.pipeline_accuracy} color="var(--color-text-muted)" />}
+                          </td>
+                        )}
                       </tr>
                     ))}
-                    {isDifficultyMode && breakdownRows.map((difficultyGroup) => {
-                      const isCollapsed = collapsedDifficultyGroups.includes(difficultyGroup.label);
-                      const typeCount = difficultyGroup.question_type_breakdown.length;
-                      const typeCountLabel = typeCount === 1 ? '1 question type' : `${typeCount} question types`;
-
-                      return (
-                        <Fragment key={difficultyGroup.label}>
-                          <tr style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
-                            <td style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                              <button
-                                type="button"
-                                onClick={() => toggleDifficultyGroup(difficultyGroup.label)}
-                                aria-expanded={!isCollapsed}
-                                title={isCollapsed ? 'Expand difficulty group' : 'Collapse difficulty group'}
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '8px',
-                                  width: '100%',
-                                  background: 'transparent',
-                                  border: 'none',
-                                  padding: 0,
-                                  color: 'inherit',
-                                  font: 'inherit',
-                                  cursor: 'pointer',
-                                  textAlign: 'left',
-                                }}
-                              >
-                                <span aria-hidden="true" style={{ width: '16px', display: 'inline-flex', justifyContent: 'center' }}>
-                                  {isCollapsed ? '▸' : '▾'}
-                                </span>
-                                <span className={`tag ${getDifficultyTagClass(difficultyGroup.label)}`}>
-                                  {formatLabel(difficultyGroup.label)}
-                                </span>
-                                <span className="tag tag-gray">{typeCountLabel}</span>
-                              </button>
-                            </td>
-                            <td><span className="tag tag-gray">{difficultyGroup.count}</span></td>
-                            <td><BreakdownAccuracyCell value={difficultyGroup.baseline_accuracy} color="var(--color-warning)" /></td>
-                            <td><BreakdownAccuracyCell value={difficultyGroup.workflow_accuracy} color="var(--color-accent)" /></td>
-                            <td><BreakdownAccuracyCell value={difficultyGroup.agentic_accuracy} color="var(--color-success)" /></td>
-                          </tr>
-                          {!isCollapsed && difficultyGroup.question_type_breakdown.map((item) => (
-                            <tr key={`${difficultyGroup.label}-${item.label}`}>
-                              <td style={{ paddingLeft: '24px', color: 'var(--color-text-secondary)' }}>
-                                ↳ {formatLabel(item.label)}
-                              </td>
-                              <td><span className="tag tag-gray">{item.count}</span></td>
-                              <td><BreakdownAccuracyCell value={item.baseline_accuracy} color="var(--color-warning)" /></td>
-                              <td><BreakdownAccuracyCell value={item.workflow_accuracy} color="var(--color-accent)" /></td>
-                              <td><BreakdownAccuracyCell value={item.agentic_accuracy} color="var(--color-success)" /></td>
-                            </tr>
-                          ))}
-                        </Fragment>
-                      );
-                    })}
                     {breakdownRows.length === 0 && (
                       <tr>
-                        <td colSpan="5" style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                        <td colSpan={hasPipeline ? 6 : 5} style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>
                           No breakdown data available.
                         </td>
                       </tr>
@@ -643,7 +492,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                       <th>Question & Truth</th>
                       <th>Answers</th>
                       <th>Winner</th>
-                      <th>Routing</th>
+                      <th>Controller</th>
                       <th>Agentic Verify</th>
                       <th>Agentic Signals</th>
                       <th>Runtime</th>
@@ -686,30 +535,27 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                               <span className="tag tag-green" style={{ fontSize: '9px', padding: '1px 5px', minWidth: '55px', justifyContent: 'center', marginRight: '6px' }}>Agentic</span>
                               <span style={{ color: row.agentic_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.agentic_correct && row.agentic_answer ? 'line-through' : 'none' }}>{row.agentic_answer || '—'}</span>
                             </div>
+                            {row.pipeline_answer !== null && row.pipeline_answer !== undefined && (
+                              <div>
+                                <span className="tag tag-gray" style={{ fontSize: '9px', padding: '1px 5px', minWidth: '55px', justifyContent: 'center', marginRight: '6px' }}>Pipeline</span>
+                                <span style={{ color: row.pipeline_correct ? 'var(--color-success)' : 'inherit', textDecoration: !row.pipeline_correct && row.pipeline_answer ? 'line-through' : 'none' }}>{row.pipeline_answer || '—'}</span>
+                              </div>
+                            )}
                           </div>
                         </td>
                         <td><span className={`tag ${getWinnerTagClass(row.winner)}`}>{row.winner.replace(/_/g, ' ')}</span></td>
                         <td>
                           <div className="evaluation-signal-stack">
                             <span
-                              className={`tag ${getDifficultyTagClass(row.routing_difficulty)}`}
-                              data-tooltip={getRoutingProcedureTooltip(row.routing_difficulty)}
+                              className={`tag ${getControllerPathTagClass(row.controller_path)}`}
+                              data-tooltip={(row.controller_actions || []).join(' → ') || 'No controller actions recorded'}
                               data-tooltip-align="left"
                             >
-                              {formatLabel(row.routing_difficulty)}
+                              {formatLabel(row.controller_path)}
                             </span>
-                            <span className={`tag ${getVerificationPolicyTagClass(row.routing_verification_policy)}`}>
-                              {formatLabel(row.routing_verification_policy)} verify
-                            </span>
-                            <span
-                              className="tag tag-gray"
-                              data-tooltip={[
-                                row.routing_fallback_policy ? `Fallback: ${formatLabel(row.routing_fallback_policy)}` : null,
-                                row.routing_rationale ? `Routing: ${row.routing_rationale}` : null,
-                              ].filter(Boolean).join(' | ') || 'Routing details unavailable'}
-                            >
-                              details
-                            </span>
+                            {row.agentic_attempts ? (
+                              <span className="evaluation-list-subtitle">{row.agentic_attempts} answer{row.agentic_attempts === 1 ? '' : 's'}</span>
+                            ) : null}
                           </div>
                         </td>
                         <td>

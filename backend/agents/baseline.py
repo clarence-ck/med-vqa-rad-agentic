@@ -43,7 +43,7 @@ IMPORTANT INSTRUCTION: You MUST evaluate if the image is a radiology image (e.g.
 Return a JSON object with:
 {{
   "is_radiology_image": true,
-  "answer": "Direct answer to the question",
+  "answer": "Direct, concise answer to the question. If it can be answered yes or no, start with yes or no.",
   "explanation": "Brief explanation (1-2 sentences)",
   "confidence": "high / medium / low"
 }}

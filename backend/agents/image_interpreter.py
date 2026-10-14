@@ -1,3 +1,4 @@
+import base64
 import json
 import re
 import time
@@ -296,8 +297,14 @@ Return ONLY the JSON object, no additional text."""
             # Use ImageFileToImageContent for standardized image processing
             # Wrap bytes in ByteStream for the component
             stream = ByteStream(data=image_bytes, mime_type=mime_type)
-            converter_result = self.image_converter.run(sources=[stream])
-            image_content = converter_result["image_contents"][0]
+            converted = self.image_converter.run(sources=[stream])["image_contents"]
+            if converted:
+                image_content = converted[0]
+            else:
+                # Unusual or mislabelled formats: send the original bytes rather than failing.
+                _log.warning("Image converter could not read the image; sending original bytes")
+                image_content = ImageContent(base64_image=base64.b64encode(image_bytes).decode("utf-8"),
+                                             mime_type=mime_type, detail="high")
             
             messages = [
                 ChatMessage.from_user(content_parts=[

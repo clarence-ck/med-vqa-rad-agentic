@@ -16,6 +16,7 @@ from sentence_transformers import SentenceTransformer
 
 from agents.baseline import baseline_answer
 from agents.agentic_loop import run_agentic
+from agents.orchestrator import run_pipeline
 from agents.workflow_baseline import workflow_answer
 from utils.data_loader import get_sample_cases, get_sample_by_id, get_image_bytes, EXCLUDED_SAMPLE_IDS
 from utils import scoring
@@ -240,12 +241,17 @@ def _build_accuracy_breakdown(rows: list[dict], group_key: str, preferred_order:
             "baseline_correct": 0,
             "workflow_correct": 0,
             "agentic_correct": 0,
+            "pipeline_correct": 0,
+            "pipeline_count": 0,
             "disagreement_count": 0,
         })
         bucket["count"] += 1
         bucket["baseline_correct"] += 1 if row["baseline_correct"] else 0
         bucket["workflow_correct"] += 1 if row["workflow_correct"] else 0
         bucket["agentic_correct"] += 1 if row["agentic_correct"] else 0
+        if row.get("pipeline_correct") is not None:
+            bucket["pipeline_count"] += 1
+            bucket["pipeline_correct"] += 1 if row["pipeline_correct"] else 0
         bucket["disagreement_count"] += 1 if row["disagreement"] else 0
 
     order_map = {value: index for index, value in enumerate(preferred_order or [])}
@@ -263,6 +269,7 @@ def _build_accuracy_breakdown(rows: list[dict], group_key: str, preferred_order:
             "baseline_accuracy": bucket["baseline_correct"] / bucket["count"] if bucket["count"] else 0.0,
             "workflow_accuracy": bucket["workflow_correct"] / bucket["count"] if bucket["count"] else 0.0,
             "agentic_accuracy": bucket["agentic_correct"] / bucket["count"] if bucket["count"] else 0.0,
+            "pipeline_accuracy": bucket["pipeline_correct"] / bucket["pipeline_count"] if bucket["pipeline_count"] else None,
             "disagreement_rate": bucket["disagreement_count"] / bucket["count"] if bucket["count"] else 0.0,
         }
         for bucket in sorted(grouped_rows.values(), key=sort_key)
@@ -293,6 +300,8 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
             "avg_duration_ms": 0,
             "by_question_type": [],
             "by_difficulty_type": [],
+            "by_controller_path": [],
+            "pipeline_cases": 0,
         }
 
     baseline_correct = sum(1 for row in rows if row["baseline_correct"])
@@ -315,6 +324,14 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
     avg_agentic_duration_ms = int(total_agentic_duration_ms / len(rows_with_agentic_ms)) if total_agentic_duration_ms is not None else None
     close_ended_rows = [row for row in rows if row.get("answer_style") == "close_ended"]
     open_ended_rows = [row for row in rows if row.get("answer_style") == "open_ended"]
+
+    # Fixed-pipeline ablation: only for rows that have it.
+    pipeline_rows = [row for row in rows if row.get("pipeline_correct") is not None]
+    pipeline_ms = [row["pipeline_duration_ms"] for row in pipeline_rows if row.get("pipeline_duration_ms") is not None]
+
+    def pipeline_subset(subset: list[dict]) -> float | None:
+        with_pipeline = [row for row in subset if row.get("pipeline_correct") is not None]
+        return _subset_accuracy(with_pipeline, "pipeline_correct") if with_pipeline else None
 
     return {
         "total_cases": total,
@@ -343,11 +360,68 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
         "total_agentic_duration_ms": total_agentic_duration_ms,
         "by_question_type": _build_accuracy_breakdown(rows, "question_type"),
         "by_difficulty_type": _build_accuracy_breakdown(rows, "routing_difficulty", ["easy", "medium", "hard", "unknown"]),
+        "by_controller_path": _build_accuracy_breakdown(rows, "controller_path", ["direct", "relook", "reanswer", "abstained", "pipeline"]),
+        "pipeline_cases": len(pipeline_rows),
+        "pipeline_accuracy": pipeline_subset(rows),
+        "pipeline_close_ended_accuracy": pipeline_subset(close_ended_rows),
+        "pipeline_open_ended_accuracy": pipeline_subset(open_ended_rows),
+        "avg_pipeline_duration_ms": int(sum(pipeline_ms) / len(pipeline_ms)) if pipeline_ms else None,
+        "total_pipeline_duration_ms": sum(pipeline_ms) if pipeline_ms else None,
     }
 
 
+_FAILURE_ANSWERS = {
+    "baseline failed to produce an answer.",
+    "baseline error.",
+    "workflow failed: image interpretation error.",
+    "workflow failed: question analysis error.",
+    "unable to generate an answer.",
+}
+_FAILURE_NOTES = {"verification failed due to an error.", "verification could not be completed."}
+
+
+def _api_failures(results: dict) -> list[str]:
+    """Systems whose result shows an API/parse failure rather than a genuine answer.
+
+    Such results must not be cached: they would be scored as wrong answers.
+    """
+    failed = []
+    for name, result in results.items():
+        if not isinstance(result, dict):
+            failed.append(name)
+            continue
+        answer = str(result.get("answer", "")).strip().lower()
+        notes = str(result.get("verification_notes", "")).strip().lower()
+        if (
+            (name in {"baseline", "workflow"} and result.get("status") == "error")
+            or answer in _FAILURE_ANSWERS
+            or notes in _FAILURE_NOTES
+            or (result.get("api_errors") or 0) > 0
+        ):
+            failed.append(name)
+    return failed
+
+
+def _write_cache(cache_path: str, payload: dict) -> None:
+    """Write atomically, without the base64 image (it is re-read from disk on a cache hit)."""
+    stored = dict(payload)
+    stored["sample"] = {k: v for k, v in (payload.get("sample") or {}).items() if k != "image_base64"}
+    tmp_path = cache_path + ".tmp"
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        json.dump(stored, f)
+    os.replace(tmp_path, cache_path)
+
+
+def _with_sample_image(payload: dict, sample: dict) -> dict:
+    result = dict(payload)
+    result["sample"] = {**(payload.get("sample") or {}), **sample}
+    result["cached"] = True
+    return result
+
+
 @router.get("/sample/{sample_id}/analysis")
-async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=False)):
+async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=False),
+                              ablation: bool = Query(default=False)):
     token = sample_id_var.set(str(sample_id))
     try:
         sample, image_bytes = _get_sample_with_image(sample_id)
@@ -364,35 +438,73 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
         mime_type = sample.get("image_mime", "image/png")
         cache_path = _get_cache_path(sample_id, question)
 
+        cached_payload = None
         if not refresh and os.path.exists(cache_path):
-            _log.info("Cache HIT for sample %d (question=%r)", sample_id, question[:80])
             with open(cache_path, "r", encoding="utf-8") as f:
                 cached_payload = json.load(f)
-                cached_payload["cached"] = True
-                return cached_payload
+            if not ablation or cached_payload.get("pipeline_result"):
+                _log.info("Cache HIT for sample %d (question=%r)", sample_id, question[:80])
+                return _with_sample_image(cached_payload, sample)
+
+        def run_with_usage(fn, *args, **kwargs):
+            with track_usage() as records:
+                result = fn(*args, **kwargs)
+            return result, summarize_usage(records)
+
+        async def timed(fn, *args, **kwargs):
+            t0 = time.time()
+            result, usage = await asyncio.to_thread(run_with_usage, fn, *args, **kwargs)
+            return result, int((time.time() - t0) * 1000), usage
+
+        def run_ablation(image: bytes, text: str, mime: str) -> dict:
+            # Fixed six-stage pipeline with the image passed to the reasoner: isolates what
+            # the controller loop adds over a fixed chain with the same image access.
+            return run_pipeline(image, text, mime, reasoner_sees_image=True)
+
+        if cached_payload is not None:
+            # Cached three-system result exists; only the ablation is missing.
+            _log.info("Cache HIT for sample %d without ablation; running fixed pipeline only", sample_id)
+            pipeline_result, pipeline_ms, pipeline_usage = await timed(run_ablation, image_bytes, question, mime_type)
+            failed = _api_failures({"pipeline": pipeline_result})
+            if failed:
+                _log.warning("Sample %d ablation had API failures (%s); not caching", sample_id, failed)
+                return JSONResponse(status_code=503, content={"error": "API failure", "failed_systems": failed})
+            cached_payload.update({
+                "pipeline_result": pipeline_result,
+                "pipeline_duration_ms": pipeline_ms,
+            })
+            cached_payload.setdefault("usage", {})["pipeline"] = pipeline_usage
+            _write_cache(cache_path, cached_payload)
+            return _with_sample_image(cached_payload, sample)
 
         _log.info(
-            "Cache MISS for sample %d  question=%r  refresh=%s  running all 3 pipelines in parallel",
-            sample_id, question[:80], refresh,
+            "Cache MISS for sample %d  question=%r  refresh=%s  ablation=%s  running systems in parallel",
+            sample_id, question[:80], refresh, ablation,
         )
         started_at = time.time()
 
-        def run_with_usage(fn, *args):
-            with track_usage() as records:
-                result = fn(*args)
-            return result, summarize_usage(records)
-
-        async def timed(fn, *args):
-            t0 = time.time()
-            result, usage = await asyncio.to_thread(run_with_usage, fn, *args)
-            return result, int((time.time() - t0) * 1000), usage
-
+        jobs = [
+            timed(baseline_answer, image_bytes, question, mime_type),
+            timed(workflow_answer, image_bytes, question, mime_type),
+            timed(run_agentic, image_bytes, question, mime_type),
+        ]
+        if ablation:
+            jobs.append(timed(run_ablation, image_bytes, question, mime_type))
+        outcomes = await asyncio.gather(*jobs)
         (baseline_result, baseline_ms, baseline_usage), (workflow_result, workflow_ms, workflow_usage), \
-            (agentic_result, agentic_ms, agentic_usage) = await asyncio.gather(
-                timed(baseline_answer, image_bytes, question, mime_type),
-                timed(workflow_answer, image_bytes, question, mime_type),
-                timed(run_agentic, image_bytes, question, mime_type),
-            )
+            (agentic_result, agentic_ms, agentic_usage) = outcomes[:3]
+        pipeline_outcome = outcomes[3] if ablation else None
+
+        failed = _api_failures({
+            "baseline": baseline_result,
+            "workflow": workflow_result,
+            "agentic": agentic_result,
+            **({"pipeline": pipeline_outcome[0]} if pipeline_outcome else {}),
+        })
+        if failed:
+            _log.warning("Sample %d had API failures (%s); not caching so it can be re-run", sample_id, failed)
+            return JSONResponse(status_code=503, content={"error": "API failure", "failed_systems": failed})
+
         _log.info(
             "Sample %d usage  baseline=$%.4f (%d calls)  workflow=$%.4f (%d calls)  agentic=$%.4f (%d calls)",
             sample_id,
@@ -400,27 +512,9 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
             workflow_usage["cost_usd"], workflow_usage["calls"],
             agentic_usage["cost_usd"], agentic_usage["calls"],
         )
-
-        total_ms = int((time.time() - started_at) * 1000)
-        question_subtype = str(
-            agentic_result.get("question_analysis", {}).get("question_subtype", "unknown")
-            if isinstance(agentic_result, dict)
-            else "unknown"
-        )
-        question_type = str(
-            agentic_result.get("question_analysis", {}).get("question_type", "unknown")
-            if isinstance(agentic_result, dict)
-            else "unknown"
-        )
         _log.info(
-            "Sample %d analysis complete  baseline=%dms  workflow=%dms  agentic=%dms  total=%dms",
-            sample_id, baseline_ms, workflow_ms, agentic_ms, total_ms,
-        )
-        _log.info(
-            "Sample %d answers  type=%s  subtype=%s  baseline=%r  workflow=%r  agentic=%r  ground_truth=%r",
+            "Sample %d answers  baseline=%r  workflow=%r  agentic=%r  ground_truth=%r",
             sample_id,
-            question_type,
-            question_subtype,
             str(baseline_result.get("answer", ""))[:60],
             str(workflow_result.get("answer", ""))[:60],
             str(agentic_result.get("answer", ""))[:60],
@@ -448,10 +542,12 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
                 "agentic": agentic_usage,
             },
         }
+        if pipeline_outcome:
+            payload["pipeline_result"] = pipeline_outcome[0]
+            payload["pipeline_duration_ms"] = pipeline_outcome[1]
+            payload["usage"]["pipeline"] = pipeline_outcome[2]
 
-        with open(cache_path, "w", encoding="utf-8") as f:
-            json.dump(payload, f)
-
+        _write_cache(cache_path, payload)
         return payload
     finally:
         sample_id_var.reset(token)
@@ -540,6 +636,13 @@ def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
     baseline_correct = scoring.answers_match(baseline_normalized, ground_truth_normalized, is_close_ended, original_question_type, similarity)
     workflow_correct = scoring.answers_match(workflow_normalized, ground_truth_normalized, is_close_ended, original_question_type, similarity)
     agentic_correct = scoring.answers_match(agentic_normalized, ground_truth_normalized, is_close_ended, original_question_type, similarity)
+    pipeline_result = payload.get("pipeline_result")
+    pipeline_answer_text = pipeline_result.get("answer", "") if isinstance(pipeline_result, dict) else None
+    pipeline_correct = (
+        scoring.answers_match(_normalize_answer(pipeline_answer_text), ground_truth_normalized, is_close_ended,
+                              original_question_type, similarity)
+        if pipeline_answer_text is not None else None
+    )
 
     answer_style = "close_ended" if is_close_ended else "open_ended"
     candidates = {
@@ -586,6 +689,12 @@ def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
         "baseline_correct": baseline_correct,
         "workflow_correct": workflow_correct,
         "agentic_correct": agentic_correct,
+        "pipeline_answer": pipeline_answer_text,
+        "pipeline_correct": pipeline_correct,
+        "pipeline_duration_ms": payload.get("pipeline_duration_ms"),
+        "controller_path": agentic_result.get("controller_path") or ("pipeline" if agentic_result.get("agent_mode") == "pipeline" else "unknown"),
+        "controller_actions": agentic_result.get("controller_actions", []),
+        "agentic_attempts": agentic_result.get("attempts"),
         "baseline_token_f1": round(_token_f1(baseline_normalized, ground_truth_normalized), 4),
         "workflow_token_f1": round(_token_f1(workflow_normalized, ground_truth_normalized), 4),
         "agentic_token_f1": round(_token_f1(agentic_normalized, ground_truth_normalized), 4),
@@ -653,6 +762,7 @@ async def get_evaluation_summary():
             _normalize_answer(baseline_result.get("answer", "")),
             _normalize_answer(workflow_result.get("answer", "")),
             _normalize_answer(agentic_result.get("answer", "")),
+            _normalize_answer((payload.get("pipeline_result") or {}).get("answer", "")),
             _normalize_answer(ground_truth),
         ]
         all_texts.update(t for t in texts if t)

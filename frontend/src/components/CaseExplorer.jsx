@@ -54,10 +54,10 @@ function getVerificationTagClass(status) {
   return 'tag-gray';
 }
 
-function getDifficultyTagClass(difficulty) {
-  if (difficulty === 'easy') return 'tag-green';
-  if (difficulty === 'medium') return 'tag-amber';
-  if (difficulty === 'hard') return 'tag-red';
+function getControllerPathTagClass(path) {
+  if (path === 'direct') return 'tag-green';
+  if (path === 'relook' || path === 'reanswer') return 'tag-amber';
+  if (path === 'abstained') return 'tag-red';
   return 'tag-gray';
 }
 
@@ -133,10 +133,11 @@ export default function CaseExplorer({
   const reviewRecommended = Boolean(analysisData?.agentic_result?.should_flag_for_review);
   const issueCount = analysisData?.agentic_result?.issues_found?.length || 0;
   const crossModalAgreement = analysisData?.agentic_result?.cross_modal_agreement?.level || 'unknown';
-  const routingDecision = analysisData?.agentic_result?.routing_decision || {};
-  const routingDifficulty = routingDecision.difficulty || 'unknown';
-  const routingFallbackPolicy = routingDecision.fallback_policy || 'none';
-  const routingRationale = routingDecision.routing_rationale || '';
+  const agentic = analysisData?.agentic_result || {};
+  const controllerPath = agentic.controller_path || (agentic.agent_mode === 'pipeline' ? 'pipeline' : 'unknown');
+  const controllerActions = agentic.controller_actions || [];
+  const answerAttempts = agentic.attempts || 0;
+  const selectedAttempt = agentic.selected_attempt || 0;
 
   const groupedSamples = useMemo(() => {
     const groups = samples.reduce((acc, sample) => {
@@ -608,18 +609,18 @@ export default function CaseExplorer({
                       </section>
 
                       <section className="summary-section">
-                        <div className="summary-section-title">Routing</div>
+                        <div className="summary-section-title">Controller</div>
                         <div className="summary-stat-list">
                           <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label" data-tooltip="Question difficulty assessed by the Difficulty Router agent: easy (conspicuous finding, clean study), medium (subtle finding needing systematic review), hard (near the limits of visibility or poor image quality).">Difficulty</span>
-                            <span className={`tag ${getDifficultyTagClass(routingDifficulty)}`}>{routingDifficulty}</span>
+                            <span className="summary-stat-label" data-tooltip="What the agentic controller did: direct (look, answer, check, finish), relook (focused re-examination of a region), reanswer (answer revised after a failed check) or abstained.">Path</span>
+                            <span className={`tag ${getControllerPathTagClass(controllerPath)}`}>{controllerPath}</span>
                           </div>
                           <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label" data-tooltip="Fallback policy set by the Difficulty Router. Controls whether a disclaimer is added or the case is flagged for review on low confidence.">Fallback policy</span>
-                            <span className={`tag ${routingFallbackPolicy === 'flag_for_review' ? 'tag-red' : routingFallbackPolicy === 'add_disclaimer' ? 'tag-amber' : 'tag-gray'}`}>{routingFallbackPolicy.replace(/_/g, ' ')}</span>
+                            <span className="summary-stat-label" data-tooltip="Number of answers produced, and which one was kept (the best-verified answer).">Answers</span>
+                            <span className="summary-stat-value">{answerAttempts ? `${answerAttempts} (kept #${selectedAttempt})` : '—'}</span>
                           </div>
                           <div className="summary-summary-text">
-                            {routingRationale || 'No routing rationale recorded for this case.'}
+                            {controllerActions.length ? controllerActions.join(' → ') : 'No controller actions recorded for this case.'}
                           </div>
                         </div>
                       </section>

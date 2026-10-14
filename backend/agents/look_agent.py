@@ -1,3 +1,4 @@
+import base64
 import json
 import time
 from typing import Any, Dict
@@ -5,7 +6,7 @@ from typing import Any, Dict
 from haystack import component
 from haystack.components.converters.image import ImageFileToImageContent
 from haystack.components.generators.chat import OpenAIChatGenerator
-from haystack.dataclasses import ByteStream, ChatMessage, TextContent
+from haystack.dataclasses import ByteStream, ChatMessage, ImageContent, TextContent
 from haystack.utils import Secret
 
 from config import OPENAI_API_KEY, MODELS, generation_kwargs
@@ -33,6 +34,16 @@ class LookAgent:
     def __init__(self):
         self.generator = OpenAIChatGenerator(api_key=Secret.from_token(OPENAI_API_KEY), model=MODELS["look"])
         self.image_converter = ImageFileToImageContent(detail="high", size=(1024, 1024))
+
+    def _image_content(self, image_bytes: bytes, mime_type: str) -> ImageContent:
+        """Resize via Haystack's converter; if it cannot read the file (unusual or mislabelled
+        formats), send the original bytes instead of failing the look."""
+        contents = self.image_converter.run(sources=[ByteStream(data=image_bytes, mime_type=mime_type)])["image_contents"]
+        if contents:
+            return contents[0]
+        _log.warning("Image converter could not read the image; sending original bytes")
+        return ImageContent(base64_image=base64.b64encode(image_bytes).decode("utf-8"),
+                            mime_type=mime_type, detail="high")
 
     @component.output_types(result=Dict[str, Any])
     def run(self, image_bytes: bytes, question: str, mime_type: str = "image/png",
@@ -75,9 +86,7 @@ Return ONLY the JSON object, no additional text."""
         started = time.perf_counter()
         _log.info("Look  focus=%r  question=%r", focus, question[:80])
         try:
-            image_content = self.image_converter.run(
-                sources=[ByteStream(data=image_bytes, mime_type=mime_type)]
-            )["image_contents"][0]
+            image_content = self._image_content(image_bytes, mime_type)
             response = self.generator.run(
                 messages=[ChatMessage.from_user(content_parts=[TextContent(text=prompt), image_content])],
                 generation_kwargs=generation_kwargs("look"),

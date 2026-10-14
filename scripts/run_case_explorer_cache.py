@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 import sys
 from pathlib import Path
 
@@ -63,7 +64,7 @@ def _show_cache_status(selected_samples: list) -> None:
 
 
 async def warm_cache(skip: int, limit: int, refresh: bool, dry_run: bool = False, status_only: bool = False,
-                     max_cost: float | None = None, concurrency: int = 1) -> None:
+                     max_cost: float | None = None, concurrency: int = 1, ablation: bool = False) -> None:
     if skip < 0:
         raise ValueError("skip must be >= 0")
     if limit < 0:
@@ -120,10 +121,18 @@ async def warm_cache(skip: int, limit: int, refresh: bool, dry_run: bool = False
     # before each case starts, so the final spend can exceed it by the cases in flight.
     stats = {"completed": 0, "errors": 0, "cost": 0.0, "stopped": False}
     semaphore = asyncio.Semaphore(max(1, concurrency))
-    pending = [
-        (index, sample) for index, sample in enumerate(samples, start=1)
-        if refresh or not _cache_path_for(int(sample["id"]), str(sample.get("question", ""))).exists()
-    ]
+    def needs_run(sample: dict) -> bool:
+        path = _cache_path_for(int(sample["id"]), str(sample.get("question", "")))
+        if refresh or not path.exists():
+            return True
+        if ablation:
+            try:
+                return not json.loads(path.read_text(encoding="utf-8")).get("pipeline_result")
+            except (OSError, ValueError):
+                return True
+        return False
+
+    pending = [(index, sample) for index, sample in enumerate(samples, start=1) if needs_run(sample)]
 
     async def process(index: int, sample: dict) -> None:
         async with semaphore:
@@ -134,14 +143,15 @@ async def warm_cache(skip: int, limit: int, refresh: bool, dry_run: bool = False
                 return
             sample_id = int(sample["id"])
             question_type = sample.get("question_type", "unknown")
-            payload = await analyze_sample_case(sample_id, refresh=refresh)
+            payload = await analyze_sample_case(sample_id, refresh=refresh, ablation=ablation)
             if not isinstance(payload, dict) or payload.get("error"):
                 message = payload.get("error") if isinstance(payload, dict) else getattr(payload, "status_code", payload)
                 print(f"[{index}/{len(samples)}] sample_id={sample_id}  -> ERROR: {message}", flush=True)
                 stats["errors"] += 1
                 return
             usage = payload.get("usage") or {}
-            costs = {system: (usage.get(system) or {}).get("cost_usd", 0.0) for system in ("baseline", "workflow", "agentic")}
+            costs = {system: (usage.get(system) or {}).get("cost_usd", 0.0)
+                     for system in ("baseline", "workflow", "agentic", "pipeline") if usage.get(system)}
             case_cost = sum(costs.values())
             stats["cost"] += case_cost
             stats["completed"] += 1
@@ -185,6 +195,11 @@ def parse_args() -> argparse.Namespace:
         help="Preview which cases would be processed without running analysis.",
     )
     parser.add_argument(
+        "--ablation",
+        action="store_true",
+        help="Also run the fixed-pipeline ablation (added to existing cache files if missing).",
+    )
+    parser.add_argument(
         "--concurrency",
         type=int,
         default=1,
@@ -215,6 +230,7 @@ def main() -> None:
         status_only=args.status,
         max_cost=args.max_cost,
         concurrency=args.concurrency,
+        ablation=args.ablation,
     ))
 
 

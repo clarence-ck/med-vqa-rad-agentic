@@ -46,9 +46,21 @@ MAX_LOOKS = 3        # 1 initial + 2 focused re-looks
 MAX_ANSWERS = 3
 MAX_AGENT_STEPS = 16
 ABSTAIN_ANSWER = "Unable to determine from this image."
+IMAGE_ANALYSIS_FAILED = "The image could not be analysed. Please try again or upload a different image."
 
 _VERIFICATION_RANK = {"verified": 4, "partially_verified": 3, "low_confidence": 2, "unsupported": 1}
 _CONFIDENCE_RANK = {"High": 3, "Medium": 2, "Low": 1}
+
+
+def controller_path(actions: list[str], abstained: bool = False) -> str:
+    """Summarise what the controller did: direct, relook, reanswer or abstained."""
+    if abstained or any(action.startswith("finish(abstain") for action in actions):
+        return "abstained"
+    if any(action.startswith("look(") for action in actions):
+        return "relook"
+    if any(action.startswith("answer(guided") for action in actions):
+        return "reanswer"
+    return "direct"
 
 
 def consistency_level(agreeing: int, total: int) -> str:
@@ -177,6 +189,9 @@ class LoopContext:
                                      focus=focus, previous_observations=previous)["result"]
         except NonRadiologyImageError as e:
             raise ImageBlockerAbort(str(e))
+        if result.get("status") != "success" and not self.looks:
+            # Without a successful first look the radiology check never ran: do not answer blind.
+            raise ImageBlockerAbort(IMAGE_ANALYSIS_FAILED)
         self.looks.append(result)
         label = f"Focused Look: {focus}" if focus else "Image Interpretation"
         observed = result.get("focus_observation") or "; ".join(result.get("question_relevant_observations", []) or [])
@@ -323,9 +338,12 @@ def _image_analysis(ctx: LoopContext) -> dict:
 
 
 def _rejected_payload(message: str, started: float) -> dict:
+    # A failed analysis (API/image error) is retryable; a non-radiology rejection is a real answer.
+    failed = message == IMAGE_ANALYSIS_FAILED
     return {
+        "api_errors": 1 if failed else 0,
         "answer": message, "guarded_answer": message, "explanation": "", "reasoning_trace": "",
-        "evidence_used": [], "confidence": "unknown", "verification_status": "rejected", "checks": {},
+        "evidence_used": [], "confidence": "unknown", "verification_status": "error" if failed else "rejected", "checks": {},
         "verification_notes": "", "issues_found": [], "failure_categories": [],
         "self_consistency_signal": {"level": "low", "passed_checks": 0, "total_checks": 0},
         "cross_modal_agreement": {"level": "low", "grounded_in_evidence": None, "no_contradictions": None},
@@ -426,6 +444,11 @@ def run_agentic_loop(image_bytes: bytes, question: str, mime_type: str = "image/
         "agent_mode": "loop",
         "controller_actions": ctx.actions,
         "abstained": ctx.abstained,
+        "controller_path": controller_path(ctx.actions, ctx.abstained),
+        "api_errors": sum(
+            1 for result in [ctx.question_analysis, *ctx.looks, *ctx.answers, *ctx.checks]
+            if isinstance(result, dict) and result.get("status") == "error"
+        ),
         "selected_attempt": best + 1,
         "attempts": len(ctx.answers),
         "total_duration_ms": int((time.time() - started) * 1000),
