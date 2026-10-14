@@ -76,36 +76,45 @@ def main():
     arrow(ax, (1.85, 8.2), (1.85, 7.7))
     arrow(ax, (1.85, 6.5), (1.85, 5.9))
 
-    # ---- Agentic loop --------------------------------------------------------------
-    frame(ax, 3.8, 3.6, 10.4, 6.5, "Agentic loop (Haystack Agent, one per request)", PURPLE)
-    box(ax, 6.6, 8.55, 4.8, 1.05, PURPLE_SOFT, PURPLE, "Controller  ·  gpt-6-luna",
-        "decides the next tool call from the tool results")
-    path(ax, [(3.1, 5.6), (3.6, 5.6), (3.6, 9.05), (6.6, 9.05)], color=GREEN, label="question",
-         label_xy=(5.0, 9.05), lc=GREEN)
+    # ---- Agentic loop: one agent (the controller) + its tools ---------------------------
+    frame(ax, 3.8, 3.6, 10.4, 6.5, "Agentic loop: ONE Haystack Agent per request", PURPLE)
+    box(ax, 4.1, 6.3, 3.0, 1.75, PURPLE_SOFT, PURPLE, "Controller (the agent)",
+        "gpt-6-luna\nreads every tool result and\nchooses the next tool call", fs1=11, fs2=8.2)
+    path(ax, [(3.1, 5.6), (3.6, 5.6), (3.6, 7.15), (4.1, 7.15)], color=GREEN, label="question",
+         label_xy=(3.6, 6.4), lc=GREEN)
+    # the loop: call a tool, get the result back, decide again
+    arrow(ax, (4.75, 8.05), (6.45, 8.05), color=PURPLE, lw=2, rad=-1.1)
+    ax.text(5.6, 9.25, "repeat until finish (≤ 16 steps)", ha="center", va="center", fontsize=8.5,
+            color=PURPLE, weight="bold", bbox=dict(boxstyle="round,pad=0.2", fc=BG, ec="none"), zorder=6)
+    arrow(ax, (7.1, 7.55), (8.55, 7.55), color=PURPLE, lw=2, label="call a tool", label_xy=(7.82, 7.85), lc=PURPLE)
+    arrow(ax, (8.55, 6.8), (7.1, 6.8), color=PURPLE, lw=2, label="result", label_xy=(7.82, 6.5), lc=PURPLE)
 
+    ax.add_patch(FancyBboxPatch((8.6, 4.95), 5.25, 4.75, boxstyle="round,pad=0.02,rounding_size=0.18",
+                                linewidth=1.4, edgecolor=SLATE, facecolor="white", zorder=1))
+    ax.text(11.22, 9.45, "Tools: functions the controller calls (not agents)", ha="center", va="center",
+            fontsize=9.5, color=TEXT, weight="bold", zorder=4)
     tools = [
-        (4.1, "analyze_question()", "type + expected format\ngpt-6-luna", BLUE_SOFT, BLUE),
-        (6.1, "look(focus)", "question-aware vision;\nre-examine a region\ngpt-6-luna", BLUE_SOFT, BLUE),
-        (8.1, "answer(guidance)", "image + all observations\ngpt-6-luna", BLUE_SOFT, BLUE),
-        (10.1, "check()", "verifies against the image;\nrecommends next action\ngpt-6.1-sol", AMBER_SOFT, AMBER),
-        (12.1, "finish(abstain)", "ends the episode", PURPLE_SOFT, PURPLE),
+        ("analyze_question()", "question type + expected answer format · gpt-6-luna", BLUE_SOFT, BLUE),
+        ("look(focus)", "examine the image, or re-examine one region · gpt-6-luna", BLUE_SOFT, BLUE),
+        ("answer(guidance)", "answer from image + all observations · gpt-6-luna", BLUE_SOFT, BLUE),
+        ("check() · gpt-6.1-sol", "verifies vs image; suggests accept / relook / reanswer / abstain", AMBER_SOFT, AMBER),
+        ("finish(abstain)", "end with the latest checked answer, or abstain", PURPLE_SOFT, PURPLE),
     ]
-    for x, title, sub, fc, ec in tools:
-        box(ax, x, 6.25, 1.85, 1.45, fc, ec, title, sub, fs1=9.2, fs2=7.6)
-        arrow(ax, (9.0, 8.55), (x + 0.92, 7.7), color=PURPLE, lw=1.4)
+    for i, (title, sub, fc, ec) in enumerate(tools):
+        y = 8.45 - i * 0.85
+        h = 0.72
+        ax.add_patch(FancyBboxPatch((8.8, y), 4.85, h, boxstyle="round,pad=0.02,rounding_size=0.12",
+                                    linewidth=1.4, edgecolor=ec, facecolor=fc, zorder=3))
+        ax.text(8.95, y + h * 0.68, title, ha="left", va="center", fontsize=9.2, color=TEXT, weight="bold", zorder=4)
+        ax.text(8.95, y + h * 0.28, sub, ha="left", va="center", fontsize=7.5, color=MUTED, zorder=4)
 
-    # check -> next action
-    path(ax, [(10.75, 6.25), (10.75, 5.75), (9.3, 5.75), (9.3, 6.25)], color=AMBER,
-         label="reanswer(guidance)", label_xy=(10.0, 5.75), lc=AMBER)
-    path(ax, [(11.35, 6.25), (11.35, 5.2), (7.0, 5.2), (7.0, 6.25)], color=AMBER,
-         label="relook(focus)", label_xy=(8.2, 5.2), lc=AMBER)
-    path(ax, [(11.65, 6.25), (11.65, 5.75), (13.0, 5.75), (13.0, 6.25)], color=GREEN,
-         label="accept / abstain", label_xy=(12.55, 5.75), lc=GREEN)
-
-    box(ax, 4.1, 3.95, 3.4, 0.95, "white", SLATE, "Shared image + working memory",
-        "looks, answers, checks (per request)", fs1=9.5, fs2=7.8)
-    ax.text(13.95, 4.1, "budgets: ≤ 2 focused looks, ≤ 3 answers,\n≤ 16 agent steps; safety net checks the\nlatest answer if the controller stalls",
-            ha="right", va="bottom", fontsize=8, color=MUTED, style="italic")
+    box(ax, 4.1, 4.15, 3.0, 1.0, "white", SLATE, "Shared image + working memory",
+        "looks, answers, checks (per request)", fs1=9.2, fs2=7.8)
+    ax.text(8.65, 4.58, "Example episode: analyze → look → answer → check (partial; relook 'left base')\n"
+            "→ look(focus) → answer → check (verified) → finish",
+            ha="left", va="center", fontsize=7.8, color=TEXT, zorder=4, linespacing=1.3)
+    ax.text(8.65, 3.95, "budgets: ≤ 2 focused looks, ≤ 3 answers; a safety net checks the\nlatest answer if the controller stalls",
+            ha="left", va="center", fontsize=7.2, color=MUTED, style="italic")
 
     # ---- Output / guardrails -----------------------------------------------------------
     frame(ax, 14.6, 3.6, 4.1, 6.5, "Decision & safety", RED)
@@ -114,7 +123,7 @@ def main():
     box(ax, 14.9, 5.4, 3.5, 1.1, RED_SOFT, RED, "Guardrail", "failure categories, disclaimer,\nflag for review")
     box(ax, 14.9, 3.9, 3.5, 1.1, "white", RED, "Final state",
         "verified · partially verified · low confidence\n· review · abstained · rejected (non-radiology)", fs2=7.6)
-    path(ax, [(13.95, 6.95), (14.45, 6.95), (14.45, 8.95), (14.9, 8.95)], color=RED)
+    path(ax, [(13.65, 5.5), (14.45, 5.5), (14.45, 8.95), (14.9, 8.95)], color=RED, label="final", label_xy=(14.45, 7.2), lc=RED)
     for y0, y1 in [(8.4, 8.0), (6.9, 6.5), (5.4, 5.0)]:
         arrow(ax, (16.65, y0), (16.65, y1), color=RED)
     path(ax, [(14.9, 4.2), (14.4, 4.2), (14.4, 3.3), (3.6, 3.3), (3.6, 5.2), (3.1, 5.2)], color=SLATE,

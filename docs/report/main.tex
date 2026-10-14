@@ -117,9 +117,10 @@ question types. We evaluate on a seeded random sample of 200 test questions; no 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{system_diagram.png}
-  \caption{MedVisionQuery. A Haystack Agent controller calls question analysis, question-aware perception
-  (\texttt{look}), answer synthesis and image-grounded verification (\texttt{check}); \texttt{check}'s recommendation
-  drives a focused re-look, a revised answer, abstention or finish. A decision-and-safety stage keeps the
+  \caption{MedVisionQuery. One Haystack Agent (the controller) calls five tools in a loop, reading each result
+  before choosing the next: question analysis, question-aware perception (\texttt{look}), answer synthesis,
+  image-grounded verification (\texttt{check}) and \texttt{finish}. The tools are not agents; \texttt{check} only
+  recommends a re-look, a revised answer, abstention or acceptance, and the controller decides. A decision-and-safety stage keeps the
   best-verified answer, measures self-consistency and applies guardrails.}
   \label{fig:arch}
 \end{figure}

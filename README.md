@@ -82,7 +82,9 @@ A single model call conflates steps that fail in different ways. The system sepa
 
 A fresh Haystack `Agent` is created per request (`backend/agents/agentic_loop.py`). Its tools are bound to a
 per-request working memory that holds the image, the question analysis, every look, every answer and every check.
-The controller sees only short text results from each tool and chooses the next call:
+The controller sees only short text results from each tool and chooses the next call. There is one agent (the
+controller); the five tools are functions it calls, not agents. `check` only *recommends* the next step; the
+controller decides whether to follow it, which is what separates the loop from the fixed-order ablation.
 
 | Tool | Role | Model (default) | Notes |
 |---|---|---|---|
