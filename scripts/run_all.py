@@ -246,6 +246,17 @@ def now() -> str:
     return dt.datetime.now().isoformat(timespec="seconds")
 
 
+def keep_awake() -> None:
+    """Stop Windows from sleeping until this process exits, so every stage of a long run finishes (no-op elsewhere).
+
+    Each stage runs as a child process; holding the request here covers all of them, not just the evaluation.
+    """
+    if sys.platform == "win32":
+        import ctypes
+        ES_CONTINUOUS, ES_SYSTEM_REQUIRED = 0x80000000, 0x00000001
+        ctypes.windll.kernel32.SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0],
                                      formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__)
@@ -304,6 +315,7 @@ def main() -> None:
             sys.exit("Cancelled (nothing was spent).")
 
     os.environ["MEDVQA_RUN"] = run_id  # every stage (and the servers for screenshots) works on this run
+    keep_awake()
     if new_run:
         start_run(run_id, args.budget)
 
