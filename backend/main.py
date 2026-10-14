@@ -91,6 +91,6 @@ async def root():
             "samples": "GET /api/dataset/samples",
             "sample": "GET /api/dataset/sample/{id}",
             "sample_analysis": "GET /api/dataset/sample/{id}/analysis",
-            "evaluation": "GET /api/dataset/evaluation",
+            "evaluation": "GET /api/dataset/evaluation?run=<run_id>",
         }
     }

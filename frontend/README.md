@@ -24,7 +24,7 @@ npm run build
 ## Screenshots
 
 `scripts/capture-screenshots.mjs` drives a local Chrome/Edge with `puppeteer-core` and saves the Evaluation view
-and the Case Explorer traces of the showcase cases listed in `experiments/final_metrics.json`. The easiest way to run
+and the Case Explorer traces of the current run's showcase cases (its `final_metrics.json`). The easiest way to run
 it is `python scripts/run_all.py --stages screenshots` from the repo root, which starts and stops both servers.
 
 ```bash

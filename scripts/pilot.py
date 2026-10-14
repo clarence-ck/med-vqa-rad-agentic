@@ -11,7 +11,7 @@ Results go to experiments/<name>/results.json (not the Case Explorer cache); see
 
 Usage (run from repo root):
     python scripts/pilot.py --systems baseline,agentic_loop --n 20 --max-cost 0.75 --name pilots/5-my-pilot
-    python scripts/pilot.py --systems baseline,agentic_loop --from-eval-sample 200 --n 50 --name variance_repeat
+    python scripts/pilot.py --systems baseline,agentic_loop --from-eval-sample 200 --n 50 --out experiments/runs/<run_id>/variance.json
 """
 from __future__ import annotations
 
@@ -72,6 +72,8 @@ def main() -> None:
     parser.add_argument("--systems", default="baseline,agentic_text_only,agentic_with_image",
                         help=f"Comma-separated subset of {', '.join(ALL_SYSTEMS)}")
     parser.add_argument("--name", default="pilots/new-pilot", help="Results folder under experiments/")
+    parser.add_argument("--out", default=None,
+                        help="Results file (overrides --name); an existing file is resumed, skipping finished cases")
     parser.add_argument("--from-eval-sample", type=int, default=0, metavar="N",
                         help="Draw the --n cases from the first N evaluation cases (the Case Explorer sample), "
                              "e.g. 200, so repeats cover cases from the main run")
@@ -80,7 +82,7 @@ def main() -> None:
     unknown = set(systems) - set(ALL_SYSTEMS)
     if unknown:
         parser.error(f"unknown systems: {sorted(unknown)}")
-    output = OUTPUT_DIR / args.name / "results.json"
+    output = Path(args.out).resolve() if args.out else OUTPUT_DIR / args.name / "results.json"
 
     if args.from_eval_sample:
         test_ids = sorted(sample["id"] for sample in get_sample_cases(limit=args.from_eval_sample))
@@ -89,10 +91,35 @@ def main() -> None:
                     if item.get("split") == "test" and item["id"] not in EXCLUDED_SAMPLE_IDS]
     sample_ids = random.Random(args.seed).sample(test_ids, args.n)
 
-    rows, total_cost = [], 0.0
+    previous = json.loads(output.read_text(encoding="utf-8")) if args.out and output.exists() else {}
+    rows = previous.get("rows", [])
+    total_cost, new_cost = float(previous.get("total_cost_usd", 0.0)), 0.0
+    done_ids = {row["sample_id"] for row in rows}
+    if done_ids:
+        print(f"Resuming: {len(done_ids)} of {len(sample_ids)} cases already done")
+
+    def save() -> dict:
+        summary = {}
+        for name in systems:
+            done = [row[name] for row in rows]
+            summary[name] = {
+                "accuracy": sum(r["correct"] for r in done) / len(done) if done else 0.0,
+                "correct": sum(r["correct"] for r in done),
+                "cases": len(done),
+                "avg_duration_ms": int(sum(r["duration_ms"] for r in done) / len(done)) if done else 0,
+                "avg_calls": round(sum(r["usage"]["calls"] for r in done) / len(done), 1) if done else 0,
+                "cost_usd": round(sum(r["usage"]["cost_usd"] for r in done), 4),
+            }
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps({"seed": args.seed, "models": model_manifest(), "summary": summary,
+                                      "total_cost_usd": round(total_cost, 4), "rows": rows}, indent=2), encoding="utf-8")
+        return summary
+
     for index, sample_id in enumerate(sample_ids, start=1):
-        if total_cost >= args.max_cost:
-            print(f"Stopping: spend ${total_cost:.4f} reached --max-cost ${args.max_cost:.2f}")
+        if sample_id in done_ids:
+            continue
+        if new_cost >= args.max_cost:
+            print(f"Stopping: spend ${new_cost:.4f} reached --max-cost ${args.max_cost:.2f}")
             break
         sample = get_sample_by_id(sample_id)
         image_bytes = get_image_bytes(sample["image_name"])
@@ -121,25 +148,13 @@ def main() -> None:
             }
             case_cost += usage["cost_usd"]
         total_cost += case_cost
+        new_cost += case_cost
         rows.append(row)
+        save()  # after every case, so an interrupted run can resume
         marks = "  ".join(f"{name}={'Y' if row[name]['correct'] else 'N'}" for name in systems)
         print(f"[{index}/{len(sample_ids)}] {sample_id} {question[:50]!r:54} {marks}  ${case_cost:.4f} (total ${total_cost:.4f})", flush=True)
 
-    summary = {}
-    for name in systems:
-        done = [row[name] for row in rows]
-        summary[name] = {
-            "accuracy": sum(r["correct"] for r in done) / len(done) if done else 0.0,
-            "correct": sum(r["correct"] for r in done),
-            "cases": len(done),
-            "avg_duration_ms": int(sum(r["duration_ms"] for r in done) / len(done)) if done else 0,
-            "avg_calls": round(sum(r["usage"]["calls"] for r in done) / len(done), 1) if done else 0,
-            "cost_usd": round(sum(r["usage"]["cost_usd"] for r in done), 4),
-        }
-
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps({"seed": args.seed, "models": model_manifest(), "summary": summary,
-                                  "total_cost_usd": round(total_cost, 4), "rows": rows}, indent=2), encoding="utf-8")
+    summary = save()
 
     print("\nsystem               accuracy   avg time  avg calls  cost")
     for name, s in summary.items():

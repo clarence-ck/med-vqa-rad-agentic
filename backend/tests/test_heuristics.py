@@ -160,6 +160,24 @@ class ImportTests(unittest.TestCase):
             importlib.import_module(module)
 
 
+class RunSelectionTests(unittest.TestCase):
+    def test_current_run_is_latest_completed_unless_overridden(self):
+        import os
+        import tempfile
+        from pathlib import Path
+        from unittest import mock
+        from utils import runs
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(runs, "RUNS_DIR", Path(tmp)),                 mock.patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("MEDVQA_RUN", None)
+            self.assertIsNone(runs.current_run_id())
+            runs.write_run("2026-01-01_0900", {"status": "completed"})
+            runs.write_run("2026-02-01_0900", {"status": "running"})
+            self.assertEqual(runs.current_run_id(), "2026-01-01_0900")  # an unfinished run is not shown
+            self.assertEqual(runs.latest_unfinished_run_id(), "2026-02-01_0900")
+            os.environ["MEDVQA_RUN"] = "2026-02-01_0900"
+            self.assertEqual(runs.current_run_id(), "2026-02-01_0900")
+
+
 if __name__ == "__main__":
     unittest.main()
 

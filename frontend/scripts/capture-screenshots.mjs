@@ -4,7 +4,7 @@
 // cache already filled by scripts/run_case_explorer_cache.py. scripts/run_all.py --stages screenshots
 // starts both servers and runs this for you.
 //
-// Cases default to the showcase cases in experiments/final_metrics.json. Only pass --cases IDs that
+// Cases default to the showcase cases of the current run (final_metrics.json). Only pass --cases IDs that
 // are cached: opening an uncached case in Case Explorer runs all systems live (and costs money).
 //
 // Usage (from frontend/):
@@ -22,9 +22,26 @@ function arg(name, fallback) {
 const BASE_URL = arg('url', 'http://localhost:5173');
 const OUT_DIR = path.resolve(arg('out', '../eval-dashboard-screenshots'));
 
+// The current run: MEDVQA_RUN (set by scripts/run_all.py), else the latest completed run (see backend/utils/runs.py).
+function currentRunDir() {
+  const runsDir = path.resolve('../experiments/runs');
+  if (process.env.MEDVQA_RUN) return path.join(runsDir, process.env.MEDVQA_RUN);
+  const readRun = (id) => {
+    try {
+      return JSON.parse(fs.readFileSync(path.join(runsDir, id, 'run.json'), 'utf-8'));
+    } catch {
+      return null;
+    }
+  };
+  const all = fs.existsSync(runsDir) ? fs.readdirSync(runsDir).filter((id) => readRun(id)).sort() : [];
+  const completed = all.filter((id) => readRun(id).status === 'completed');
+  const id = (completed.length ? completed : all).at(-1);
+  return id ? path.join(runsDir, id) : null;
+}
+
 function showcaseCaseIds() {
   try {
-    const metrics = JSON.parse(fs.readFileSync(path.resolve('../experiments/final_metrics.json'), 'utf-8'));
+    const metrics = JSON.parse(fs.readFileSync(path.join(currentRunDir(), 'final_metrics.json'), 'utf-8'));
     return (metrics.showcase || []).map((item) => String(item.sample_id));
   } catch {
     return [];

@@ -20,21 +20,21 @@ from agents.agentic_loop import ABSTAIN_ANSWER, controller_path, run_agentic
 from agents.orchestrator import run_pipeline
 from agents.workflow_baseline import workflow_answer
 from utils.data_loader import get_sample_cases, get_sample_by_id, get_image_bytes, EXCLUDED_SAMPLE_IDS
-from utils import scoring
+from utils import runs, scoring
 from config import AGENT_MODE, CODE_VERSION, model_manifest
 from utils.usage import track_usage, summarize as summarize_usage
 from logger import get_logger, sample_id_var
 
 router = APIRouter(prefix="/api/dataset")
-CACHE_DIR = os.path.join(os.path.dirname(__file__), "..", ".case_explorer_cache")
-JUDGMENTS_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "experiments", "judge", "judgments.json")
 _JUDGED_SYSTEMS = ("baseline", "workflow", "agentic", "pipeline")
 
 
-def _load_judgments() -> dict:
+def _load_judgments(run_id: str | None) -> dict:
     """LLM-judge verdicts for open-ended answers the strict scorer marked wrong (scripts/judge_open_ended.py)."""
+    if not run_id:
+        return {}
     try:
-        with open(JUDGMENTS_PATH, "r", encoding="utf-8") as f:
+        with open(runs.run_dir(run_id) / "judgments.json", "r", encoding="utf-8") as f:
             return json.load(f).get("judgments", {})
     except (OSError, ValueError):
         return {}
@@ -222,10 +222,8 @@ def _get_sample_with_image(sample_id: int) -> tuple[dict | None, bytes | None]:
     return sample, image_bytes
 
 
-def _get_cache_path(sample_id: int, question: str) -> str:
-    os.makedirs(CACHE_DIR, exist_ok=True)
-    question_hash = md5(question.encode("utf-8")).hexdigest()[:10]
-    return os.path.join(CACHE_DIR, f"sample_{sample_id}_{question_hash}.json")
+def case_file_name(sample_id: int, question: str) -> str:
+    return f"sample_{sample_id}_{md5(question.encode('utf-8')).hexdigest()[:10]}.json"
 
 
 def _normalize_answer(text: str) -> str:
@@ -477,6 +475,18 @@ def _with_sample_image(payload: dict, sample: dict) -> dict:
 @router.get("/sample/{sample_id}/analysis")
 async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=False),
                               ablation: bool = Query(default=False)):
+    """UI entry point: shows the current run's result for the case; new analyses go to the live cache."""
+    return await analyze_case(sample_id, refresh=refresh, ablation=ablation)
+
+
+async def analyze_case(sample_id: int, refresh: bool = False, ablation: bool = False,
+                       cache_dir: str | os.PathLike | None = None):
+    """Run (or load) all systems on one case.
+
+    With cache_dir (an evaluation run's cases/ folder), results are read from and written there. Without it
+    (the UI), a live re-analysis wins over the current run's stored result, and new results go to the live
+    cache so they never change a run's record.
+    """
     token = sample_id_var.set(str(sample_id))
     try:
         sample, image_bytes = _get_sample_with_image(sample_id)
@@ -491,11 +501,20 @@ async def analyze_sample_case(sample_id: int, refresh: bool = Query(default=Fals
 
         question = sample.get("question", "")
         mime_type = sample.get("image_mime", "image/png")
-        cache_path = _get_cache_path(sample_id, question)
+        file_name = case_file_name(sample_id, question)
+        if cache_dir is not None:
+            cache_path = os.path.join(cache_dir, file_name)
+            candidates = [cache_path]
+        else:
+            cache_path = os.path.join(runs.LIVE_CACHE_DIR, file_name)
+            current = runs.current_run_id()
+            candidates = [cache_path] + ([os.path.join(runs.cases_dir(current), file_name)] if current else [])
+        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
 
         cached_payload = None
-        if not refresh and os.path.exists(cache_path):
-            with open(cache_path, "r", encoding="utf-8") as f:
+        existing = next((c for c in candidates if os.path.exists(c)), None)
+        if not refresh and existing:
+            with open(existing, "r", encoding="utf-8") as f:
                 cached_payload = json.load(f)
             if not ablation or cached_payload.get("pipeline_result"):
                 _log.info("Cache HIT for sample %d (question=%r)", sample_id, question[:80])
@@ -773,17 +792,13 @@ def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
 
 
 @router.get("/evaluation")
-async def get_evaluation_summary():
-    import time
+async def get_evaluation_summary(run: str | None = None):
+    """Aggregate metrics and per-case rows for one evaluation run (default: the current run)."""
     start_time = time.time()
-    
-    os.makedirs(CACHE_DIR, exist_ok=True)
-    cache_files = [
-        os.path.join(CACHE_DIR, filename)
-        for filename in os.listdir(CACHE_DIR)
-        if filename.endswith(".json")
-    ]
-    _log.info("Evaluation summary requested  cache_files=%d", len(cache_files))
+    run_id = run or runs.current_run_id()
+    case_dir = runs.cases_dir(run_id) if run_id else None
+    cache_files = sorted(str(f) for f in case_dir.glob("*.json")) if case_dir and case_dir.exists() else []
+    _log.info("Evaluation summary requested  run=%s  case_files=%d", run_id, len(cache_files))
 
     # Load all cache files concurrently
     load_start = time.time()
@@ -818,7 +833,7 @@ async def get_evaluation_summary():
     _log.info("Computed %d unique embeddings in %.2fs", len(embeddings_map), time.time() - embed_start)
 
     # Build evaluation rows using pre-computed embeddings
-    judgments = _load_judgments()
+    judgments = _load_judgments(run_id)
     rows = []
     for payload in payloads:
         try:
@@ -845,10 +860,13 @@ async def get_evaluation_summary():
         len(rows), skipped, total_time,
     )
     
+    run_info = runs.read_run(run_id) if run_id else {}
     summary = {
         "summary": _build_evaluation_summary(rows),
         "rows": rows,
         "skipped_files": skipped,
+        "run": {"run_id": run_id, "status": run_info.get("status"), "started": run_info.get("started"),
+                "finished": run_info.get("finished")},
     }
     
     # Clear embedding cache to free memory after evaluation is complete

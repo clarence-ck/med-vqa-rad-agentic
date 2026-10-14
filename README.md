@@ -36,7 +36,7 @@ Built for SUTD 51.511 Multimodal Generative AI (Template 1: Agentic Multimodal S
 ## Results at a glance
 
 <!-- generated:glance -->
-200 seeded-random VQA-RAD test questions (111 close-ended, 89 open-ended), all systems on the same answering model
+Run `2026-10-14_1330`: 200 seeded-random VQA-RAD test questions (111 close-ended, 89 open-ended), all systems on the same answering model
 (`gpt-6-luna`; the agentic loop and the fixed pipeline also use `gpt-6.1-sol` as verifier). Per-case times were
 measured with four cases running at once; the mean is pulled up by a few long re-look cases (actual run times are in
 [Run timings](#run-timings)). "Strict" uses the rule-based scorer; "judged" also accepts open-ended paraphrases
@@ -163,9 +163,11 @@ The April version described the image once, *without the question*, and every la
 
 ## Evaluation design
 
-Every number in this README and the report is generated from the cached results by `scripts/final_metrics.py`
-(`experiments/final_metrics.json`) and `scripts/update_docs.py`; text between `<!-- generated -->` markers is not
-edited by hand.
+Every evaluation is a **run** with its own folder, `experiments/runs/<run_id>/` (cases, judge verdicts, variance
+repeats, metrics, timings, cost); a later run never changes an earlier one, and `experiments/runs/README.md` lists
+them all. Every number in this README and the report comes from the current (latest completed) run via
+`scripts/final_metrics.py` and `scripts/update_docs.py`; text between `<!-- generated -->` markers is not edited by
+hand.
 
 - **Data:** the VQA-RAD test split (451 questions); a seeded random sample of 200 (`EVAL_SAMPLE_SEED=42`), excluding
   one known-bad item. The sample follows the natural mix (56% yes/no), so per-type numbers for small categories are
@@ -182,7 +184,7 @@ edited by hand.
     (≥ 0.95 short, ≥ 0.90 long).
 - **LLM judge** (`scripts/judge_open_ended.py`): for open-ended answers the strict scorer rejected, `gpt-6.1-sol`
   judges meaning equivalence, blinded to the system (answers shuffled and anonymised). A 30-verdict spot check agreed
-  on 29/30 credit decisions (AI-assisted review, `experiments/judge/review_sample.md`).
+  on 29/30 credit decisions (AI-assisted review, `judge_review_sample.md` in the run folder).
 - **Statistics:** 95% intervals are about ±6.7 points at n = 200; paired comparisons use the exact McNemar test.
 - **Variance:** the baseline and agentic loop were re-run on 50 of the evaluated cases.
 <!-- generated:cost -->
@@ -191,7 +193,8 @@ edited by hand.
 
 ### Run timings
 
-Wall-clock time of each stage, recorded by `scripts/run_all.py` (`experiments/run_log.json`):
+Wall-clock time of each stage of run `2026-10-14_1330`, recorded by `scripts/run_all.py`
+(`experiments/runs/2026-10-14_1330/run.json`):
 
 | Stage | Started | Finished | Wall clock | Work | Cost |
 |---|---|---|---|---|---|
@@ -395,21 +398,24 @@ python scripts/run_all.py --stages metrics,docs,diagram,report   # rebuild outpu
 
 | Stage | What it runs | Last cost | Last wall clock |
 |---|---|---|---|
-| `eval` | `run_case_explorer_cache.py --refresh --ablation --concurrency 4` (200 cases × 4 systems) | $3.43 | ~40 min |
-| `variance` | `pilot.py --from-eval-sample 200 --n 50 --name variance_repeat` | $0.54 | ~35 min |
-| `judge` | `judge_open_ended.py --fresh` | $0.11 | ~6 min |
-| `metrics` | `final_metrics.py` → `experiments/final_metrics.json` | free | seconds |
+| `eval` | `run_case_explorer_cache.py --ablation --concurrency 4` (200 cases × 4 systems) | $3.43 | ~40 min |
+| `variance` | `pilot.py --from-eval-sample 200 --n 50` (baseline + agentic loop again) | $0.54 | ~35 min |
+| `judge` | `judge_open_ended.py` | $0.11 | ~6 min |
+| `metrics` | `final_metrics.py` → `final_metrics.json` and `cases.csv` in the run folder | free | seconds |
 | `docs` | `update_docs.py` → README blocks and `docs/report/results.tex` | free | seconds |
 | `diagram` | `system_diagram.py` → `system_diagram.png` (+ copy for the report) | free | seconds |
 | `screenshots` | starts backend + frontend, `capture-screenshots.mjs` for the showcase cases | free | ~1 min |
 | `report` | `tectonic main.tex` → `docs/report/MGAI_Final_Report_Group9_revised.pdf` | free | ~1 min |
 <!-- /generated:reproduce -->
 
-- Paid stages ask for confirmation (or `--yes`) and share a spend cap, `--budget` (default $5). If a run is
-  interrupted, `--stages eval --resume` continues where it stopped.
+- Paid stages ask for confirmation (or `--yes`) and share one spend cap per run, `--budget` (default $5). The judge
+  runs before the variance repeats, so if money runs short only the repeats are cut.
+- An interrupted run (crash, closed laptop, budget reached) continues with `python scripts/run_all.py --resume`:
+  finished cases are kept, and the README and report are only rebuilt once the run is complete.
 - `screenshots` needs Node.js and a local Chrome or Edge; `report` needs `tectonic` (included in `environment.yml`).
 - Two things stay manual after a full re-run: re-checking the judge spot check
-  (`experiments/judge/review_sample.md`) and re-reading the narrative in *Systematic failure patterns* and the report.
+  (`judge_review_sample.md` in the run folder) and re-reading the narrative in *Systematic failure patterns* and the
+  report.
 - Every cached result records the git commit, models, reasoning efforts and token usage. Failed API calls are never
   cached; the runner retries them and counts their cost toward the cap.
 
@@ -435,10 +441,11 @@ backend/
   routes/                      /api/analyze*, /api/dataset/* (samples, analysis, evaluation)
   utils/                       scoring, answer normalisation, usage tracking, data loading
   tests/                       unit tests (no API calls)
-  .case_explorer_cache/        200-case evaluation results (one JSON per case)
+  utils/runs.py                where evaluation runs live; which run is current
 frontend/                      React 19 + Vite UI; scripts/capture-screenshots.mjs
 scripts/                       run_all.py (one command for everything) and the stages it runs
-experiments/                   final_metrics.json (all headline numbers), run_log.json, judge, variance repeats, pilots/
+experiments/runs/              one folder per evaluation run (cases/, judgments, variance, metrics, cases.csv)
+experiments/pilots/            20-case development pilots
 eval-dashboard-screenshots/    dashboard screenshots (regenerated by scripts/run_all.py)
 ```
 
@@ -455,7 +462,7 @@ eval-dashboard-screenshots/    dashboard screenshots (regenerated by scripts/run
 | GET | `/api/dataset/samples` | The 200 evaluation cases |
 | GET | `/api/dataset/sample/{id}` | One case with its image |
 | GET | `/api/dataset/sample/{id}/analysis?refresh=&ablation=` | Run (or load cached) all systems on a case |
-| GET | `/api/dataset/evaluation` | Aggregate metrics and per-case rows from the cache |
+| GET | `/api/dataset/evaluation?run=` | Aggregate metrics and per-case rows of a run (default: the current run) |
 
 ## License
 

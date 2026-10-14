@@ -9,13 +9,13 @@ model whether each strict-wrong open-ended answer means the same as the ground t
   judge does not know which system produced which answer.
 - Verdicts: correct / partially_correct / incorrect. Only "correct" adds credit.
 
-Output: experiments/judge/judgments.json (read by the Evaluation dashboard). A case is re-judged
+Output: experiments/runs/<run_id>/judgments.json (read by the Evaluation dashboard). A case is re-judged
 whenever its strict-wrong answers differ from the ones already judged, so re-runs never reuse a
 verdict for a different answer; --fresh discards all earlier verdicts.
 
 Usage (run from repo root):
-    python scripts/judge_open_ended.py --max-cost 0.6
-    python scripts/judge_open_ended.py --fresh       # after a full re-run
+    python scripts/judge_open_ended.py --max-cost 0.6              # the current run
+    python scripts/judge_open_ended.py --run-id 2026-10-16_0930 --fresh
 """
 from __future__ import annotations
 
@@ -35,10 +35,10 @@ from haystack.utils import Secret  # noqa: E402
 
 from config import MODELS, OPENAI_API_KEY, generation_kwargs  # noqa: E402
 from routes import dataset as ds  # noqa: E402
+from utils import runs  # noqa: E402
 from utils.json_utils import strip_json_fences  # noqa: E402
 from utils.usage import record_usage, summarize, track_usage  # noqa: E402
 
-OUTPUT = ROOT_DIR / "experiments" / "judge" / "judgments.json"
 SYSTEMS = ("baseline", "workflow", "agentic", "pipeline")
 
 PROMPT = """You are grading answers to a radiology visual question answering benchmark.
@@ -96,9 +96,14 @@ def main() -> None:
     parser.add_argument("--max-cost", type=float, default=0.6)
     parser.add_argument("--seed", type=int, default=7, help="Seed for shuffling candidate labels")
     parser.add_argument("--fresh", action="store_true", help="Discard earlier verdicts and judge every case again")
+    parser.add_argument("--run-id", default=None, help="Run under experiments/runs/ (default: the current run)")
     args = parser.parse_args()
 
-    rows = asyncio.run(ds.get_evaluation_summary())["rows"]
+    run_id = args.run_id or runs.current_run_id()
+    if not run_id:
+        sys.exit("No run yet: start one with python scripts/run_all.py")
+    OUTPUT = runs.run_dir(run_id) / "judgments.json"
+    rows = asyncio.run(ds.get_evaluation_summary(run=run_id))["rows"]
     todo = [row for row in rows if row["answer_style"] == "open_ended" and strict_wrong_candidates(row)]
     existing = {} if args.fresh or not OUTPUT.exists() else json.loads(OUTPUT.read_text(encoding="utf-8"))
     # Keep only verdicts that judged exactly the answers in the current results.
@@ -112,6 +117,11 @@ def main() -> None:
     print(f"{len(todo)} open-ended cases with strict-wrong answers; {len(judgments)} already judged; judge={MODELS['judge']}")
 
     generator = OpenAIChatGenerator(api_key=Secret.from_token(OPENAI_API_KEY), model=MODELS["judge"])
+
+    def save(cost: float) -> None:
+        OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+        OUTPUT.write_text(json.dumps({"judge_model": MODELS["judge"], "seed": args.seed, "cost_usd": round(cost, 4),
+                                      "judgments": judgments}, indent=2), encoding="utf-8")
     spent = float(existing.get("cost_usd", 0.0))
     with track_usage() as records:
         for index, row in enumerate(todo, start=1):
@@ -129,11 +139,10 @@ def main() -> None:
                 continue
             marks = " ".join(f"{s}={v['verdict'][:4]}" for s, v in judgments[key]["verdicts"].items())
             print(f"[{index}/{len(todo)}] {key} {marks}", flush=True)
+            save(spent + summarize(records)["cost_usd"])  # after every case, so an interrupted run can resume
         spent += summarize(records)["cost_usd"]
 
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(json.dumps({"judge_model": MODELS["judge"], "seed": args.seed, "cost_usd": round(spent, 4),
-                                  "judgments": judgments}, indent=2), encoding="utf-8")
+    save(spent)
     print(f"Saved {len(judgments)} judged cases -> {OUTPUT.relative_to(ROOT_DIR)}  (total judge spend ${spent:.4f})")
 
 

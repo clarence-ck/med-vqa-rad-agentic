@@ -22,8 +22,8 @@ backend/.env.*
 data/
 !data/.gitkeep
 
-# App cache
-#backend/.case_explorer_cache/
+# Analyses started from the UI (evaluation runs live in experiments/runs/)
+backend/.live_cache/
 
 # OS
 .DS_Store
@@ -34,4 +34,4 @@ Thumbs.db
 .idea/
 
 # Runtime logs
-backend/logs/*.log
+backend/logs/

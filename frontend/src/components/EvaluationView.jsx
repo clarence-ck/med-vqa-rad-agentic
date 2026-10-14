@@ -227,7 +227,12 @@ export default function EvaluationView({ loading, evaluationData, error, onRefre
       <section className="evaluation-header-strip">
         <div>
           <h1 className="evaluation-title">Evaluation Dashboard</h1>
-          <p className="evaluation-subtitle">Accuracy over cached Case Explorer runs, scored by backend/utils/scoring.py. Close-ended: yes/no answers must start with the correct word; binary terms (normal/abnormal, present/absent, …) must name the correct term and not its opposite. Counting: the numbers must match. Open-ended: every content word of the ground truth must appear (aliases and plurals folded), or at least 60% of them when the ground truth is longer than 3 words; left/right conflicts, and answers starting with “no” when the ground truth does not, are wrong; S-PubMedBert-MS-MARCO similarity is only a strict fallback (≥ 0.95 short, ≥ 0.90 long).</p>
+          {evaluationData?.run?.run_id && (
+            <span className="tag tag-blue" data-tooltip="Evaluation run shown (experiments/runs/). A later run never changes an earlier one.">
+              Run {evaluationData.run.run_id}{evaluationData.run.status === 'completed' ? '' : ` (${evaluationData.run.status})`}
+            </span>
+          )}
+          <p className="evaluation-subtitle">Accuracy over the cases of one evaluation run, scored by backend/utils/scoring.py. Close-ended: yes/no answers must start with the correct word; binary terms (normal/abnormal, present/absent, …) must name the correct term and not its opposite. Counting: the numbers must match. Open-ended: every content word of the ground truth must appear (aliases and plurals folded), or at least 60% of them when the ground truth is longer than 3 words; left/right conflicts, and answers starting with “no” when the ground truth does not, are wrong; S-PubMedBert-MS-MARCO similarity is only a strict fallback (≥ 0.95 short, ≥ 0.90 long).</p>
         </div>
         <div className="evaluation-actions">
           <button className="btn btn-secondary" onClick={onRefresh} disabled={loading}>

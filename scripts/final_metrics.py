@@ -1,13 +1,18 @@
-"""Compute every headline number quoted in the README and the report, from the cached results.
+"""Compute every headline number quoted in the README and the report, for one evaluation run.
 
-Uses the same evaluation code as the dashboard (routes/dataset.get_evaluation_summary), plus
-the variance repeats and the LLM-judge file. Writes experiments/final_metrics.json.
+Uses the same evaluation code as the dashboard (routes/dataset.get_evaluation_summary), plus the run's
+variance repeats and LLM-judge verdicts. Writes final_metrics.json and cases.csv into the run folder
+(experiments/runs/<run_id>/).
 
-Usage (run from repo root): python scripts/final_metrics.py
+Usage (run from repo root):
+    python scripts/final_metrics.py                    # the current run
+    python scripts/final_metrics.py --run-id 2026-10-16_0930
 """
 from __future__ import annotations
 
+import argparse
 import asyncio
+import csv
 import glob
 import json
 import statistics
@@ -20,10 +25,12 @@ sys.path.insert(0, str(ROOT_DIR / "backend"))
 from scipy.stats import binomtest  # noqa: E402
 
 from routes import dataset as ds  # noqa: E402
+from utils import runs  # noqa: E402
 
 SYSTEMS = ("baseline", "workflow", "agentic", "pipeline")
-OUTPUT = ROOT_DIR / "experiments" / "final_metrics.json"
-RUN_LOG = ROOT_DIR / "experiments" / "run_log.json"
+CSV_COLUMNS = ["sample_id", "question", "ground_truth_answer", "answer_style", "controller_path",
+               "verification_status", "self_consistency_level"] + [
+    f"{system}_{field}" for system in SYSTEMS for field in ("answer", "correct", "judged_correct")]
 
 
 def pct(x, digits=1):
@@ -74,9 +81,15 @@ def showcase_cases(rows):
 
 
 def main() -> None:
-    result = asyncio.run(ds.get_evaluation_summary())
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--run-id", default=None, help="Run under experiments/runs/ (default: the current run)")
+    run_id = parser.parse_args().run_id or runs.current_run_id()
+    if not run_id:
+        sys.exit("No run yet: start one with python scripts/run_all.py")
+    run_dir = runs.run_dir(run_id)
+    result = asyncio.run(ds.get_evaluation_summary(run=run_id))
     s, rows = result["summary"], result["rows"]
-    cache = [json.load(open(f, encoding="utf-8")) for f in glob.glob(str(ROOT_DIR / "backend" / ".case_explorer_cache" / "*.json"))]
+    cache = [json.load(open(f, encoding="utf-8")) for f in glob.glob(str(runs.cases_dir(run_id) / "*.json"))]
 
     metrics = {"cases": s["total_cases"], "close_ended_cases": s["close_ended_cases"], "open_ended_cases": s["open_ended_cases"],
                "systems": {}}
@@ -121,7 +134,7 @@ def main() -> None:
     answered = [r for r in rows if r["controller_path"] != "abstained"]
     metrics["agentic_answered"] = {"cases": len(answered), "strict": pct2(sum(r["agentic_correct"] for r in answered) / len(answered))}
 
-    variance_file = ROOT_DIR / "experiments" / "variance_repeat" / "results.json"
+    variance_file = run_dir / "variance.json"
     if variance_file.exists():
         rep = {r["sample_id"]: r for r in json.load(open(variance_file, encoding="utf-8"))["rows"]}
         main_rows = {r["sample_id"]: r for r in rows}
@@ -134,15 +147,16 @@ def main() -> None:
         metrics["variance"] = variance
 
     run_cost = sum(sum(v["cost_usd"] for v in (p.get("usage") or {}).values()) for p in cache)
-    judge_file = ROOT_DIR / "experiments" / "judge" / "judgments.json"
+    judge_file = run_dir / "judgments.json"
     metrics["costs_usd"] = {
         "evaluation_run": round(run_cost, 2),
         "variance_repeats": round(json.load(open(variance_file, encoding="utf-8")).get("total_cost_usd", 0), 2) if variance_file.exists() else None,
         "judge": round(json.load(open(judge_file, encoding="utf-8")).get("cost_usd", 0), 2) if judge_file.exists() else None,
     }
     # Wall-clock times of each stage, recorded by scripts/run_all.py.
-    metrics["run_timings"] = (json.loads(RUN_LOG.read_text(encoding="utf-8")).get("stages", {})
-                              if RUN_LOG.exists() else {})
+    run_info = runs.read_run(run_id)
+    metrics["run"] = {k: run_info.get(k) for k in ("run_id", "status", "started", "finished", "code_version")}
+    metrics["run_timings"] = {k: v for k, v in run_info.get("stages", {}).items() if k in ("eval", "variance", "judge")}
     metrics["showcase"] = showcase_cases(rows)
     agentic, baseline = metrics["systems"]["agentic"], metrics["systems"]["baseline"]
     baseline_cost = statistics.mean(p["usage"]["baseline"]["cost_usd"] for p in cache)
@@ -154,8 +168,13 @@ def main() -> None:
     }
     metrics["case_wall_time_mean_s"] = round(statistics.mean(p["duration_ms"] for p in cache) / 1000, 1)
 
-    OUTPUT.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
-    print(f"Wrote {OUTPUT.relative_to(ROOT_DIR)}: " + ", ".join(
+    output = run_dir / "final_metrics.json"
+    output.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
+    with open(run_dir / "cases.csv", "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=CSV_COLUMNS, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(sorted(rows, key=lambda r: r["sample_id"]))
+    print(f"Wrote {output.relative_to(ROOT_DIR)} and cases.csv: " + ", ".join(
         f"{k} {v['strict']}% strict / {v['judged']}% judged" for k, v in metrics["systems"].items()))
 
 
