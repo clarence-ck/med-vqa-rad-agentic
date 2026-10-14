@@ -39,9 +39,28 @@ class QuestionStyleTests(unittest.TestCase):
         for question in ["Is this a CT scan?", "What modality is used?", "Is this an x-ray?", "Is this an MRI?"]:
             self.assertEqual(_style(question), "modality_identification", question)
 
+    def test_findings_on_a_named_modality_are_not_modality_questions(self):
+        for question in [
+            "is a mass present in this xray?",
+            "can the optic nerve be visualized in this mri image?",
+            "are there any skeletal joints in the ct?",
+        ]:
+            self.assertNotEqual(_style(question), "modality_identification", question)
+
     def test_side_substring_does_not_trigger_location(self):
         self.assertNotEqual(_style("Is this considered normal?"), "location")
         self.assertEqual(_style("Which side is the lesion on?"), "location")
+
+    def test_either_or_questions_are_not_yes_no(self):
+        for question in [
+            "is this supratentorial or infratentorial?",
+            "are the structures in the pancreas cystic or solid?",
+            "is this a t1 weighted, t2 weighted, or flair image?",
+            "is the mass solid or cystic?",
+        ]:
+            self.assertNotIn(_style(question), {"yes_no", "presence_absence"}, question)
+        for question in ["Is there a fracture or dislocation?", "Are there nodules or masses?", "Can you see a mass or lesion?"]:
+            self.assertIn(_style(question), {"yes_no", "presence_absence"}, question)
 
 
 class YesNoNormalisationTests(unittest.TestCase):

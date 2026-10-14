@@ -101,6 +101,13 @@ class QuestionAnalyzer:
             "normal or abnormal", "abnormal or normal", "present or absent", "absent or present",
             "benign or malignant", "malignant or benign", "left or right", "right or left",
         ])
+        # "Is this supratentorial or infratentorial?" asks to pick an option, not yes/no. "Is there a fracture
+        # or dislocation?" and "Can you see X or Y?" stay yes/no.
+        open_choice = (
+            starts_binary
+            and re.search(r"\bor\b", q) is not None
+            and not re.match(r"^(is|are|was|were) (there|any)\b|^(do|does|did|can|could|will|would|has|have|should)\b", q)
+        )
 
         if starts_counting or (has_counting_signal and re.search(r"\bhow many\b|\bnumber of\b|\bcount\b", q)):
             return {
@@ -126,10 +133,13 @@ class QuestionAnalyzer:
                 "question_clarity": "clear",
             }
 
-        if _has_any(q, modality_words) or (
+        # A yes/no question only asks about the modality when it is about the image itself ("is this a CT?");
+        # "is a mass present in this x-ray?" asks about a finding.
+        about_image = not starts_binary or re.match(r"^(is|was) (this|it|the image)\b", q) is not None
+        if about_image and (_has_any(q, modality_words) or (
             _has_any(q, {"xray", "x-ray", "ct", "mri", "ultrasound", "radiograph"})
             and _has_any(q, {"what", "which", "identify", "determine", "is this", "is it"})
-        ):
+        )):
             return {
                 "question_type": "modality_identification",
                 "expected_answer_format": "short_phrase",
@@ -155,6 +165,14 @@ class QuestionAnalyzer:
                 "question_type": "explanation_request",
                 "expected_answer_format": "sentence",
                 "reasoning_type": "medical_knowledge",
+                "question_clarity": "clear",
+            }
+
+        if open_choice:
+            return {
+                "question_type": "other",
+                "expected_answer_format": "short_phrase",
+                "reasoning_type": "comparison",
                 "question_clarity": "clear",
             }
 

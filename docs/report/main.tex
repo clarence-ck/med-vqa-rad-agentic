@@ -48,7 +48,7 @@ strict rule-based scorer and a blinded LLM judge. The agentic loop matches the s
 (64.5\% vs.\ 63.5\% strict; 72.0\% vs.\ 70.0\% judged; McNemar $p=0.86$), clearly beats the fixed pipeline
 (+7.5 points, $p=0.02$) and the workflow (28.0\%), and is substantially more reliable: its verification and
 self-consistency signals predict errors, it abstains on hard cases, and only 2\% of its answers change across
-re-runs versus 12\% for the single prompt---at about 45$\times$ the cost. Code is available at
+re-runs versus 12\% for the single prompt---at about 41$\times$ the cost. Code is available at
 \url{https://github.com/clarence-ck/med-vqa-rad-agentic}.
 \end{abstract}
 
@@ -148,8 +148,8 @@ focus, \emph{reanswer} with guidance, or \emph{abstain}.
 
 \paragraph{Model and tool choices.} All roles use OpenAI models, sized by need and configurable per role. The
 controller and question analysis make simple decisions (\texttt{gpt-6-luna}, no/low reasoning effort); perception
-and answering use \texttt{gpt-6-luna} with medium effort, after a pilot showed that giving the answerer the image
-mattered far more than model size (50\%$\to$70\% on 20 cases). Verification uses a different, larger model
+and answering use \texttt{gpt-6-luna} with medium effort, and the answerer always sees the image: in a 20-case
+pilot that alone raised accuracy from 50\% to 70\%. Verification uses a different, larger model
 (\texttt{gpt-6.1-sol}) so that the answering model does not verify itself. Haystack's \texttt{Agent}/\texttt{Tool}
 abstraction provides the tool-calling loop and exit conditions; keeping the image in per-request memory rather than
 in the controller's context keeps the controller cheap. An earlier retrieval stage over SLAKE~\cite{liu2021slake} was
@@ -169,8 +169,8 @@ The system uses two modalities, the radiology image and the text question, and t
 determines the answer: the question (and any focus) steers what \texttt{look} examines; \texttt{answer} and
 \texttt{check} receive the image directly alongside the text observations; only the controller works purely in
 text. Our earlier design described the image once, \emph{without} the question, and passed only that text downstream;
-in a 20-case pilot all four failures of that design were ``cannot be determined from the image description'', and
-all four were answered correctly once the reasoner saw the image. Because the verifier sees the image, its
+in a 20-case pilot, giving the reasoner the image raised accuracy from 10/20 to 14/20, and typical text-only
+failures were ``cannot be determined from the provided image description''. Because the verifier sees the image, its
 ``explanation grounded in evidence'' and ``no contradictions'' checks are genuine cross-modal agreement checks.
 
 % ============================================================================
@@ -278,7 +278,7 @@ more often than right, it recovers on hard cases by re-examining specific region
 across runs, and every decision is auditable. Against a fixed multi-stage pipeline with identical models, letting a
 controller decide is clearly better---the benefit comes from \emph{adaptive control}, not from decomposition alone.
 
-\paragraph{Limitations.} About 45$\times$ the cost and 8$\times$ the latency of a single prompt for equal accuracy.
+\paragraph{Limitations.} About 41$\times$ the cost and 8$\times$ the latency of a single prompt for equal accuracy.
 The verifier shares the perception weaknesses of vision models, so agreement is not correctness. Two hundred cases
 give $\pm$6.7-point intervals and noisy per-type estimates; the LLM judge is an upper bound, spot-checked but not
 human-annotated. A retrieval stage did not help perception-bound questions and was removed; retrieval may still

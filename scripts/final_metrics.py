@@ -109,6 +109,14 @@ def main() -> None:
         "variance_repeats": {"start": "14:10:55", "end": "14:45:36", "wall_clock_s": 2081, "cases": 50, "concurrency": 1},
         "judge": {"start": "15:20:09", "end": "15:26:28", "wall_clock_s": 379, "cases": 82},
     }
+    agentic, baseline = metrics["systems"]["agentic"], metrics["systems"]["baseline"]
+    baseline_cost = statistics.mean(p["usage"]["baseline"]["cost_usd"] for p in cache)
+    agentic_cost = statistics.mean(p["usage"]["agentic"]["cost_usd"] for p in cache)
+    metrics["agentic_vs_baseline"] = {
+        "cost_ratio": round(agentic_cost / baseline_cost, 1),
+        "mean_latency_ratio": round(agentic["mean_time_s"] / baseline["mean_time_s"], 1),
+        "median_latency_ratio": round(agentic["median_time_s"] / baseline["median_time_s"], 1),
+    }
     metrics["case_wall_time_mean_s"] = round(statistics.mean(p["duration_ms"] for p in cache) / 1000, 1)
 
     OUTPUT.write_text(json.dumps(metrics, indent=2), encoding="utf-8")

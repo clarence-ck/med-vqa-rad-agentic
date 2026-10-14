@@ -180,5 +180,10 @@
       "cases": 82
     }
   },
+  "agentic_vs_baseline": {
+    "cost_ratio": 41.0,
+    "mean_latency_ratio": 8.5,
+    "median_latency_ratio": 8.1
+  },
   "case_wall_time_mean_s": 45.9
 }

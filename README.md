@@ -35,8 +35,8 @@ Built for SUTD 51.511 Multimodal Generative AI (Template 1: Agentic Multimodal S
 
 ## Results at a glance
 
-200 seeded-random VQA-RAD test questions (111 close-ended, 89 open-ended), all systems on the same model
-(`gpt-6-luna`), 0 API failures. Per-case times were measured with four cases running at once; the mean is pulled up
+200 seeded-random VQA-RAD test questions (111 close-ended, 89 open-ended), all systems on the same answering model
+(`gpt-6-luna`; the agentic loop and the fixed pipeline also use `gpt-6.1-sol` as verifier), 0 API failures. Per-case times were measured with four cases running at once; the mean is pulled up
 by a few long re-look cases (actual run times are in [Run timings](#run-timings)). "Strict" uses the rule-based scorer; "judged" also accepts open-ended paraphrases
 confirmed by a blinded LLM judge (see [Evaluation design](#evaluation-design)).
 
@@ -109,8 +109,8 @@ and/or checks before finishing. Paths observed on the 200-case evaluation:
 - **Haystack `Agent` + `Tool`** gives a tool-calling loop with typed tools and exit conditions. Keeping the image in
   per-request memory (not in the controller's context) keeps the controller cheap.
 - **One model family (OpenAI), roles sized by need.** The controller and question analysis are simple decisions, so
-  they use `gpt-6-luna` with low or no reasoning effort. Answering uses `gpt-6-luna` with medium effort: a 20-case
-  pilot showed that giving the answerer the image mattered far more than model size (50% → 70%).
+  they use `gpt-6-luna` with low or no reasoning effort. Answering uses `gpt-6-luna` with medium effort, and the answerer always sees
+  the image: in a 20-case pilot that alone raised accuracy from 50% to 70%.
 - **A different model verifies.** `check` (and the evaluation judge) use `gpt-6.1-sol`, so the model that answered
   does not verify its own answer.
 - All roles are configurable (`MODEL_<ROLE>`, `REASONING_EFFORT_<ROLE>` in `.env`); every call's tokens and cost are
@@ -137,9 +137,9 @@ The two modalities are the image and the text question. They interact at every s
 | `check()` | ✓ sent directly | answer, explanation, observations |
 | Controller | ✗ | short tool results only |
 
-The April version described the image once, *without the question*, and every later stage worked from that text. A
-20-case pilot showed this was the main cause of errors: all four failures of the text-only reasoner were "cannot be
-determined from the image description"; with the image, all four were answered correctly.
+The April version described the image once, *without the question*, and every later stage worked from that text. In a
+20-case pilot, giving the reasoner the image raised accuracy from 10/20 to 14/20; typical text-only failures were
+"unclear" or "cannot be determined from the provided image description".
 
 ---
 
@@ -301,7 +301,7 @@ multi-stage pipeline with the same models, letting a controller decide is clearl
 
 **Limitations**
 
-- About 45× the cost and 8× the latency of a single prompt for equal accuracy.
+- About 41× the cost and 8× the latency of a single prompt for equal accuracy.
 - The verifier shares the perception weaknesses of vision models; agreement is not correctness.
 - 200 cases give ±6.7-point intervals; per-type results for small categories are noisy.
 - The strict scorer under-credits paraphrases; the LLM judge is an upper bound, spot-checked but not human-annotated.
