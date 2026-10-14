@@ -50,6 +50,9 @@ AGENT_MODE = os.getenv("AGENT_MODE", "loop").strip().lower()
 # Send the image to the reasoning agent as well as the stage-1 summary (experiment flag).
 REASONER_SEES_IMAGE = os.getenv("REASONER_SEES_IMAGE", "false").strip().lower() in {"1", "true", "yes"}
 
+# Agentic loop: independent re-answers used to measure self-consistency (0 disables).
+SELF_CONSISTENCY_SAMPLES = int(os.getenv("SELF_CONSISTENCY_SAMPLES", "2"))
+
 # Reasoning models count hidden reasoning tokens toward this limit, so keep it generous.
 MAX_COMPLETION_TOKENS = int(os.getenv("MAX_COMPLETION_TOKENS", "8000"))
 

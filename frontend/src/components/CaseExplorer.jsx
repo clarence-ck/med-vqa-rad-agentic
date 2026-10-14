@@ -594,7 +594,7 @@ export default function CaseExplorer({
                             </span>
                           </div>
                           <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label" data-tooltip="Derived from the proportion of verification checks passed. 'High' means all checks passed; 'medium' means at most 1 check failed; 'low' otherwise.">Self-consistency</span>
+                            <span className="summary-stat-label" data-tooltip="Self-consistency: the reasoner is re-asked independently (default 2 times) and the re-answers are compared with the final answer. High = all agree; medium = at least half agree; low = most disagree (the case is flagged for review).">Self-consistency</span>
                             <span className={`tag ${getConfidenceTagClass(selfConsistencyLevel)}`}>
                               {selfConsistencyLevel}
                             </span>

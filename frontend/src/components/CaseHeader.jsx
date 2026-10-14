@@ -8,6 +8,7 @@ const AGENT_NAMES = {
   'Reasoning & Answer': 'Reasoning',
   'Verification': 'Verify',
   'Finish': 'Finish',
+  'Self-Consistency': 'Consistency',
 };
 
 function formatDuration(ms) {

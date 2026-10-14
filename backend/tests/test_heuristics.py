@@ -114,5 +114,14 @@ class AttemptSelectionTests(unittest.TestCase):
         self.assertEqual(select_best_attempt([verified, partial]), 0)  # regression is ignored
 
 
+class ConsistencyLevelTests(unittest.TestCase):
+    def test_levels(self):
+        from agents.agentic_loop import consistency_level
+        self.assertEqual(consistency_level(2, 2), "high")
+        self.assertEqual(consistency_level(1, 2), "medium")
+        self.assertEqual(consistency_level(0, 2), "low")
+        self.assertEqual(consistency_level(0, 0), "not_run")
+
+
 if __name__ == "__main__":
     unittest.main()

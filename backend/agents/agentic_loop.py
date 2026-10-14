@@ -13,7 +13,9 @@ Unlike the fixed pipeline (orchestrator.run_pipeline), the tool sequence depends
 answer(guidance) -> check. Budgets cap re-looks and answers.
 """
 import base64
+import contextvars
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 from haystack.components.agents import Agent
 from haystack.components.generators.chat import OpenAIChatGenerator
@@ -26,7 +28,6 @@ from agents.orchestrator import (
     ImageBlockerAbort,
     _build_cross_modal_agreement_signal,
     _build_guardrail_payload,
-    _build_self_consistency_signal,
     _categorize_failure_modes,
     _normalize_final_answer,
     run_pipeline,
@@ -34,8 +35,9 @@ from agents.orchestrator import (
 from agents.question_analyzer import QuestionAnalyzer
 from agents.reasoning_agent import ReasoningAgent
 from agents.verification_agent import VerificationAgent
-from config import AGENT_MODE, MODELS, OPENAI_API_KEY, generation_kwargs
+from config import AGENT_MODE, MODELS, OPENAI_API_KEY, SELF_CONSISTENCY_SAMPLES, generation_kwargs
 from logger import get_logger
+from utils import scoring
 from utils.usage import record_usage
 
 _log = get_logger("agents.agentic_loop")
@@ -47,6 +49,17 @@ ABSTAIN_ANSWER = "Unable to determine from this image."
 
 _VERIFICATION_RANK = {"verified": 4, "partially_verified": 3, "low_confidence": 2, "unsupported": 1}
 _CONFIDENCE_RANK = {"High": 3, "Medium": 2, "Low": 1}
+
+
+def consistency_level(agreeing: int, total: int) -> str:
+    """high = every resample agrees with the final answer; medium = at least half; low = fewer."""
+    if total <= 0:
+        return "not_run"
+    if agreeing == total:
+        return "high"
+    if agreeing * 2 >= total:
+        return "medium"
+    return "low"
 
 
 def select_best_attempt(checks: list[dict]) -> int:
@@ -230,6 +243,40 @@ class LoopContext:
                 f"relook_focus={result.get('relook_focus', '')!r}; reanswer_guidance={result.get('reanswer_guidance', '')!r}; "
                 f"issues={issues!r}")[:900]
 
+    def self_consistency(self, final_answer: str, samples: int) -> dict:
+        """Re-ask the reasoner `samples` times independently and measure agreement with the final answer."""
+        if samples <= 0 or self.abstained or not final_answer:
+            return {"level": "not_run", "method": "resampling", "agreeing_samples": 0, "total_samples": 0, "samples": []}
+        started = time.time()
+        observations = self.observations()
+
+        def one_sample(_):
+            return ReasoningAgent().run(
+                image_interpretation=observations,
+                question_analysis=self.question_analysis,
+                original_question=self.question,
+                image_bytes_b64=self.image_b64,
+                mime_type=self.mime_type,
+            )["result"].get("answer", "")
+
+        # copy_context() so usage tracking (a context variable) follows the worker threads
+        with ThreadPoolExecutor(max_workers=samples) as pool:
+            futures = [pool.submit(contextvars.copy_context().run, one_sample, i) for i in range(samples)]
+            answers = [f.result() for f in futures]
+
+        qa = self.question_analysis
+        close_ended = qa.get("expected_answer_format") == "yes_no" or qa.get("question_type") in {"yes_no", "presence_absence"}
+        agreeing = sum(
+            1 for answer in answers
+            if scoring.answers_agree(str(answer), str(final_answer), close_ended, qa.get("question_type"))
+        )
+        level = consistency_level(agreeing, len(answers))
+        self._record("Self-Consistency", "pass" if level == "high" else "warning" if level == "medium" else "fail",
+                     f"{agreeing}/{len(answers)} independent re-answers agree with the final answer",
+                     {"level": level, "final_answer": final_answer, "samples": answers}, started)
+        return {"level": level, "method": "resampling", "agreeing_samples": agreeing,
+                "total_samples": len(answers), "samples": answers}
+
     def finish(self, abstain: bool = False, reason: str = "") -> str:
         self.actions.append("finish(abstain)" if abstain else "finish")
         if self.answers and len(self.checks) < len(self.answers) and not abstain:
@@ -328,9 +375,23 @@ def run_agentic_loop(image_bytes: bytes, question: str, mime_type: str = "image/
     answer_text = _normalize_final_answer(answer_result.get("answer", ""), ctx.question_analysis, _image_analysis(ctx))
     answer_result["answer"] = answer_text
 
+    self_consistency = ctx.self_consistency(answer_text, SELF_CONSISTENCY_SAMPLES)
+
     failure_categories = _categorize_failure_modes(answer_result=answer_result, verification_result=verification_result)
+    if self_consistency["level"] == "low":
+        failure_categories.append({
+            "code": "self_inconsistent",
+            "label": "Self-inconsistent",
+            "description": "Independent re-answers mostly disagree with the final answer.",
+            "severity": "medium",
+        })
     guardrail = _build_guardrail_payload(answer_result=answer_result, verification_result=verification_result,
                                          failure_categories=failure_categories)
+    if self_consistency["level"] == "low":
+        guardrail["should_flag_for_review"] = True
+        guardrail["suggested_disclaimer"] = guardrail["suggested_disclaimer"] or (
+            "Repeated answers to this question were inconsistent. Please review with a qualified medical professional."
+        )
     relooks = sum(1 for look in ctx.looks if look.get("focus"))
     reanswers = max(0, len(ctx.answers) - 1)
     qa = ctx.question_analysis
@@ -346,7 +407,7 @@ def run_agentic_loop(image_bytes: bytes, question: str, mime_type: str = "image/
         "verification_notes": verification_result.get("verification_notes", ""),
         "issues_found": verification_result.get("issues_found", []),
         "failure_categories": failure_categories,
-        "self_consistency_signal": _build_self_consistency_signal(verification_result),
+        "self_consistency_signal": self_consistency,
         "cross_modal_agreement": _build_cross_modal_agreement_signal(verification_result),
         "fallback_recommendation": guardrail["fallback_recommendation"],
         "suggested_disclaimer": guardrail["suggested_disclaimer"],
