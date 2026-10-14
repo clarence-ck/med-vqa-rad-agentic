@@ -311,7 +311,8 @@ multi-stage pipeline with the same models, letting a controller decide is clearl
 
 ## What changed since the April 2026 version
 
-The April report's numbers (80% / 65% / 75%, screenshots at the top level of `eval-dashboard-screenshots/`) came from
+The April report's numbers (80% / 65% / 75%; its screenshots, logs and cached answers were removed and remain in git
+history at commit `b804160`) came from
 a pipeline and a scorer with defects found in a later review. Re-scoring the cached April answers with the fixed
 scorer gives roughly 62% / 30% / 50%. The main changes:
 
@@ -409,7 +410,7 @@ backend/
 frontend/                      React 19 + Vite UI; scripts/capture-screenshots.mjs
 scripts/                       evaluation runner, pilots, LLM judge, final metrics, dataset download, diagram
 experiments/                   pilot, variance and judge results; final_metrics.json (all headline numbers)
-eval-dashboard-screenshots/    2026-10/ = current; top level = April 2026 (superseded)
+eval-dashboard-screenshots/    dashboard screenshots of the final evaluation (2026-10/)
 ```
 
 ---
