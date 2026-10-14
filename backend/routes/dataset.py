@@ -26,6 +26,31 @@ from logger import get_logger, sample_id_var
 
 router = APIRouter(prefix="/api/dataset")
 CACHE_DIR = os.path.join(os.path.dirname(__file__), "..", ".case_explorer_cache")
+JUDGMENTS_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "experiments", "judge", "judgments.json")
+_JUDGED_SYSTEMS = ("baseline", "workflow", "agentic", "pipeline")
+
+
+def _load_judgments() -> dict:
+    """LLM-judge verdicts for open-ended answers the strict scorer marked wrong (scripts/judge_open_ended.py)."""
+    try:
+        with open(JUDGMENTS_PATH, "r", encoding="utf-8") as f:
+            return json.load(f).get("judgments", {})
+    except (OSError, ValueError):
+        return {}
+
+
+def _apply_judgments(row: dict, judgments: dict) -> None:
+    """Judged correctness = strict-correct, or judged 'correct' by the LLM judge (open-ended only)."""
+    verdicts = (judgments.get(str(row.get("sample_id"))) or {}).get("verdicts", {})
+    row["judged"] = bool(verdicts)
+    for system in _JUDGED_SYSTEMS:
+        strict = row.get(f"{system}_correct")
+        if strict is None:
+            row[f"{system}_judged_correct"] = None
+            continue
+        verdict = (verdicts.get(system) or {}).get("verdict")
+        row[f"{system}_judged_correct"] = bool(strict) or verdict == "correct"
+        row[f"{system}_judge_verdict"] = verdict
 _log = get_logger("routes.dataset")
 
 
@@ -276,6 +301,21 @@ def _build_accuracy_breakdown(rows: list[dict], group_key: str, preferred_order:
     ]
 
 
+def _judged_summary(rows: list[dict]) -> dict:
+    """Accuracy when LLM-judged paraphrases count as correct (upper bound to the strict scorer)."""
+    if not any(row.get("judged") for row in rows):
+        return {"judge_available": False}
+    summary = {"judge_available": True, "judged_cases": sum(1 for row in rows if row.get("judged"))}
+    open_rows = [row for row in rows if row.get("answer_style") == "open_ended"]
+    for system in _JUDGED_SYSTEMS:
+        key = f"{system}_judged_correct"
+        scored = [row for row in rows if row.get(key) is not None]
+        scored_open = [row for row in open_rows if row.get(key) is not None]
+        summary[f"{system}_judged_accuracy"] = _subset_accuracy(scored, key) if scored else None
+        summary[f"{system}_judged_open_ended_accuracy"] = _subset_accuracy(scored_open, key) if scored_open else None
+    return summary
+
+
 def _build_evaluation_summary(rows: list[dict]) -> dict:
     total = len(rows)
     if total == 0:
@@ -363,6 +403,7 @@ def _build_evaluation_summary(rows: list[dict]) -> dict:
         "by_controller_path": _build_accuracy_breakdown(rows, "controller_path", ["direct", "relook", "reanswer", "abstained", "pipeline"]),
         "pipeline_cases": len(pipeline_rows),
         "pipeline_accuracy": pipeline_subset(rows),
+        **_judged_summary(rows),
         "pipeline_close_ended_accuracy": pipeline_subset(close_ended_rows),
         "pipeline_open_ended_accuracy": pipeline_subset(open_ended_rows),
         "avg_pipeline_duration_ms": int(sum(pipeline_ms) / len(pipeline_ms)) if pipeline_ms else None,
@@ -783,12 +824,14 @@ async def get_evaluation_summary():
     _log.info("Computed %d unique embeddings in %.2fs", len(embeddings_map), time.time() - embed_start)
 
     # Build evaluation rows using pre-computed embeddings
+    judgments = _load_judgments()
     rows = []
     for payload in payloads:
         try:
             row = _build_evaluation_row_batch(payload, embeddings_map)
             if row.get("sample_id") in EXCLUDED_SAMPLE_IDS:
                 continue
+            _apply_judgments(row, judgments)
             rows.append(row)
         except Exception as exc:
             _log.warning("Error building evaluation row: %s", exc)

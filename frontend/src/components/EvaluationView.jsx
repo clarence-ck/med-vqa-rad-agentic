@@ -72,7 +72,7 @@ function formatLabel(value) {
   return String(value || 'unknown').replace(/_/g, ' ');
 }
 
-function SystemPerformanceCard({ title, icon, accuracy, avgDuration, totalDuration }) {
+function SystemPerformanceCard({ title, icon, accuracy, judgedAccuracy, avgDuration, totalDuration }) {
   return (
     <div className="card evaluation-system-card">
       <div className="card-header">
@@ -82,6 +82,15 @@ function SystemPerformanceCard({ title, icon, accuracy, avgDuration, totalDurati
         <div className="evaluation-system-stat">
           <div className="evaluation-list-subtitle">Overall accuracy (strict scorer)</div>
           <div className="evaluation-metric-value">{formatPercent(accuracy)}</div>
+          {judgedAccuracy !== null && judgedAccuracy !== undefined && (
+            <div
+              className="evaluation-list-subtitle"
+              data-tooltip="Upper bound: open-ended answers the strict scorer rejected but a blinded LLM judge (gpt-6.1-sol) rated as meaning the same as the ground truth also count as correct."
+              data-tooltip-align="left"
+            >
+              LLM-judged: {formatPercent(judgedAccuracy)}
+            </div>
+          )}
         </div>
         <div className="evaluation-system-stat">
           <div className="evaluation-list-subtitle">Avg runtime</div>
@@ -218,6 +227,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
           <section className="evaluation-system-grid animate-fade-in">
             <SystemPerformanceCard
               title="Baseline"
+              judgedAccuracy={summary.baseline_judged_accuracy}
               icon="⚡"
               accuracy={summary.baseline_accuracy}
               avgDuration={summary.avg_baseline_duration_ms}
@@ -225,6 +235,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
             />
             <SystemPerformanceCard
               title="Workflow"
+              judgedAccuracy={summary.workflow_judged_accuracy}
               icon="🧭"
               accuracy={summary.workflow_accuracy}
               avgDuration={summary.avg_workflow_duration_ms}
@@ -232,6 +243,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
             />
             <SystemPerformanceCard
               title="Agentic (controller loop)"
+              judgedAccuracy={summary.agentic_judged_accuracy}
               icon="🔗"
               accuracy={summary.agentic_accuracy}
               avgDuration={summary.avg_agentic_duration_ms}
@@ -242,6 +254,7 @@ export default function EvaluationView({ loading, evaluationData, onRefresh }) {
                 title={`Fixed Pipeline — ablation (${summary.pipeline_cases} cases)`}
                 icon="🧱"
                 accuracy={summary.pipeline_accuracy}
+                judgedAccuracy={summary.pipeline_judged_accuracy}
                 avgDuration={summary.avg_pipeline_duration_ms}
                 totalDuration={summary.total_pipeline_duration_ms}
               />
