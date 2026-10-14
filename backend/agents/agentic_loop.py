@@ -53,8 +53,12 @@ _CONFIDENCE_RANK = {"High": 3, "Medium": 2, "Low": 1}
 
 
 def controller_path(actions: list[str], abstained: bool = False) -> str:
-    """Summarise what the controller did: direct, relook, reanswer or abstained."""
-    if abstained or any(action.startswith("finish(abstain") for action in actions):
+    """Summarise what the controller did: direct, relook, reanswer or abstained.
+
+    `abstained` must be the episode outcome: a refused finish(abstain) call (e.g. the
+    latest answer was still unchecked) appears in `actions` but is not an abstention.
+    """
+    if abstained:
         return "abstained"
     if any(action.startswith("look(") for action in actions):
         return "relook"

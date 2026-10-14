@@ -15,7 +15,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 
 from agents.baseline import baseline_answer
-from agents.agentic_loop import run_agentic
+from agents.agentic_loop import controller_path, run_agentic
 from agents.orchestrator import run_pipeline
 from agents.workflow_baseline import workflow_answer
 from utils.data_loader import get_sample_cases, get_sample_by_id, get_image_bytes, EXCLUDED_SAMPLE_IDS
@@ -695,7 +695,11 @@ def _build_evaluation_row_batch(payload: dict, embeddings_map: dict) -> dict:
         "pipeline_answer": pipeline_answer_text,
         "pipeline_correct": pipeline_correct,
         "pipeline_duration_ms": payload.get("pipeline_duration_ms"),
-        "controller_path": agentic_result.get("controller_path") or ("pipeline" if agentic_result.get("agent_mode") == "pipeline" else "unknown"),
+        "controller_path": (
+            controller_path(agentic_result.get("controller_actions") or [], bool(agentic_result.get("abstained")))
+            if agentic_result.get("agent_mode") == "loop"
+            else ("pipeline" if agentic_result.get("agent_mode") == "pipeline" else "unknown")
+        ),
         "controller_actions": agentic_result.get("controller_actions", []),
         "agentic_attempts": agentic_result.get("attempts"),
         "baseline_token_f1": round(_token_f1(baseline_normalized, ground_truth_normalized), 4),

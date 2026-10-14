@@ -114,6 +114,16 @@ class AttemptSelectionTests(unittest.TestCase):
         self.assertEqual(select_best_attempt([verified, partial]), 0)  # regression is ignored
 
 
+class ControllerPathTests(unittest.TestCase):
+    def test_refused_abstain_is_not_an_abstention(self):
+        from agents.agentic_loop import controller_path
+        actions = ["analyze_question", "look", "answer", "finish(abstain)", "check", "finish"]
+        self.assertEqual(controller_path(actions, abstained=False), "direct")
+        self.assertEqual(controller_path(actions + ["finish(abstain)"], abstained=True), "abstained")
+        self.assertEqual(controller_path(["look", "answer", "check", "look(left kidney)", "answer(guided)"]), "relook")
+        self.assertEqual(controller_path(["look", "answer", "check", "answer(guided)", "check"]), "reanswer")
+
+
 class ConsistencyLevelTests(unittest.TestCase):
     def test_levels(self):
         from agents.agentic_loop import consistency_level
