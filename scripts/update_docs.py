@@ -37,7 +37,7 @@ SYSTEM_LABELS = {
 def p_value(p: float) -> str:
     if p < 0.001:
         return "< 0.001"
-    return f"{p:.3f}" if p < 0.01 else f"{p:.2f}"
+    return f"{p:.3f}" if p < 0.1 else f"{p:.2f}"
 
 
 def minutes(seconds: float) -> str:
@@ -92,8 +92,20 @@ def block_glance(m: dict, d: dict) -> str:
         for k in ("baseline", "workflow", "agentic", "pipeline"))
     ab, ap = pair["agentic_vs_baseline_strict"], pair["agentic_vs_pipeline_strict"]
     abj, apj = pair["agentic_vs_baseline_judged"], pair["agentic_vs_pipeline_judged"]
-    tie = ab["p"] >= 0.05 and abj["p"] >= 0.05
     flips = d["flip_pct"]
+    ahead = s["agentic"]["strict"] > s["baseline"]["strict"]
+    if ab["p"] < 0.05 and abj["p"] < 0.05:
+        verdict = "agentic ahead, significant on both scores" if ahead else "single-shot ahead, significant on both scores"
+    elif abj["p"] < 0.05 or ab["p"] < 0.05:
+        which = "judged" if abj["p"] < 0.05 else "strict"
+        verdict = f"agentic ahead, significant on the {which} score only" if ahead else f"single-shot ahead on the {which} score only"
+    else:
+        verdict = "no significant difference"
+    blind = m.get("blind_reading")
+    blind_line = (f"\n- **Agentic vs its verifier model alone** (`gpt-6.1-sol` answering in one shot, the check's blind reading): "
+                  f"{s['agentic']['strict']}% vs {blind['strict']}% strict (p = {p_value(blind['agentic_vs_blind']['p'])}), "
+                  f"so the loop's lead over the single prompt may come partly from its larger verifier."
+                  if blind else "")
     return f"""Run `{m['run']['run_id']}`: {m['cases']} seeded-random VQA-RAD test questions ({m['close_ended_cases']} close-ended, {m['open_ended_cases']} open-ended), all systems on the same answering model
 (`gpt-6-luna`; the agentic loop and the fixed pipeline also use `gpt-6.1-sol` as verifier). Per-case times were
 measured with four cases running at once; the mean is pulled up by a few long re-look cases (actual run times are in
@@ -104,10 +116,10 @@ judge, `gpt-6-astra` (see [Evaluation design](#evaluation-design)).
 |---|---|---|---|---|
 {rows}
 
-- **Agentic vs single-shot: {'a tie' if tie else 'a significant difference'}** (exact McNemar p = {p_value(ab['p'])} strict, {p_value(abj['p'])} judged).
+- **Agentic vs single-shot: {verdict}** ({s['agentic']['strict'] - s['baseline']['strict']:+.1f} points strict, p = {p_value(ab['p'])}; {s['agentic']['judged'] - s['baseline']['judged']:+.1f} judged, p = {p_value(abj['p'])}; exact McNemar).
 - **Agentic vs fixed pipeline:** {d['vs_pipeline_strict']:+} points strict (p = {p_value(ap['p'])}), {d['vs_pipeline_judged']:+} judged (p = {p_value(apj['p'])}).
 - **Reliability:** verification and self-consistency signals predict errors, the loop can abstain, and
-  {flips.get('agentic', '–')}% of its answers flip between runs vs {flips.get('baseline', '–')}% for the single prompt."""
+  {flips.get('agentic', '–')}% of its answers flip between runs vs {flips.get('baseline', '–')}% for the single prompt.{blind_line}"""
 
 
 def block_paths(m: dict, d: dict) -> str:
@@ -255,7 +267,7 @@ Representative cases, chosen automatically by `scripts/final_metrics.py` (screen
 def block_limit_cost(m: dict, d: dict) -> str:
     r = m["agentic_vs_baseline"]
     return (f"- About {rounded(r['cost_ratio'])}× the cost and {rounded(r['median_latency_ratio'])}× the (median) latency "
-            f"of a single prompt for similar accuracy.")
+            f"of a single prompt, for {m['systems']['agentic']['strict'] - m['systems']['baseline']['strict']:+.1f} points of strict accuracy.")
 
 
 def block_question_cost(m: dict, d: dict) -> str:

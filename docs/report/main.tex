@@ -45,11 +45,13 @@ look at the image, answer, verify the answer \emph{against the image}, and wheth
 revise, abstain or finish. Perception is question-aware, the answerer and the verifier both see the image, and a
 different, larger model verifies. We evaluate on \NCases{} randomly sampled VQA-RAD test questions against a single-prompt
 baseline, a hand-designed workflow and a fixed-pipeline ablation, all on the same answering model, scoring with a
-strict rule-based scorer and a blinded LLM judge. The agentic loop matches the single prompt in accuracy
-(\AgStrict\% vs.\ \BaseStrict\% strict; \AgJudged\% vs.\ \BaseJudged\% judged; McNemar $p=\PairBaseP$), beats the
-fixed pipeline (\VsPlStrict{} points, $p=\PairPlP$) and the workflow (\WfStrict\%), and is more reliable: its
-verification and self-consistency signals predict errors, it abstains on hard cases, and only \VarAgFlip\% of its
-answers change across re-runs versus \VarBaseFlip\% for the single prompt---at about \CostRatio$\times$ the cost. Code is available at
+strict rule-based scorer and a blinded LLM judge. The agentic loop is the most accurate system on
+the same answering model: \AgStrict\% vs.\ \BaseStrict\% strict and \AgJudged\% vs.\ \BaseJudged\% judged for the
+single prompt (McNemar $p=\PairBaseP$ strict, $p=\PairBaseJP$ judged), ahead of the fixed pipeline
+(\VsPlStrict{} points, $p=\PairPlP$) and the workflow (\WfStrict\%). It does not beat its larger verifier model
+answering alone (\BlindStrict\%), so part of its lead may come from that model. It is more reliable---verification and
+self-consistency signals predict errors, it can abstain, and \VarAgFlip\% of its answers change across re-runs versus
+\VarBaseFlip\% for the single prompt---at about \CostRatio$\times$ the cost. Code is available at
 \url{https://github.com/clarence-ck/med-vqa-rad-agentic}.
 \end{abstract}
 
@@ -207,7 +209,7 @@ three words), with left/right conflicts and denials counted wrong and embedding 
 only as a strict fallback. Because word matching both rejects correct paraphrases and accepts vague answers that
 contain the reference word, a \emph{blinded LLM judge} (\texttt{gpt-6-astra}, a model that neither answers nor
 verifies in any system; answers shuffled and anonymised) scores every open-ended answer as a second, independent
-measure. Paired comparisons use the exact McNemar test; 95\% intervals are about
+measure; a 30-verdict spot check agreed with 28 credit decisions (the other two lenient, on workflow answers). Paired comparisons use the exact McNemar test; 95\% intervals are about
 $\pm$\CIHalf{} points. The baseline and agentic loop were re-run on \VarCases{} cases to measure stability. API cost of the
 evaluation: \$\CostTotal{} (\$\CostRun{} runs, \$\CostRepeats{} repeats, \$\CostJudge{} judge). Wall-clock time:
 \MinEval\,min for the main run (four cases at a time), \MinRepeats\,min for the sequential repeats and
@@ -230,12 +232,14 @@ evaluation: \$\CostTotal{} (\$\CostRun{} runs, \$\CostRepeats{} repeats, \$\Cost
   \end{tabular}
 \end{table}
 
-\paragraph{Results.} Table~\ref{tab:main}. The agentic loop and the single prompt are statistically
-indistinguishable (\PairBaseA{} vs.\ \PairBaseB{} discordant cases, $p=\PairBaseP$; judged $p=\PairBaseJP$). Against
-the same models in a fixed order the controller's decisions help (\PairPlA{} vs.\ \PairPlB, $p=\PairPlP$; judged
-\PairPlJA{} vs.\ \PairPlJB, $p=\PairPlJP$), and both far exceed the hand-designed workflow. On cases it re-examined
-the loop scored \PathRelookAg\% versus \PathRelookBase\% for the single prompt, and on revised cases \PathReanswerAg\%
-versus \PathReanswerBase\% (Table~\ref{tab:paths}).
+\paragraph{Results.} Table~\ref{tab:main}. The agentic loop leads the single prompt (\PairBaseA{} vs.\ \PairBaseB{}
+discordant cases, $p=\PairBaseP$); under the judge the lead is significant (\PairBaseJA{} vs.\ \PairBaseJB,
+$p=\PairBaseJP$). Against the same models in a fixed order it leads but not significantly (\PairPlA{} vs.\
+\PairPlB, $p=\PairPlP$; judged $p=\PairPlJP$), and both far exceed the hand-designed workflow. Gains concentrate
+where the controller acts: on re-examined cases the loop scored \PathRelookAg\% versus \PathRelookBase\% for the
+single prompt, and on revised cases \PathReanswerAg\% versus \PathReanswerBase\% (Table~\ref{tab:paths}). The verifier
+model answering alone---the check's blind reading---scores \BlindStrict\% strict ($p=\BlindAgP$ against the loop),
+so the loop does not exceed, and numerically trails, the larger model it consults.
 
 \begin{table}[t]
   \centering
@@ -281,15 +285,16 @@ accuracy by question type and by controller path, disagreement and a per-case ta
 % ============================================================================
 \section{Reflection}
 % ============================================================================
-\paragraph{When agentic behaviour is beneficial.} Not for raw accuracy on this benchmark: a strong single prompt on
-the same model is as accurate. The agentic system pays off when answers must be \emph{trustworthy}: its
-verification and consistency signals identify likely errors, it abstains on cases where the single prompt is wrong
-more often than right, it recovers on hard cases by re-examining specific regions, its answers are far more stable
-across runs, and every decision is auditable. Against a fixed multi-stage pipeline with identical models, letting a
-controller decide is clearly better---the benefit comes from \emph{adaptive control}, not from decomposition alone.
+\paragraph{When agentic behaviour is beneficial.} The loop is the most accurate system built on the same answering
+model, and its gains sit exactly where the controller intervenes (revised and re-examined cases). The accuracy gain
+over a single prompt is modest and not significant on every score, and the loop does not beat its larger verifier
+answering alone, so we attribute part of it to that model rather than to control alone. Its clearer benefit is
+\emph{trustworthiness}: verification and consistency signals identify likely errors, it abstains rather than guess,
+its answers change less between runs, and every decision is auditable---valuable in clinical review, at a
+substantial cost.
 
-\paragraph{Limitations.} About \CostRatio$\times$ the cost and \LatRatio$\times$ the median latency of a single prompt for
-similar accuracy.
+\paragraph{Limitations.} About \CostRatio$\times$ the cost and \LatRatio$\times$ the median latency of a single prompt for a
+modest accuracy gain.
 The verifier shares the perception weaknesses of vision models, so agreement is not correctness. \NCases{} questions
 give $\pm$\CIHalf-point intervals and noisy per-type estimates; the LLM judge is itself a model, spot-checked but not
 human-annotated. A retrieval stage did not help perception-bound questions and was removed; retrieval may still

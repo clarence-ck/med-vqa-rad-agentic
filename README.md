@@ -36,7 +36,7 @@ Built for SUTD 51.511 Multimodal Generative AI (Template 1: Agentic Multimodal S
 ## Results at a glance
 
 <!-- generated:glance -->
-Run `2026-10-14_1330`: 200 seeded-random VQA-RAD test questions (111 close-ended, 89 open-ended), all systems on the same answering model
+Run `2026-10-15_0555`: 300 seeded-random VQA-RAD test questions (169 close-ended, 131 open-ended), all systems on the same answering model
 (`gpt-6-luna`; the agentic loop and the fixed pipeline also use `gpt-6.1-sol` as verifier). Per-case times were
 measured with four cases running at once; the mean is pulled up by a few long re-look cases (actual run times are in
 [Run timings](#run-timings)). "Strict" uses the rule-based scorer; "judged" scores open-ended answers with a blinded LLM
@@ -44,15 +44,16 @@ judge, `gpt-6-astra` (see [Evaluation design](#evaluation-design)).
 
 | System | Strict accuracy | Judged accuracy | Time / case (mean · median) | Cost / case |
 |---|---|---|---|---|
-| Single-shot baseline | 63.5% | 70.0% | 4.4 s · 3.6 s | $0.0002 |
-| Workflow baseline (hand-designed) | 28.0% | 31.0% | 9.0 s · 8.7 s | $0.0005 |
-| **Agentic controller loop** | **64.5%** | **72.0%** | 37.2 s · 29.3 s | $0.0094 |
-| Fixed pipeline (ablation) | 57.0% | 61.5% | 38.1 s · 29.4 s | $0.0070 |
+| Single-shot baseline | 65.7% | 67.3% | 3.6 s · 2.8 s | $0.0002 |
+| Workflow baseline (hand-designed) | 32.3% | 34.7% | 7.2 s · 6.8 s | $0.0005 |
+| **Agentic controller loop** | **70.3%** | **73.3%** | 42.4 s · 27.6 s | $0.0139 |
+| Fixed pipeline (ablation) | 67.3% | 69.3% | 30.2 s · 24.0 s | $0.0067 |
 
-- **Agentic vs single-shot: a tie** (exact McNemar p = 0.86 strict, 0.61 judged).
-- **Agentic vs fixed pipeline:** +7.5 points strict (p = 0.02), +10.5 judged (p = 0.002).
+- **Agentic vs single-shot: agentic ahead, significant on the judged score only** (+4.6 points strict, p = 0.070; +6.0 judged, p = 0.015; exact McNemar).
+- **Agentic vs fixed pipeline:** +3.0 points strict (p = 0.23), +4.0 judged (p = 0.081).
 - **Reliability:** verification and self-consistency signals predict errors, the loop can abstain, and
-  2% of its answers flip between runs vs 12% for the single prompt.
+  8% of its answers flip between runs vs 13% for the single prompt.
+- **Agentic vs its verifier model alone** (`gpt-6.1-sol` answering in one shot, the check's blind reading): 70.3% vs 73.0% strict (p = 0.33), so the loop's lead over the single prompt may come partly from its larger verifier.
 <!-- /generated:glance -->
 
 ![Evaluation dashboard](eval-dashboard-screenshots/01-eval-kpi-cards.png)
@@ -102,10 +103,10 @@ and/or checks before finishing. Paths observed in the current run:
 <!-- generated:paths -->
 | Path | Cases | Tool sequence |
 |---|---|---|
-| direct | 141 | analyze → look → answer → check → finish |
-| relook | 19 | … → check → look(focus) → answer(guided) → check → finish |
-| reanswer | 29 | … → check → answer(guided) → check → finish |
-| abstained | 11 | … → check → finish(abstain) |
+| direct | 181 | analyze → look → answer → check → finish |
+| relook | 67 | … → check → look(focus) → answer(guided) → check → finish |
+| reanswer | 34 | … → check → answer(guided) → check → finish |
+| abstained | 18 | … → check → finish(abstain) |
 <!-- /generated:paths -->
 
 ### Why these models and tools
@@ -186,26 +187,27 @@ hand.
   right or wrong by the strict rules, for meaning equivalence with the ground truth, blinded to the system (answers
   shuffled and anonymised). Its verdict is the "judged" score for open-ended answers; yes/no answers stay rule-based.
   Astra neither answers (`gpt-6-luna`) nor verifies (`gpt-6.1-sol`) in any system, so it favours none. A 30-verdict
-  spot check is recorded in `judge_review_sample.md` in the run folder (AI-assisted review, not human annotation).
+  spot check agreed with 28 credit decisions; the other two were lenient credits for workflow-baseline answers
+  (`judge_review_sample.md` in the run folder; AI-assisted review, not human annotation).
 - **Statistics:** 95% intervals are about ±5.5 points at n = 300; paired comparisons use the exact McNemar test.
 - **Variance:** the baseline and agentic loop are run again on 100 of the evaluated questions.
 <!-- generated:cost -->
-- **Cost:** every OpenAI call is recorded (`backend/utils/usage.py`): evaluation $3.43, repeats
-  $0.54, judge $0.11 ($4.08 in total).
+- **Cost:** every OpenAI call is recorded (`backend/utils/usage.py`): evaluation $6.40, repeats
+  $1.31, judge $1.10 ($8.81 in total).
 
 ### Run timings
 
-Wall-clock time of each stage of run `2026-10-14_1330`, recorded by `scripts/run_all.py`
-(`experiments/runs/2026-10-14_1330/run.json`):
+Wall-clock time of each stage of run `2026-10-15_0555`, recorded by `scripts/run_all.py`
+(`experiments/runs/2026-10-15_0555/run.json`):
 
 | Stage | Started | Finished | Wall clock | Work | Cost |
 |---|---|---|---|---|---|
-| Main evaluation (4 systems) | 2026-10-14 13:30:51 | 14:10:55 | 40 min 4 s | 199 cases (1 cached earlier), 4 at a time | $3.43 |
-| Variance repeats (baseline + agentic) | 2026-10-14 14:10:55 | 14:45:36 | 34 min 41 s | 50 cases, one at a time | $0.54 |
-| LLM judge (`gpt-6.1-sol`) | 2026-10-14 15:20:09 | 15:26:28 | 6 min 19 s | 82 open-ended cases | $0.11 |
+| Main evaluation (4 systems) | 2026-10-15 05:55:27 | 06:53:31 | 58 min 3 s | 300 cases x 4 systems, 4 at a time | $6.40 |
+| LLM judge (`gpt-6-astra`) | 2026-10-15 06:53:31 | 07:09:40 | 16 min 8 s | 131 open-ended cases | $1.10 |
+| Variance repeats (baseline + agentic) | 2026-10-15 07:09:40 | 08:17:45 | 68 min 5 s | 100 cases, one at a time | $1.31 |
 
 Per-case times in the results tables are each system's own latency inside a case; a full case (all four systems in
-turn) took 45.9 s on average.
+turn) took 46.1 s on average.
 <!-- /generated:cost -->
 
 ---
@@ -215,28 +217,28 @@ turn) took 45.9 s on average.
 <!-- generated:results -->
 ### Overall
 
-| System | Strict | Judged | Close-ended (111) | Open-ended (89), strict → judged |
+| System | Strict | Judged | Close-ended (169) | Open-ended (131), strict → judged |
 |---|---|---|---|---|
-| Single-shot baseline | 63.5% | 70.0% | 76.6% | 47.2% → 61.8% |
-| Workflow baseline | 28.0% | 31.0% | 42.3% | 10.1% → 16.9% |
-| **Agentic loop** | **64.5%** | **72.0%** | 76.6% | 49.4% → 66.3% |
-| Fixed pipeline (ablation) | 57.0% | 61.5% | 68.5% | 42.7% → 52.8% |
+| Single-shot baseline | 65.7% | 67.3% | 77.5% | 50.4% → 54.2% |
+| Workflow baseline | 32.3% | 34.7% | 46.7% | 13.7% → 19.1% |
+| **Agentic loop** | **70.3%** | **73.3%** | 81.1% | 56.5% → 63.4% |
+| Fixed pipeline (ablation) | 67.3% | 69.3% | 76.9% | 55.0% → 59.5% |
 
 Paired comparisons (cases where exactly one of the two systems is right):
 
 | Comparison | Strict | Judged |
 |---|---|---|
-| Agentic vs single-shot | 17 vs 15, p = 0.86 | 19 vs 15, p = 0.61 |
-| Agentic vs fixed pipeline | 26 vs 11, p = 0.02 | 32 vs 11, p = 0.002 |
+| Agentic vs single-shot | 33 vs 19, p = 0.070 | 34 vs 16, p = 0.015 |
+| Agentic vs fixed pipeline | 27 vs 18, p = 0.23 | 26 vs 14, p = 0.081 |
 
 ### By controller path
 
 | Path | Cases | Agentic | Single-shot | Fixed pipeline |
 |---|---|---|---|---|
-| direct | 141 | 74% | 72% | 67% |
-| relook | 19 | 47% | 37% | 37% |
-| reanswer | 29 | 55% | 45% | 31% |
-| abstained | 11 | — (abstained) | 45% | 36% |
+| direct | 181 | 85% | 80% | 83% |
+| relook | 67 | 49% | 43% | 45% |
+| reanswer | 34 | 71% | 47% | 47% |
+| abstained | 18 | — (abstained) | 39% | 33% |
 
 ![Accuracy by controller path](eval-dashboard-screenshots/03-accuracy-by-controller-path.png)
 
@@ -244,18 +246,25 @@ Paired comparisons (cases where exactly one of the two systems is right):
 
 | Signal | Levels | Agentic accuracy |
 |---|---|---|
-| Verification | verified (169) / partially verified (25) / unsupported or low confidence (6) | 70% / 40% / 0% |
-| Self-consistency | high (162) / medium or low (27) | 72% / 40–53% |
-| Abstention | 11 cases, on which the single-shot baseline is wrong 55% of the time | — |
+| Verification | verified (205) / partially verified (87) / unsupported or low confidence (8) | 84% / 45% / 0% |
+| Self-consistency | high (248) / medium or low (34) | 77% / 55–65% |
+| Abstention | 18 cases, on which the single-shot baseline is wrong 61% of the time | — |
 
-On the 189 cases it answered, the agentic loop is 68% correct (strict).
+On the 282 cases it answered, the agentic loop is 75% correct (strict).
 
-### Stability across runs (same 50 cases)
+### Stability across runs (same 100 cases)
 
 | System | Run 1 | Run 2 | Answers that flipped right ↔ wrong |
 |---|---|---|---|
-| Single-shot baseline | 33/50 | 33/50 | 6 (12%) |
-| Agentic loop | 35/50 | 34/50 | 1 (2%) |
+| Single-shot baseline | 72/100 | 73/100 | 13 (13%) |
+| Agentic loop | 79/100 | 77/100 | 8 (8%) |
+
+### Blind check and zoom
+
+The check's blind reading is the verifier model (`gpt-6.1-sol`) answering from the image alone. Scored as a system
+of its own it reaches 73.0% strict: a reference for how much of the agentic result could come from the
+larger verifier model (agentic vs blind reading 22 vs 30, p = 0.33; blind reading vs
+single-shot 42 vs 20, p = 0.007). Zoomed re-looks happened on 74 cases (agentic 41.9% vs single-shot 39.2% there).
 <!-- /generated:results -->
 
 ---
@@ -266,22 +275,22 @@ The four analyses Template 1 asks for are built into every agentic run and summa
 
 <!-- generated:failure -->
 - **Self-consistency checks:** 2 independent re-answers per case; low agreement flags the case for review. Low
-  consistency marks uncertainty, not certain error: 53% of low-consistency answers were still correct.
+  consistency marks uncertainty, not certain error: 65% of low-consistency answers were still correct.
 - **Cross-modal agreement:** the verifier sees the image, so "explanation grounded in evidence" and "no
   contradictions" are checked against the image itself, not only a text description.
 - **Verifier model:** a different, larger model (`gpt-6.1-sol`) verifies `gpt-6-luna`'s answers and steers
-  59 of 200 episodes away from the direct path.
-- **Disagreement analysis:** the three systems disagree on 65% of cases under the same matching rules;
-  wins (only one system right): agentic 16, single-shot 12, workflow 7.
+  119 of 300 episodes away from the direct path.
+- **Disagreement analysis:** the three systems disagree on 68% of cases under the same matching rules;
+  wins (only one system right): agentic 27, single-shot 14, workflow 14.
 
 Representative cases, chosen automatically by `scripts/final_metrics.py` (screenshots in `eval-dashboard-screenshots/`):
 
 | Case | What happened |
 |---|---|
-| 1900 "is there an acute infarction?" | A focused re-look got it right; the single prompt did not (agentic: "yes"; single prompt: "No, there is no definite acute infarcti…"; reference: "yes") |
-| 1794 "is there airspace consolidation on the left side?" | The verifier's guidance fixed the answer; the single prompt was wrong (agentic: "Yes—there is airspace consolidation in …"; single prompt: "No, there is no focal airspace consolid…"; reference: "yes") |
-| 1825 "is this supratentorial or infratentorial?" | The loop re-examined or revised and still ended wrong, while the single prompt was right (agentic: "yes"; single prompt: "Supratentorial."; reference: "supratentorial") |
-| 1866 "are there increased vascular markings" | Low self-consistency flagged the case for review, though the final answer was right (agentic: "yes"; single prompt: "Yes, the central/perihilar vascular mar…"; reference: "yes") |
+| 1896 "what side of the brain is a lesion on?" | A focused re-look got it right; the single prompt did not (agentic: "Left cerebral hemisphere"; single prompt: "The lesion is on the right side of the …"; reference: "left") |
+| 1794 "is there airspace consolidation on the left side?" | The verifier's guidance fixed the answer; the single prompt was wrong (agentic: "Yes—there is a left perihilar/midlung o…"; single prompt: "No, there is no definite airspace conso…"; reference: "yes") |
+| 1858 "describe the pathology" | The loop re-examined or revised and still ended wrong, while the single prompt was right (agentic: "Marked enlargement of the cardiac silho…"; single prompt: "Marked cardiomegaly with mild pulmonary…"; reference: "cardiomegaly with pulmonary e…") |
+| 1875 "what lobe of the brain is the lesion located in?" | Low self-consistency flagged the case for review, though the final answer was right (agentic: "Right frontal lobe"; single prompt: "Right parietal lobe."; reference: "right frontal lobe") |
 <!-- /generated:failure -->
 
 **Systematic failure patterns**
@@ -292,22 +301,25 @@ Representative cases, chosen automatically by `scripts/final_metrics.py` (screen
    answer limits the damage.
 3. **Benchmark quirks:** some questions don't match their image (e.g. a "right upper quadrant mass" asked of a chest
    film); every system fails them.
-4. **Workflow rigidity:** fixed rules answer "Brain" or "X-ray" where a specific finding is needed (28%).
+4. **Workflow rigidity:** fixed rules answer "Brain" or "X-ray" where a specific finding is needed.
 
 ---
 
 ## Reflection and limitations
 
-**When is agentic behaviour beneficial?** Not for raw accuracy on this benchmark: a strong single prompt on the same
-model is equally accurate. The agentic system earns its cost when answers must be *trustworthy*. It knows when it is
-unsure (verification and consistency signals predict errors), it can abstain, it recovers on hard cases by
-re-examining specific regions, it is far more stable across runs, and every decision is auditable. Against a fixed
-multi-stage pipeline with the same models, letting a controller decide is clearly better.
+**When is agentic behaviour beneficial?** On this run the agentic loop is the most accurate system built on the
+same answering model: ahead of the single prompt (significant on the judged score, borderline on the strict score)
+and ahead of the fixed pipeline (not significant). Its gains come where the controller acts: on revised and
+re-examined cases it beats the single prompt clearly, while on direct cases the two are close. But it does **not**
+beat its own verifier model answering alone in one shot, so part of its lead plausibly comes from the larger model
+in its check rather than from the control loop itself. Its clearest value is *trustworthiness*: "verified" answers
+are far more often right than unverified ones, it can abstain, its answers change less between runs, and every
+decision is auditable. Whether that is worth roughly 60 times the cost depends on the use.
 
 **Limitations**
 
 <!-- generated:limit-cost -->
-- About 41× the cost and 8× the (median) latency of a single prompt for similar accuracy.
+- About 59× the cost and 10× the (median) latency of a single prompt, for +4.6 points of strict accuracy.
 <!-- /generated:limit-cost -->
 - The verifier shares the perception weaknesses of vision models; agreement is not correctness.
 - 300 questions give about ±5.5-point intervals; per-type results for small categories are noisy.
@@ -390,9 +402,9 @@ python scripts/run_all.py --stages metrics,docs,diagram,report   # rebuild outpu
 
 | Stage | What it runs | Last cost | Last wall clock |
 |---|---|---|---|
-| `eval` | `run_case_explorer_cache.py --ablation --concurrency 4` (200 cases × 4 systems) | $3.43 | ~40 min |
-| `variance` | `repeat_cases.py --from-eval-sample 300 --n 50` (baseline + agentic loop again) | $0.54 | ~35 min |
-| `judge` | `judge_open_ended.py` | $0.11 | ~6 min |
+| `eval` | `run_case_explorer_cache.py --ablation --concurrency 4` (300 questions × 4 systems) | $6.40 | ~58 min |
+| `variance` | `repeat_cases.py --from-eval-sample 300 --n 50` (baseline + agentic loop again) | $1.31 | ~68 min |
+| `judge` | `judge_open_ended.py` | $1.10 | ~16 min |
 | `metrics` | `final_metrics.py` → `final_metrics.json` and `cases.csv` in the run folder | free | seconds |
 | `docs` | `update_docs.py` → README blocks and `docs/report/results.tex` | free | seconds |
 | `diagram` | `system_diagram.py` → `system_diagram.png` (+ copy for the report) | free | seconds |
