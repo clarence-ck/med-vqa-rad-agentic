@@ -83,7 +83,7 @@ export default function CaseHeader({ result, baselineResult, workflowResult }) {
       {/* Agent trace breakdown */}
       {agentTimings.length > 0 && (
         <div className="case-header-item timing-section">
-          <span className="case-header-label">Pipeline Steps</span>
+          <span className="case-header-label">Agent Steps</span>
           <div className="timing-badges">
             {agentTimings.map((item, i) => (
               <span key={i} className="timing-badge timing-agent">
