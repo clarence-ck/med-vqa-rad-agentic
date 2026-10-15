@@ -49,8 +49,28 @@ def mcnemar(rows, a, b):
             "p": round(binomtest(only_a, only_a + only_b, 0.5).pvalue, 3)}
 
 
-def showcase_cases(rows):
+def _similarity(first: str, second: str) -> float:
+    a, b = ds._get_cached_embedding(first), ds._get_cached_embedding(second)
+    if a is None or b is None:
+        return 0.0
+    return float(ds.cosine_similarity([a], [b])[0][0])
+
+
+def strict_right(payload: dict, answer) -> bool:
+    """Score any answer of a case (also intermediate ones) with the evaluation's strict scorer."""
+    gt = ds._normalize_answer(payload.get("ground_truth_answer", ""))
+    return scoring.answers_match(ds._normalize_answer(str(answer)), gt, scoring.is_close_ended(gt),
+                                 payload["sample"].get("question_type"), _similarity)
+
+
+def loop_answers(payload: dict) -> list[str]:
+    return [(s.get("output") or {}).get("answer", "") for s in payload["agentic_result"].get("agent_trace", [])
+            if s.get("agent") == "Reasoning & Answer"]
+
+
+def showcase_cases(rows, cache=()):
     """Four representative cases for the README trace table and the screenshots, chosen by fixed rules."""
+    by_id = {p["sample"]["id"]: p for p in cache}
     used = set()
 
     def first(predicate):
@@ -72,6 +92,14 @@ def showcase_cases(rows):
     out = []
     for kind, story, predicate in picks:
         row = first(predicate)
+        if row and kind == "recovery_failure" and row["sample_id"] in by_id:
+            # Say so when a right intermediate answer was later replaced (the check may even verify the wrong one).
+            payload = by_id[row["sample_id"]]
+            answers = loop_answers(payload)
+            if any(strict_right(payload, a) for a in answers[:-1]):
+                verified = row["verification_status"] == "verified"
+                story = ("An intermediate answer was right, but a later revision replaced it with a wrong one"
+                         + (" that the check verified" if verified else "") + "; the single prompt was right")
         if row:
             out.append({"kind": kind, "story": story, "sample_id": row["sample_id"], "question": row["question"],
                         "ground_truth": row["ground_truth_answer"], "agentic_answer": row["agentic_answer"],
@@ -87,17 +115,7 @@ def mechanisms(rows: list[dict], cache: list[dict]) -> dict:
     S-PubMedBert fallback), so "fixed" and "broken" compare like with like.
     """
     by_id = {p["sample"]["id"]: p for p in cache}
-
-    def similarity(first: str, second: str) -> float:
-        a, b = ds._get_cached_embedding(first), ds._get_cached_embedding(second)
-        if a is None or b is None:
-            return 0.0
-        return float(ds.cosine_similarity([a], [b])[0][0])
-
-    def right(payload, answer):
-        gt = ds._normalize_answer(payload.get("ground_truth_answer", ""))
-        return scoring.answers_match(ds._normalize_answer(str(answer)), gt, scoring.is_close_ended(gt),
-                                     payload["sample"].get("question_type"), similarity)
+    right = strict_right
 
     def trace(payload, agent):
         return [s.get("output") or {} for s in payload["agentic_result"].get("agent_trace", []) if s.get("agent") == agent]
@@ -239,7 +257,7 @@ def main() -> None:
     run_info = runs.read_run(run_id)
     metrics["run"] = {k: run_info.get(k) for k in ("run_id", "status", "started", "finished", "code_version")}
     metrics["run_timings"] = {k: v for k, v in run_info.get("stages", {}).items() if k in ("eval", "variance", "judge")}
-    metrics["showcase"] = showcase_cases(rows)
+    metrics["showcase"] = showcase_cases(rows, cache)
     agentic, baseline = metrics["systems"]["agentic"], metrics["systems"]["baseline"]
     baseline_cost = statistics.mean(p["usage"]["baseline"]["cost_usd"] for p in cache)
     agentic_cost = statistics.mean(p["usage"]["agentic"]["cost_usd"] for p in cache)

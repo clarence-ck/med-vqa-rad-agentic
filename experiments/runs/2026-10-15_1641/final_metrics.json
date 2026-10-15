@@ -248,7 +248,7 @@
     },
     {
       "kind": "recovery_failure",
-      "story": "The loop re-examined or revised and still ended wrong, while the single prompt was right",
+      "story": "An intermediate answer was right, but a later revision replaced it with a wrong one that the check verified; the single prompt was right",
       "sample_id": 8,
       "question": "where is the mass?",
       "ground_truth": "pineal region",

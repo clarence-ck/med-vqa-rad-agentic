@@ -304,7 +304,7 @@ Representative cases, chosen automatically by `scripts/final_metrics.py` (screen
 |---|---|
 | 503 "is there a pleural effusion present?" | A focused re-look got it right; the single prompt did not (agentic: "no"; single prompt: "Yes, there is a small left pleural effu…"; reference: "no") |
 | 457 "what brain region demonstrates edema?" | The verifier's guidance fixed the answer; the single prompt was wrong (agentic: "Bilateral basal ganglia"; single prompt: "Both thalami demonstrate edema."; reference: "basal ganglia") |
-| 8 "where is the mass?" | The loop re-examined or revised and still ended wrong, while the single prompt was right (agentic: "Around the posterior third ventricle, e…"; single prompt: "The mass is in the midline pineal regio…"; reference: "pineal region") |
+| 8 "where is the mass?" | An intermediate answer was right, but a later revision replaced it with a wrong one that the check verified; the single prompt was right (agentic: "Around the posterior third ventricle, e…"; single prompt: "The mass is in the midline pineal regio…"; reference: "pineal region") |
 | 19 "what plane is seen?" | Low self-consistency flagged the case for review, though the final answer was right (agentic: "Frontal (PA) view"; single prompt: "Frontal (coronal) plane."; reference: "pa") |
 <!-- /generated:failure -->
 
@@ -351,7 +351,8 @@ replace a low-confidence answer, and testing both on fresh questions.
 <!-- generated:limit-cost -->
 - About 58× the cost and 10× the (median) latency of a single prompt.
 <!-- /generated:limit-cost -->
-- The verifier shares the perception weaknesses of vision models; agreement is not correctness.
+- The verifier shares the perception weaknesses of vision models; agreement is not correctness (in case 8 the check
+  verified a wrong revision that had replaced a right answer).
 - The loop's accuracy cannot be fully separated from its verifier's, because the verifier's guidance may suggest
   answers. A critique-only verifier (issues, no suggested answer) would isolate the loop's own contribution.
 - Abstentions are scored as wrong (under the judge, one is credited because its reference answer is "maybe"), so
