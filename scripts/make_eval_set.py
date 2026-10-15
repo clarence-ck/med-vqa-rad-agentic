@@ -1,15 +1,12 @@
 """Choose the evaluation questions and write them to experiments/eval_set.json.
 
-By default: a seeded random sample of the VQA-RAD test split (--split all for the full dataset) that keeps its mix of close-ended (yes/no) and
-open-ended questions. With --reuse-from, half the questions come from an earlier run (for a before/after
-comparison on identical questions) and half are questions that run did not use. With --exclude-run, no question
-an earlier run used is chosen. The list is shuffled; the same command always gives the same set.
+A seeded random sample that keeps the pool's mix of close-ended (yes/no) and open-ended questions. The pool is the
+VQA-RAD test split by default, or the whole dataset with --split all. With --exclude-run, no question an earlier run
+used is chosen. The list is shuffled; the same command always gives the same set.
 
 Usage (run from repo root):
     python scripts/make_eval_set.py --size 300
-    python scripts/make_eval_set.py --size 300 --split all
     python scripts/make_eval_set.py --size 300 --split all --exclude-run <run_id> --seed 51511
-    python scripts/make_eval_set.py --size 250 --reuse-from <run_id>
 """
 from __future__ import annotations
 
@@ -41,51 +38,35 @@ def stratified(pool: list[dict], n: int, close_share: float, rng: random.Random)
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--size", type=int, default=300, help="Number of questions")
-    parser.add_argument("--reuse-from", default=None,
-                        help="Optional earlier run: half the questions are reused from it, half are new")
     parser.add_argument("--exclude-run", default=None, help="Optional earlier run whose questions are not chosen")
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--split", choices=["test", "train", "all"], default="test",
-                        help="Dataset split to draw from (all = the full dataset)")
+    parser.add_argument("--split", choices=["test", "all"], default="test",
+                        help="Draw from the test split or from the whole dataset (all)")
     args = parser.parse_args()
 
-    test = []
+    pool = []
     for index, item in enumerate(load_dataset()):
         if args.split in ("all", item.get("split")) and index not in EXCLUDED_SAMPLE_IDS:
-            test.append({"id": index, "close_ended": scoring.is_close_ended(_normalize_answer(item.get("answer", "")))})
-    if not test:
+            pool.append({"id": index, "close_ended": scoring.is_close_ended(_normalize_answer(item.get("answer", "")))})
+    if not pool:
         sys.exit("VQA-RAD not found: run python scripts/download_dataset.py first")
-    excluded = set()
+    extra = {}
     if args.exclude_run:
         excluded = {int(p.name.split("_")[1]) for p in runs.cases_dir(args.exclude_run).glob("sample_*.json")}
         if not excluded:
             sys.exit(f"Run {args.exclude_run} has no cases")
-        test = [q for q in test if q["id"] not in excluded]
-    test.sort(key=lambda q: q["id"])
-    close_share = sum(q["close_ended"] for q in test) / len(test)
+        pool = [q for q in pool if q["id"] not in excluded]
+        extra = {"excluded_run": args.exclude_run}
+    pool.sort(key=lambda q: q["id"])
+    close_share = sum(q["close_ended"] for q in pool) / len(pool)
     rng = random.Random(args.seed)
 
-    extra = {}
-    if args.reuse_from:
-        previous = {int(p.name.split("_")[1]) for p in runs.cases_dir(args.reuse_from).glob("sample_*.json")}
-        if not previous:
-            sys.exit(f"Run {args.reuse_from} has no cases")
-        half = args.size // 2
-        reused = stratified([q for q in test if q["id"] in previous], half, close_share, rng)
-        new = stratified([q for q in test if q["id"] not in previous], args.size - half, close_share, rng)
-        chosen = reused + new
-        extra = {"reused_from": args.reuse_from, "reused_ids": sorted(q["id"] for q in reused),
-                 "new_ids": sorted(q["id"] for q in new)}
-        description = (f"{len(reused)} questions reused from run {args.reuse_from} and {len(new)} it did not use; "
-                       f"each half keeps the pool's close/open-ended mix ({close_share:.0%} close-ended).")
-    else:
-        chosen = stratified(test, args.size, close_share, rng)
-        pool_name = "VQA-RAD questions (full dataset)" if args.split == "all" else f"VQA-RAD {args.split} questions"
-        description = (f"{args.size} of the {len(test)} {pool_name}, drawn at random while keeping their "
-                       f"close/open-ended mix ({close_share:.0%} close-ended).")
-        if args.exclude_run:
-            description += f" None of the {len(excluded)} questions run {args.exclude_run} used is included."
-            extra = {"excluded_run": args.exclude_run}
+    chosen = stratified(pool, args.size, close_share, rng)
+    pool_name = "VQA-RAD questions (full dataset)" if args.split == "all" else "VQA-RAD test questions"
+    description = (f"{args.size} of the {len(pool)} {pool_name}, drawn at random while keeping their "
+                   f"close/open-ended mix ({close_share:.0%} close-ended).")
+    if args.exclude_run:
+        description += f" None of the {len(excluded)} questions run {args.exclude_run} used is included."
     rng.shuffle(chosen)
 
     eval_set = {
