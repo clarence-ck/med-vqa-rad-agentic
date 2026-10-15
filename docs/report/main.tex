@@ -50,8 +50,8 @@ than the agentic loop (\BaseStrict\% vs.\ \AgStrict\% strict, \BaseJudged\% vs.\
 $p=\PairBaseP$ and $p=\PairBaseJP$, significant only under the judge), the loop and the fixed pipeline do not differ significantly ($p=\PairPlP$), and
 the loop's higher-tier verifier answering alone beats it (\BlindStrict\%, $p=\BlindAgP$). On the questions it answers, the
 loop matches the single prompt (\AnsweredAgAcc\% vs.\ \AnsweredBaseAcc\%); its \PathAbstainN{} abstentions account for
-the gap. Its value is calibrated confidence: answers its check verifies are \SigVerAcc\% correct, the
-rest \UnverAcc\%---at about \CostRatio$\times$ the cost of a single prompt. Code is available at
+the gap. Its value is calibrated confidence: answers its check verifies are \SigVerAcc\% correct, its
+other answers \UnverAcc\%---at about \CostRatio$\times$ the cost of a single prompt. Code is available at
 \url{https://github.com/clarence-ck/med-vqa-rad-agentic}.
 \end{abstract}
 
@@ -132,7 +132,7 @@ rather than only its test split (Section~\ref{sec:eval}).
 \paragraph{Controller loop.} A fresh Haystack \texttt{Agent} is created per request (Figure~\ref{fig:arch}). Its
 five tools are bound to per-request working memory holding the image, the question analysis, and every look,
 answer and check; the controller sees only short text results and chooses the next call. Unlike the
-fixed-pipeline ablation, the tool sequence depends on what verification finds: on the \NCases{} evaluation cases the controller
+ablation, whose only branch is one conditional re-run, the controller chooses the step after every check: on the \NCases{} evaluation cases the controller
 finished directly in \PathDirectN{} cases, re-examined a region in \PathRelookN, revised its answer in
 \PathReanswerN{} and abstained in \PathAbstainN. Budgets
 cap the loop at two focused re-looks, three answers and 16 steps, with a safety net that answers or checks before
@@ -143,7 +143,8 @@ The per-request \emph{working memory} (image, question analysis, looks, answers,
 read from and write to it.
 \textbf{\texttt{analyze\_question}} (task understanding) classifies the question type and expected answer format.
 \textbf{\texttt{look(focus)}} (perception) examines the image \emph{with the question in mind}; with a focus, it
-zooms: the named region is located, cropped and enlarged, and examined beside the full image; the first look rejects
+zooms: the named region is located, cropped and enlarged, and examined beside the full image (a plain re-look if
+it cannot be located); the first look rejects
 non-radiology images.
 \textbf{\texttt{answer(guidance)}} (executor) answers from the image plus all observations, applying the
 verifier's guidance on revisions.
@@ -170,7 +171,7 @@ in the controller's context keeps the controller cheap.
 hand-written rules per question type. The \emph{fixed-pipeline ablation} is a controller instructed to call six tools in a prescribed
 order---\texttt{interpret\_image}, \texttt{analyze\_question}, \texttt{filter\_image\_context},
 \texttt{route\_difficulty}, \texttt{reason\_answer}, \texttt{verify\_answer}---re-running the sequence once when
-verification flags a fixable problem. It uses the same models but a question-agnostic image description, no zoom, no
+verification flags a fixable or high-severity problem. It uses the same models but a question-agnostic image description, no zoom, no
 blind check and a text-only verifier, so comparing against it measures the agentic design as a whole, not control
 alone. A demo UI (Section~\ref{sec:ui}) exposes all systems.
 
@@ -193,13 +194,13 @@ LLM judge compares answers with the reference as text. Because the verifier sees
 \emph{self-inconsistent}, from resampling.
 \textbf{Recovery.} Instead of re-running the whole pipeline, the controller zooms into the region the verifier
 names or revises the answer with the verifier's guidance. When the blind reading disagrees, the controller is told
-only \emph{that} it disagrees, never the blind answer, so the loop must resolve it with its own model. A later answer replaces an earlier one only if its check
+only \emph{that} it disagrees, never the blind answer (the review's guidance may still suggest one). A later answer replaces an earlier one only if its check
 is strictly better, because focused re-looks can over-read.
 \textbf{Self-critique.} After finishing, the answerer is re-asked independently twice; low agreement adds a failure
 category and flags the case for review.
 \textbf{Fallback.} The controller may abstain (reported as an abstention, never coerced into ``no''); a guardrail
 adds a disclaimer and a review flag for low-confidence, unsupported, high-severity or self-inconsistent cases;
-non-radiology or unreadable images are rejected before any answer is produced.
+non-radiology images are rejected, and the loop stops rather than answer blind if the first look fails.
 
 % ============================================================================
 \section{Evaluation}\label{sec:eval}
@@ -215,7 +216,7 @@ three words), with left/right conflicts and denials counted wrong and embedding 
 only as a strict fallback. Because word matching both rejects correct paraphrases and accepts vague answers that
 contain the reference word, a \emph{blinded LLM judge} (\texttt{gpt-6-astra}, a model that neither answers nor
 verifies in any system; answers shuffled and anonymised) scores every open-ended answer as a second, independent
-measure; a 30-verdict spot check agreed with 29 credit decisions (the other, strict, on an agentic answer). Paired comparisons use the exact McNemar test; 95\% intervals are about
+measure; a 30-verdict spot check agreed with 29 credit decisions (in the other, it was too harsh on an agentic answer). Paired comparisons use the exact McNemar test; 95\% intervals are about
 $\pm$\CIHalf{} points. The baseline and agentic loop were re-run on \VarCases{} cases to measure stability. API cost of the
 evaluation: \$\CostTotal{} (\$\CostRun{} runs, \$\CostRepeats{} repeats, \$\CostJudge{} judge). Wall-clock time:
 \MinEval\,min for the main run (four cases at a time), \MinRepeats\,min for the sequential repeats and
@@ -247,14 +248,16 @@ the loop scores \AnsweredAgAcc\% versus \AnsweredBaseAcc\%, while on its \PathAb
 was right in \AbstainBaseRight{} and the loop's own last answer in \AbstainOwnRight. The loop's mechanisms work
 individually: revision fixed \RevFixed{} wrong first answers and broke \RevBroken{} (\RevN{} revised episodes), and when
 the blind check objected to a first answer it was wrong in \BlindFlagWrong{} of \BlindFlagN{} cases. They do not lift
-the hardest cases above the single prompt: zoomed re-looks score \ZoomAg\% vs.\ \ZoomBase\% and re-answered cases
-\PathReanswerAg\% vs.\ \PathReanswerBase\% (Table~\ref{tab:paths}). A post-hoc check (rule chosen after seeing these
-results, not a system result) locates the loss: taking the blind reading whenever it disagreed with the loop's final
-answer would have raised the loop's word-rule score by about 7 points, to the verifier's own.
+the hardest cases above the single prompt: answered questions with a zoomed look score \ZoomAg\% vs.\ \ZoomBase\%
+and re-answered cases \PathReanswerAg\% vs.\ \PathReanswerBase\% (Table~\ref{tab:paths}). A post-hoc check (rule
+chosen after seeing these results, not a system result) locates the loss: taking the blind reading whenever the loop
+abstained or disagreed with it would have raised the loop to \PostHoc\% strict, close to the verifier's own
+\BlindStrict\%.
 
 \begin{table}[t]
   \centering
-  \caption{Left: accuracy (strict, \%) by the path the controller took. Right: agentic accuracy by its own signals.}
+  \caption{Left: accuracy (strict, \%) by the path the controller took. Right: agentic accuracy by its own signals,
+  on the \AnsweredN{} answered questions.}
   \label{tab:paths}
   \small
   \begin{tabular}{lcccc@{\hskip 18pt}lc}
@@ -262,10 +265,9 @@ answer would have raised the loop's word-rule score by about 7 points, to the ve
     Path & $n$ & Agentic & Single & Pipeline & Signal & Agentic \\
     \midrule
     direct    & \PathDirectN & \PathDirectAg & \PathDirectBase & \PathDirectPl & verified (\SigVerN)            & \SigVerAcc \\
-    relook    & \PathRelookN & \PathRelookAg & \PathRelookBase & \PathRelookPl & partially verified (\SigPartN) & \SigPartAcc \\
-    reanswer  & \PathReanswerN & \PathReanswerAg & \PathReanswerBase & \PathReanswerPl & unsupported/low (\SigLowN) & \SigLowAcc \\
-    abstained & \PathAbstainN & -- & \PathAbstainBase & \PathAbstainPl & consistency high (\ScHighN) & \ScHighAcc \\
-              &     &    &    &    & consistency med/low (\ScMedLowN) & \ScMedLowRange \\
+    relook    & \PathRelookN & \PathRelookAg & \PathRelookBase & \PathRelookPl & not verified (\UnverN) & \UnverAcc \\
+    reanswer  & \PathReanswerN & \PathReanswerAg & \PathReanswerBase & \PathReanswerPl & consistency high (\ScHighN) & \ScHighAcc \\
+    abstained & \PathAbstainN & -- & \PathAbstainBase & \PathAbstainPl & consistency med/low (\ScMedLowN) & \ScMedLowRange \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -273,18 +275,19 @@ answer would have raised the loop's word-rule score by about 7 points, to the ve
 \paragraph{Failure case analysis.}
 \emph{Self-consistency:} two independent re-answers per case; high consistency means \ScHighAcc\% accuracy,
 medium/low \ScMedLowRange\%, so low consistency marks uncertainty rather than certain error.
-\emph{Cross-modal agreement:} because the verifier sees the image, verification status is predictive: verified
-answers are \SigVerAcc\% correct, the rest \UnverAcc\%.
+\emph{Cross-modal agreement:} the verifier checks the answer against the image, and its status is predictive:
+verified answers are \SigVerAcc\% correct, other answers \UnverAcc\%.
 \emph{Verifier model:} a higher-tier model verifies the answering model; after its checks, \NotDirect{} of \NCases{}
 episodes leave the direct path.
 \emph{Disagreement:} the three systems disagree on \DisagreePct\% of cases; when exactly one system is right, it is the
 agentic loop \WinsAg{} times, the single prompt \WinsBase{} and the workflow \WinsWf.
 \emph{Stability:} on \VarCases{} repeated cases, \VarBaseFlip\% of single-prompt answers flipped between right and
 wrong, versus \VarAgFlip\% for the agentic loop.
-Five patterns dominate the errors: (i) a shared perception blind spot: 65 questions (22\%), mostly open-ended ones
-asking for a specific location, finding or diagnosis, defeat the single prompt, the loop and the pipeline alike; no check catches a misreading
-that looker and verifier share, and 51 of the 65 still get high self-consistency; (ii) abstention withholding a right answer: the verifier's review recommended 21 of the
-25 abstentions, 14 times although its own blind reading agreed with the loop's answer; (iii) the hardest questions resisting re-looks, with an occasional revision breaking a
+Five patterns dominate the errors: (i) a shared perception blind spot: under the judge, 65 questions (22\%), mostly open-ended
+ones asking for a specific location, finding or diagnosis, defeat the single prompt, the loop and the pipeline alike;
+no check catches a misreading that looker and verifier share, and 51 of the 59 the loop answered still get high
+self-consistency; (ii) abstention withholding a right answer: the verifier's review recommended 21 of the
+25 abstentions, 14 times although its own blind reading agreed with the loop's best-verified answer; (iii) the hardest questions resisting re-looks, with an occasional revision breaking a
 right answer; (iv) benchmark quirks---ungrammatical questions, or references needing detail an image rarely
 settles---where abstaining or hedging is scored wrong; and (v) workflow rigidity, where fixed rules answer
 ``Abdomen'' or ``Chest'' when a specific finding or side is needed.
@@ -306,13 +309,13 @@ errors---revision fixes more answers than it breaks, and the blind check's objec
 decisions waste that signal: it abstains, or keeps its own answer, where the verifier's blind reading is often right,
 and a loop repaired by deferring to that reading would be little more than its verifier. Its answers are also less
 stable between runs. Its benefit is \emph{calibrated confidence}: the verified label separates answers that are
-\SigVerAcc\% correct from the rest at \UnverAcc\%, and every decision is auditable, which suits review workflows that
+\SigVerAcc\% correct from its other answers at \UnverAcc\%, and every decision is auditable, which suits review workflows that
 can act on that signal. Answering with a low-confidence flag instead of abstaining, and letting a disagreeing blind
 reading replace a low-confidence answer, tested on fresh questions, are the natural next steps.
 
 \paragraph{Limitations.} About \CostRatio$\times$ the cost and \LatRatio$\times$ the median latency of a single prompt,
-for lower accuracy on this benchmark. Abstentions are scored as wrong, so the abstention policy lowers accuracy
-by design.
+for lower accuracy on this benchmark. Abstentions are scored as wrong (one is judged correct, its reference being ``maybe''), so the
+abstention policy lowers accuracy by design.
 The verifier shares the perception weaknesses of vision models, so agreement is not correctness, and because its
 guidance may suggest answers, the loop's contribution cannot be fully separated from the verifier's (a critique-only
 verifier would isolate it). \NCases{} questions

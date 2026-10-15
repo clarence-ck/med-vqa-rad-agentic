@@ -67,7 +67,7 @@ def vs_unverified_n(m: dict) -> int:
 
 
 def vs_unverified_acc(m: dict) -> float:
-    """Agentic accuracy on answers the check did not verify."""
+    """Agentic accuracy on answered questions the check did not verify (abstentions excluded)."""
     vs = m["verification_signal"]
     n = vs_unverified_n(m)
     right = (vs["partially_verified"]["cases"] * (vs["partially_verified"]["agentic"] or 0)
@@ -124,7 +124,7 @@ def block_glance(m: dict, d: dict) -> str:
     verified = m["verification_signal"]["verified"]
     return f"""Run `{m['run']['run_id']}`: a seeded, stratified sample of {m['cases']} VQA-RAD questions ({m['close_ended_cases']} close-ended, {m['open_ended_cases']} open-ended), all systems on the same answering model
 (`gpt-6-luna`; the agentic loop and the fixed pipeline also use `gpt-6.1-sol` as verifier). Per-case times were
-measured with four cases running at once; the mean is pulled up by a few long re-look cases (actual run times are in
+measured with four cases running at once; the mean is pulled up by the {m['controller_paths'].get('relook', {}).get('cases', 0)} re-look episodes, which take longest (actual run times are in
 [Run timings](#run-timings)). "Strict" uses the rule-based scorer; "judged" scores open-ended answers with a blinded LLM
 judge, `gpt-6-astra` (see [Evaluation design](#evaluation-design)).
 
@@ -135,8 +135,8 @@ judge, `gpt-6-astra` (see [Evaluation design](#evaluation-design)).
 - **Agentic vs single-shot: {verdict}** ({s['agentic']['strict'] - s['baseline']['strict']:+.1f} points strict, p = {p_value(ab['p'])}; {s['agentic']['judged'] - s['baseline']['judged']:+.1f} judged, p = {p_value(abj['p'])}; exact McNemar).
 - **Agentic vs fixed pipeline:** {d['vs_pipeline_strict']:+} points strict (p = {p_value(ap['p'])}), {d['vs_pipeline_judged']:+} judged (p = {p_value(apj['p'])}).
 {blind_line.lstrip(chr(10))}
-- **Confidence and stability:** answers the check verified are {rounded(verified['agentic'])}% correct, the rest
-  {rounded(d['unverified_acc'])}%; between two runs, {flips.get('agentic', '–')}% of the loop's answers change right ↔ wrong vs
+- **Confidence and stability:** answers the check verified are {rounded(verified['agentic'])}% correct, the loop's
+  other answers {rounded(d['unverified_acc'])}% (abstentions excluded); between two runs, {flips.get('agentic', '–')}% of the loop's answers change right ↔ wrong vs
   {flips.get('baseline', '–')}% for the single prompt."""
 
 
@@ -225,7 +225,7 @@ Paired comparisons (cases where exactly one of the two systems is right):
 
 | Signal | Levels | Agentic accuracy |
 |---|---|---|
-| Verification | verified ({vs['verified']['cases']}) / partially verified ({vs['partially_verified']['cases']}) / unsupported or low confidence ({vs['unsupported_or_low']['cases']}) | {rounded(vs['verified']['agentic'])}% / {rounded(vs['partially_verified']['agentic'])}% / {rounded(vs['unsupported_or_low']['agentic'])}% |
+| Verification (answered questions) | verified ({vs['verified']['cases']}) / not verified ({d['unverified_n']}) | {rounded(vs['verified']['agentic'])}% / {rounded(d['unverified_acc'])}% |
 | Self-consistency | high ({sc['high']['cases']}) / medium or low ({d['sc_medlow_n']}) | {rounded(sc['high']['agentic'])}% / {d['sc_medlow_range']}% |
 | Abstention | {ab.get('cases', 0)} cases, on which the single-shot baseline is wrong {d['abstained_baseline_wrong']}% of the time | — |
 
@@ -252,9 +252,9 @@ def block_blind_zoom(m: dict) -> str:
 
 | Mechanism | Result in this run |
 |---|---|
-| Revision (re-look or re-answer) | {mech['revised']} questions: {mech['revised_fixed']} wrong first answers fixed, {mech['revised_broken']} right ones broken |
+| Revision (re-look or re-answer) | {mech['revised']} questions: {mech['revised_fixed']} wrong first answers fixed, {mech['revised_broken']} right ones broken (first and final answers both scored strictly) |
 | Blind check | Objected to {mech['blind_flagged_first_answer']} first answers; {mech['blind_flagged_and_wrong']} of them ({flag_pct}%) were wrong. Where the word rules could not settle agreement, the verifier's meaning comparison decided it ({mech['blind_decided_by_meaning']} answers) |
-| Zoom | Used on the {z.get('cases', 0)} questions the loop chose to re-examine: agentic {z.get('agentic')}% vs single-shot {z.get('baseline')}% there |
+| Zoom | A zoomed look in {z.get('episodes', 0)} episodes ({z.get('episodes', 0) - z.get('cases', 0)} later abstained); on the {z.get('cases', 0)} answered, agentic {z.get('agentic')}% vs single-shot {z.get('baseline')}% |
 | Abstention | {mech['abstained']} questions; the loop's own last answer was right in {mech['abstained_own_answer_right']}, the single prompt in {mech['abstained_baseline_right']} |
 | Answered questions only | Agentic {mech['answered_agentic_strict']:.1f}% vs single-shot {mech['answered_baseline_strict']:.1f}% on the same {mech['answered']} questions |
 
@@ -387,6 +387,8 @@ def latex_macros(m: dict, d: dict) -> str:
         "BlindStrict": (m.get("blind_reading") or {}).get("strict", "--"),
         "BlindAgP": p_value((m.get("blind_reading") or {}).get("agentic_vs_blind", {}).get("p", 1.0)).replace("< ", "<"),
         "ZoomN": (m.get("zoom") or {}).get("cases") or 0,
+        "ZoomEpisodes": (m.get("zoom") or {}).get("episodes") or 0,
+        "PostHoc": (m.get("mechanisms") or {}).get("posthoc_defer_to_blind_strict", "--"),
         "ZoomAg": rounded((m.get("zoom") or {}).get("agentic") or 0),
         "ZoomBase": rounded((m.get("zoom") or {}).get("baseline") or 0),
         "RevN": (m.get("mechanisms") or {}).get("revised", 0),

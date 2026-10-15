@@ -126,7 +126,7 @@ function SystemPerformanceCard({ title, icon, accuracy, judgedAccuracy, avgDurat
         <div className="evaluation-system-stat">
           <div
             className="evaluation-list-subtitle"
-            data-tooltip="Median latency per case: the typical case. The mean is pulled up by a few long cases (e.g. focused re-looks)."
+            data-tooltip="Median latency per case: the typical case. The mean is pulled up by the longest episodes, mainly focused re-looks."
             data-tooltip-align="left"
           >
             Median time / case

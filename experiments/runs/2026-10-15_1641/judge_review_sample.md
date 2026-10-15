@@ -5,7 +5,7 @@ random (seed 7) from all 560 judged answers and reviewed against the reference a
 human annotation). A verdict counts as agreed when its credit decision (correct vs not) is right; a
 `partially_correct` verdict earns no credit.
 
-**Result: 29 of 30 agreed. The other (#22) was a strict non-credit for an agentic-loop answer.**
+**Result: 29 of 30 agreed. In the other (#22) the judge was too harsh on an agentic-loop answer.**
 
 | # | Case | System | Question | Reference | Answer | Verdict | Review |
 |---|---|---|---|---|---|---|---|

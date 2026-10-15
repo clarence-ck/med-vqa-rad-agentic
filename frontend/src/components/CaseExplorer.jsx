@@ -607,7 +607,7 @@ export default function CaseExplorer({
                             </span>
                           </div>
                           <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label" data-tooltip="Number of explicit flaws identified by the Verification Agent during the final review phase.">Issues found</span>
+                            <span className="summary-stat-label" data-tooltip="Number of issues the verifier found in the kept (best-verified) answer.">Issues found</span>
                             <span className={`tag ${issueCount === 0 ? 'tag-green' : 'tag-amber'}`}>{issueCount}</span>
                           </div>
                         </div>

@@ -7,7 +7,7 @@ const STEP_META = {
   'Difficulty Routing': { stage: 'Planning', subtitle: 'difficulty + verification policy', className: 'routing' },
   'Reasoning & Answer': { stage: 'Reasoning', subtitle: 'final synthesis', className: 'reasoning' },
   'Verification': { stage: 'Safety', subtitle: 'reviewed against the image; may suggest a fix', className: 'verification' },
-  'Focused Look': { stage: 'Perception', subtitle: 'zoomed re-examination chosen by the controller', className: 'perception' },
+  'Focused Look': { stage: 'Perception', subtitle: 're-examination chosen by the controller (zoomed when the region is located)', className: 'perception' },
   'Finish': { stage: 'Decision', subtitle: 'controller ends the episode', className: 'routing' },
   'Self-Consistency': { stage: 'Safety', subtitle: 'independent re-answers vs final answer', className: 'verification' },
   'Blind Reading': { stage: 'Safety', subtitle: 'verifier answers from the image alone, without seeing ours', className: 'verification' },

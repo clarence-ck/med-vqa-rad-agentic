@@ -81,13 +81,23 @@ def showcase_cases(rows):
 
 
 def mechanisms(rows: list[dict], cache: list[dict]) -> dict:
-    """What the loop's own mechanisms did: revisions, the blind check, abstention (strict word rules, no embeddings)."""
+    """What the loop's own mechanisms did: revisions, the blind check, abstention.
+
+    Intermediate answers are scored with the same strict scorer as the final ones (word rules plus the
+    S-PubMedBert fallback), so "fixed" and "broken" compare like with like.
+    """
     by_id = {p["sample"]["id"]: p for p in cache}
+
+    def similarity(first: str, second: str) -> float:
+        a, b = ds._get_cached_embedding(first), ds._get_cached_embedding(second)
+        if a is None or b is None:
+            return 0.0
+        return float(ds.cosine_similarity([a], [b])[0][0])
 
     def right(payload, answer):
         gt = ds._normalize_answer(payload.get("ground_truth_answer", ""))
         return scoring.answers_match(ds._normalize_answer(str(answer)), gt, scoring.is_close_ended(gt),
-                                     payload["sample"].get("question_type"), None)
+                                     payload["sample"].get("question_type"), similarity)
 
     def trace(payload, agent):
         return [s.get("output") or {} for s in payload["agentic_result"].get("agent_trace", []) if s.get("agent") == agent]
@@ -115,7 +125,15 @@ def mechanisms(rows: list[dict], cache: list[dict]) -> dict:
             abstained_baseline_right += bool(r["baseline_correct"])
     answered = [r for r in rows if r["controller_path"] != "abstained"]
     meaning = sum(1 for p in cache if (p["agentic_result"].get("blind_reading") or {}).get("agreement_method") == "meaning")
+    # Post-hoc (rule chosen after seeing the results): take the blind reading whenever the loop abstained or its
+    # final answer disagreed with the blind reading.
+    deferred = [r for r in rows if r.get("blind_correct") is not None and r["sample_id"] in by_id]
+    defer = lambda r: r["controller_path"] == "abstained" or (
+        (by_id[r["sample_id"]]["agentic_result"].get("blind_reading") or {}).get("agrees_with_final") is False)
+    posthoc = pct(sum(bool(r["blind_correct"]) if defer(r) else bool(r["agentic_correct"]) for r in deferred)
+                  / len(deferred)) if deferred else None
     return {
+        "posthoc_defer_to_blind_strict": posthoc,
         "revised": revised, "revised_fixed": fixed, "revised_broken": broken,
         "blind_flagged_first_answer": flagged, "blind_flagged_and_wrong": flagged_wrong,
         "blind_decided_by_meaning": meaning,
@@ -168,10 +186,13 @@ def main() -> None:
         for b in s["by_controller_path"]
     }
 
+    answered_rows = [r for r in rows if r["controller_path"] != "abstained"]
+
     def signal(key, groups):
+        # Answered questions only: an abstention is never verified and always scored wrong.
         out = {}
         for label, values in groups.items():
-            subset = [r for r in rows if r[key] in values]
+            subset = [r for r in answered_rows if r[key] in values]
             out[label] = {"cases": len(subset), "agentic": pct2(sum(r["agentic_correct"] for r in subset) / len(subset)) if subset else None}
         return out
     metrics["verification_signal"] = signal("verification_status", {
@@ -186,8 +207,9 @@ def main() -> None:
             "agentic_vs_blind": mcnemar(blind_rows, "agentic_correct", "blind_correct"),
             "blind_vs_baseline": mcnemar(blind_rows, "blind_correct", "baseline_correct"),
         }
-    zoomed = [r for r in rows if r.get("zoomed_looks")]
-    metrics["zoom"] = {"cases": len(zoomed),
+    zoomed_all = [r for r in rows if r.get("zoomed_looks")]
+    zoomed = [r for r in zoomed_all if r["controller_path"] != "abstained"]
+    metrics["zoom"] = {"episodes": len(zoomed_all), "cases": len(zoomed),
                        "agentic": pct(sum(r["agentic_correct"] for r in zoomed) / len(zoomed)) if zoomed else None,
                        "baseline": pct(sum(r["baseline_correct"] for r in zoomed) / len(zoomed)) if zoomed else None}
     answered = [r for r in rows if r["controller_path"] != "abstained"]

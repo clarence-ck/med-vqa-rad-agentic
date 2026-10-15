@@ -109,11 +109,11 @@
       "agentic": 71.36
     },
     "partially_verified": {
-      "cases": 65,
-      "agentic": 33.85
+      "cases": 54,
+      "agentic": 40.74
     },
     "unsupported_or_low": {
-      "cases": 15,
+      "cases": 1,
       "agentic": 0.0
     }
   },
@@ -131,8 +131,8 @@
       "agentic": 39.13
     },
     "not_run": {
-      "cases": 25,
-      "agentic": 0.0
+      "cases": 0,
+      "agentic": null
     }
   },
   "blind_reading": {
@@ -150,20 +150,22 @@
     }
   },
   "zoom": {
-    "cases": 63,
-    "agentic": 33.3,
-    "baseline": 38.1
+    "episodes": 63,
+    "cases": 58,
+    "agentic": 36.2,
+    "baseline": 39.7
   },
   "agentic_answered": {
     "cases": 275,
     "strict": 65.09
   },
   "mechanisms": {
+    "posthoc_defer_to_blind_strict": 66.3,
     "revised": 88,
-    "revised_fixed": 12,
-    "revised_broken": 5,
+    "revised_fixed": 11,
+    "revised_broken": 6,
     "blind_flagged_first_answer": 82,
-    "blind_flagged_and_wrong": 61,
+    "blind_flagged_and_wrong": 59,
     "blind_decided_by_meaning": 66,
     "abstained": 25,
     "abstained_own_answer_right": 7,

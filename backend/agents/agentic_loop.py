@@ -5,7 +5,7 @@ Tools (bound to one per-request LoopContext):
   analyze_question()        classify the question (type, expected format)
   look(focus="")            question-aware look at the image; with `focus`, a zoomed re-examination of that region
   answer(guidance="")       answer from the image + all observations so far
-  check()                   blind reading of the image (once), then verify the latest answer; recommends the next action
+  check()                   verify the latest answer, plus a blind reading of the image (made once); recommends the next action
   finish(abstain, reason)   end the episode
 
 Unlike the fixed pipeline (orchestrator.run_pipeline), the tool sequence depends on what

@@ -37,7 +37,7 @@ Built for SUTD 51.511 Multimodal Generative AI (Template 1: Agentic Multimodal S
 <!-- generated:glance -->
 Run `2026-10-15_1641`: a seeded, stratified sample of 300 VQA-RAD questions (160 close-ended, 140 open-ended), all systems on the same answering model
 (`gpt-6-luna`; the agentic loop and the fixed pipeline also use `gpt-6.1-sol` as verifier). Per-case times were
-measured with four cases running at once; the mean is pulled up by a few long re-look cases (actual run times are in
+measured with four cases running at once; the mean is pulled up by the 63 re-look episodes, which take longest (actual run times are in
 [Run timings](#run-timings)). "Strict" uses the rule-based scorer; "judged" scores open-ended answers with a blinded LLM
 judge, `gpt-6-astra` (see [Evaluation design](#evaluation-design)).
 
@@ -51,8 +51,8 @@ judge, `gpt-6-astra` (see [Evaluation design](#evaluation-design)).
 - **Agentic vs single-shot: single-shot ahead, significant on the judged score only** (-4.3 points strict, p = 0.079; -5.3 judged, p = 0.033; exact McNemar).
 - **Agentic vs fixed pipeline:** +1.7 points strict (p = 0.58), +2.7 judged (p = 0.35).
 - **Agentic vs its verifier model alone** (`gpt-6.1-sol` answering once, the check's blind reading): 59.7% vs 67.0% strict (p = 0.008).
-- **Confidence and stability:** answers the check verified are 71% correct, the rest
-  28%; between two runs, 12% of the loop's answers change right ↔ wrong vs
+- **Confidence and stability:** answers the check verified are 71% correct, the loop's
+  other answers 40% (abstentions excluded); between two runs, 12% of the loop's answers change right ↔ wrong vs
   6% for the single prompt.
 <!-- /generated:glance -->
 
@@ -92,7 +92,7 @@ controller decides whether to follow it; in the fixed-pipeline ablation every st
 | Tool | Role | Model (default) | Notes |
 |---|---|---|---|
 | `analyze_question()` | Task understanding | gpt-6-luna | Question type and expected answer format; keyword rules use whole-word matching |
-| `look(focus)` | Perception (executor) | gpt-6-luna, vision | Looks *with the question in mind*; with `focus` it **zooms**: the named region is located, cropped and enlarged, and examined next to the full image. The first look also rejects non-radiology images |
+| `look(focus)` | Perception (executor) | gpt-6-luna, vision | Looks *with the question in mind*; with `focus` it **zooms**: the named region is located, cropped and enlarged, and examined next to the full image (if it cannot be located, a plain re-look). The first look also rejects non-radiology images |
 | `answer(guidance)` | Synthesis (executor) | gpt-6-luna, vision | Receives the image plus all observations; `guidance` carries what the verifier asked to fix |
 | `check()` | Evaluator (a higher-tier model) | gpt-6.1-sol, vision | Two parts. **Blind reading** (independent): once per episode, the verifier answers from the image and question alone, without the proposed answer or the looker's notes. **Review** (critic): it checks the answer against the image (grounding, contradictions, format) and returns a status, the issues found and a next step (`accept`, `relook` with a focus, `reanswer` with guidance, `abstain`); the guidance may include a suggested corrected answer. An answer is *verified* only if the review passes **and** the blind reading agrees (word rules first, exact for yes/no; for open-ended answers the verifier judges whether the two mean the same). The controller learns only whether they agree, never the blind answer |
 | `finish(abstain)` | Decision | — | Ends the episode; a normal finish is refused while the latest answer is unchecked (abstaining is not) |
@@ -129,7 +129,7 @@ and/or checks before finishing. Paths observed in the current run:
 |---|---|---|
 | Single-shot baseline | `backend/agents/baseline.py` | One vision prompt; asked for a concise answer that starts with yes/no where applicable |
 | Workflow baseline | `backend/agents/workflow_baseline.py` | Fixed chain: question-agnostic image description → question analysis → hand-written rules per question type |
-| Fixed pipeline (ablation) | `backend/agents/orchestrator.py` | A controller instructed to call six tools in a prescribed order (`interpret_image` → `analyze_question` → `filter_image_context` → `route_difficulty` → `reason_answer` → `verify_answer`), re-running the sequence once when verification flags a fixable problem. Same models, but a question-agnostic image description, no zoom, no blind check and a text-only verifier, so the comparison measures the agentic design as a whole (control, question-aware and zoomed looks, image-grounded checking), not control alone |
+| Fixed pipeline (ablation) | `backend/agents/orchestrator.py` | A controller instructed to call six tools in a prescribed order (`interpret_image` → `analyze_question` → `filter_image_context` → `route_difficulty` → `reason_answer` → `verify_answer`), re-running the sequence once when verification flags a fixable or high-severity problem. Same models, but a question-agnostic image description, no zoom, no blind check and a text-only verifier, so the comparison measures the agentic design as a whole (control, question-aware and zoomed looks, image-grounded checking), not control alone |
 
 ---
 
@@ -155,7 +155,7 @@ text. The evaluation's LLM judge compares answers with the reference as text and
 
 | Mechanism | What it does |
 |---|---|
-| Image-grounded verification | `check` compares the answer with an independent blind reading of the image, then judges it against the image: 5 checks, a status (`verified`, `partially_verified`, `low_confidence`, `unsupported`) and a recommended next action |
+| Image-grounded verification | `check` judges the answer against the image and compares it with an independent blind reading of the image: 5 checks, a status (`verified`, `partially_verified`, `low_confidence`, `unsupported`) and a recommended next action |
 | Targeted recovery | The controller zooms into a region (`look(focus)`) or revises (`answer(guidance)`) instead of re-running everything |
 | Best-verified answer | A later answer replaces an earlier one only if its check is strictly better (re-looks can over-read) |
 | Self-consistency | After finishing, the answerer is re-asked independently (2×); low agreement adds `self_inconsistent` and flags the case for review |
@@ -196,7 +196,7 @@ budgets come from the code.
   right or wrong by the strict rules, for meaning equivalence with the ground truth, blinded to the system (answers
   shuffled and anonymised). Its verdict is the "judged" score for open-ended answers; close-ended answers stay rule-based.
   Astra neither answers (`gpt-6-luna`) nor verifies (`gpt-6.1-sol`) in any system. A 30-verdict
-  spot check agreed with 29 credit decisions; the other was a strict non-credit for an agentic-loop answer
+  spot check agreed with 29 credit decisions; in the other (#22) the judge was too harsh on an agentic-loop answer
   (`judge_review_sample.md` in the run folder; AI-assisted review, not human annotation).
 - **Statistics:** 95% intervals are about ±5.6 points at n = 300 (±5.7 at most); paired comparisons use the exact
   McNemar test.
@@ -256,7 +256,7 @@ Paired comparisons (cases where exactly one of the two systems is right):
 
 | Signal | Levels | Agentic accuracy |
 |---|---|---|
-| Verification | verified (220) / partially verified (65) / unsupported or low confidence (15) | 71% / 34% / 0% |
+| Verification (answered questions) | verified (220) / not verified (55) | 71% / 40% |
 | Self-consistency | high (242) / medium or low (33) | 69% / 39–40% |
 | Abstention | 25 cases, on which the single-shot baseline is wrong 56% of the time | — |
 
@@ -271,9 +271,9 @@ Paired comparisons (cases where exactly one of the two systems is right):
 
 | Mechanism | Result in this run |
 |---|---|
-| Revision (re-look or re-answer) | 88 questions: 12 wrong first answers fixed, 5 right ones broken |
-| Blind check | Objected to 82 first answers; 61 of them (74%) were wrong. Where the word rules could not settle agreement, the verifier's meaning comparison decided it (66 answers) |
-| Zoom | Used on the 63 questions the loop chose to re-examine: agentic 33.3% vs single-shot 38.1% there |
+| Revision (re-look or re-answer) | 88 questions: 11 wrong first answers fixed, 6 right ones broken (first and final answers both scored strictly) |
+| Blind check | Objected to 82 first answers; 59 of them (72%) were wrong. Where the word rules could not settle agreement, the verifier's meaning comparison decided it (66 answers) |
+| Zoom | A zoomed look in 63 episodes (5 later abstained); on the 58 answered, agentic 36.2% vs single-shot 39.7% |
 | Abstention | 25 questions; the loop's own last answer was right in 7, the single prompt in 11 |
 | Answered questions only | Agentic 65.1% vs single-shot 65.8% on the same 275 questions |
 
@@ -312,15 +312,16 @@ Representative cases, chosen automatically by `scripts/final_metrics.py` (screen
 
 1. **Shared perception blind spot:** 65 questions (22%) defeat the single prompt, the loop and the fixed pipeline
    alike under the judge, 49 of them open-ended (mostly asking for a specific location, finding or diagnosis). When the looker and the verifier
-   misread the image the same way, no check catches it, and self-consistency rarely helps: 51 of the 65 still get high
-   consistency, so the models are consistently wrong rather than unsure.
+   misread the image the same way, no check catches it, and self-consistency rarely helps: 51 of the 59 the loop answered
+   still get high consistency, so the models are consistently wrong rather than unsure.
 2. **Abstention withholds right answers:** the loop abstained on 25 questions, 16 of them close-ended. In 21 the
-   verifier's review recommended abstaining, 14 times although its own blind reading agreed with the loop's answer.
-   The single prompt was right on 11 of the 25 and the loop's own last answer on 7. This is where the loop loses to
-   the single prompt: on the 275 questions it answered, the two are level.
+   verifier's review recommended abstaining, 14 times although its own blind reading agreed with the loop's best-verified
+   answer. The single prompt was right on 11 of the 25, the loop's own last answer on 7 and the blind reading on 18.
+   This is where the loop loses: on the 275 questions it answered the two are level (65.1% vs 65.8%), and the
+   abstentions account for 11 of the single prompt's 13-question strict lead.
 3. **The hardest questions resist re-looking:** zoomed re-looks concentrate on the hardest questions and do not lift
-   them above the single prompt, and re-answered questions also trail it; occasionally a revision breaks a right
-   answer, which keeping the best-verified answer limits.
+   them above the single prompt, and re-answered questions also trail it; revisions broke 6 right first answers
+   (against 11 fixed), which keeping the best-verified answer limits but does not prevent.
 4. **Benchmark quirks:** some questions are ungrammatical ("is the gyral enhancement?") or expect detail an image
    rarely settles ("below the 7th rib in the right lung"), yet the dataset gives a reference answer, so abstaining
    or hedging on them is scored wrong.
@@ -333,16 +334,15 @@ Representative cases, chosen automatically by `scripts/final_metrics.py` (screen
 **When is agentic behaviour beneficial?** In this run, not for accuracy. The single prompt is more accurate than
 the agentic loop (significantly so under the judge, not on the strict score), and the loop's higher-tier verifier,
 answering alone, is significantly more accurate than the loop. The loss comes almost entirely from abstention: on
-the 275 questions it answers, the loop matches the single prompt (65.1% vs 65.8%), but its 25 abstentions are scored
-wrong. Its mechanisms
-work individually: revising fixes more answers than it breaks, and when the blind check objects, the first answer is
-usually wrong. The loop does not act on that well enough. It abstains, or keeps its own answer, where the verifier's
-blind reading is often right. A post-hoc check (rule chosen after seeing these results, so not a system result)
-shows the scale: taking the blind reading whenever it disagrees with the loop's final answer would have raised the
-loop's word-rule score by about 7 points, to the verifier's own word-rule score. The loop would then be little more
-than its verifier. The loop's answers are also less stable between runs. What it adds is *calibrated confidence*: verified
-answers are far more often right than the rest, so "verified" is a usable signal for deciding which answers need
-review, and every decision is auditable. That costs about 58 times as much as a single prompt. The next steps this
+the 275 questions it answers, the loop matches the single prompt (65.1% vs 65.8%), but its 25 abstentions score zero
+on the strict scorer. Its mechanisms work individually: revising fixes more answers than it breaks (11 vs 6), and
+when the blind check objects, the first answer is usually wrong (59 of 82). The controller does not act on that
+signal: it abstains, or keeps its own answer, where the blind reading is often right (on 18 of the 25 abstentions).
+A post-hoc check (rule chosen after seeing these results, so not a system result) shows the scale: taking the blind
+reading whenever the loop abstained or disagreed with it would have raised the loop from 59.7% to 66.3% strict, close
+to the verifier's own 67.0%, so the loop would then be little more than its verifier. Its answers are also less stable
+between runs. What it adds is *calibrated confidence*: answers it verifies are 71% correct against 40% for its other
+answers, so "verified" is a usable signal for deciding which answers need review, and every decision is auditable. That costs about 58 times as much as a single prompt. The next steps this
 run points to are answering with a low-confidence flag instead of abstaining, letting a disagreeing blind reading
 replace a low-confidence answer, and testing both on fresh questions.
 
@@ -354,7 +354,8 @@ replace a low-confidence answer, and testing both on fresh questions.
 - The verifier shares the perception weaknesses of vision models; agreement is not correctness.
 - The loop's accuracy cannot be fully separated from its verifier's, because the verifier's guidance may suggest
   answers. A critique-only verifier (issues, no suggested answer) would isolate the loop's own contribution.
-- Abstentions are scored as wrong, so the abstention policy lowers accuracy by design.
+- Abstentions are scored as wrong (under the judge, one is credited because its reference answer is "maybe"), so
+  the abstention policy lowers accuracy by design.
 - The loop's answers are less stable between runs than a single prompt's.
 - 300 questions give intervals of at most ±5.7 points; per-type results for small categories are noisy.
 - The sample comes from the whole dataset, mostly train-labelled questions, so scores are not directly comparable
