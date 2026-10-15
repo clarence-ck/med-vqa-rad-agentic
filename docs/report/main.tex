@@ -146,19 +146,21 @@ zooms: the named region is located, cropped and enlarged, and examined beside th
 non-radiology images.
 \textbf{\texttt{answer(guidance)}} (executor) answers from the image plus all observations, applying the
 verifier's guidance on revisions.
-\textbf{\texttt{check}} (evaluator) first reads the image \emph{blind}---the verifier answers from the image and
-question alone, without the proposed answer or the looker's notes---then verifies the answer against the image with
-five checks; an answer is only verified if the blind reading agrees---by word rules, or for open-ended answers
-by meaning, judged by the verifier model, so paraphrases do not count as disagreement. It returns a status
-(verified, partially verified, low confidence, unsupported) and recommends \emph{accept}, \emph{relook} with a
-focus, \emph{reanswer} with guidance, or \emph{abstain}.
+\textbf{\texttt{check}} (evaluator, a larger model) has two parts. A \emph{blind reading}, made once per episode: the
+verifier answers from the image and question alone, without the proposed answer or the looker's notes. A
+\emph{review}: it checks the answer against the image (grounding, contradictions, format) and returns a status
+(verified, partially verified, low confidence, unsupported), the issues found and a next step---\emph{accept},
+\emph{relook} with a focus, \emph{reanswer} with guidance, or \emph{abstain}; the guidance may include a suggested
+corrected answer. An answer is verified only if the review passes and the blind reading agrees (by word rules, or for
+open-ended answers by meaning, judged by the verifier); the controller learns only whether they agree.
 \textbf{\texttt{finish(abstain)}} ends the episode and is refused while the latest answer is unchecked.
 
 \paragraph{Model and tool choices.} All roles use OpenAI models, sized by need and configurable per role. The
 controller and question analysis make simple decisions (\texttt{gpt-6-luna}, no/low reasoning effort); perception
 and answering use \texttt{gpt-6-luna} with medium effort, and the answerer always sees the image, because a
 text description loses the visual detail many questions depend on. Verification uses a different, larger model
-(\texttt{gpt-6.1-sol}) so that the answering model does not verify itself. Haystack's \texttt{Agent}/\texttt{Tool}
+(\texttt{gpt-6.1-sol}) so that the answering model never verifies itself; since its guidance can suggest answers,
+we also score it answering alone as a reference. Haystack's \texttt{Agent}/\texttt{Tool}
 abstraction provides the tool-calling loop and exit conditions; keeping the image in per-request memory rather than
 in the controller's context keeps the controller cheap. An earlier retrieval stage over SLAKE~\cite{liu2021slake} was
 removed: it returned other patients' question--answer pairs, which contradicted yes/no and location answers and gave
@@ -289,14 +291,17 @@ accuracy by question type and by controller path, disagreement and a per-case ta
 \paragraph{When agentic behaviour is beneficial.} The loop is the most accurate system built on the same answering
 model, and its gains sit exactly where the controller intervenes (revised and re-examined cases). The accuracy gain
 over a single prompt is modest and not significant on every score, and the loop does not beat its larger verifier
-answering alone, so we attribute part of it to that model rather than to control alone. Its clearer benefit is
+answering alone: part of the gain is the verifier's, which checks every answer and may propose corrections, while the
+loop's own contribution is deciding when to look again, revise or abstain. Its clearer benefit is
 \emph{trustworthiness}: verification and consistency signals identify likely errors, it abstains rather than guess,
 its answers change less between runs, and every decision is auditable---valuable in clinical review, at a
 substantial cost.
 
 \paragraph{Limitations.} About \CostRatio$\times$ the cost and \LatRatio$\times$ the median latency of a single prompt for a
 modest accuracy gain.
-The verifier shares the perception weaknesses of vision models, so agreement is not correctness. \NCases{} questions
+The verifier shares the perception weaknesses of vision models, so agreement is not correctness, and because its
+guidance may suggest answers, the loop's contribution cannot be fully separated from the verifier's (a critique-only
+verifier would isolate it). \NCases{} questions
 give $\pm$\CIHalf-point intervals and noisy per-type estimates; the LLM judge is itself a model, spot-checked but not
 human-annotated. A retrieval stage did not help perception-bound questions and was removed; retrieval may still
 help questions that need knowledge not visible in the image, which VQA-RAD rarely contains.

@@ -94,7 +94,7 @@ controller decides whether to follow it, which is what separates the loop from t
 | `analyze_question()` | Task understanding | gpt-6-luna | Question type and expected answer format; keyword rules use whole-word matching |
 | `look(focus)` | Perception (executor) | gpt-6-luna, vision | Looks *with the question in mind*; with `focus` it **zooms**: the named region is located, cropped and enlarged, and examined next to the full image. The first look also rejects non-radiology images |
 | `answer(guidance)` | Synthesis (executor) | gpt-6-luna, vision | Receives the image plus all observations; `guidance` carries what the verifier asked to fix |
-| `check()` | Evaluator | gpt-6.1-sol, vision | **Blind reading first:** the verifier answers from the image and question alone, without seeing the proposed answer or the looker's notes (once per episode). Then an answer-aware review checks grounding and format. The answer is only *verified* if both agree: word rules decide first (exact for yes/no), and for open-ended answers the rules call different, the verifier model judges whether they mean the same, so paraphrases are not counted as disagreements; the controller is told that the readings disagree, never the blind answer itself. Recommends `accept`, `relook` (with a focus), `reanswer` (with guidance) or `abstain` |
+| `check()` | Evaluator (a larger model) | gpt-6.1-sol, vision | Two parts. **Blind reading** (independent): once per episode, the verifier answers from the image and question alone, without the proposed answer or the looker's notes. **Review** (critic): it checks the answer against the image (grounding, contradictions, format) and returns a status, the issues found and a next step (`accept`, `relook` with a focus, `reanswer` with guidance, `abstain`); the guidance may include a suggested corrected answer. An answer is *verified* only if the review passes **and** the blind reading agrees (word rules first, exact for yes/no; for open-ended answers the verifier judges whether the two mean the same). The controller learns only whether they agree, never the blind answer |
 | `finish(abstain)` | Decision | — | Ends the episode; refused while the latest answer is unchecked |
 
 Budgets: at most 2 focused re-looks, 3 answers and 16 agent steps. If the controller stalls, a safety net answers
@@ -116,8 +116,10 @@ and/or checks before finishing. Paths observed in the current run:
 - **One model family (OpenAI), roles sized by need.** The controller and question analysis are simple decisions, so
   they use `gpt-6-luna` with low or no reasoning effort. Answering uses `gpt-6-luna` with medium effort, and the answerer always sees
   the image: a text description of the image loses the visual detail many questions depend on.
-- **A different model verifies, a third judges.** `check` uses `gpt-6.1-sol`, so the model that answered
-  does not verify its own answer.
+- **A different, larger model verifies; a third judges.** `check` uses `gpt-6.1-sol`, so the answering model never
+  verifies itself and the critique comes from a stronger reader. Because the review's guidance can suggest a
+  corrected answer, part of the loop's accuracy can come from the verifier, so every run also scores the verifier
+  answering alone (its blind reading) as a reference. The evaluation judge, `gpt-6-astra`, takes part in no system.
 - All roles are configurable (`MODEL_<ROLE>`, `REASONING_EFFORT_<ROLE>` in `.env`); every call's tokens and cost are
   recorded.
 
@@ -311,8 +313,9 @@ Representative cases, chosen automatically by `scripts/final_metrics.py` (screen
 same answering model: ahead of the single prompt (significant on the judged score, borderline on the strict score)
 and ahead of the fixed pipeline (not significant). Its gains come where the controller acts: on revised and
 re-examined cases it beats the single prompt clearly, while on direct cases the two are close. But it does **not**
-beat its own verifier model answering alone in one shot, so part of its lead plausibly comes from the larger model
-in its check rather than from the control loop itself. Its clearest value is *trustworthiness*: "verified" answers
+beat its own verifier model answering alone in one shot. Part of its lead is therefore the verifier's: a larger model
+checks every answer, and its guidance can propose corrections. The loop's own contribution is deciding, case by
+case, when to look again, revise or abstain, which is where its gains concentrate. Its clearest value is *trustworthiness*: "verified" answers
 are far more often right than unverified ones, it can abstain, its answers change less between runs, and every
 decision is auditable. Whether that is worth roughly 60 times the cost depends on the use.
 
@@ -322,6 +325,8 @@ decision is auditable. Whether that is worth roughly 60 times the cost depends o
 - About 59× the cost and 10× the (median) latency of a single prompt, for +4.6 points of strict accuracy.
 <!-- /generated:limit-cost -->
 - The verifier shares the perception weaknesses of vision models; agreement is not correctness.
+- The loop's accuracy cannot be fully separated from its verifier's, because the verifier's guidance may suggest
+  answers. A critique-only verifier (issues, no suggested answer) would isolate the loop's own contribution.
 - 300 questions give about ±5.5-point intervals; per-type results for small categories are noisy.
 - The strict scorer under-credits paraphrases and over-credits vague answers that contain the reference word; the
   LLM judge corrects both, but it is a model, spot-checked rather than human-annotated.
