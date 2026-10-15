@@ -381,6 +381,61 @@ class BlindMeaningTests(unittest.TestCase):
         self.assertEqual((check["blind_agreement"], check["blind_agreement_method"]), (False, "rules"))
 
 
+
+class FixedPipelineWiringTests(unittest.TestCase):
+    """The fixed-pipeline ablation end to end through Haystack, with a scripted controller and faked model calls."""
+
+    def test_six_stages_run_in_order_and_the_reasoner_sees_the_image(self):
+        from unittest import mock
+        from haystack import component
+        from haystack.dataclasses import ChatMessage, ToolCall
+        from agents import orchestrator
+
+        steps = ["interpret_image", "analyze_question", "filter_image_context", "route_difficulty",
+                 "reason_answer", "verify_answer"]
+        called = []
+
+        @component
+        class ScriptedController:
+            def __init__(self, **_):
+                self.step = 0
+
+            @component.output_types(replies=list[ChatMessage])
+            def run(self, messages, streaming_callback=None, generation_kwargs=None, *, tools=None, tools_strict=None):
+                name = steps[min(self.step, len(steps) - 1)]
+                self.step += 1
+                called.append(name)
+                return {"replies": [ChatMessage.from_assistant(tool_calls=[ToolCall(tool_name=name, arguments={})])]}
+
+        def fake(result, capture=None):
+            def run(**kwargs):
+                if capture is not None:
+                    capture.update(kwargs)
+                return {"result": result}
+            return mock.Mock(return_value=mock.Mock(run=run))
+
+        reasoner_inputs = {}
+        with mock.patch.object(orchestrator, "OpenAIChatGenerator", ScriptedController), \
+                mock.patch.object(orchestrator, "Secret", mock.Mock()), \
+                mock.patch.object(orchestrator, "ImageInterpreter", fake({"status": "success", "modality": "CT",
+                                                                         "body_region": "chest", "visual_summary": "v",
+                                                                         "visible_structures": [], "notable_findings": []})), \
+                mock.patch.object(orchestrator, "QuestionAnalyzer", fake({"status": "success", "question_type": "yes_no",
+                                                                         "expected_answer_format": "yes_no"})), \
+                mock.patch.object(orchestrator, "DifficultyRouter", fake({"difficulty": "easy", "verification_policy": "standard",
+                                                                         "fallback_policy": "none"})), \
+                mock.patch.object(orchestrator, "ReasoningAgent", fake({"status": "success", "answer": "no", "explanation": "e",
+                                                                       "answer_confidence": "high"}, reasoner_inputs)), \
+                mock.patch.object(orchestrator, "VerificationAgent", fake({"verification_status": "verified",
+                                                                          "confidence_label": "High", "checks": {},
+                                                                          "issues_found": []})):
+            result = orchestrator.run_pipeline(b"image-bytes", "is there a fracture?")
+        self.assertEqual(called, steps)
+        self.assertEqual(result["answer"], "no")
+        self.assertEqual(result["verification_status"], "verified")
+        self.assertTrue(reasoner_inputs.get("image_bytes_b64"), "the reasoner must receive the image")
+
+
 if __name__ == "__main__":
     unittest.main()
 

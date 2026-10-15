@@ -233,16 +233,16 @@ def _tool_route_difficulty(question_analysis: dict = None, image_interpretation:
 def _tool_reason_answer(image_interpretation: dict = None, question_analysis: dict = None,
                         filtered_image_context: dict = None, question: str = "",
                         retry_context: dict = None, image_bytes_b64: str = "",
-                        mime_type: str = "image/png", reasoner_sees_image: bool = False) -> dict:
+                        mime_type: str = "image/png") -> dict:
     started = time.time()
-    _log.info("[tool] reason_answer called  is_retry=%s  sees_image=%s", bool(retry_context), bool(reasoner_sees_image))
+    _log.info("[tool] reason_answer called  is_retry=%s", bool(retry_context))
     result = ReasoningAgent().run(
         image_interpretation=image_interpretation,
         question_analysis=question_analysis,
         filtered_image_context=filtered_image_context,
         original_question=question,
         retry_context=retry_context,
-        image_bytes_b64=image_bytes_b64 if reasoner_sees_image else "",
+        image_bytes_b64=image_bytes_b64,  # the reasoner always sees the image
         mime_type=mime_type,
     )["result"]
     duration_ms = int((time.time() - started) * 1000)
@@ -357,7 +357,6 @@ _REASON_ANSWER_TOOL = Tool(
         "retry_context": "retry_context",
         "image_bytes_b64": "image_bytes_b64",
         "mime_type": "mime_type",
-        "reasoner_sees_image": "reasoner_sees_image",
     },
     outputs_to_state={
         "answer_data": {"source": "result"},
@@ -416,7 +415,6 @@ _STATE_SCHEMA = {
     "answer_duration_ms": {"type": int},
     "verification_duration_ms": {"type": int},
     "retry_context": {"type": dict},
-    "reasoner_sees_image": {"type": bool},
 }
 
 
@@ -889,10 +887,8 @@ def _payload_score(payload: dict) -> tuple[int, int, int, int, int]:
     return verification_rank, confidence_rank, -high_severity_count, -review_flag, specificity_score
 
 
-def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png",
-                 reasoner_sees_image: bool = True) -> dict:
-    """Fixed six-stage pipeline (the ablation). The reasoner always sees the image; the switch is kept only so the
-    April text-only design can be reproduced (reasoner_sees_image=False)."""
+def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png") -> dict:
+    """Fixed six-stage pipeline (the ablation): the same stages in a fixed order, with the image given to the reasoner."""
     pipeline_start = time.time()
     _log.info(
         "=== Agentic pipeline START  question=%r  mime_type=%s  size=%d bytes ===",
@@ -910,7 +906,6 @@ def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png"
                 mime_type=mime_type,
                 question=question,
                 retry_context=retry_context or {},
-                reasoner_sees_image=reasoner_sees_image,
             )
         except ImageBlockerAbort as e:
             _log.warning("Agentic pipeline halted by ImageBlockerAbort: %s", e)
