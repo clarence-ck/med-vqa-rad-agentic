@@ -20,6 +20,7 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT_DIR / "backend"))
 
 from utils import runs  # noqa: E402
+from utils.data_loader import load_dataset  # noqa: E402
 
 README = ROOT_DIR / "README.md"
 RUNS_INDEX = runs.RUNS_DIR / "README.md"
@@ -33,6 +34,15 @@ SYSTEM_LABELS = {
     "pipeline": "Fixed pipeline (ablation)",
 }
 
+
+
+def question_pool(run_id: str) -> str:
+    """Where the run's questions came from: the test split only, or the full dataset."""
+    data = load_dataset()
+    ids = [int(p.name.split("_")[1]) for p in runs.cases_dir(run_id).glob("sample_*.json")]
+    if ids and all(data[i].get("split") == "test" for i in ids):
+        return "VQA-RAD test questions"
+    return "questions from the full VQA-RAD dataset"
 
 def p_value(p: float) -> str:
     if p < 0.001:
@@ -121,7 +131,7 @@ def block_glance(m: dict, d: dict) -> str:
                   f"{s['agentic']['strict']}% vs {blind['strict']}% strict (p = {p_value(blind['agentic_vs_blind']['p'])})."
                   if blind else "")
     verified = m["verification_signal"]["verified"]
-    return f"""Run `{m['run']['run_id']}`: a seeded, stratified sample of {m['cases']} VQA-RAD test questions ({m['close_ended_cases']} close-ended, {m['open_ended_cases']} open-ended), all systems on the same answering model
+    return f"""Run `{m['run']['run_id']}`: a seeded, stratified sample of {m['cases']} {question_pool(m['run']['run_id'])} ({m['close_ended_cases']} close-ended, {m['open_ended_cases']} open-ended), all systems on the same answering model
 (`gpt-6-luna`; the agentic loop and the fixed pipeline also use `gpt-6.1-sol` as verifier). Per-case times were
 measured with four cases running at once; the mean is pulled up by a few long re-look cases (actual run times are in
 [Run timings](#run-timings)). "Strict" uses the rule-based scorer; "judged" scores open-ended answers with a blinded LLM

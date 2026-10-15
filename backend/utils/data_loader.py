@@ -9,7 +9,7 @@ from config import DATA_DIR
 # 2070: Problematic question and answer pair (ground truth issue)
 EXCLUDED_SAMPLE_IDS = {2070}
 
-# Seed for the evaluation sample drawn from the test split (used only when there is no eval_set.json).
+# Seed for the evaluation sample drawn from the evaluation split (used only when there is no eval_set.json).
 SAMPLE_SEED = int(os.getenv("EVAL_SAMPLE_SEED", "42"))
 
 # The evaluation questions, as an explicit list (written by scripts/make_eval_set.py).
@@ -21,6 +21,14 @@ def eval_set_ids() -> list[int] | None:
         return [int(i) for i in json.loads(EVAL_SET_PATH.read_text(encoding="utf-8"))["ids"]]
     except (OSError, ValueError, KeyError):
         return None
+
+
+def eval_split() -> str:
+    """The dataset split the evaluation questions come from ("all" for the full dataset; test by default)."""
+    try:
+        return str(json.loads(EVAL_SET_PATH.read_text(encoding="utf-8")).get("split") or "test").lower()
+    except (OSError, ValueError):
+        return "test"
 
 
 QUESTION_TYPE_ORDER = [
@@ -65,6 +73,7 @@ def get_sample_cases(limit: int = 1000) -> list:
     if not data:
         return _get_fallback_samples()
 
+    split = eval_split()
     buckets = {}
     for i, item in enumerate(data):
         if i in EXCLUDED_SAMPLE_IDS:
@@ -72,7 +81,7 @@ def get_sample_cases(limit: int = 1000) -> list:
         q_type = _classify_question(item.get("question", ""))
         image_name = item.get("image_name", item.get("image", ""))
         sample_split = _resolve_split(item, image_name)
-        if sample_split != "test":
+        if split != "all" and sample_split != split:
             continue
         sample = {
             "id": i,
@@ -95,7 +104,7 @@ def get_sample_cases(limit: int = 1000) -> list:
         by_id = {sample["id"]: sample for sample in pool}
         chosen = [by_id[i] for i in listed if i in by_id][:limit]
     else:
-        # Seeded random sample of the test split, so results are not biased by which questions sort first.
+        # Seeded random sample of the split, so results are not biased by which questions sort first.
         chosen = random.Random(SAMPLE_SEED).sample(pool, min(limit, len(pool)))
     type_rank = {question_type: index for index, question_type in enumerate(QUESTION_TYPE_ORDER)}
     chosen.sort(key=lambda sample: (type_rank.get(sample["question_type"], len(type_rank)),
@@ -114,7 +123,8 @@ def get_sample_by_id(sample_id: int) -> dict | None:
     item = data[sample_id]
     image_name = item.get("image_name", item.get("image", ""))
     sample_split = _resolve_split(item, image_name)
-    if sample_split != "test":
+    split = eval_split()
+    if split != "all" and sample_split != split:
         return None
     image_path = os.path.join(DATA_DIR, "images", image_name)
 

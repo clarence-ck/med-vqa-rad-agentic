@@ -1,12 +1,14 @@
 """Choose the evaluation questions and write them to experiments/eval_set.json.
 
-By default: a seeded random sample of the VQA-RAD test split that keeps the split's mix of close-ended (yes/no) and
+By default: a seeded random sample of the VQA-RAD test split (--split all for the full dataset) that keeps its mix of close-ended (yes/no) and
 open-ended questions. With --reuse-from, half the questions come from an earlier run (for a before/after
-comparison on identical questions) and half are questions that run did not use. The list is shuffled; the same
-command always gives the same set.
+comparison on identical questions) and half are questions that run did not use. With --exclude-run, no question
+an earlier run used is chosen. The list is shuffled; the same command always gives the same set.
 
 Usage (run from repo root):
     python scripts/make_eval_set.py --size 300
+    python scripts/make_eval_set.py --size 300 --split all
+    python scripts/make_eval_set.py --size 300 --split all --exclude-run <run_id> --seed 51511
     python scripts/make_eval_set.py --size 250 --reuse-from <run_id>
 """
 from __future__ import annotations
@@ -41,15 +43,24 @@ def main() -> None:
     parser.add_argument("--size", type=int, default=300, help="Number of questions")
     parser.add_argument("--reuse-from", default=None,
                         help="Optional earlier run: half the questions are reused from it, half are new")
+    parser.add_argument("--exclude-run", default=None, help="Optional earlier run whose questions are not chosen")
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--split", choices=["test", "train", "all"], default="test",
+                        help="Dataset split to draw from (all = the full dataset)")
     args = parser.parse_args()
 
     test = []
     for index, item in enumerate(load_dataset()):
-        if item.get("split") == "test" and index not in EXCLUDED_SAMPLE_IDS:
+        if args.split in ("all", item.get("split")) and index not in EXCLUDED_SAMPLE_IDS:
             test.append({"id": index, "close_ended": scoring.is_close_ended(_normalize_answer(item.get("answer", "")))})
     if not test:
         sys.exit("VQA-RAD not found: run python scripts/download_dataset.py first")
+    excluded = set()
+    if args.exclude_run:
+        excluded = {int(p.name.split("_")[1]) for p in runs.cases_dir(args.exclude_run).glob("sample_*.json")}
+        if not excluded:
+            sys.exit(f"Run {args.exclude_run} has no cases")
+        test = [q for q in test if q["id"] not in excluded]
     test.sort(key=lambda q: q["id"])
     close_share = sum(q["close_ended"] for q in test) / len(test)
     rng = random.Random(args.seed)
@@ -66,16 +77,21 @@ def main() -> None:
         extra = {"reused_from": args.reuse_from, "reused_ids": sorted(q["id"] for q in reused),
                  "new_ids": sorted(q["id"] for q in new)}
         description = (f"{len(reused)} questions reused from run {args.reuse_from} and {len(new)} it did not use; "
-                       f"each half keeps the test split's close/open-ended mix ({close_share:.0%} close-ended).")
+                       f"each half keeps the pool's close/open-ended mix ({close_share:.0%} close-ended).")
     else:
         chosen = stratified(test, args.size, close_share, rng)
-        description = (f"{args.size} of the {len(test)} VQA-RAD test questions, drawn at random while keeping the "
-                       f"split's close/open-ended mix ({close_share:.0%} close-ended).")
+        pool_name = "VQA-RAD questions (full dataset)" if args.split == "all" else f"VQA-RAD {args.split} questions"
+        description = (f"{args.size} of the {len(test)} {pool_name}, drawn at random while keeping their "
+                       f"close/open-ended mix ({close_share:.0%} close-ended).")
+        if args.exclude_run:
+            description += f" None of the {len(excluded)} questions run {args.exclude_run} used is included."
+            extra = {"excluded_run": args.exclude_run}
     rng.shuffle(chosen)
 
     eval_set = {
         "created": dt.date.today().isoformat(),
         "seed": args.seed,
+        "split": args.split,
         "description": description,
         "ids": [q["id"] for q in chosen],
         "close_ended": sum(q["close_ended"] for q in chosen),
