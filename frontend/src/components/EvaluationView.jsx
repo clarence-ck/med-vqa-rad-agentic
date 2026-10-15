@@ -318,7 +318,7 @@ export default function EvaluationView({ loading, evaluationData, error, onRefre
             <div className="card">
               <div className="card-header">
                 <span className="card-title">Lexical Overlap</span>
-                <span className="tag tag-gray" data-tooltip="Average token F1 overlap score (0-1) across all cases. This is a surface-level diagnostic similarity metric only and is not used for correctness. Compare with Open-ended Accuracy, which uses content-word matching with a strict embedding fallback." data-tooltip-align="left">info</span>
+                <span className="tag tag-gray" data-tooltip="Average token F1 overlap across all cases, shown as a percentage. This is a surface-level diagnostic similarity metric only and is not used for correctness. Compare with Open-ended Accuracy, which uses content-word matching with a strict embedding fallback." data-tooltip-align="left">info</span>
               </div>
               <AccuracyMetricStack
                 baseline={avgBaselineF1}
@@ -340,7 +340,7 @@ export default function EvaluationView({ loading, evaluationData, error, onRefre
             </div>
             <div className="card">
               <div className="card-header">
-                <span className="card-title">Close-ended Accuracy</span>
+                <span className="card-title">Close-ended Accuracy (strict)</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.close_ended_cases} cases</span>
                   <span className="tag tag-gray" data-tooltip="Yes/no ground truth: the answer must start with the correct word (“No, there is…” counts as no). Binary ground truth (normal/abnormal, present/absent, positive/negative, benign/malignant, acute/chronic, diffuse/focal): the answer must contain the correct term and not its opposite." data-tooltip-align="left">info</span>
@@ -355,7 +355,7 @@ export default function EvaluationView({ loading, evaluationData, error, onRefre
             </div>
             <div className="card">
               <div className="card-header">
-                <span className="card-title">Open-ended Accuracy</span>
+                <span className="card-title">Open-ended Accuracy (strict)</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">{summary.open_ended_cases} cases</span>
                   <span className="tag tag-gray" data-tooltip="Every content word of the ground truth must appear in the answer (aliases such as CT = computed tomography; plurals folded), or at least 60% of them when the ground truth is longer than 3 words. Answers naming the opposite side (left vs right), or starting with “no” when the ground truth does not, are wrong. S-PubMedBert-MS-MARCO similarity is only a strict fallback (≥ 0.95 short, ≥ 0.90 long). Counting questions compare the numbers." data-tooltip-align="left">info</span>
@@ -562,10 +562,10 @@ export default function EvaluationView({ loading, evaluationData, error, onRefre
                             <div className="evaluation-list-title">{row.question || '—'}</div>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', margin: '6px 0 4px 0' }}>
                               <span className="tag tag-gray" style={{ fontSize: '10px' }}>
-                                Original Question Type: {formatLabel(row.original_question_type)}
+                                Question Type (keyword rules): {formatLabel(row.original_question_type)}
                               </span>
                               <span className={`tag ${row.agentic_question_type ? 'tag-blue' : 'tag-gray'}`} style={{ fontSize: '10px' }}>
-                                Agentic Reclass Type: {formatLabel(row.agentic_question_type || row.original_question_type)}
+                                Agentic Question Type: {formatLabel(row.agentic_question_type || row.original_question_type)}
                               </span>
                               <span className="tag tag-gray" style={{ fontSize: '10px' }}>
                                 Ground Truth Answer Style: {formatLabel(row.answer_style)}

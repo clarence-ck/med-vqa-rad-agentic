@@ -113,16 +113,16 @@ def main():
     ax.text(8.65, 4.58, "Example episode: analyze → look → answer → check (partial; relook 'left base')\n"
             "→ look(focus) → answer → check (verified) → finish",
             ha="left", va="center", fontsize=7.8, color=TEXT, zorder=4, linespacing=1.3)
-    ax.text(8.65, 3.95, "budgets: ≤ 2 focused looks, ≤ 3 answers; a safety net checks the\nlatest answer if the controller stalls",
+    ax.text(8.65, 3.95, "budgets: ≤ 2 focused looks, ≤ 3 answers; if the controller stalls,\na safety net answers or checks before finishing",
             ha="left", va="center", fontsize=7.2, color=MUTED, style="italic")
 
     # ---- Output / guardrails -----------------------------------------------------------
     frame(ax, 14.6, 3.6, 4.1, 6.5, "Decision & safety", RED)
-    box(ax, 14.9, 8.4, 3.5, 1.1, RED_SOFT, RED, "Best-verified answer", "a later answer replaces an earlier\none only if its check is better")
+    box(ax, 14.9, 8.4, 3.5, 1.1, RED_SOFT, RED, "Best-verified answer", "a later answer replaces an earlier\none only if its check is strictly better")
     box(ax, 14.9, 6.9, 3.5, 1.1, RED_SOFT, RED, "Self-consistency", "2 independent re-answers;\nlow agreement → review flag")
     box(ax, 14.9, 5.4, 3.5, 1.1, RED_SOFT, RED, "Guardrail", "failure categories, disclaimer,\nflag for review")
     box(ax, 14.9, 3.9, 3.5, 1.1, "white", RED, "Final state",
-        "verified · partially verified · low confidence\n· review · abstained · rejected (non-radiology)", fs2=7.6)
+        "verified · partially verified\n· low confidence · unsupported · review\n· abstained · rejected (non-radiology)", fs2=7.6)
     path(ax, [(13.65, 5.5), (14.45, 5.5), (14.45, 8.95), (14.9, 8.95)], color=RED, label="final", label_xy=(14.45, 7.2), lc=RED)
     for y0, y1 in [(8.4, 8.0), (6.9, 6.5), (5.4, 5.0)]:
         arrow(ax, (16.65, y0), (16.65, y1), color=RED)
