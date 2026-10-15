@@ -568,10 +568,17 @@ def _normalize_final_answer(answer: str, question_analysis: dict, image_analysis
         leading = leading_yes_no(lowered)
         if leading:
             return leading
-        if any(marker in lowered for marker in ["normal", "present", "visible", "seen", "identifiable", "abnormal"]):
+        # Negated phrases first ("no visible fracture" must not match "visible"), then positive words as whole words
+        # ("normal" must not match inside "abnormal").
+        if any(marker in lowered for marker in ["not absent", "not negative"]):
             return "yes"
-        if any(marker in lowered for marker in ["absent", "negative", "not seen", "not visible", "cannot determine", "unable to determine"]):
+        if any(marker in lowered for marker in [
+                "not present", "not visible", "not seen", "not identifiable", "not detected", "not normal",
+                "no visible", "no evidence", "no sign", "absent", "negative", "cannot determine", "unable to determine"]):
             return "no"
+        if any(re.search(rf"\b{marker}\b", lowered)
+               for marker in ["normal", "present", "visible", "seen", "identifiable", "abnormal"]):
+            return "yes"
 
     if question_type == "location":
         lowered = text.lower()

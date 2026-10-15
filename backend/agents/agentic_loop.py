@@ -5,7 +5,7 @@ Tools (bound to one per-request LoopContext):
   analyze_question()        classify the question (type, expected format)
   look(focus="")            question-aware look at the image; with `focus`, a zoomed re-examination of that region
   answer(guidance="")       answer from the image + all observations so far
-  check()                   verify the latest answer, plus a blind reading of the image (made once); recommends the next action
+  check()                   blind reading of the image (once), then verify the latest answer; recommends the next action
   finish(abstain, reason)   end the episode
 
 Unlike the fixed pipeline (orchestrator.run_pipeline), the tool sequence depends on what
@@ -281,6 +281,9 @@ class LoopContext:
             return "Nothing to check yet: call answer first."
         if len(self.checks) == len(self.answers):
             return "The latest answer is already checked. Act on that result or finish."
+        # Blind reading first (made once per episode, from the image and question only), then the answer-aware
+        # review. The two are independent: neither sees the other's output until apply_blind_agreement.
+        blind = self.blind_reading()
         started = time.time()
         result = VerificationAgent().run(
             answer_data=self.answers[-1],
@@ -290,7 +293,7 @@ class LoopContext:
             image_bytes_b64=self.image_b64,
             mime_type=self.mime_type,
         )["result"]
-        apply_blind_agreement(result, self.answers[-1].get("answer", ""), self.blind_reading(), self.question_analysis,
+        apply_blind_agreement(result, self.answers[-1].get("answer", ""), blind, self.question_analysis,
                               same_meaning=lambda first, second: answers_equivalent(self.question, first, second))
         self.checks.append(result)
         status = result.get("verification_status", "unknown")

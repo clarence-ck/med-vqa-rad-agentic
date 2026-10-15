@@ -94,7 +94,7 @@ controller decides whether to follow it; in the fixed-pipeline ablation every st
 | `analyze_question()` | Task understanding | gpt-6-luna | Question type and expected answer format; keyword rules use whole-word matching |
 | `look(focus)` | Perception (executor) | gpt-6-luna, vision | Looks *with the question in mind*; with `focus` it **zooms**: the named region is located, cropped and enlarged, and examined next to the full image (if it cannot be located, a plain re-look). The first look also rejects non-radiology images |
 | `answer(guidance)` | Synthesis (executor) | gpt-6-luna, vision | Receives the image plus all observations; `guidance` carries what the verifier asked to fix |
-| `check()` | Evaluator (a higher-tier model) | gpt-6.1-sol, vision | Two parts. **Blind reading** (independent): once per episode, the verifier answers from the image and question alone, without the proposed answer or the looker's notes. **Review** (critic): it checks the answer against the image (grounding, contradictions, format) and returns a status, the issues found and a next step (`accept`, `relook` with a focus, `reanswer` with guidance, `abstain`); the guidance may include a suggested corrected answer. An answer is *verified* only if the verifier returns `verified`, no format or question-type check fails, **and** the blind reading agrees (word rules first, exact for yes/no; for open-ended answers the verifier judges whether the two mean the same). The controller learns only whether they agree, never the blind answer, though the review's guidance may still name a corrected answer |
+| `check()` | Evaluator (a higher-tier model) | gpt-6.1-sol, vision | Two parts, in this order. **Blind reading** (independent): once per episode, the verifier answers from the image and question alone, without the proposed answer or the looker's notes. **Review** (critic): it checks the answer against the image (grounding, contradictions, format) and returns a status, the issues found and a next step (`accept`, `relook` with a focus, `reanswer` with guidance, `abstain`); the guidance may include a suggested corrected answer. An answer is *verified* only if the verifier returns `verified`, no format or question-type check fails, **and** the blind reading agrees (word rules first, exact for yes/no; for open-ended answers the verifier judges whether the two mean the same). The controller learns only whether they agree, never the blind answer, though the review's guidance may still name a corrected answer |
 | `finish(abstain)` | Decision | — | Ends the episode; a normal finish is refused while the latest answer is unchecked (abstaining is not) |
 
 Budgets: at most 2 focused re-looks, 3 answers and 16 agent steps. If the controller stalls, a safety net answers
@@ -155,7 +155,7 @@ text. The evaluation's LLM judge compares answers with the reference as text and
 
 | Mechanism | What it does |
 |---|---|
-| Image-grounded verification | `check` judges the answer against the image and compares it with an independent blind reading of the image: 5 checks, a status (`verified`, `partially_verified`, `low_confidence`, `unsupported`) and a recommended next action |
+| Image-grounded verification | `check` takes an independent blind reading of the image (once per episode), judges the answer against the image, and compares the two: 5 checks, a status (`verified`, `partially_verified`, `low_confidence`, `unsupported`) and a recommended next action |
 | Targeted recovery | The controller zooms into a region (`look(focus)`) or revises (`answer(guidance)`) instead of re-running everything |
 | Best-verified answer | A later answer replaces an earlier one only if its check is strictly better (re-looks can over-read) |
 | Self-consistency | After finishing, the answerer is re-asked independently (2×); low agreement adds `self_inconsistent` and flags the case for review |
@@ -201,6 +201,11 @@ budgets come from the code.
 - **Statistics:** 95% intervals are about ±5.6 points at n = 300 (±5.7 at most); paired comparisons use the exact
   McNemar test.
 - **Variance:** the baseline and agentic loop are run again on 100 of the evaluated questions.
+- **Code changes after the run** (the run is recorded at commit `2b1d54f`): the yes/no normaliser now checks negated
+  phrases before positive words ("no visible fracture" was read as "yes"), and `check` takes the blind reading before
+  the review, as the controller's prompt states. Neither changes this run's results: replaying all 4,519 recorded
+  answers through the old and new normaliser gives identical output, and the two `check` calls are independent (neither
+  sees the other's output), so no model input changes.
 <!-- generated:cost -->
 - **Cost:** every OpenAI call is recorded (`backend/utils/usage.py`): evaluation $6.20, repeats
   $1.31, judge $1.22 ($8.73 in total).
@@ -367,8 +372,6 @@ right on 18 of the 25 abstentions), tested on fresh questions.
   with published VQA-RAD results on its test split.
 - The strict scorer under-credits paraphrases and over-credits vague answers that contain the reference word; the
   LLM judge corrects both, but it is a model, spot-checked rather than human-annotated.
-- The yes/no normaliser that turns a final answer into "yes"/"no" is keyword-based: it checks positive phrases
-  first, so negated phrasing such as "not visible" can come out as "yes". It changed no final answer in this run.
 - The workflow baseline uses a question-agnostic image description by design.
 - The system uses no retrieval, so it cannot draw on knowledge that is not visible in the image.
 

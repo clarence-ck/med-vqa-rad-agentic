@@ -148,7 +148,7 @@ it cannot be located); the first look rejects
 non-radiology images.
 \textbf{\texttt{answer(guidance)}} (executor) answers from the image plus all observations, applying the
 verifier's guidance on revisions.
-\textbf{\texttt{check}} (evaluator, a higher-tier model) has two parts. A \emph{blind reading}, made once per episode: the
+\textbf{\texttt{check}} (evaluator, a higher-tier model) has two parts, in this order. A \emph{blind reading}, made once per episode: the
 verifier answers from the image and question alone, without the proposed answer or the looker's notes. A
 \emph{review}: it checks the answer against the image (grounding, contradictions, format) and returns a status
 (verified, partially verified, low confidence, unsupported), the issues found and a next step---\emph{accept},

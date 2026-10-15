@@ -453,6 +453,49 @@ class LogTagTests(unittest.TestCase):
         self.assertEqual(record.sample, " [sample 1793]")
 
 
+class YesNoNormaliserTests(unittest.TestCase):
+    """Negated phrasing must not be read as "yes" (checked before the positive keywords)."""
+
+    QA = {"question_type": "yes_no", "expected_answer_format": "yes_no"}
+
+    def test_negations_become_no(self):
+        for text in ("Not visible", "There is no visible fracture", "Unable to determine whether it is present",
+                     "No evidence of effusion"):
+            self.assertEqual(_normalize_final_answer(text, self.QA, {}), "no", text)
+
+    def test_positive_and_double_negative_become_yes(self):
+        for text in ("A mass is present", "The liver appears abnormal", "Not absent"):
+            self.assertEqual(_normalize_final_answer(text, self.QA, {}), "yes", text)
+
+
+class CheckOrderTests(unittest.TestCase):
+    """check(): the blind reading is made before the answer-aware review, as the controller is told."""
+
+    def test_blind_reading_runs_before_the_review(self):
+        from unittest import mock
+        from agents import agentic_loop
+        calls = []
+
+        def fake_blind(*_args, **_kwargs):
+            calls.append("blind")
+            return {"status": "success", "answer": "yes"}
+
+        class FakeVerifier:
+            def run(self, **_kwargs):
+                calls.append("review")
+                return {"result": {"verification_status": "verified", "confidence_label": "High",
+                                   "recommended_action": "accept", "checks": {}, "issues_found": []}}
+
+        ctx = agentic_loop.LoopContext(b"img", "is there an effusion?", "image/png")
+        ctx.question_analysis = {"question_type": "yes_no", "expected_answer_format": "yes_no"}
+        ctx.answers.append({"answer": "yes"})
+        with mock.patch.object(agentic_loop, "blind_read", fake_blind), \
+                mock.patch.object(agentic_loop, "VerificationAgent", FakeVerifier):
+            ctx.check()
+        self.assertEqual(calls, ["blind", "review"])
+        self.assertTrue(ctx.checks[0]["blind_agreement"])
+
+
 if __name__ == "__main__":
     unittest.main()
 
