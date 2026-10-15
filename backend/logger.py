@@ -6,6 +6,7 @@ Provides a pre-configured logger with:
   - Level-coloring (via colorlog if installed, plain otherwise)
   - Consistent name prefixes per module / agent
   - Per-session log file named: medvqa_<YYYYMMDD_HHMMSS>_<short-id>.log
+  - Lines logged while a dataset case runs are tagged "[sample <id>]", so one case's lines can be found with grep
   - A get_logger() factory for per-component loggers
 """
 
@@ -30,10 +31,10 @@ except ImportError:
     _HAVE_COLORLOG = False
 
 _ROOT_LOGGER_NAME = "medvqa"
-_LOG_FORMAT_PLAIN = "%(asctime)s  %(levelname)-8s  %(name)s  %(message)s"
+_LOG_FORMAT_PLAIN = "%(asctime)s  %(levelname)-8s  %(name)s%(sample)s  %(message)s"
 _LOG_FORMAT_COLOR = (
     "%(log_color)s%(asctime)s  %(levelname)-8s%(reset)s  "
-    "%(cyan)s%(name)s%(reset)s  %(message)s"
+    "%(cyan)s%(name)s%(reset)s%(sample)s  %(message)s"
 )
 _DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
@@ -55,29 +56,12 @@ _SESSION_LOG_FILENAME = f"medvqa_{_SESSION_TIMESTAMP}_{_SESSION_ID}.log"
 # Log directory sits next to this file i.e. backend/logs/
 _LOG_DIR = os.path.join(os.path.dirname(__file__), "logs")
 
-class PerSampleFileHandler(logging.Handler):
-    """
-    Appends the log record to a specific sample_XYZ.log file if a sample_id
-    is set in the current execution context.
-    """
-    def __init__(self, log_dir: str):
-        super().__init__()
-        self.log_dir = log_dir
-        os.makedirs(self.log_dir, exist_ok=True)
-
-    def emit(self, record):
-        try:
-            sid = sample_id_var.get()
-            if not sid:
-                return  # If no sample ID in context, do nothing
-
-            msg = self.format(record)
-            # Create a dedicated log file per sample ID, prefixing with session timestamp
-            file_path = os.path.join(self.log_dir, f"medvqa_{_SESSION_TIMESTAMP}_{sid}.log")
-            with open(file_path, "a", encoding="utf-8") as f:
-                f.write(msg + "\n")
-        except Exception:
-            self.handleError(record)
+class SampleTagFilter(logging.Filter):
+    """Adds `record.sample` (" [sample <id>]" while a dataset case runs, else empty) for the log format."""
+    def filter(self, record: logging.LogRecord) -> bool:
+        sid = sample_id_var.get()
+        record.sample = f" [sample {sid}]" if sid else ""
+        return True
 
 _configured = False
 
@@ -114,9 +98,10 @@ def _configure_root() -> None:
         console_formatter = plain_formatter
 
     console_handler.setFormatter(console_formatter)
+    console_handler.addFilter(SampleTagFilter())
     root.addHandler(console_handler)
 
-    # Tests and offline scripts can opt out of writing session/per-sample log files.
+    # Tests and offline scripts can opt out of writing the session log file.
     if os.getenv("MEDVQA_DISABLE_FILE_LOGS", "").strip().lower() in {"1", "true", "yes"}:
         for noisy in ("httpx", "httpcore", "openai", "haystack"):
             logging.getLogger(noisy).setLevel(logging.WARNING)
@@ -134,13 +119,8 @@ def _configure_root() -> None:
     )
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(plain_formatter)
+    file_handler.addFilter(SampleTagFilter())
     root.addHandler(file_handler)
-
-    # ── Per-Sample File handler ──────────────────────────────────────────────
-    per_sample_handler = PerSampleFileHandler(_LOG_DIR)
-    per_sample_handler.setLevel(logging.DEBUG)
-    per_sample_handler.setFormatter(plain_formatter)
-    root.addHandler(per_sample_handler)
 
     # Emit the session header so it's easy to find session boundaries in logs
     root.info(

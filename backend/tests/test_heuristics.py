@@ -436,6 +436,23 @@ class FixedPipelineWiringTests(unittest.TestCase):
         self.assertTrue(reasoner_inputs.get("image_bytes_b64"), "the reasoner must receive the image")
 
 
+class LogTagTests(unittest.TestCase):
+    """Case lines are tagged in the one session log instead of being copied into per-case files."""
+
+    def test_lines_inside_a_case_carry_its_sample_id(self):
+        import logging
+        from logger import SampleTagFilter, sample_id_var
+        record = logging.LogRecord("medvqa.test", logging.INFO, __file__, 1, "msg", None, None)
+        SampleTagFilter().filter(record)
+        self.assertEqual(record.sample, "")
+        token = sample_id_var.set("1793")
+        try:
+            SampleTagFilter().filter(record)
+        finally:
+            sample_id_var.reset(token)
+        self.assertEqual(record.sample, " [sample 1793]")
+
+
 if __name__ == "__main__":
     unittest.main()
 
