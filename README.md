@@ -396,7 +396,8 @@ right on 18 of the 25 abstentions), tested on fresh questions.
   shows the answer, explanation, verification checks, failure categories and the full trace.
 - **Case Explorer:** browse the evaluation questions with the single prompt's, the workflow's and the loop's cached
   answers and the loop's full trace (the fixed pipeline's answers are in the Evaluation table);
-  search by question text or ID (an exact ID match is listed first). A question not in the current run runs live.
+  search by question text or ID (an exact ID match is listed first). A question not in the current run, or one
+  re-run with "Refresh analysis", runs live and is tagged "Live result, not from the evaluation run".
 - **Evaluation:** strict and LLM-judged accuracy for all four systems, close- and open-ended accuracy, accuracy by
   question type and by controller path, disagreement, and a filterable table of every case.
 
