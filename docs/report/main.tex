@@ -43,12 +43,12 @@ answer synthesis and verification---steps that fail in different ways and are hi
 We present MedVisionQuery, an agentic system in which a Haystack Agent controller decides, case by case, how to
 look at the image, answer, verify the answer \emph{against the image}, and whether to re-examine a specific region,
 revise, abstain or finish. Perception is question-aware, the answerer and the verifier both see the image, and a
-different, larger model verifies. We evaluate on \NCases{} questions sampled at random from the whole VQA-RAD
+different, higher-tier model verifies. We evaluate on \NCases{} questions sampled at random from the whole VQA-RAD
 dataset against a single-prompt baseline, a hand-designed workflow and a fixed-pipeline ablation, all on the same
 answering model, scoring with a strict rule-based scorer and a blinded LLM judge. The single prompt is more accurate
 than the agentic loop (\BaseStrict\% vs.\ \AgStrict\% strict, \BaseJudged\% vs.\ \AgJudged\% judged; McNemar
 $p=\PairBaseP$ and $p=\PairBaseJP$, significant only under the judge), the loop and the fixed pipeline do not differ significantly ($p=\PairPlP$), and
-the loop's larger verifier answering alone beats it (\BlindStrict\%, $p=\BlindAgP$). On the questions it answers, the
+the loop's higher-tier verifier answering alone beats it (\BlindStrict\%, $p=\BlindAgP$). On the questions it answers, the
 loop matches the single prompt (\AnsweredAgAcc\% vs.\ \AnsweredBaseAcc\%); its \PathAbstainN{} abstentions account for
 the gap. Its value is calibrated confidence: answers its check verifies are \SigVerAcc\% correct, the
 rest \UnverAcc\%---at about \CostRatio$\times$ the cost of a single prompt. Code is available at
@@ -147,7 +147,7 @@ zooms: the named region is located, cropped and enlarged, and examined beside th
 non-radiology images.
 \textbf{\texttt{answer(guidance)}} (executor) answers from the image plus all observations, applying the
 verifier's guidance on revisions.
-\textbf{\texttt{check}} (evaluator, a larger model) has two parts. A \emph{blind reading}, made once per episode: the
+\textbf{\texttt{check}} (evaluator, a higher-tier model) has two parts. A \emph{blind reading}, made once per episode: the
 verifier answers from the image and question alone, without the proposed answer or the looker's notes. A
 \emph{review}: it checks the answer against the image (grounding, contradictions, format) and returns a status
 (verified, partially verified, low confidence, unsupported), the issues found and a next step---\emph{accept},
@@ -159,8 +159,8 @@ open-ended answers by meaning, judged by the verifier); the controller learns on
 \paragraph{Model and tool choices.} All roles use OpenAI models, sized by need and configurable per role. The
 controller and question analysis make simple decisions (\texttt{gpt-6-luna}, no/low reasoning effort); perception
 and answering use \texttt{gpt-6-luna} with medium effort, and the answerer always sees the image, because a
-text description loses the visual detail many questions depend on. Verification uses a different, larger model
-(\texttt{gpt-6.1-sol}) so that the answering model never verifies itself; since its guidance can suggest answers,
+text description loses the visual detail many questions depend on. Verification uses a different, higher-tier model
+(\texttt{gpt-6.1-sol}, 20$\times$ the per-token price) so that the answering model never verifies itself; since its guidance can suggest answers,
 we also score it answering alone as a reference. Haystack's \texttt{Agent}/\texttt{Tool}
 abstraction provides the tool-calling loop and exit conditions; keeping the image in per-request memory rather than
 in the controller's context keeps the controller cheap.
@@ -275,7 +275,7 @@ answer would have raised the loop's word-rule score by about 7 points, to the ve
 medium/low \ScMedLowRange\%, so low consistency marks uncertainty rather than certain error.
 \emph{Cross-modal agreement:} because the verifier sees the image, verification status is predictive: verified
 answers are \SigVerAcc\% correct, the rest \UnverAcc\%.
-\emph{Verifier model:} a larger model verifying a smaller one steers \NotDirect{} of \NCases{} episodes away from the direct path.
+\emph{Verifier model:} a higher-tier model verifying the answering model steers \NotDirect{} of \NCases{} episodes away from the direct path.
 \emph{Disagreement:} the three systems disagree on \DisagreePct\% of cases; when exactly one system is right, it is the
 agentic loop \WinsAg{} times, the single prompt \WinsBase{} and the workflow \WinsWf.
 \emph{Stability:} on \VarCases{} repeated cases, \VarBaseFlip\% of single-prompt answers flipped between right and

@@ -46,7 +46,7 @@ function getBreakdownTooltip(mode) {
     return 'Breakdown by what the agentic controller did: direct (look → answer → check → finish), relook (a focused re-examination of a region), reanswer (answer revised after a failed check) or abstained. The pipeline column is the fixed six-stage ablation on the same cases.';
   }
 
-  return 'Breakdown by the dataset question type (independent of the agent’s own classification), using the same scoring rules as the summary above.';
+  return 'Breakdown by question type, assigned by simple keyword rules on the question text (independent of the agent’s own classification), using the same scoring rules as the summary above.';
 }
 
 const QUESTION_TYPE_ORDER = [
@@ -202,7 +202,7 @@ export default function EvaluationView({ loading, evaluationData, error, onRefre
   const breakdownRows = (isControllerMode ? summary?.by_controller_path : summary?.by_question_type) || [];
   const breakdownTitle = isControllerMode ? 'Accuracy by Controller Path' : 'Accuracy by Question Type';
   const breakdownPrimaryLabel = isControllerMode ? 'Controller Path' : 'Question Type';
-  const breakdownContextTag = isControllerMode ? 'Agentic decisions' : 'Dataset labels';
+  const breakdownContextTag = isControllerMode ? 'Agentic decisions' : 'Keyword rules';
   const breakdownTooltip = getBreakdownTooltip(breakdownMode);
   const filteredRows = selectedSampleIds.length
     ? rows.filter((row) => selectedSampleIds.includes(String(row.sample_id ?? '')))
@@ -620,13 +620,13 @@ export default function EvaluationView({ loading, evaluationData, error, onRefre
                         </td>
                         <td>
                           <div className="evaluation-signal-stack">
-                            <span className={`tag ${getLevelTagClass(row.confidence)}`} data-tooltip="Overall confidence level. High = passed all 5 verification checks: (1) answer matches question type, (2) explanation is grounded in image evidence, (3) confidence level is appropriate, (4) no contradictions with image, (5) format is correct. Medium/Low = some checks failed.">
+                            <span className={`tag ${getLevelTagClass(row.confidence)}`} data-tooltip="The verifier's confidence label for the final answer. It is capped at Medium when the format or question-type check fails, or when the independent blind reading disagrees with the answer.">
                               confidence {(row.confidence || 'low').toLowerCase()}
                             </span>
-                            <span className={`tag ${getLevelTagClass(row.self_consistency_level)}`} data-tooltip="Self-consistency: the reasoner is re-asked independently (default 2 times) and the re-answers are compared with the final answer. High = all agree; medium = at least half agree; low = most disagree (the case is flagged for review).">
+                            <span className={`tag ${getLevelTagClass(row.self_consistency_level)}`} data-tooltip="Self-consistency: the reasoner is re-asked independently (default 2 times) and the re-answers are compared with the final answer. High = all agree; medium = at least half agree; low = fewer than half agree (the case is flagged for review).">
                               consistency {row.self_consistency_level}
                             </span>
-                            <span className={`tag ${getLevelTagClass(row.cross_modal_agreement_level)}`} data-tooltip="Agreement between answer and image evidence. Two checks: (1) explanation grounded in actual image evidence, (2) no contradictions between answer and what the image shows. High = both checks passed. Medium = unclear/insufficient evidence. Low = contradicts image or makes unsupported claims.">
+                            <span className={`tag ${getLevelTagClass(row.cross_modal_agreement_level)}`} data-tooltip="Agreement between answer and image evidence. Two checks: (1) explanation grounded in actual image evidence, (2) no contradictions between answer and what the image shows. High = both checks passed. Low = either check failed. Medium = a check result is missing.">
                               cross-modal {row.cross_modal_agreement_level}
                             </span>
                           </div>

@@ -283,7 +283,7 @@ def block_failure(m: dict, d: dict) -> str:
   consistency marks uncertainty, not certain error: {rounded(sc['low']['agentic'])}% of low-consistency answers were still correct.
 - **Cross-modal agreement:** the verifier sees the image, so "explanation grounded in evidence" and "no
   contradictions" are checked against the image itself, not only a text description.
-- **Verifier model:** a different, larger model (`gpt-6.1-sol`) verifies `gpt-6-luna`'s answers and steers
+- **Verifier model:** a different, higher-tier model (`gpt-6.1-sol`) verifies `gpt-6-luna`'s answers and steers
   {d['not_direct']} of {m['cases']} episodes away from the direct path.
 - **Disagreement analysis:** the three systems disagree on {rounded(m['disagreement_pct'])}% of cases under the same matching rules;
   wins (only one system right): agentic {wins['agentic']}, single-shot {wins['baseline']}, workflow {wins['workflow']}.

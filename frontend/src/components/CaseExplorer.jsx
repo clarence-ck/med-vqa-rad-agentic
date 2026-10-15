@@ -85,7 +85,7 @@ function MethodologyLabels() {
           <span style={{ color: 'var(--color-warning)', fontWeight: 'bold' }}>🧭 Workflow Baseline</span>
         </div>
         <p style={{ color: 'var(--color-text-secondary)', lineHeight: '1.4' }}>
-          A deterministic sequence of analysis steps that follows a fixed path without agentic self-correction or feedback.
+          A fixed sequence of steps (a question-agnostic image description, question analysis, then hand-written rules per question type) without self-correction or feedback.
         </p>
       </div>
       <div>
@@ -575,29 +575,29 @@ export default function CaseExplorer({
                         <div className="summary-section-title">Agentic Quality</div>
                         <div className="summary-stat-list">
                           <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label" data-tooltip="The model's self-reported confidence in its final answer, based on the currently selected methodology (Agentic, Workflow, or Baseline).">Selected confidence</span>
+                            <span className="summary-stat-label" data-tooltip="Confidence label of the selected system's final answer (for the agentic loop, set by the verifier).">Selected confidence</span>
                             <span className={`tag ${getConfidenceTagClass(selectedConfidence)}`}>
                               {selectedConfidence}
                             </span>
                           </div>
                           <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label" data-tooltip="Based on the Verification Agent's checks. 'Verified' means it passed all checks (question matched, evidence grounded, strength appropriate, no contradictions, format correct). 'Partially_verified' means it passed most but not all checks.">Verification</span>
+                            <span className="summary-stat-label" data-tooltip="Based on the Verification Agent's checks. 'Verified' requires the review to pass its checks (question matched, evidence grounded, strength appropriate, no contradictions, format correct) and an independent blind reading of the image to agree with the answer. 'Partially_verified' means the review found problems or the blind reading disagrees.">Verification</span>
                             <span className={`tag ${getVerificationTagClass(overallVerification)}`}>
                               {overallVerification.replace(/_/g, ' ')}
                             </span>
                           </div>
                           <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label" data-tooltip="Self-consistency: the reasoner is re-asked independently (default 2 times) and the re-answers are compared with the final answer. High = all agree; medium = at least half agree; low = most disagree (the case is flagged for review).">Self-consistency</span>
+                            <span className="summary-stat-label" data-tooltip="Self-consistency: the reasoner is re-asked independently (default 2 times) and the re-answers are compared with the final answer. High = all agree; medium = at least half agree; low = fewer than half agree (the case is flagged for review).">Self-consistency</span>
                             <span className={`tag ${getConfidenceTagClass(selfConsistencyLevel)}`}>
                               {selfConsistencyLevel}
                             </span>
                           </div>
                           <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label" data-tooltip="Evaluates whether the answer is grounded in the visual evidence AND free of contradictions with the image interpretation. 'High' = both true; 'low' = either false; 'medium' otherwise.">Cross-modal agreement</span>
+                            <span className="summary-stat-label" data-tooltip="Evaluates whether the answer is grounded in the visual evidence AND free of contradictions with the image itself. 'High' = both true; 'low' = either false; 'medium' otherwise.">Cross-modal agreement</span>
                             <span className={`tag ${getConfidenceTagClass(crossModalAgreement)}`}>{crossModalAgreement}</span>
                           </div>
                           <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label" data-tooltip="Set to 'yes' if the pipeline encountered 'unsupported claims', 'visual contradictions', a 'parser failure', or if the Verification Agent explicitly recommended flagging for review.">Review recommended</span>
+                            <span className="summary-stat-label" data-tooltip="Set to 'yes' when the verification status is low confidence or unsupported, a high-severity failure category is found (e.g. unsupported claim, visual contradiction, parser failure), or the re-answers are self-inconsistent.">Review recommended</span>
                             <span className={`tag ${reviewRecommended ? 'tag-red' : 'tag-green'}`}>
                               {reviewRecommended ? 'yes' : 'no'}
                             </span>
@@ -631,7 +631,7 @@ export default function CaseExplorer({
                       <div className="summary-section-title">Selected Result</div>
                       <div className="summary-stat-list">
                         <div className="summary-stat-row summary-stat-row-inline">
-                          <span className="summary-stat-label" data-tooltip="The model's self-reported confidence in its final answer, based on the currently selected methodology (Agentic, Workflow, or Baseline).">Selected confidence</span>
+                          <span className="summary-stat-label" data-tooltip="Confidence label of the selected system's final answer (for the agentic loop, set by the verifier).">Selected confidence</span>
                           <span className={`tag ${getConfidenceTagClass(selectedConfidence)}`}>
                             {selectedConfidence}
                           </span>
@@ -715,7 +715,7 @@ export default function CaseExplorer({
                 <div className="card-content">
                   <p className="explanation-text">
                     {comparisonMode === 'workflow'
-                      ? 'Workflow Baseline: a deterministic sequence of analysis steps without agentic self-correction.'
+                      ? 'Workflow Baseline: a fixed sequence of steps without self-correction.'
                       : 'Single-shot Baseline: a direct, single-prompt approach without intermediate decomposition.'}
                     {' '}Switch to Agentic Loop to inspect the controller's steps and verification details.
                   </p>

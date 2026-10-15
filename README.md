@@ -94,7 +94,7 @@ controller decides whether to follow it; in the fixed-pipeline ablation every st
 | `analyze_question()` | Task understanding | gpt-6-luna | Question type and expected answer format; keyword rules use whole-word matching |
 | `look(focus)` | Perception (executor) | gpt-6-luna, vision | Looks *with the question in mind*; with `focus` it **zooms**: the named region is located, cropped and enlarged, and examined next to the full image. The first look also rejects non-radiology images |
 | `answer(guidance)` | Synthesis (executor) | gpt-6-luna, vision | Receives the image plus all observations; `guidance` carries what the verifier asked to fix |
-| `check()` | Evaluator (a larger model) | gpt-6.1-sol, vision | Two parts. **Blind reading** (independent): once per episode, the verifier answers from the image and question alone, without the proposed answer or the looker's notes. **Review** (critic): it checks the answer against the image (grounding, contradictions, format) and returns a status, the issues found and a next step (`accept`, `relook` with a focus, `reanswer` with guidance, `abstain`); the guidance may include a suggested corrected answer. An answer is *verified* only if the review passes **and** the blind reading agrees (word rules first, exact for yes/no; for open-ended answers the verifier judges whether the two mean the same). The controller learns only whether they agree, never the blind answer |
+| `check()` | Evaluator (a higher-tier model) | gpt-6.1-sol, vision | Two parts. **Blind reading** (independent): once per episode, the verifier answers from the image and question alone, without the proposed answer or the looker's notes. **Review** (critic): it checks the answer against the image (grounding, contradictions, format) and returns a status, the issues found and a next step (`accept`, `relook` with a focus, `reanswer` with guidance, `abstain`); the guidance may include a suggested corrected answer. An answer is *verified* only if the review passes **and** the blind reading agrees (word rules first, exact for yes/no; for open-ended answers the verifier judges whether the two mean the same). The controller learns only whether they agree, never the blind answer |
 | `finish(abstain)` | Decision | — | Ends the episode; a normal finish is refused while the latest answer is unchecked (abstaining is not) |
 
 Budgets: at most 2 focused re-looks, 3 answers and 16 agent steps. If the controller stalls, a safety net answers
@@ -116,8 +116,8 @@ and/or checks before finishing. Paths observed in the current run:
 - **One model family (OpenAI), roles sized by need.** The controller and question analysis are simple decisions, so
   they use `gpt-6-luna` with low or no reasoning effort. Answering uses `gpt-6-luna` with medium effort, and the answerer always sees
   the image: a text description of the image loses the visual detail many questions depend on.
-- **A different, larger model verifies; a third judges.** `check` uses `gpt-6.1-sol`, so the answering model never
-  verifies itself and the critique comes from a larger model. Because the review's guidance can suggest a
+- **A different, higher-tier model verifies; a third judges.** `check` uses `gpt-6.1-sol` (20× `gpt-6-luna`'s
+  per-token price), so the answering model never verifies itself and the critique comes from a higher-tier model. Because the review's guidance can suggest a
   corrected answer, part of the loop's accuracy can come from the verifier, so every run also scores the verifier
   answering alone (its blind reading) as a reference. The evaluation judge, `gpt-6-astra`, takes part in no system.
 - All roles are configurable (`MODEL_<ROLE>`, `REASONING_EFFORT_<ROLE>` in `.env`); every call's tokens and cost are
@@ -176,7 +176,8 @@ narrative (failure patterns, reflection) were computed from the same run's case 
 budgets come from the code.
 
 - **Data:** 300 questions drawn at random (seed 51511) from the whole VQA-RAD dataset (2,244 questions, all with a
-  reference answer), keeping its mix of yes/no and open-ended questions (160 close-ended, 140 open-ended). One
+  reference answer), keeping its mix of close-ended (yes/no, or a single binary term such as normal/abnormal) and
+  open-ended questions (160 close-ended, 140 open-ended). One
   known-bad item and the 300 questions of an earlier evaluation run are excluded from the draw. No system is trained,
   so the dataset's train/test labels play no role (277 of the 300 carry the train label). The list is
   `experiments/eval_set.json` (`scripts/make_eval_set.py --split all`); per-type numbers for small categories are
@@ -193,7 +194,7 @@ budgets come from the code.
     (≥ 0.95 short, ≥ 0.90 long).
 - **LLM judge** (`scripts/judge_open_ended.py`): `gpt-6-astra` judges **every** open-ended answer of every system,
   right or wrong by the strict rules, for meaning equivalence with the ground truth, blinded to the system (answers
-  shuffled and anonymised). Its verdict is the "judged" score for open-ended answers; yes/no answers stay rule-based.
+  shuffled and anonymised). Its verdict is the "judged" score for open-ended answers; close-ended answers stay rule-based.
   Astra neither answers (`gpt-6-luna`) nor verifies (`gpt-6.1-sol`) in any system. A 30-verdict
   spot check agreed with 29 credit decisions; the other was a strict non-credit for an agentic-loop answer
   (`judge_review_sample.md` in the run folder; AI-assisted review, not human annotation).
@@ -291,7 +292,7 @@ The four analyses Template 1 asks for are built into every agentic run and summa
   consistency marks uncertainty, not certain error: 39% of low-consistency answers were still correct.
 - **Cross-modal agreement:** the verifier sees the image, so "explanation grounded in evidence" and "no
   contradictions" are checked against the image itself, not only a text description.
-- **Verifier model:** a different, larger model (`gpt-6.1-sol`) verifies `gpt-6-luna`'s answers and steers
+- **Verifier model:** a different, higher-tier model (`gpt-6.1-sol`) verifies `gpt-6-luna`'s answers and steers
   113 of 300 episodes away from the direct path.
 - **Disagreement analysis:** the three systems disagree on 69% of cases under the same matching rules;
   wins (only one system right): agentic 15, single-shot 20, workflow 12.
@@ -311,7 +312,7 @@ Representative cases, chosen automatically by `scripts/final_metrics.py` (screen
 1. **Shared perception blind spot:** 65 questions (22%) defeat the single prompt, the loop and the fixed pipeline
    alike under the judge, 49 of them open-ended (mostly asking for a specific location, finding or diagnosis). When the looker and the verifier
    misread the image the same way, no check catches it; self-consistency flags some of these cases.
-2. **Abstention withholds right answers:** the loop abstained on 25 questions, 16 of them yes/no. In 21 the
+2. **Abstention withholds right answers:** the loop abstained on 25 questions, 16 of them close-ended. In 21 the
    verifier's review recommended abstaining, 14 times although its own blind reading agreed with the loop's answer.
    The single prompt was right on 11 of the 25 and the loop's own last answer on 7. This is where the loop loses to
    the single prompt: on the 275 questions it answered, the two are level.
@@ -328,7 +329,7 @@ Representative cases, chosen automatically by `scripts/final_metrics.py` (screen
 ## Reflection and limitations
 
 **When is agentic behaviour beneficial?** In this run, not for accuracy. The single prompt is more accurate than
-the agentic loop (significantly so under the judge, not on the strict score), and the loop's larger verifier,
+the agentic loop (significantly so under the judge, not on the strict score), and the loop's higher-tier verifier,
 answering alone, is significantly more accurate than the loop. The loss has one source: on the questions it
 answers, the loop matches the single prompt, but it abstains on 25 questions, which are scored wrong. Its mechanisms
 work individually: revising fixes more answers than it breaks, and when the blind check objects, the first answer is
