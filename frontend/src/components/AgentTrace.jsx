@@ -6,7 +6,7 @@ const STEP_META = {
   'Image Context Filter': { stage: 'Perception', subtitle: 'question-relevant findings', className: 'perception' },
   'Difficulty Routing': { stage: 'Planning', subtitle: 'difficulty + verification policy', className: 'routing' },
   'Reasoning & Answer': { stage: 'Reasoning', subtitle: 'final synthesis', className: 'reasoning' },
-  'Verification': { stage: 'Safety', subtitle: 'checked against the image', className: 'verification' },
+  'Verification': { stage: 'Safety', subtitle: 'reviewed against the image; may suggest a fix', className: 'verification' },
   'Focused Look': { stage: 'Perception', subtitle: 'zoomed re-examination chosen by the controller', className: 'perception' },
   'Finish': { stage: 'Decision', subtitle: 'controller ends the episode', className: 'routing' },
   'Self-Consistency': { stage: 'Safety', subtitle: 'independent re-answers vs final answer', className: 'verification' },

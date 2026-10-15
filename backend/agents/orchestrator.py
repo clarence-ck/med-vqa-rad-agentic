@@ -891,7 +891,8 @@ def _payload_score(payload: dict) -> tuple[int, int, int, int, int]:
 
 def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png",
                  reasoner_sees_image: bool = True) -> dict:
-    """Fixed six-stage pipeline (the ablation). reasoner_sees_image=False reproduces the April text-only design."""
+    """Fixed six-stage pipeline (the ablation). The reasoner always sees the image; the switch is kept only so the
+    April text-only design can be reproduced (reasoner_sees_image=False)."""
     pipeline_start = time.time()
     _log.info(
         "=== Agentic pipeline START  question=%r  mime_type=%s  size=%d bytes ===",

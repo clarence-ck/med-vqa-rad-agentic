@@ -16,7 +16,7 @@ _log = get_logger("agents.difficulty_router")
 @component
 class DifficultyRouter:
     """
-    Agent 3: Difficulty Routing / Planning Agent
+    Difficulty routing (fixed pipeline only).
 
     Evaluates the complexity of the VQA question and determines the
     appropriate handling for the downstream agents:

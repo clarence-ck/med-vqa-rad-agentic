@@ -18,7 +18,7 @@ _log = get_logger("agents.reasoning_agent")
 @component
 class ReasoningAgent:
     """
-    Agent 5: Reasoning & Answer Agent
+    Answer synthesis from the image and the observations (the loop's answer tool and the fixed pipeline's reason stage).
     Synthesizes image analysis and question analysis into a final answer with explanation.
     """
     def __init__(self):

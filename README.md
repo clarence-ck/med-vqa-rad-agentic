@@ -154,7 +154,7 @@ now sees the image itself.
 
 | Mechanism | What it does |
 |---|---|
-| Image-grounded verification | `check` compares the answer with an independent blind reading of the image, then judges it against the image: 5 checks, a status (`verified`, `partially_verified`, `low_confidence`, `unsupported`) and a recommended next action. Added after the 14 Oct run, where 30% of answers the answer-aware check called verified were wrong |
+| Image-grounded verification | `check` compares the answer with an independent blind reading of the image, then judges it against the image: 5 checks, a status (`verified`, `partially_verified`, `low_confidence`, `unsupported`) and a recommended next action. Added after an earlier run (kept in git history) in which 30% of the answers the answer-aware check called verified were wrong |
 | Targeted recovery | The controller zooms into a region (`look(focus)`) or revises (`answer(guidance)`) instead of re-running everything |
 | Best-verified answer | A later answer replaces an earlier one only if its check is strictly better (re-looks can over-read) |
 | Self-consistency | After finishing, the answerer is re-asked independently (2×); low agreement adds `self_inconsistent` and flags the case for review |
@@ -191,7 +191,7 @@ hand.
   Astra neither answers (`gpt-6-luna`) nor verifies (`gpt-6.1-sol`) in any system, so it favours none. A 30-verdict
   spot check agreed with 28 credit decisions; the other two were lenient credits for workflow-baseline answers
   (`judge_review_sample.md` in the run folder; AI-assisted review, not human annotation).
-- **Statistics:** 95% intervals are about ±5.5 points at n = 300; paired comparisons use the exact McNemar test.
+- **Statistics:** 95% intervals are about ±5 points at n = 300; paired comparisons use the exact McNemar test.
 - **Variance:** the baseline and agentic loop are run again on 100 of the evaluated questions.
 <!-- generated:cost -->
 - **Cost:** every OpenAI call is recorded (`backend/utils/usage.py`): evaluation $6.40, repeats
@@ -327,7 +327,7 @@ decision is auditable. Whether that is worth roughly 60 times the cost depends o
 - The verifier shares the perception weaknesses of vision models; agreement is not correctness.
 - The loop's accuracy cannot be fully separated from its verifier's, because the verifier's guidance may suggest
   answers. A critique-only verifier (issues, no suggested answer) would isolate the loop's own contribution.
-- 300 questions give about ±5.5-point intervals; per-type results for small categories are noisy.
+- 300 questions give about ±5-point intervals; per-type results for small categories are noisy.
 - The strict scorer under-credits paraphrases and over-credits vague answers that contain the reference word; the
   LLM judge corrects both, but it is a model, spot-checked rather than human-annotated.
 - For non-abstained answers, the yes/no normaliser maps "cannot determine" to "no" (no measurable effect in this run).
@@ -408,7 +408,7 @@ python scripts/run_all.py --stages metrics,docs,diagram,report   # rebuild outpu
 | Stage | What it runs | Last cost | Last wall clock |
 |---|---|---|---|
 | `eval` | `run_case_explorer_cache.py --ablation --concurrency 4` (300 questions × 4 systems) | $6.40 | ~58 min |
-| `variance` | `repeat_cases.py --from-eval-sample 300 --n 50` (baseline + agentic loop again) | $1.31 | ~68 min |
+| `variance` | `repeat_cases.py --from-eval-sample 300 --n 100` (baseline + agentic loop again) | $1.31 | ~68 min |
 | `judge` | `judge_open_ended.py` | $1.10 | ~16 min |
 | `metrics` | `final_metrics.py` → `final_metrics.json` and `cases.csv` in the run folder | free | seconds |
 | `docs` | `update_docs.py` → README blocks and `docs/report/results.tex` | free | seconds |

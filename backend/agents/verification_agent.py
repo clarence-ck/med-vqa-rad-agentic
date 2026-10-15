@@ -18,8 +18,11 @@ _log = get_logger("agents.verification_agent")
 @component
 class VerificationAgent:
     """
-    Agent 6: Verification Agent
-    Checks consistency and believability of the generated answer after reasoning.
+    Verifier review (the answer-aware part of the agentic loop's check, and the fixed pipeline's verify stage).
+
+    Checks the answer against the image: grounding, contradictions, strength and format. Returns a status, the issues
+    found and, in the loop, a next step; its guidance may include a suggested corrected answer. The loop's
+    independent blind reading is blind_read() below.
     """
     def __init__(self):
         self.generator = OpenAIChatGenerator(

@@ -106,7 +106,7 @@ function SystemPerformanceCard({ title, icon, accuracy, judgedAccuracy, avgDurat
           {judgedAccuracy !== null && judgedAccuracy !== undefined && (
             <div
               className="evaluation-list-subtitle"
-              data-tooltip="Upper bound: open-ended answers the strict scorer rejected but a blinded LLM judge (gpt-6.1-sol) rated as meaning the same as the ground truth also count as correct."
+              data-tooltip="Second score: every open-ended answer is graded by a blinded LLM judge (gpt-6-astra, which takes part in no system) for meaning against the ground truth; yes/no answers keep the strict score."
               data-tooltip-align="left"
             >
               LLM-judged: {formatPercent1(judgedAccuracy)}

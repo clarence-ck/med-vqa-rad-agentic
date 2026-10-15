@@ -247,7 +247,7 @@ def _build_count_metadata(result: dict) -> dict:
 @component
 class ImageInterpreter:
     """
-    Agent 1: Image Interpretation Agent
+    Question-agnostic image description (stage 1 of the fixed pipeline; also used by the workflow baseline).
     Takes a medical image and extracts modality, anatomy, visible structures.
     Uses ImageFileToImageContent for standardized image processing.
     """

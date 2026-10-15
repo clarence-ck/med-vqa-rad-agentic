@@ -26,7 +26,7 @@ def _has_any(text: str, terms) -> bool:
 @component
 class QuestionAnalyzer:
     """
-    Agent 2: Question Understanding Agent
+    Question understanding: question type and expected answer format (used by every system except the single prompt).
     Classifies the user question into type, target entity, reasoning needed, and answer format.
     """
     def __init__(self):

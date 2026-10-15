@@ -7,7 +7,7 @@ command always gives the same set.
 
 Usage (run from repo root):
     python scripts/make_eval_set.py --size 300
-    python scripts/make_eval_set.py --size 250 --reuse-from 2026-10-14_1330
+    python scripts/make_eval_set.py --size 250 --reuse-from <run_id>
 """
 from __future__ import annotations
 
