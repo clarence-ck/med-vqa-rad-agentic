@@ -219,8 +219,6 @@ Paired comparisons (cases where exactly one of the two systems is right):
 |---|---|---|---|---|
 {path_rows}
 
-![Accuracy by controller path]({SCREENSHOTS}/03-accuracy-by-controller-path.png)
-
 ### Uncertainty signals predict errors
 
 | Signal | Levels | Agentic accuracy |

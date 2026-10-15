@@ -268,8 +268,6 @@ Paired comparisons (cases where exactly one of the two systems is right):
 | reanswer | 25 | 56% | 64% | 52% |
 | abstained | 25 | — (abstained) | 44% | 40% |
 
-![Accuracy by controller path](eval-dashboard-screenshots/03-accuracy-by-controller-path.png)
-
 ### Uncertainty signals predict errors
 
 | Signal | Levels | Agentic accuracy |
