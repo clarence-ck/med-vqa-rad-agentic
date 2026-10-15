@@ -1,9 +1,12 @@
 # MedVisionQuery frontend
 
-React 19 + Vite UI for MedVisionQuery. It talks to the FastAPI backend at `VITE_API_BASE`
-(default `http://localhost:8000`, see `src/config.js`). See the [root README](../README.md) for the system itself.
+This is the React 19 and Vite interface for MedVisionQuery. It connects to the FastAPI backend through
+`VITE_API_BASE`. The default address is `http://localhost:8000`; see `src/config.js`. For information about the full
+system, see the [root README](../README.md).
 
 ## Run
+
+Run these commands from the `frontend/` folder:
 
 ```bash
 npm install
@@ -14,20 +17,23 @@ npm run build
 
 ## Views
 
-- **Dashboard** — upload an image and ask a question; shows the answer, explanation, verification and the agent trace.
-- **Case Explorer** — the evaluation questions (`experiments/eval_set.json`) with the single prompt, workflow and agentic loop side by side (`CaseExplorer.jsx`, `AgentTrace.jsx`,
-  `VerificationPanel.jsx`, `FailureModeDrawer.jsx`).
-- **Evaluation** (`EvaluationView.jsx`) — reads `/api/dataset/evaluation`: strict and LLM-judged accuracy, mean and
-  median time per case, accuracy by question type and by controller path, disagreement, and a per-case table.
-  Data hooks live in `src/hooks/`.
+- **Dashboard** — upload an image and ask a question. Compare the agentic answer with the single-shot and workflow
+  baselines. The agentic view also shows its explanation, verification result, and decision trace.
+- **Case Explorer** — browse questions from `experiments/eval_set.json` and compare saved results from the single-shot
+  baseline, workflow baseline, and agentic loop. The main components are `CaseExplorer.jsx`, `AgentTrace.jsx`,
+  `VerificationPanel.jsx`, and `FailureModeDrawer.jsx`.
+- **Evaluation** (`EvaluationView.jsx`) — reads `/api/dataset/evaluation` and shows strict and LLM-judged accuracy,
+  mean and median response time, accuracy by question type and controller path, system disagreements, and a table of
+  every case. Data-loading hooks are in `src/hooks/`.
 
 ## Screenshots
 
-`scripts/capture-screenshots.mjs` drives a local Chrome/Edge with `puppeteer-core` and saves the Evaluation view
-and the Case Explorer traces of the current run's showcase cases (its `final_metrics.json`). The easiest way to run
-it is `python scripts/run_all.py --stages screenshots` from the repo root, which starts and stops both servers.
+`scripts/capture-screenshots.mjs` controls a local Chrome or Edge browser with `puppeteer-core`. It saves the
+Evaluation view and the Case Explorer traces for the example cases listed in the current run's `final_metrics.json`.
+The simplest option is to run `python scripts/run_all.py --stages screenshots` from the repository root. That command
+starts both servers, captures the images, and stops the servers.
 
 ```bash
-node scripts/capture-screenshots.mjs                 # backend and npm run dev already running
-# options: --cases 1900,2102 (cached cases only), --out <dir>, --url, --browser <path to chrome.exe>
+node scripts/capture-screenshots.mjs                 # requires the backend and npm run dev to be running
+# options: --cases 1900,2102 (cached cases only), --out <dir>, --url <address>, --browser <path>
 ```

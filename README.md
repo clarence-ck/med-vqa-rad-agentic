@@ -1,9 +1,9 @@
 # MedVisionQuery — an agentic multimodal system for medical visual question answering
 
-MedVisionQuery answers natural-language questions about radiology images (X-ray, CT, MRI). Its agentic system is a
-**Haystack Agent controller** that decides, case by case, how to look at the image, answer, check the answer *against
-the image*, and whether to re-examine a region, revise, abstain or finish. It is evaluated against a single-prompt
-baseline, a hand-designed workflow and a fixed-pipeline ablation on 300 VQA-RAD questions.
+MedVisionQuery answers plain-language questions about radiology images, including X-rays, CT scans, and MRI scans.
+It uses a **Haystack Agent controller** to decide how to inspect an image, answer a question, check the answer against
+the image, and choose whether to inspect a region again, revise the answer, abstain, or finish. We evaluated it on
+300 VQA-RAD questions and compared it with a single-prompt baseline, a hand-designed workflow, and a fixed pipeline.
 
 > ⚠️ **For education and research only. Not for clinical use.**
 
@@ -35,11 +35,11 @@ Built for SUTD 51.511 Multimodal Generative AI (Template 1: Agentic Multimodal S
 ## Results at a glance
 
 <!-- generated:glance -->
-Run `2026-10-15_1641`: a seeded, stratified sample of 300 VQA-RAD questions (160 close-ended, 140 open-ended), all systems on the same answering model
-(`gpt-6-luna`; the agentic loop and the fixed pipeline also use `gpt-6.1-sol` as verifier). Per-case times were
-measured with four cases running at once; the mean is pulled up by the 63 re-look-path episodes, which take longest (actual run times are in
-[Run timings](#run-timings)). "Strict" uses the rule-based scorer; "judged" scores open-ended answers with a blinded LLM
-judge, `gpt-6-astra` (see [Evaluation design](#evaluation-design)).
+Run `2026-10-15_1641` used a seeded, stratified sample of 300 VQA-RAD questions: 160 close-ended and 140 open-ended.
+All systems used the same answering model, `gpt-6-luna`. The agentic loop and fixed pipeline also used `gpt-6.1-sol`
+as a verifier. Four cases ran at the same time. The 63 cases that required another image inspection took the longest
+and raised the mean time. See [Run timings](#run-timings) for the full timing data. “Strict” uses rule-based scoring.
+“Judged” uses `gpt-6-astra` as a blind judge for open-ended answers. See [Evaluation design](#evaluation-design).
 
 | System | Strict accuracy | Judged accuracy | Time / case (mean · median) | Cost / case |
 |---|---|---|---|---|
@@ -48,12 +48,15 @@ judge, `gpt-6-astra` (see [Evaluation design](#evaluation-design)).
 | **Agentic controller loop** | 59.7% | 64.7% | 48.1 s · 34.2 s | $0.0132 |
 | Fixed pipeline (ablation) | 58.0% | 62.0% | 34.5 s · 27.9 s | $0.0068 |
 
-- **Agentic vs single-shot: single-shot ahead, significant on the judged score only** (-4.3 points strict, p = 0.079; -5.3 judged, p = 0.033; exact McNemar).
-- **Agentic vs fixed pipeline:** +1.7 points strict (p = 0.58), +2.7 judged (p = 0.35).
-- **Agentic vs its verifier model alone** (`gpt-6.1-sol` answering once, the check's blind reading): 59.7% vs 67.0% strict (p = 0.008).
-- **Confidence and stability:** answers the check verified are 71% correct, the loop's
-  other answers 40% (abstentions excluded); between two runs, 12% of the loop's answers change right ↔ wrong vs
-  6% for the single prompt.
+- **Agentic vs single-shot:** single-shot performed better. The difference was significant only for the judged score
+  (-4.3 percentage points strict, p = 0.079; -5.3 judged, p = 0.033; exact McNemar test).
+- **Agentic vs fixed pipeline:** the agentic loop was 1.7 points better on strict accuracy (p = 0.58) and 2.7 points
+  better on judged accuracy (p = 0.35).
+- **Agentic vs its verifier alone:** the agentic loop scored 59.7% strict accuracy. The verifier model's single blind
+  reading scored 67.0% (p = 0.008).
+- **Confidence and stability:** answers marked as verified were correct 71% of the time. Other non-abstained answers
+  were correct 40% of the time. When the same 100 cases were run a second time, 12% of agentic answers changed from
+  right to wrong or wrong to right, compared with 6% for the single-shot baseline.
 <!-- /generated:glance -->
 
 ![Evaluation dashboard](eval-dashboard-screenshots/01-eval-kpi-cards.png)
@@ -62,18 +65,18 @@ judge, `gpt-6-astra` (see [Evaluation design](#evaluation-design)).
 
 ## Problem and task decomposition
 
-**Input:** a radiology image (JPEG/PNG) and a free-text question. **Output:** an answer, an explanation grounded in
-visible evidence, a verification status, uncertainty signals, and a trace of every decision.
+**Input:** a radiology image in JPEG or PNG format and a plain-text question. **Output:** an answer, an explanation
+based on visible evidence, a verification status, uncertainty signals, and a record of every decision.
 
-A single model call conflates steps that fail in different ways. The system separates them:
+A single model call combines several tasks that can fail for different reasons. This system separates those tasks:
 
 | Sub-task | Question it answers | Component |
 |---|---|---|
-| Question understanding | What kind of answer is expected (yes/no, location, modality…)? | `analyze_question` |
-| Perception | What does the image show *that bears on this question*? | `look(focus)` |
-| Synthesis | What is the best answer given the image and observations? | `answer(guidance)` |
-| Verification | Does the image itself support this answer? What should happen next? | `check` |
-| Planning / control | Re-examine a region, revise, abstain or finish? | Controller (Haystack Agent) |
+| Question understanding | What kind of answer is needed, such as yes/no, location, or image type? | `analyze_question` |
+| Perception | What does the image show that is relevant to the question? | `look(focus)` |
+| Synthesis | What is the best answer based on the image and observations? | `answer(guidance)` |
+| Verification | Does the image support the answer, and what should happen next? | `check` |
+| Planning / control | Should the system inspect a region again, revise, abstain, or finish? | Controller (Haystack Agent) |
 
 ---
 
@@ -83,35 +86,36 @@ A single model call conflates steps that fail in different ways. The system sepa
 
 ### Controller loop
 
-A fresh Haystack `Agent` is created per request (`backend/agents/agentic_loop.py`). Its tools are bound to a
-per-request working memory that holds the image, the question analysis, every look, every answer and every check.
-The controller sees only short text results from each tool and chooses the next call. There is one agent (the
-controller); the five tools are functions it calls, not agents. `check` only *recommends* the next step and the
-controller decides whether to follow it; in the fixed-pipeline ablation every step runs in a prescribed order.
+The system creates a new Haystack `Agent` for each request in `backend/agents/agentic_loop.py`. Each request has its
+own working memory, which stores the image, question analysis, image inspections, answers, and checks. The controller
+sees only short text results from the tools and decides which tool to call next. There is one agent: the controller.
+The five tools are functions, not separate agents. The `check` tool recommends a next step, but the controller makes
+the final decision. In the fixed-pipeline comparison, all steps run in a fixed order.
 
 | Tool | Role | Model (default) | Notes |
 |---|---|---|---|
-| `analyze_question()` | Task understanding | gpt-6-luna | Question type and expected answer format; keyword rules use whole-word matching |
-| `look(focus)` | Perception (executor) | gpt-6-luna, vision | Looks *with the question in mind*; with `focus` it **zooms**: the named region is located, cropped and enlarged, and examined next to the full image (if it cannot be located, a plain re-look). The first look also rejects non-radiology images |
-| `answer(guidance)` | Synthesis (executor) | gpt-6-luna, vision | Receives the image plus all observations; `guidance` carries what the verifier asked to fix |
-| `check()` | Evaluator (a higher-tier model) | gpt-6.1-sol, vision | A blind reading, then an answer-aware review; returns a status and recommends the next step (details below) |
-| `finish(abstain)` | Decision | — | Ends the episode; a normal finish is refused while the latest answer is unchecked (abstaining is not) |
+| `analyze_question()` | Understand the task | gpt-6-luna | Finds the question type and expected answer format. Keyword rules match whole words. |
+| `look(focus)` | Inspect the image | gpt-6-luna, vision | Examines the image with the question in mind. When given a `focus`, it finds, crops, enlarges, and inspects that region beside the full image. If it cannot find the region, it inspects the full image again. The first look also rejects images that are not radiology images. |
+| `answer(guidance)` | Create an answer | gpt-6-luna, vision | Receives the image and all observations. `guidance` explains what the verifier asked it to fix. |
+| `check()` | Check the answer | gpt-6.1-sol, vision | First reads the image without seeing the proposed answer, then reviews the answer and recommends the next step. |
+| `finish(abstain)` | End the process | — | Ends the case. A normal finish is blocked if the latest answer has not been checked, but abstaining is still allowed. |
 
-**How `check` works.** Two parts, in this order:
+**How `check` works.** It has two parts, in this order:
 
-1. **Blind reading** (independent): once per episode, the verifier answers from the image and question alone, without
-   the proposed answer or the looker's notes.
-2. **Review** (critic): it checks the answer against the image (grounding, contradictions, format) and returns a status,
-   the issues found and a next step (`accept`, `relook` with a focus, `reanswer` with guidance, `abstain`); the
-   guidance may include a suggested corrected answer.
+1. **Blind reading:** once per case, the verifier answers using only the image and question. It does not see the
+   proposed answer or the image-inspection notes.
+2. **Review:** the verifier checks whether the answer matches the image, contradicts visible evidence, or uses the
+   wrong format. It returns a status, a list of problems, and one recommended action: `accept`, `relook` with a focus,
+   `reanswer` with guidance, or `abstain`. The guidance may include a suggested corrected answer.
 
-An answer is *verified* only if the verifier returns `verified`, no format or question-type check fails, **and** the
-blind reading agrees (word rules first, exact for yes/no; for open-ended answers the verifier judges whether the two
-mean the same). The controller learns only whether they agree, never the blind answer, though the review's guidance
-may still name a corrected answer.
+An answer is marked as *verified* only when all three conditions are met: the verifier returns `verified`, no format
+or question-type check fails, and the blind reading agrees with the proposed answer. Word-based rules are checked
+first, with exact matching for yes/no answers. For open-ended answers, the verifier decides whether the meanings are
+the same. The controller learns whether the answers agree, but it never sees the blind answer. However, the review
+guidance may still include a corrected answer.
 
-Budgets: at most 2 focused re-looks, 3 answers and 16 agent steps. If the controller stalls, a safety net answers
-and/or checks before finishing. Paths observed in the current run:
+The limits are 2 focused re-inspections, 3 answers, and 16 agent steps. If the controller stops making progress, a
+safety rule creates and/or checks an answer before finishing. The current run used these paths:
 
 <!-- generated:paths -->
 | Path | Cases | Tool sequence |
@@ -124,43 +128,43 @@ and/or checks before finishing. Paths observed in the current run:
 
 ### Why these models and tools
 
-- **Haystack `Agent` + `Tool`** gives a tool-calling loop with typed tools and exit conditions. Keeping the image in
-  per-request memory (not in the controller's context) keeps the controller cheap.
-- **One model family (OpenAI), roles sized by need.** The controller and question analysis are simple decisions, so
-  they use `gpt-6-luna` with low or no reasoning effort. Answering uses `gpt-6-luna` with medium effort, and the answerer always sees
-  the image: a text description of the image loses the visual detail many questions depend on.
-- **A different, higher-tier model verifies; a third judges.** `check` uses `gpt-6.1-sol` (20× `gpt-6-luna`'s
-  per-token price), so the answering model never verifies itself and the critique comes from a higher-tier model. Because the review's guidance can suggest a
-  corrected answer, part of the loop's accuracy can come from the verifier, so every run also scores the verifier
-  answering alone (its blind reading) as a reference. The evaluation judge, `gpt-6-astra`, takes part in no system.
-- All roles are configurable (`MODEL_<ROLE>`, `REASONING_EFFORT_<ROLE>` in `.env`); every call's tokens and cost are
-  recorded.
+- **Haystack `Agent` + `Tool`:** provides a tool-calling loop with defined input types and stopping rules. The image
+  stays in request memory instead of the controller's context, which lowers controller cost.
+- **One OpenAI model family with different models for different jobs:** controller decisions and question analysis
+  are simple, so they use `gpt-6-luna` with low or no reasoning effort. Answering uses `gpt-6-luna` with medium effort.
+  The answerer always sees the image because a text description can lose important visual details.
+- **A stronger model verifies and a third model judges:** `check` uses `gpt-6.1-sol`, which costs 20 times more per
+  token than `gpt-6-luna`. This prevents the answering model from checking itself. Because the verifier can suggest
+  a corrected answer, the evaluation also measures the verifier's blind answer by itself. The evaluation judge,
+  `gpt-6-astra`, is not used by any system being tested.
+- All roles can be changed through `MODEL_<ROLE>` and `REASONING_EFFORT_<ROLE>` in `.env`. The system records token
+  use and cost for every model call.
 
 ### Baselines and ablation
 
 | System | File | What it does |
 |---|---|---|
-| Single-shot baseline | `backend/agents/baseline.py` | One vision prompt; asked for a concise answer that starts with yes/no where applicable |
-| Workflow baseline | `backend/agents/workflow_baseline.py` | Fixed chain: question-agnostic image description → question analysis → hand-written rules per question type |
-| Fixed pipeline (ablation) | `backend/agents/orchestrator.py` | A controller instructed to call six tools in a prescribed order (`interpret_image` → `analyze_question` → `filter_image_context` → `route_difficulty` → `reason_answer` → `verify_answer`), re-running the sequence once when verification flags a fixable or high-severity problem. Same models, but a question-agnostic image description, no zoom, no blind check and a text-only verifier, so the comparison measures the agentic design as a whole (control, question-aware and zoomed looks, image-grounded checking), not control alone |
+| Single-shot baseline | `backend/agents/baseline.py` | Uses one vision prompt. It gives a short answer and starts with yes or no when needed. |
+| Workflow baseline | `backend/agents/workflow_baseline.py` | Uses a fixed chain: a general image description, question analysis, and hand-written rules for each question type. |
+| Fixed pipeline (ablation) | `backend/agents/orchestrator.py` | Calls six tools in a fixed order: `interpret_image` → `analyze_question` → `filter_image_context` → `route_difficulty` → `reason_answer` → `verify_answer`. It repeats the sequence once if verification finds a serious or fixable problem. It uses the same models, but has a general image description, no zoom, no blind check, and a text-only verifier. The comparison therefore measures the full agentic design, not only controller freedom. |
 
 ---
 
 ## Multimodal grounding
 
-The two modalities are the image and the text question. They interact at every step that matters:
+The system uses two types of input: the image and the text question. They work together at every important step:
 
 | Step | Image | Text |
 |---|---|---|
-| `analyze_question()` | ✗ | the question, plus any observations so far |
-| `look(focus)` | ✓ sent at high detail, plus an enlarged crop of the focus region | the question (and focus) decide what is examined |
-| `answer(guidance)` | ✓ sent directly | question analysis, all observations, verifier guidance |
-| `check()` | ✓ sent directly (blind reading: image + question only) | answer, explanation, observations (review step only) |
-| Controller | ✗ | short tool results only |
+| `analyze_question()` | ✗ | The question and any observations made so far |
+| `look(focus)` | ✓ Full image at high detail, plus an enlarged crop when a focus is given | The question and focus tell the model what to inspect |
+| `answer(guidance)` | ✓ Sent directly | Question analysis, all observations, and verifier guidance |
+| `check()` | ✓ Sent directly; the blind reading sees only the image and question | The review also sees the answer, explanation, and observations |
+| Controller | ✗ | Short tool results only |
 
-In the agentic loop, every model that looks, answers or verifies sees the image itself, because a text description
-of the image loses the visual detail many questions depend on; only the question analysis and the controller work from
-text. The evaluation's LLM judge compares answers with the reference as text and does not see the image.
+Every model that inspects, answers, or verifies sees the image directly. This is important because a text description
+can leave out visual details. Only the question analyzer and controller use text alone. The LLM evaluation judge
+compares text answers with the reference answer and does not see the image.
 
 ---
 
@@ -168,74 +172,76 @@ text. The evaluation's LLM judge compares answers with the reference as text and
 
 | Mechanism | What it does |
 |---|---|
-| Image-grounded verification | `check` takes an independent blind reading of the image (once per episode), judges the answer against the image, and compares the two: 5 checks, a status (`verified`, `partially_verified`, `low_confidence`, `unsupported`) and a recommended next action |
-| Targeted recovery | The controller zooms into a region (`look(focus)`) or revises (`answer(guidance)`) instead of re-running everything |
-| Best-verified answer | A later answer replaces an earlier one only if its check is strictly better (re-looks can over-read) |
-| Self-consistency | After finishing, the answerer is re-asked independently (2×); low agreement adds `self_inconsistent` and flags the case for review |
-| Abstention | The controller may abstain; abstentions are reported as such (never normalised into "no") |
-| Guardrail | Failure categories (`unsupported_claim`, `low_confidence`, `visual_contradiction`, `partially_verified`, `question_answer_mismatch`, `reasoning_generation_unstable`, `parser_failure`, `self_inconsistent`), a disclaimer and a review flag |
-| Input rejection | Non-radiology images are rejected on the first look. Unreadable images fall back to the raw bytes; if the first look still fails, the system stops instead of answering blind |
+| Image-grounded verification | `check` makes one independent blind reading, checks the answer against the image, and compares both answers. It returns five checks, a status (`verified`, `partially_verified`, `low_confidence`, or `unsupported`), and a recommended next action. |
+| Targeted recovery | The controller can zoom into one region with `look(focus)` or revise with `answer(guidance)` instead of repeating the full process. |
+| Best-verified answer | A later answer replaces an earlier answer only if its check result is clearly better. This helps because repeated inspections can create false details. |
+| Self-consistency | After finishing, the answerer answers the question independently two more times. Low agreement adds `self_inconsistent` and marks the case for review. |
+| Abstention | The controller may choose not to answer. Abstentions are recorded as abstentions and are never changed to “no.” |
+| Guardrail | Records failure categories (`unsupported_claim`, `low_confidence`, `visual_contradiction`, `partially_verified`, `question_answer_mismatch`, `reasoning_generation_unstable`, `parser_failure`, `self_inconsistent`), adds a disclaimer, and marks cases that need review. |
+| Input rejection | The first inspection rejects non-radiology images. If normal image reading fails, the system tries the original bytes. If the first inspection still fails, it stops instead of guessing. |
 
 ---
 
 ## Evaluation design
 
-Every evaluation is a **run** with its own folder, `experiments/runs/<run_id>/` (cases, judge verdicts, variance
-repeats, metrics, timings, cost); a later run never changes an earlier one, and `experiments/runs/README.md` lists
-them all. Every result in this README and the report (accuracies, tests, counts, timings, costs) comes from the current
-(latest completed) run. Text between `<!-- generated -->` markers and the report's numbers are written by
-`scripts/final_metrics.py` and `scripts/update_docs.py` and are not edited by hand; the few counts quoted in the
-narrative (failure patterns, reflection) were computed from the same run's case files. Settings such as thresholds and
-budgets come from the code.
+Each evaluation is stored as a separate **run** in `experiments/runs/<run_id>/`. A run contains cases, judge results,
+repeat runs, metrics, timings, and costs. A new run never changes an old one. `experiments/runs/README.md` lists all
+runs. Every number in this README and the report comes from the latest completed run. The scripts
+`scripts/final_metrics.py` and `scripts/update_docs.py` create the text between generated markers and update the report
+numbers. The failure-pattern and reflection counts come from the same run files. Thresholds and limits come from code.
 
-- **Data:** VQA-RAD has 2,244 questions, all with a reference answer. Excluding one known-bad item and the 300
-  test-split questions of an earlier evaluation run leaves 1,943, from which 300 are drawn at random (seed 51511),
-  keeping the pool's mix of close-ended (yes/no, or a single binary term such as normal/abnormal) and open-ended
-  questions (160 close-ended, 140 open-ended). No system is trained, so the train/test labels play no role; because the
-  excluded questions were all test-split, 277 of the 300 carry the train label. The list is `experiments/eval_set.json`
-  (`python scripts/make_eval_set.py --size 300 --split all --seed 51511 --exclude-run 2026-10-15_1308`); per-type
-  numbers for small categories are noisy.
-- **Systems:** single-shot baseline, workflow baseline, agentic loop and fixed-pipeline ablation, all on the same cases
-  and the same answering model.
+- **Data:** VQA-RAD contains 2,244 questions, each with a reference answer. We removed one known bad item and the 300
+  test questions used in an earlier evaluation. From the remaining 1,943 questions, we selected 300 at random with
+  seed 51511 while keeping the same mix of close-ended and open-ended questions: 160 close-ended and 140 open-ended.
+  No system was trained, so the dataset's train/test labels do not affect the systems. Because all excluded questions
+  were from the test split, 277 selected questions have a train label. The list is in `experiments/eval_set.json`.
+  It was created with `python scripts/make_eval_set.py --size 300 --split all --seed 51511 --exclude-run 2026-10-15_1308`.
+  Results for question types with few examples are less reliable.
+- **Systems:** the single-shot baseline, workflow baseline, agentic loop, and fixed-pipeline ablation all answer the
+  same questions with the same answering model.
 - **Strict scorer** (`backend/utils/scoring.py`):
-  - yes/no ground truth: the answer must start with the correct word;
-  - binary terms (normal/abnormal, present/absent, …): the correct term and not its opposite;
+  - yes/no reference: the answer must start with the correct word;
+  - paired terms such as normal/abnormal or present/absent: the answer must contain the correct term and not its opposite;
   - counting: the numbers must match;
-  - open-ended: every content word of the ground truth must appear (aliases such as CT = computed tomography; plurals
-    folded), or at least 60% of them for ground truths longer than 3 words. Left/right conflicts, and answers starting
-    with "no" when the ground truth does not, are wrong. S-PubMedBert-MS-MARCO similarity is only a strict fallback
-    (≥ 0.95 short, ≥ 0.90 long).
-- **LLM judge** (`scripts/judge_open_ended.py`): `gpt-6-astra` judges **every** open-ended answer of every system,
-  right or wrong by the strict rules, for meaning equivalence with the ground truth, blinded to the system (answers
-  shuffled and anonymised). Its verdict is the "judged" score for open-ended answers; close-ended answers stay rule-based.
-  Astra neither answers (`gpt-6-luna`) nor verifies (`gpt-6.1-sol`) in any system. A 30-verdict
-  spot check agreed with 29 credit decisions; in the other (#22) the judge was too harsh on an agentic-loop answer
-  (`judge_review_sample.md` in the run folder; AI-assisted review, not human annotation).
-- **Statistics:** 95% intervals are about ±5.6 points at n = 300 (±5.7 at most); paired comparisons use the exact
-  McNemar test.
-- **Variance:** the baseline and agentic loop are run again on 100 of the evaluated questions.
-- **Code changes after the run** (the run is recorded at commit `2b1d54f`): the yes/no normaliser now checks negated
-  phrases before positive words ("no visible fracture" was read as "yes"), and `check` takes the blind reading before
-  the review, as the controller's prompt states. Neither changes this run's results: replaying all 4,519 recorded
-  answers through the old and new normaliser gives identical output, and the two `check` calls are independent (neither
-  sees the other's output), so no model input changes.
+  - open-ended: every important word from the reference must appear, or at least 60% for references longer than three
+    words. The scorer handles aliases such as CT and computed tomography and treats singular and plural forms as the
+    same. Left/right conflicts are wrong. An answer that starts with “no” is wrong when the reference does not.
+    S-PubMedBert-MS-MARCO similarity is used only as a fallback, with thresholds of 0.95 for short answers and 0.90
+    for long answers.
+- **LLM judge** (`scripts/judge_open_ended.py`): `gpt-6-astra` judges every open-ended answer from every system,
+  including answers marked right or wrong by the strict scorer. It checks whether each answer has the same meaning as
+  the reference. System names are hidden, and answers are shuffled. Its result becomes the “judged” score for
+  open-ended answers. Close-ended answers keep the rule-based score. Astra does not answer questions or verify answers
+  in any tested system. In a 30-result review, it agreed with 29 credit decisions. In case 22, it was too strict with
+  an agentic-loop answer. See `judge_review_sample.md` in the run folder. This was an AI-assisted review, not human
+  annotation.
+- **Statistics:** at n = 300, the 95% intervals are about ±5.6 percentage points and never wider than ±5.7 points.
+  Paired comparisons use the exact McNemar test.
+- **Variance:** 100 questions from the main evaluation are selected with seed 42. The original answers are treated as
+  the first pass, then the single-shot baseline and agentic loop answer the same questions again in an independent
+  repeat. Both passes belong to the same evaluation run folder.
+- **Code changes after the run:** the run used commit `2b1d54f`. The yes/no normalizer now checks negative phrases
+  before positive words, because “no visible fracture” was previously read as “yes.” Also, `check` now makes the blind
+  reading before the review, as described in the controller prompt. Neither change affects this run's results. Replaying
+  all 4,519 recorded answers gave the same normalized output, and the two `check` calls are independent, so their order
+  does not change either model's input.
 <!-- generated:cost -->
-- **Cost:** every OpenAI call is recorded (`backend/utils/usage.py`): evaluation $6.20, repeats
-  $1.31, judge $1.22 ($8.73 in total).
+- **Cost:** every OpenAI call is recorded by `backend/utils/usage.py`. The evaluation cost $6.20, repeats cost $1.31,
+  and judging cost $1.22, for a total of $8.73.
 
 ### Run timings
 
-Wall-clock time of each stage of run `2026-10-15_1641`, recorded by `scripts/run_all.py`
-(`experiments/runs/2026-10-15_1641/run.json`):
+These are the wall-clock times for each stage of run `2026-10-15_1641`, recorded by `scripts/run_all.py` in
+`experiments/runs/2026-10-15_1641/run.json`:
 
 | Stage | Started | Finished | Wall clock | Work | Cost |
 |---|---|---|---|---|---|
-| Main evaluation (4 systems) | 2026-10-15 16:41:12 | 17:48:42 | 67 min 29 s | 300 cases x 4 systems, 4 at a time | $6.20 |
+| Main evaluation (4 systems) | 2026-10-15 16:41:12 | 17:48:42 | 67 min 29 s | 300 cases × 4 systems, 4 at a time | $6.20 |
 | LLM judge (`gpt-6-astra`) | 2026-10-15 17:48:43 | 17:59:33 | 10 min 50 s | 140 open-ended cases | $1.22 |
 | Variance repeats (baseline + agentic) | 2026-10-15 17:59:33 | 19:22:22 | 82 min 48 s | 100 cases, one at a time | $1.31 |
 
-Per-case times in the results tables are each system's own latency inside a case; a full case (all four systems in
-parallel) took 52.9 s on average.
+The per-case times in the results tables show each system's own response time. Because all four systems ran in
+parallel, a full case took 52.9 seconds on average.
 <!-- /generated:cost -->
 
 ---
@@ -252,7 +258,7 @@ parallel) took 52.9 s on average.
 | **Agentic loop** | 59.7% | 64.7% | 73.8% | 43.6% → 54.3% |
 | Fixed pipeline (ablation) | 58.0% | 62.0% | 73.1% | 40.7% → 49.3% |
 
-Paired comparisons (cases where exactly one of the two systems is right):
+Paired comparisons count cases where one system was right and the other was wrong:
 
 | Comparison | Strict | Judged |
 |---|---|---|
@@ -274,11 +280,14 @@ Paired comparisons (cases where exactly one of the two systems is right):
 |---|---|---|
 | Verification (answered questions) | verified (220) / not verified (55) | 71% / 40% |
 | Self-consistency | high (242) / medium or low (33) | 69% / 39–40% |
-| Abstention | 25 cases, on which the single-shot baseline is wrong 56% of the time | — |
+| Abstention | 25 cases; the single-shot baseline was wrong on 56% of them | — |
 
 ### Stability across runs (same 100 cases)
 
-| System | Run 1 | Run 2 | Answers that flipped right ↔ wrong |
+This table uses strict scoring. “Original evaluation” is the first answer recorded during the 300-case evaluation.
+“Independent repeat” is a new answer for the same case during the variance stage of the same run.
+
+| System | Original evaluation | Independent repeat | Answers that flipped right ↔ wrong |
 |---|---|---|---|
 | Single-shot baseline | 60/100 | 60/100 | 6 (6%) |
 | Agentic loop | 59/100 | 55/100 | 12 (12%) |
@@ -287,135 +296,147 @@ Paired comparisons (cases where exactly one of the two systems is right):
 
 | Mechanism | Result in this run |
 |---|---|
-| Revision (re-look or re-answer) | 88 questions: 11 wrong first answers fixed, 6 right ones broken (first and final answers both scored strictly) |
-| Blind check | Objected to 82 first answers; 59 of them (72%) were wrong. Where the word rules could not settle agreement, the verifier's meaning comparison decided it (66 answers) |
-| Zoom | A zoomed look in 63 episodes (5 later abstained); on the 58 answered, agentic 36.2% vs single-shot 39.7% |
-| Abstention | 25 questions; the loop's own last answer was right in 7, the single prompt in 11 |
-| Answered questions only | Agentic 65.1% vs single-shot 65.8% on the same 275 questions |
+| Revision (re-look or re-answer) | Used on 88 questions. It fixed 11 wrong first answers and broke 6 right first answers under strict scoring. |
+| Blind check | Rejected 82 first answers, and 59 of those answers (72%) were wrong. When word rules could not decide agreement, the verifier compared meanings for 66 answers. |
+| Zoom | Used in 63 cases; 5 later abstained. On the remaining 58, agentic accuracy was 36.2% and single-shot accuracy was 39.7%. |
+| Abstention | Used on 25 questions. The loop's last answer was right in 7 cases, and the single-shot answer was right in 11. |
+| Answered questions only | On the same 275 answered questions, agentic accuracy was 65.1% and single-shot accuracy was 65.8%. |
 
-The blind reading is the verifier model (`gpt-6.1-sol`) answering from the image alone. Scored on its own it reaches
-67.0% strict (agentic vs blind reading 21 vs 43, p = 0.008; blind reading vs single-shot
-29 vs 20, p = 0.25).
+The blind reading is the verifier model, `gpt-6.1-sol`, answering directly from the image. By itself, it reached
+67.0% strict accuracy. Agentic vs blind reading was 21 vs 43, p = 0.008. Blind reading vs single-shot was 29 vs 20,
+p = 0.25.
 <!-- /generated:results -->
 
 ---
 
 ## Failure analysis
 
-The four analyses Template 1 asks for are computed for every run and summarised on the dashboard.
+The dashboard summarizes the four analyses required by Template 1 for every run.
 
 <!-- generated:failure -->
-- **Self-consistency checks:** 2 independent re-answers per case; low agreement flags the case for review. Low
-  consistency marks uncertainty, not certain error: 39% of low-consistency answers were still correct.
-- **Cross-modal agreement:** the verifier sees the image, so "explanation grounded in evidence" and "no
-  contradictions" are checked against the image itself, not only a text description.
-- **Verifier model:** a different, higher-tier model (`gpt-6.1-sol`) verifies `gpt-6-luna`'s answers; after its
-  checks, 113 of 300 episodes leave the direct path.
-- **Disagreement analysis:** the three systems disagree on 69% of cases under the same matching rules;
-  wins (only one system right): agentic 15, single-shot 20, workflow 12.
+- **Self-consistency checks:** the answerer gives two independent extra answers per case. Low agreement marks the case
+  for review. Low consistency means uncertainty, not certain failure: 39% of low-consistency answers were still right.
+- **Cross-modal agreement:** the verifier sees the image. It checks whether the explanation is supported by visible
+  evidence and whether the answer contradicts the image, rather than checking only a text description.
+- **Verifier model:** a different, stronger model, `gpt-6.1-sol`, checks answers from `gpt-6-luna`. After checking,
+  113 of the 300 cases left the direct path.
+- **Disagreement analysis:** under the same scoring rules, the three systems disagreed on 69% of cases. When only one
+  system was right, the agentic system won 15 cases, single-shot won 20, and workflow won 12.
 
-Representative cases, chosen automatically by `scripts/final_metrics.py` (screenshots in `eval-dashboard-screenshots/`):
+The following examples were selected automatically by `scripts/final_metrics.py`. Screenshots are in
+`eval-dashboard-screenshots/`.
 
 | Case | What happened |
 |---|---|
-| 503 "is there a pleural effusion present?" | A focused re-look got it right; the single prompt did not (agentic: "no"; single prompt: "Yes, there is a small left pleural effu…"; reference: "no") |
-| 457 "what brain region demonstrates edema?" | A re-answer guided by the verifier got it right; the single prompt was wrong (agentic: "Bilateral basal ganglia"; single prompt: "Both thalami demonstrate edema."; reference: "basal ganglia") |
-| 8 "where is the mass?" | An intermediate answer was right, but a later revision replaced it with a wrong one that the check verified; the single prompt was right (agentic: "Around the posterior third ventricle, e…"; single prompt: "The mass is in the midline pineal regio…"; reference: "pineal region") |
-| 19 "what plane is seen?" | Low self-consistency flagged the case for review, though the final answer was right (agentic: "Frontal (PA) view"; single prompt: "Frontal (coronal) plane."; reference: "pa") |
+| 503 “is there a pleural effusion present?” | A focused second look answered correctly, while single-shot did not. Agentic: “no”; single-shot: “Yes, there is a small left pleural effu…”; reference: “no”. |
+| 457 “what brain region demonstrates edema?” | A verifier-guided revision answered correctly, while single-shot did not. Agentic: “Bilateral basal ganglia”; single-shot: “Both thalami demonstrate edema.”; reference: “basal ganglia”. |
+| 8 “where is the mass?” | An intermediate answer was right, but a later revision replaced it with a wrong answer that passed verification. Single-shot was right. Agentic: “Around the posterior third ventricle, e…”; single-shot: “The mass is in the midline pineal regio…”; reference: “pineal region”. |
+| 19 “what plane is seen?” | Low self-consistency marked the case for review, although the final answer was right. Agentic: “Frontal (PA) view”; single-shot: “Frontal (coronal) plane.”; reference: “pa”. |
 <!-- /generated:failure -->
 
 **Systematic failure patterns**
 
-1. **Shared perception blind spot:** 65 questions (22%) defeat the single prompt, the loop and the fixed pipeline
-   alike under the judge, 49 of them open-ended (mostly asking for a specific location, finding or diagnosis). When the looker and the verifier
-   misread the image the same way, no check catches it (the verifier's blind reading was right on only 16 of the 65,
-   and even then it did not carry through), and self-consistency rarely helps: 51 of the 59 the loop answered
-   still get high consistency, so the models are consistently wrong rather than unsure.
-2. **Abstention withholds right answers:** the loop abstained on 25 questions, 16 of them close-ended. In 21 the
-   verifier's review recommended abstaining, 14 times although its own blind reading agreed with the loop's best-verified
-   answer. The single prompt was right on 11 of the 25, the loop's own last answer on 7 and the blind reading on 18.
-   This is where the loop loses: on the 275 questions it answered the two are level (65.1% vs 65.8%), and the
-   abstentions account for 11 of the single prompt's 13-question strict lead.
-3. **The hardest questions resist re-looking:** zoomed re-looks concentrate on the hardest questions and do not lift
-   them above the single prompt, and re-answered questions also trail it; revisions broke 6 right first answers
-   (against 11 fixed), which keeping the best-verified answer limits but does not prevent.
-4. **Benchmark quirks:** some questions are ungrammatical ("is the gyral enhancement?") or expect detail an image
-   rarely settles ("below the 7th rib in the right lung"), yet the dataset gives a reference answer, so abstaining
-   or hedging on them is scored wrong.
-5. **Workflow rigidity:** fixed rules answer "Abdomen" or "Chest" where a specific finding or side is needed.
+1. **Shared perception errors:** 65 questions (22%) were answered incorrectly by the single-shot model, agentic loop,
+   and fixed pipeline under judged scoring. Of these, 49 were open-ended and usually asked for a location, finding, or
+   diagnosis. The check cannot find an error when the image inspector and verifier make the same mistake. The
+   verifier's blind reading was correct in only 16 of the 65 cases, and those correct readings still did not become the
+   final answer. Self-consistency was not useful here: 51 of the 59 answered cases had high consistency. In other
+   words, the models often gave the same wrong answer with confidence.
+2. **Abstention removes some correct answers:** the loop did not answer 25 questions, including 16 close-ended
+   questions. The verifier recommended abstaining in 21 cases. In 14 of those cases, its blind reading agreed with the
+   loop's best checked answer. On the 25 abstained cases, single-shot was correct 11 times, the loop's last answer was
+   correct 7 times, and the blind reading was correct 18 times. This explains most of the agentic loop's lower score.
+   On the 275 questions it answered, its accuracy was almost the same as single-shot: 65.1% compared with 65.8%.
+   Abstention caused 11 of single-shot's 13-question lead under strict scoring.
+3. **Another look does not solve the hardest cases:** the controller mainly uses zoom for difficult questions, but
+   zoom did not make it more accurate than single-shot on those cases. Verifier-guided answer revisions also remained
+   behind single-shot. Revisions fixed 11 wrong first answers but changed 6 correct first answers into wrong answers.
+   Keeping the best-verified answer reduces this risk but does not remove it.
+4. **Some dataset questions are unclear:** a few questions have grammar problems, such as “is the gyral enhancement?”,
+   or ask for detail that one image may not clearly show, such as “below the 7th rib in the right lung.” The dataset
+   still provides one reference answer, so an abstention or cautious answer is scored as wrong.
+5. **Fixed workflow rules can be too general:** the workflow may answer “Abdomen” or “Chest” when the question asks
+   for a specific finding or side.
 
 ---
 
 ## Reflection and limitations
 
-**When is agentic behaviour beneficial?** In this run, not for accuracy. The single prompt is more accurate than
-the agentic loop (significantly so under the judge, not on the strict score), and the loop's higher-tier verifier,
-answering alone, is significantly more accurate than the loop. The loss comes almost entirely from abstention: on
-the 275 questions it answers, the loop matches the single prompt (65.1% vs 65.8%), but its 25 abstentions score zero
-on the strict scorer. Revision fixes slightly more answers than it breaks (11 vs 6, not significant), partly by
-adopting answers the verifier's guidance suggested, and when the blind check objects, the first answer is usually
-wrong (59 of 82). The controller does not use that signal where it matters most: it abstains where the blind reading
-is usually right (18 of the 25 abstentions); where it answers against the blind reading, the two are right about
-equally often (15 vs 17 of 43). A post-hoc check (rule chosen after seeing these results, so not a system result)
-shows the scale: taking the blind reading whenever the loop abstained or disagreed with it would have raised the loop
-from 59.7% to 66.3% strict, close to the verifier's own 67.0%, almost all of it from the abstentions, so the loop
-would then be little more than its verifier. Its answers also flipped between runs more often (12 vs 6 of 100; not
-significant, Fisher p = 0.22). What it adds is *calibrated confidence*: answers it verifies are 71% correct against 40% for its other
-answers, so "verified" is a usable signal for deciding which answers need review, and every decision is auditable. That costs about 58 times as much as a single prompt. The next step this
-run points to is answering instead of abstaining, with a low-confidence flag (for example with the blind reading,
-right on 18 of the 25 abstentions), tested on fresh questions.
+**When is agentic behaviour beneficial?** In this run, it did not improve accuracy. Single-shot was more accurate
+than the agentic loop. The difference was significant for judged accuracy but not strict accuracy. The stronger
+verifier model also performed significantly better when answering alone than the full loop. Most of the loss came
+from abstention. On the 275 questions it answered, the loop almost matched single-shot at 65.1% vs 65.8%, but all 25
+abstentions scored zero under strict scoring. Revisions fixed slightly more answers than they broke, 11 vs 6, but the
+difference was not significant. Some fixes came from corrected answers suggested by the verifier. When the blind
+check rejected a first answer, that answer was usually wrong: 59 of 82 cases. However, the controller did not use this
+signal well in the most important cases. It often abstained when the blind reading was right: 18 of 25 abstentions.
+When the loop and blind reading disagreed but the loop still answered, they were right about equally often: 15 vs 17
+of 43 cases.
+
+A later analysis used a rule chosen after seeing the results, so it is not an official system result. If the system
+had used the blind reading whenever it abstained or disagreed with it, strict accuracy would have increased from
+59.7% to 66.3%, close to the verifier's own 67.0%. Most of the gain would come from replacing abstentions, making the
+loop behave much like the verifier alone. The loop was also less stable: 12 of 100 answers changed between right and
+wrong across runs, compared with 6 for single-shot. This difference was not significant (Fisher p = 0.22).
+
+The main benefit is **useful confidence information**. Verified answers were right 71% of the time, while other
+answers were right 40% of the time. This makes the verification status useful for deciding which answers need review,
+and the full decision history can be inspected. The trade-off is cost: the agentic loop costs about 58 times more
+than one prompt. The next step suggested by this run is to answer instead of abstaining, add a low-confidence warning,
+and test that change on new questions. The blind reading may help because it was right on 18 of 25 abstained cases.
 
 **Limitations**
 
 <!-- generated:limit-cost -->
-- About 58× the cost and 10× the (median) latency of a single prompt.
+- The agentic loop costs about 58 times more and has about 10 times the median delay of a single prompt.
 <!-- /generated:limit-cost -->
-- The verifier shares the perception weaknesses of vision models; agreement is not correctness (in case 8 the check
-  verified a wrong revision that had replaced a right answer).
-- The loop's accuracy cannot be fully separated from its verifier's, because the verifier's guidance may suggest
-  answers. A critique-only verifier (issues, no suggested answer) would isolate the loop's own contribution.
-- Abstentions are scored as wrong (under the judge, one is credited because its reference answer is "maybe"), so
-  the abstention policy lowers accuracy by design.
-- The loop's answers flipped between runs more often than a single prompt's (12 vs 6 of 100), though not
-  significantly.
-- 300 questions give intervals of at most ±5.7 points; per-type results for small categories are noisy.
-- The sample comes from the whole dataset, mostly train-labelled questions, so scores are not directly comparable
-  with published VQA-RAD results on its test split.
-- The strict scorer under-credits paraphrases and over-credits vague answers that contain the reference word; the
-  LLM judge corrects both, but it is a model, spot-checked rather than human-annotated.
-- The workflow baseline uses a question-agnostic image description by design.
-- The system uses no retrieval, so it cannot draw on knowledge that is not visible in the image.
+- The verifier has many of the same vision weaknesses as the answering model. Agreement does not guarantee a correct
+  answer. In case 8, it approved a wrong revision that replaced a right answer.
+- The loop's accuracy cannot be fully separated from the verifier's accuracy because verifier guidance may suggest an
+  answer. A verifier that reports only problems, without suggesting answers, would better measure the loop itself.
+- Abstentions are scored as wrong. The judge gave credit to one because its reference answer was “maybe.” This means
+  the abstention policy reduces accuracy by design.
+- The loop's answers changed between runs more often than single-shot answers: 12 vs 6 of 100, though the difference
+  was not significant.
+- With 300 questions, confidence intervals can be as wide as ±5.7 percentage points. Results for small question types
+  are less reliable.
+- The sample comes from the full dataset and mostly contains train-labelled questions. The scores therefore cannot be
+  compared directly with published VQA-RAD test-split results.
+- The strict scorer misses some correct paraphrases and may accept vague answers that contain the reference word. The
+  LLM judge helps correct both problems, but it is still a model and was spot-checked rather than human-annotated.
+- The workflow baseline intentionally uses a general image description that is not based on the question.
+- The system has no retrieval step, so it cannot use knowledge that is not visible in the image.
 
 ---
 
 ## User interface
 
 - **Dashboard:** upload an image, ask a question, and compare the agentic loop with both baselines. The agentic view
-  shows the answer, explanation, verification checks, failure categories and the full trace.
-- **Case Explorer:** browse the evaluation questions with the single prompt's, the workflow's and the loop's cached
-  answers and the loop's full trace (the fixed pipeline's answers are in the Evaluation table);
-  search by question text or ID (an exact ID match is listed first). A question not in the current run, or one
-  re-run with "Refresh analysis", runs live and is tagged "Live result, not from the evaluation run".
-- **Evaluation:** strict and LLM-judged accuracy for all four systems, close- and open-ended accuracy, accuracy by
-  question type and by controller path, disagreement, and a filterable table of every case.
+  shows the answer, explanation, verification checks, failure categories, and full decision history.
+- **Case Explorer:** browse evaluation questions and cached answers from single-shot, workflow, and agentic systems.
+  You can also inspect the agentic trace. Fixed-pipeline answers appear in the Evaluation table. Search by question
+  text or ID; an exact ID match appears first. If a question is not in the current run, or you select “Refresh
+  analysis,” it runs live and is labelled “Live result, not from the evaluation run.”
+- **Evaluation:** view strict and LLM-judged accuracy for all four systems, close-ended and open-ended accuracy,
+  accuracy by question type and controller path, system disagreements, and a filterable table of every case.
 
 ---
 
 ## Quick start
 
-**Prerequisites:** Python 3.12, Node.js 20.19+ or 22.12+ (required by Vite 8), and an OpenAI API key with access to
-the models in `.env`.
+**Prerequisites:** Python 3.12, Node.js 20.19+ or 22.12+ for Vite 8, and an OpenAI API key that can use the models
+listed in `.env`.
 
 ```bash
 git clone https://github.com/clarence-ck/med-vqa-rad-agentic.git
 cd med-vqa-rad-agentic
 cp .env.example .env            # set OPENAI_API_KEY; per-role models are documented in the file
 
-conda env create -f environment.yml   # recommended (native deps on Windows)
+conda env create -f environment.yml   # recommended for native dependencies on Windows
 conda activate medvisionquery
 # or: pip install -r backend/requirements.txt
 
-python scripts/download_dataset.py    # VQA-RAD → data/vqa-rad/
+python scripts/download_dataset.py    # downloads VQA-RAD to data/vqa-rad/
 
 cd backend && uvicorn main:app --port 8000      # terminal 1
 cd frontend && npm install && npm run dev       # terminal 2
@@ -425,8 +446,8 @@ cd frontend && npm install && npm run dev       # terminal 2
 Open http://localhost:5173. Each new question runs all three systems and costs about $0.014 with the default models.
 <!-- /generated:question-cost -->
 
-Run the tests from `backend/`: `python -m unittest discover tests` (no API calls). To rebuild every result file,
-figure, screenshot and the report from the cached results without spending anything:
+From `backend/`, run `python -m unittest discover tests` to run tests without making API calls. To rebuild all result
+files, figures, screenshots, and the report from cached results without spending money, run
 `python scripts/run_all.py --stages metrics,docs,diagram,screenshots,report`.
 
 ---
@@ -435,9 +456,9 @@ figure, screenshot and the report from the cached results without spending anyth
 
 <!-- generated:reproduce -->
 ```bash
-python scripts/run_all.py --dry-run         # show the stages and the estimated cost; spends nothing
-python scripts/run_all.py                   # everything: evaluation, repeats, judge, metrics, docs, figures, report
-python scripts/run_all.py --stages metrics,docs,diagram,report   # rebuild outputs from cached results (free)
+python scripts/run_all.py --dry-run         # shows stages and estimated cost; spends nothing
+python scripts/run_all.py                   # runs evaluation, repeats, judging, metrics, docs, figures, and report
+python scripts/run_all.py --stages metrics,docs,diagram,report   # rebuilds outputs from cached results for free
 ```
 
 | Stage | What it runs | Last cost | Last wall clock |
@@ -447,21 +468,21 @@ python scripts/run_all.py --stages metrics,docs,diagram,report   # rebuild outpu
 | `judge` | `judge_open_ended.py` | $1.22 | ~11 min |
 | `metrics` | `final_metrics.py` → `final_metrics.json` and `cases.csv` in the run folder | free | seconds |
 | `docs` | `update_docs.py` → README blocks and `docs/report/results.tex` | free | seconds |
-| `diagram` | `system_diagram.py` → `docs/report/system_diagram.png` (README and report) | free | seconds |
-| `screenshots` | starts backend + frontend, `capture-screenshots.mjs` for the showcase cases | free | ~1 min |
+| `diagram` | `system_diagram.py` → `docs/report/system_diagram.png` for the README and report | free | seconds |
+| `screenshots` | Starts the backend and frontend, then runs `capture-screenshots.mjs` for example cases | free | ~1 min |
 | `report` | `tectonic main.tex` → `docs/report/MGAI_Final_Report_Group9_revised.pdf` | free | ~1 min |
 <!-- /generated:reproduce -->
 
-- Paid stages ask for confirmation (or `--yes`) and share one spend cap per run, `--budget` (default $10). The judge
-  runs before the variance repeats, so if money runs short only the repeats are cut.
-- An interrupted run (crash, closed laptop, budget reached) continues with `python scripts/run_all.py --resume`:
-  finished cases are kept, and the README and report are only rebuilt once the run is complete.
-- `screenshots` needs Node.js and a local Chrome or Edge; `report` needs `tectonic` (included in `environment.yml`).
-- Two things stay manual after a full re-run: re-checking the judge spot check
-  (`judge_review_sample.md` in the run folder) and re-reading the narrative in *Systematic failure patterns* and the
-  report.
-- Every cached result records the git commit, models, reasoning efforts and token usage. Failed API calls are never
-  cached; the runner retries them and counts their cost toward the cap.
+- Paid stages ask for confirmation unless you use `--yes`. All stages share one spending limit set with `--budget`,
+  which defaults to $10. Judging runs before variance repeats, so only repeats are reduced if the budget is low.
+- Continue an interrupted run with `python scripts/run_all.py --resume`. Completed cases are kept. The README and
+  report are rebuilt only after the full run finishes.
+- The `screenshots` stage needs Node.js and a local Chrome or Edge installation. The `report` stage needs `tectonic`,
+  which is included in `environment.yml`.
+- After a full run, two manual checks remain: review the judge sample in `judge_review_sample.md` in the run folder,
+  and reread the *Systematic failure patterns* section and the report.
+- Every cached result stores the git commit, models, reasoning settings, and token use. Failed API calls are not cached.
+  The runner retries them and includes their cost in the spending limit.
 
 ---
 
@@ -501,10 +522,10 @@ eval-dashboard-screenshots/    dashboard screenshots (regenerated by scripts/run
 | Method | Path | Description |
 |---|---|---|
 | GET | `/` | Health check and endpoint list |
-| POST | `/api/analyze` | Agentic system (`AGENT_MODE=loop` by default, `pipeline` for the ablation); multipart `image`, `question` |
-| POST | `/api/analyze/baseline` | Single-shot baseline |
-| POST | `/api/analyze/workflow` | Workflow baseline |
-| GET | `/api/dataset/samples` | The evaluation questions (`experiments/eval_set.json`) |
-| GET | `/api/dataset/sample/{id}` | One case with its image |
-| GET | `/api/dataset/sample/{id}/analysis?refresh=&ablation=` | Run (or load cached) all systems on a case |
-| GET | `/api/dataset/evaluation?run=` | Aggregate metrics and per-case rows of a run (default: the current run) |
+| POST | `/api/analyze` | Runs the agentic system. `AGENT_MODE=loop` is the default; use `pipeline` for the ablation. Send multipart fields `image` and `question`. |
+| POST | `/api/analyze/baseline` | Runs the single-shot baseline |
+| POST | `/api/analyze/workflow` | Runs the workflow baseline |
+| GET | `/api/dataset/samples` | Returns the evaluation questions from `experiments/eval_set.json` |
+| GET | `/api/dataset/sample/{id}` | Returns one case and its image |
+| GET | `/api/dataset/sample/{id}/analysis?refresh=&ablation=` | Runs all systems on one case or loads cached results |
+| GET | `/api/dataset/evaluation?run=` | Returns run metrics and per-case rows. The default is the current run. |

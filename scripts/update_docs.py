@@ -122,22 +122,23 @@ def block_glance(m: dict, d: dict) -> str:
                   f"{s['agentic']['strict']}% vs {blind['strict']}% strict (p = {p_value(blind['agentic_vs_blind']['p'])})."
                   if blind else "")
     verified = m["verification_signal"]["verified"]
-    return f"""Run `{m['run']['run_id']}`: a seeded, stratified sample of {m['cases']} VQA-RAD questions ({m['close_ended_cases']} close-ended, {m['open_ended_cases']} open-ended), all systems on the same answering model
-(`gpt-6-luna`; the agentic loop and the fixed pipeline also use `gpt-6.1-sol` as verifier). Per-case times were
-measured with four cases running at once; the mean is pulled up by the {m['controller_paths'].get('relook', {}).get('cases', 0)} re-look-path episodes, which take longest (actual run times are in
-[Run timings](#run-timings)). "Strict" uses the rule-based scorer; "judged" scores open-ended answers with a blinded LLM
-judge, `gpt-6-astra` (see [Evaluation design](#evaluation-design)).
+    return f"""Run `{m['run']['run_id']}` used a seeded, stratified sample of {m['cases']} VQA-RAD questions: {m['close_ended_cases']} close-ended and {m['open_ended_cases']} open-ended.
+All systems used the same answering model, `gpt-6-luna`. The agentic loop and fixed pipeline also used `gpt-6.1-sol`
+as a verifier. Four cases ran at the same time. The {m['controller_paths'].get('relook', {}).get('cases', 0)} cases that required another image inspection took the longest
+and raised the mean time. See [Run timings](#run-timings) for the full timing data. “Strict” uses rule-based scoring.
+“Judged” uses `gpt-6-astra` as a blind judge for open-ended answers. See [Evaluation design](#evaluation-design).
 
 | System | Strict accuracy | Judged accuracy | Time / case (mean · median) | Cost / case |
 |---|---|---|---|---|
 {rows}
 
-- **Agentic vs single-shot: {verdict}** ({s['agentic']['strict'] - s['baseline']['strict']:+.1f} points strict, p = {p_value(ab['p'])}; {s['agentic']['judged'] - s['baseline']['judged']:+.1f} judged, p = {p_value(abj['p'])}; exact McNemar).
-- **Agentic vs fixed pipeline:** {d['vs_pipeline_strict']:+} points strict (p = {p_value(ap['p'])}), {d['vs_pipeline_judged']:+} judged (p = {p_value(apj['p'])}).
+- **Agentic vs single-shot: {verdict}** ({s['agentic']['strict'] - s['baseline']['strict']:+.1f} percentage points strict, p = {p_value(ab['p'])}; {s['agentic']['judged'] - s['baseline']['judged']:+.1f} judged, p = {p_value(abj['p'])}; exact McNemar test).
+- **Agentic vs fixed pipeline:** the agentic-minus-pipeline difference was {d['vs_pipeline_strict']:+.1f} points for strict accuracy (p = {p_value(ap['p'])}) and
+  {d['vs_pipeline_judged']:+.1f} points for judged accuracy (p = {p_value(apj['p'])}).
 {blind_line.lstrip(chr(10))}
-- **Confidence and stability:** answers the check verified are {rounded(verified['agentic'])}% correct, the loop's
-  other answers {rounded(d['unverified_acc'])}% (abstentions excluded); between two runs, {flips.get('agentic', '–')}% of the loop's answers change right ↔ wrong vs
-  {flips.get('baseline', '–')}% for the single prompt."""
+- **Confidence and stability:** answers marked as verified were correct {rounded(verified['agentic'])}% of the time. Other non-abstained answers
+  were correct {rounded(d['unverified_acc'])}% of the time. When the same {next(iter(m.get('variance', {}).values()))['cases'] if m.get('variance') else 0} cases were run a second time, {flips.get('agentic', '–')}% of agentic answers changed from
+  right to wrong or wrong to right, compared with {flips.get('baseline', '–')}% for the single-shot baseline."""
 
 
 def block_paths(m: dict, d: dict) -> str:
@@ -163,20 +164,20 @@ def block_cost(m: dict, d: dict) -> str:
         f"| {names.get(k, k)} | {v['started'].replace('T', ' ')} | {v['finished'][11:]} | {minutes(v['wall_clock_s'])} | "
         f"{v.get('note', '')} | {'$' + format(cost_of[k], '.2f') if cost_of.get(k) is not None else '–'} |"
         for k, v in stages.items() if k in names)
-    return f"""- **Cost:** every OpenAI call is recorded (`backend/utils/usage.py`): evaluation ${c['evaluation_run']:.2f}, repeats
-  ${c['variance_repeats']:.2f}, judge ${c['judge']:.2f} (${d['total_cost']:.2f} in total).
+    return f"""- **Cost:** every OpenAI call is recorded by `backend/utils/usage.py`. The evaluation cost ${c['evaluation_run']:.2f}, repeats cost ${c['variance_repeats']:.2f},
+  and judging cost ${c['judge']:.2f}, for a total of ${d['total_cost']:.2f}.
 
 ### Run timings
 
-Wall-clock time of each stage of run `{m['run']['run_id']}`, recorded by `scripts/run_all.py`
-(`experiments/runs/{m['run']['run_id']}/run.json`):
+These are the wall-clock times for each stage of run `{m['run']['run_id']}`, recorded by `scripts/run_all.py` in
+`experiments/runs/{m['run']['run_id']}/run.json`:
 
 | Stage | Started | Finished | Wall clock | Work | Cost |
 |---|---|---|---|---|---|
 {rows}
 
-Per-case times in the results tables are each system's own latency inside a case; a full case (all four systems in
-parallel) took {m['case_wall_time_mean_s']} s on average."""
+The per-case times in the results tables show each system's own response time. Because all four systems ran in
+parallel, a full case took {m['case_wall_time_mean_s']} seconds on average."""
 
 
 def block_results(m: dict, d: dict) -> str:
@@ -206,7 +207,7 @@ def block_results(m: dict, d: dict) -> str:
 |---|---|---|---|---|
 {overall}
 
-Paired comparisons (cases where exactly one of the two systems is right):
+Paired comparisons count cases where one system was right and the other was wrong:
 
 | Comparison | Strict | Judged |
 |---|---|---|
@@ -229,7 +230,10 @@ Paired comparisons (cases where exactly one of the two systems is right):
 
 ### Stability across runs (same {next(iter(var.values()))['cases'] if var else 0} cases)
 
-| System | Run 1 | Run 2 | Answers that flipped right ↔ wrong |
+This table uses strict scoring. “Original evaluation” is the first answer recorded during the main evaluation.
+“Independent repeat” is a new answer for the same case during the variance stage of the same run.
+
+| System | Original evaluation | Independent repeat | Answers that flipped right ↔ wrong |
 |---|---|---|---|
 {var_rows}{block_blind_zoom(m)}"""
 
@@ -268,16 +272,17 @@ def block_failure(m: dict, d: dict) -> str:
         f"| {c['sample_id']} \"{short(c['question'], 50)}\" | {c['story']} (agentic: \"{short(c['agentic_answer'], 40)}\"; "
         f"single prompt: \"{short(c['baseline_answer'], 40)}\"; reference: \"{short(c['ground_truth'], 30)}\") |"
         for c in m.get("showcase", []))
-    return f"""- **Self-consistency checks:** 2 independent re-answers per case; low agreement flags the case for review. Low
-  consistency marks uncertainty, not certain error: {rounded(sc['low']['agentic'])}% of low-consistency answers were still correct.
-- **Cross-modal agreement:** the verifier sees the image, so "explanation grounded in evidence" and "no
-  contradictions" are checked against the image itself, not only a text description.
-- **Verifier model:** a different, higher-tier model (`gpt-6.1-sol`) verifies `gpt-6-luna`'s answers; after its
-  checks, {d['not_direct']} of {m['cases']} episodes leave the direct path.
-- **Disagreement analysis:** the three systems disagree on {rounded(m['disagreement_pct'])}% of cases under the same matching rules;
-  wins (only one system right): agentic {wins['agentic']}, single-shot {wins['baseline']}, workflow {wins['workflow']}.
+    return f"""- **Self-consistency checks:** the answerer gives two independent extra answers per case. Low agreement marks the case
+  for review. Low consistency means uncertainty, not certain failure: {rounded(sc['low']['agentic'])}% of low-consistency answers were still right.
+- **Cross-modal agreement:** the verifier sees the image. It checks whether the explanation is supported by visible
+  evidence and whether the answer contradicts the image, rather than checking only a text description.
+- **Verifier model:** a different, stronger model, `gpt-6.1-sol`, checks answers from `gpt-6-luna`. After checking,
+  {d['not_direct']} of the {m['cases']} cases left the direct path.
+- **Disagreement analysis:** under the same scoring rules, the three systems disagreed on {rounded(m['disagreement_pct'])}% of cases. When only one
+  system was right, the agentic system won {wins['agentic']} cases, single-shot won {wins['baseline']}, and workflow won {wins['workflow']}.
 
-Representative cases, chosen automatically by `scripts/final_metrics.py` (screenshots in `{SCREENSHOTS}/`):
+The following examples were selected automatically by `scripts/final_metrics.py`. Screenshots are in
+`{SCREENSHOTS}/`.
 
 | Case | What happened |
 |---|---|
@@ -286,8 +291,8 @@ Representative cases, chosen automatically by `scripts/final_metrics.py` (screen
 
 def block_limit_cost(m: dict, d: dict) -> str:
     r = m["agentic_vs_baseline"]
-    return (f"- About {rounded(r['cost_ratio'])}× the cost and {rounded(r['median_latency_ratio'])}× the (median) latency "
-            f"of a single prompt.")
+    return (f"- The agentic loop costs about {rounded(r['cost_ratio'])} times more and has about "
+            f"{rounded(r['median_latency_ratio'])} times the median delay of a single prompt.")
 
 
 def block_question_cost(m: dict, d: dict) -> str:
@@ -298,9 +303,9 @@ def block_question_cost(m: dict, d: dict) -> str:
 def block_reproduce(m: dict, d: dict) -> str:
     c, mins = m["costs_usd"], d["stage_minutes"]
     return f"""```bash
-python scripts/run_all.py --dry-run         # show the stages and the estimated cost; spends nothing
-python scripts/run_all.py                   # everything: evaluation, repeats, judge, metrics, docs, figures, report
-python scripts/run_all.py --stages metrics,docs,diagram,report   # rebuild outputs from cached results (free)
+python scripts/run_all.py --dry-run         # shows stages and estimated cost; spends nothing
+python scripts/run_all.py                   # runs evaluation, repeats, judging, metrics, docs, figures, and report
+python scripts/run_all.py --stages metrics,docs,diagram,report   # rebuilds outputs from cached results for free
 ```
 
 | Stage | What it runs | Last cost | Last wall clock |
@@ -310,8 +315,8 @@ python scripts/run_all.py --stages metrics,docs,diagram,report   # rebuild outpu
 | `judge` | `judge_open_ended.py` | ${c['judge']:.2f} | ~{mins.get('judge', '?')} min |
 | `metrics` | `final_metrics.py` → `final_metrics.json` and `cases.csv` in the run folder | free | seconds |
 | `docs` | `update_docs.py` → README blocks and `docs/report/results.tex` | free | seconds |
-| `diagram` | `system_diagram.py` → `docs/report/system_diagram.png` (README and report) | free | seconds |
-| `screenshots` | starts backend + frontend, `capture-screenshots.mjs` for the showcase cases | free | ~1 min |
+| `diagram` | `system_diagram.py` → `docs/report/system_diagram.png` for the README and report | free | seconds |
+| `screenshots` | Starts the backend and frontend, then runs `capture-screenshots.mjs` for example cases | free | ~1 min |
 | `report` | `tectonic main.tex` → `docs/report/MGAI_Final_Report_Group9_revised.pdf` | free | ~1 min |"""
 
 
@@ -411,8 +416,8 @@ def latex_macros(m: dict, d: dict) -> str:
 
 def runs_index() -> str:
     lines = ["# Evaluation runs", "",
-             "One folder per run; a later run never changes an earlier one. Generated by `scripts/update_docs.py`.",
-             "The README and the report show the current run (the latest completed one).", "",
+             "Each evaluation has its own folder. Starting a new evaluation does not change an older run. This file is generated",
+             "by `scripts/update_docs.py`. The root README and report use the newest completed run.", "",
              "| Run | Status | Code | Wall clock | Cost | Agentic strict / judged | Single-shot strict / judged |",
              "|---|---|---|---|---|---|---|"]
     for run in reversed(runs.list_runs()):
