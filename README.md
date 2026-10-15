@@ -35,7 +35,7 @@ Built for SUTD 51.511 Multimodal Generative AI (Template 1: Agentic Multimodal S
 ## Results at a glance
 
 <!-- generated:glance -->
-Run `2026-10-15_1308`: 300 seeded-random VQA-RAD test questions (169 close-ended, 131 open-ended), all systems on the same answering model
+Run `2026-10-15_1308`: a seeded, stratified sample of 300 VQA-RAD test questions (169 close-ended, 131 open-ended), all systems on the same answering model
 (`gpt-6-luna`; the agentic loop and the fixed pipeline also use `gpt-6.1-sol` as verifier). Per-case times were
 measured with four cases running at once; the mean is pulled up by a few long re-look cases (actual run times are in
 [Run timings](#run-timings)). "Strict" uses the rule-based scorer; "judged" scores open-ended answers with a blinded LLM
@@ -95,7 +95,7 @@ controller decides whether to follow it; in the fixed-pipeline ablation every st
 | `look(focus)` | Perception (executor) | gpt-6-luna, vision | Looks *with the question in mind*; with `focus` it **zooms**: the named region is located, cropped and enlarged, and examined next to the full image. The first look also rejects non-radiology images |
 | `answer(guidance)` | Synthesis (executor) | gpt-6-luna, vision | Receives the image plus all observations; `guidance` carries what the verifier asked to fix |
 | `check()` | Evaluator (a larger model) | gpt-6.1-sol, vision | Two parts. **Blind reading** (independent): once per episode, the verifier answers from the image and question alone, without the proposed answer or the looker's notes. **Review** (critic): it checks the answer against the image (grounding, contradictions, format) and returns a status, the issues found and a next step (`accept`, `relook` with a focus, `reanswer` with guidance, `abstain`); the guidance may include a suggested corrected answer. An answer is *verified* only if the review passes **and** the blind reading agrees (word rules first, exact for yes/no; for open-ended answers the verifier judges whether the two mean the same). The controller learns only whether they agree, never the blind answer |
-| `finish(abstain)` | Decision | — | Ends the episode; refused while the latest answer is unchecked |
+| `finish(abstain)` | Decision | — | Ends the episode; a normal finish is refused while the latest answer is unchecked (abstaining is not) |
 
 Budgets: at most 2 focused re-looks, 3 answers and 16 agent steps. If the controller stalls, a safety net answers
 and/or checks before finishing. Paths observed in the current run:
@@ -117,7 +117,7 @@ and/or checks before finishing. Paths observed in the current run:
   they use `gpt-6-luna` with low or no reasoning effort. Answering uses `gpt-6-luna` with medium effort, and the answerer always sees
   the image: a text description of the image loses the visual detail many questions depend on.
 - **A different, larger model verifies; a third judges.** `check` uses `gpt-6.1-sol`, so the answering model never
-  verifies itself and the critique comes from a stronger reader. Because the review's guidance can suggest a
+  verifies itself and the critique comes from a larger model. Because the review's guidance can suggest a
   corrected answer, part of the loop's accuracy can come from the verifier, so every run also scores the verifier
   answering alone (its blind reading) as a reference. The evaluation judge, `gpt-6-astra`, takes part in no system.
 - All roles are configurable (`MODEL_<ROLE>`, `REASONING_EFFORT_<ROLE>` in `.env`); every call's tokens and cost are
@@ -129,7 +129,7 @@ and/or checks before finishing. Paths observed in the current run:
 |---|---|---|
 | Single-shot baseline | `backend/agents/baseline.py` | One vision prompt; asked for a concise answer that starts with yes/no where applicable |
 | Workflow baseline | `backend/agents/workflow_baseline.py` | Fixed chain: question-agnostic image description → question analysis → hand-written rules per question type |
-| Fixed pipeline (ablation) | `backend/agents/orchestrator.py` | A controller instructed to call six tools in a prescribed order (`interpret_image` → `analyze_question` → `filter_image_context` → `route_difficulty` → `reason_answer` → `verify_answer`), re-running the sequence once when verification flags a fixable problem. Same models, but a question-agnostic image description, no zoom and no blind check, so the comparison measures the agentic design as a whole (control, question-aware and zoomed looks, blind check), not control alone |
+| Fixed pipeline (ablation) | `backend/agents/orchestrator.py` | A controller instructed to call six tools in a prescribed order (`interpret_image` → `analyze_question` → `filter_image_context` → `route_difficulty` → `reason_answer` → `verify_answer`), re-running the sequence once when verification flags a fixable problem. Same models, but a question-agnostic image description, no zoom, no blind check and a text-only verifier, so the comparison measures the agentic design as a whole (control, question-aware and zoomed looks, image-grounded checking), not control alone |
 
 ---
 
@@ -139,13 +139,15 @@ The two modalities are the image and the text question. They interact at every s
 
 | Step | Image | Text |
 |---|---|---|
+| `analyze_question()` | ✗ | the question, plus any observations so far |
 | `look(focus)` | ✓ sent at high detail, plus an enlarged crop of the focus region | the question (and focus) decide what is examined |
 | `answer(guidance)` | ✓ sent directly | question analysis, all observations, verifier guidance |
 | `check()` | ✓ sent directly (blind reading: image + question only) | answer, explanation, observations (review step only) |
 | Controller | ✗ | short tool results only |
 
-Every model that answers or judges sees the image itself, because a text description of the image loses the visual
-detail many questions depend on.
+In the agentic loop, every model that looks, answers or verifies sees the image itself, because a text description
+of the image loses the visual detail many questions depend on; only the question analysis and the controller work from
+text. The evaluation's LLM judge compares answers with the reference as text and does not see the image.
 
 ---
 
@@ -167,9 +169,9 @@ detail many questions depend on.
 
 Every evaluation is a **run** with its own folder, `experiments/runs/<run_id>/` (cases, judge verdicts, variance
 repeats, metrics, timings, cost); a later run never changes an earlier one, and `experiments/runs/README.md` lists
-them all. Every number in this README and the report comes from the current (latest completed) run via
-`scripts/final_metrics.py` and `scripts/update_docs.py`; text between `<!-- generated -->` markers is not edited by
-hand.
+them all. Every result in this README and the report (accuracies, tests, counts, timings, costs) comes from the current
+(latest completed) run via `scripts/final_metrics.py` and `scripts/update_docs.py`; text between `<!-- generated -->`
+markers is not edited by hand. Settings such as thresholds and budgets come from the code.
 
 - **Data:** 300 of the VQA-RAD test split's 450 usable questions (one known-bad item excluded), drawn at random
   with seed 42 while keeping the split's mix of 56% yes/no (169 close-ended, 131 open-ended). The list is
@@ -187,7 +189,7 @@ hand.
 - **LLM judge** (`scripts/judge_open_ended.py`): `gpt-6-astra` judges **every** open-ended answer of every system,
   right or wrong by the strict rules, for meaning equivalence with the ground truth, blinded to the system (answers
   shuffled and anonymised). Its verdict is the "judged" score for open-ended answers; yes/no answers stay rule-based.
-  Astra neither answers (`gpt-6-luna`) nor verifies (`gpt-6.1-sol`) in any system, so it favours none. A 30-verdict
+  Astra neither answers (`gpt-6-luna`) nor verifies (`gpt-6.1-sol`) in any system. A 30-verdict
   spot check agreed with 29 credit decisions; the other was a lenient credit for a workflow-baseline answer
   (`judge_review_sample.md` in the run folder; AI-assisted review, not human annotation).
 - **Statistics:** 95% intervals are about ±5 points at n = 300; paired comparisons use the exact McNemar test.
@@ -208,7 +210,7 @@ Wall-clock time of each stage of run `2026-10-15_1308`, recorded by `scripts/run
 | Variance repeats (baseline + agentic) | 2026-10-15 14:29:48 | 15:52:46 | 82 min 57 s | 100 cases, one at a time | $1.28 |
 
 Per-case times in the results tables are each system's own latency inside a case; a full case (all four systems in
-turn) took 55.8 s on average.
+parallel) took 55.8 s on average.
 <!-- /generated:cost -->
 
 ---
@@ -251,8 +253,6 @@ Paired comparisons (cases where exactly one of the two systems is right):
 | Self-consistency | high (238) / medium or low (40) | 75% / 40–57% |
 | Abstention | 22 cases, on which the single-shot baseline is wrong 41% of the time | — |
 
-On the 278 cases it answered, the agentic loop is 72% correct (strict).
-
 ### Stability across runs (same 100 cases)
 
 | System | Run 1 | Run 2 | Answers that flipped right ↔ wrong |
@@ -266,7 +266,7 @@ On the 278 cases it answered, the agentic loop is 72% correct (strict).
 |---|---|
 | Revision (re-look or re-answer) | 92 questions: 23 wrong first answers fixed, 5 right ones broken |
 | Blind check | Objected to 85 first answers; 64 of them (75%) were wrong. The meaning comparison decided 44 agreements |
-| Zoom | Used on 66 questions, the hardest: agentic 33.3% vs single-shot 40.9% there |
+| Zoom | Used on the 66 questions the loop chose to re-examine: agentic 33.3% vs single-shot 40.9% there |
 | Abstention | 22 questions; the loop's own last answer was right in 11, the single prompt in 13 |
 | Answered questions only | Agentic 71.6% vs single-shot 69.1% on the same 278 questions |
 
@@ -311,7 +311,7 @@ Representative cases, chosen automatically by `scripts/final_metrics.py` (screen
    them above the single prompt; occasionally a revision breaks a right answer, which keeping the best-verified answer
    limits.
 4. **Benchmark quirks:** some questions cannot be answered from their image (e.g. a diagnosis that needs another
-   modality); every system fails them.
+   modality), yet the dataset gives a reference answer, so abstaining or hedging on them is scored wrong.
 5. **Workflow rigidity:** fixed rules answer "Brain" or "X-ray" where a specific finding is needed.
 
 ---
@@ -359,7 +359,8 @@ steps this run points to.
 
 ## Quick start
 
-**Prerequisites:** Python 3.12, Node.js 18+, and an OpenAI API key with access to the models in `.env`.
+**Prerequisites:** Python 3.12, Node.js 20.19+ or 22.12+ (required by Vite 8), and an OpenAI API key with access to
+the models in `.env`.
 
 ```bash
 git clone https://github.com/clarence-ck/med-vqa-rad-agentic.git
@@ -377,7 +378,7 @@ cd frontend && npm install && npm run dev       # terminal 2
 ```
 
 <!-- generated:question-cost -->
-Open http://localhost:5173. Each new question runs all three systems and costs about $0.01 with the default models.
+Open http://localhost:5173. Each new question runs all three systems and costs about $0.014 with the default models.
 <!-- /generated:question-cost -->
 
 Run the tests from `backend/`: `python -m unittest discover tests` (no API calls). To rebuild every result file,

@@ -111,7 +111,7 @@ finish, with structured failure handling.
 
 We target the \textbf{VQA-RAD} benchmark~\cite{lau2018vqarad}, a clinically generated radiology VQA dataset; its
 Hugging Face release contains 2,244 image--question pairs (1,793 train / 451 test) across close-ended and open-ended
-question types. We evaluate on a seeded random sample of \NCases{} test questions; no training data is used.
+question types. We evaluate on a seeded, stratified sample of \NCases{} test questions; no training data is used.
 
 % ============================================================================
 \section{Agent Architecture}
@@ -152,7 +152,7 @@ verifier answers from the image and question alone, without the proposed answer 
 \emph{relook} with a focus, \emph{reanswer} with guidance, or \emph{abstain}; the guidance may include a suggested
 corrected answer. An answer is verified only if the review passes and the blind reading agrees (by word rules, or for
 open-ended answers by meaning, judged by the verifier); the controller learns only whether they agree.
-\textbf{\texttt{finish(abstain)}} ends the episode and is refused while the latest answer is unchecked.
+\textbf{\texttt{finish(abstain)}} ends the episode; a normal finish is refused while the latest answer is unchecked.
 
 \paragraph{Model and tool choices.} All roles use OpenAI models, sized by need and configurable per role. The
 controller and question analysis make simple decisions (\texttt{gpt-6-luna}, no/low reasoning effort); perception
@@ -168,17 +168,18 @@ in the controller's context keeps the controller cheap.
 hand-written rules per question type. The \emph{fixed-pipeline ablation} is a controller instructed to call six tools in a prescribed
 order---\texttt{interpret\_image}, \texttt{analyze\_question}, \texttt{filter\_image\_context},
 \texttt{route\_difficulty}, \texttt{reason\_answer}, \texttt{verify\_answer}---re-running the sequence once when
-verification flags a fixable problem. It uses the same models but a question-agnostic image description, no zoom and
-no blind check, so comparing against it measures the agentic design as a whole, not control alone. A demo UI (Section~\ref{sec:ui}) exposes all systems.
+verification flags a fixable problem. It uses the same models but a question-agnostic image description, no zoom, no
+blind check and a text-only verifier, so comparing against it measures the agentic design as a whole, not control
+alone. A demo UI (Section~\ref{sec:ui}) exposes all systems.
 
 % ============================================================================
 \section{Multimodal Grounding}
 % ============================================================================
 The system uses two modalities, the radiology image and the text question, and they interact at every step that
 determines the answer: the question (and any focus) steers what \texttt{look} examines; \texttt{answer} and
-\texttt{check} receive the image directly alongside the text observations; only the controller works purely in
-text. Every model that answers or judges sees the image itself, because a text description of the image loses
-the visual detail many questions depend on. Because the verifier sees the image, its
+\texttt{check} receive the image directly alongside the text observations, because a text description of the image
+loses the visual detail they depend on; only question analysis and the controller work from text. The evaluation's
+LLM judge compares answers with the reference as text. Because the verifier sees the image, its
 ``explanation grounded in evidence'' and ``no contradictions'' checks are genuine cross-modal agreement checks.
 
 % ============================================================================
@@ -276,7 +277,7 @@ wrong, versus \VarAgFlip\% for the agentic loop.
 Five patterns dominate the errors: (i) a shared perception blind spot, where looker and verifier misread the image
 the same way; (ii) abstention withholding a right answer when the blind reading disagrees or one image is judged
 insufficient; (iii) the hardest questions resisting re-looks, with an occasional revision breaking a right answer;
-(iv) questions the image cannot answer, which every system fails; and (v) workflow rigidity, where fixed rules answer
+(iv) questions the image cannot answer, where abstaining or hedging is scored wrong; and (v) workflow rigidity, where fixed rules answer
 ``Brain'' or ``X-ray'' when a specific finding is needed.
 
 % ============================================================================

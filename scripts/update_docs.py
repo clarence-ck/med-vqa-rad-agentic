@@ -92,7 +92,7 @@ def derived(m: dict) -> dict:
         "abstained_baseline_wrong": rounded(100 - paths["abstained"]["baseline"]) if "abstained" in paths else None,
         "total_cost": round(sum(v for v in costs.values() if v), 2),
         "new_question_cost": round(s["agentic"]["mean_cost_usd"] + s["baseline"]["mean_cost_usd"]
-                                   + s["workflow"]["mean_cost_usd"], 2),
+                                   + s["workflow"]["mean_cost_usd"], 3),
         "flip_pct": {k: round(100 * v["flips"] / v["cases"]) for k, v in m.get("variance", {}).items()},
         "stage_minutes": {k: round(v["wall_clock_s"] / 60) for k, v in stages.items()},
     }
@@ -121,7 +121,7 @@ def block_glance(m: dict, d: dict) -> str:
                   f"{s['agentic']['strict']}% vs {blind['strict']}% strict (p = {p_value(blind['agentic_vs_blind']['p'])})."
                   if blind else "")
     verified = m["verification_signal"]["verified"]
-    return f"""Run `{m['run']['run_id']}`: {m['cases']} seeded-random VQA-RAD test questions ({m['close_ended_cases']} close-ended, {m['open_ended_cases']} open-ended), all systems on the same answering model
+    return f"""Run `{m['run']['run_id']}`: a seeded, stratified sample of {m['cases']} VQA-RAD test questions ({m['close_ended_cases']} close-ended, {m['open_ended_cases']} open-ended), all systems on the same answering model
 (`gpt-6-luna`; the agentic loop and the fixed pipeline also use `gpt-6.1-sol` as verifier). Per-case times were
 measured with four cases running at once; the mean is pulled up by a few long re-look cases (actual run times are in
 [Run timings](#run-timings)). "Strict" uses the rule-based scorer; "judged" scores open-ended answers with a blinded LLM
@@ -175,7 +175,7 @@ Wall-clock time of each stage of run `{m['run']['run_id']}`, recorded by `script
 {rows}
 
 Per-case times in the results tables are each system's own latency inside a case; a full case (all four systems in
-turn) took {m['case_wall_time_mean_s']} s on average."""
+parallel) took {m['case_wall_time_mean_s']} s on average."""
 
 
 def block_results(m: dict, d: dict) -> str:
@@ -228,8 +228,6 @@ Paired comparisons (cases where exactly one of the two systems is right):
 | Self-consistency | high ({sc['high']['cases']}) / medium or low ({d['sc_medlow_n']}) | {rounded(sc['high']['agentic'])}% / {d['sc_medlow_range']}% |
 | Abstention | {ab.get('cases', 0)} cases, on which the single-shot baseline is wrong {d['abstained_baseline_wrong']}% of the time | — |
 
-On the {m['agentic_answered']['cases']} cases it answered, the agentic loop is {rounded(m['agentic_answered']['strict'])}% correct (strict).
-
 ### Stability across runs (same {next(iter(var.values()))['cases'] if var else 0} cases)
 
 | System | Run 1 | Run 2 | Answers that flipped right ↔ wrong |
@@ -255,7 +253,7 @@ def block_blind_zoom(m: dict) -> str:
 |---|---|
 | Revision (re-look or re-answer) | {mech['revised']} questions: {mech['revised_fixed']} wrong first answers fixed, {mech['revised_broken']} right ones broken |
 | Blind check | Objected to {mech['blind_flagged_first_answer']} first answers; {mech['blind_flagged_and_wrong']} of them ({flag_pct}%) were wrong. The meaning comparison decided {mech['blind_decided_by_meaning']} agreements |
-| Zoom | Used on {z.get('cases', 0)} questions, the hardest: agentic {z.get('agentic')}% vs single-shot {z.get('baseline')}% there |
+| Zoom | Used on the {z.get('cases', 0)} questions the loop chose to re-examine: agentic {z.get('agentic')}% vs single-shot {z.get('baseline')}% there |
 | Abstention | {mech['abstained']} questions; the loop's own last answer was right in {mech['abstained_own_answer_right']}, the single prompt in {mech['abstained_baseline_right']} |
 | Answered questions only | Agentic {mech['answered_agentic_strict']:.1f}% vs single-shot {mech['answered_baseline_strict']:.1f}% on the same {mech['answered']} questions |
 
@@ -295,7 +293,7 @@ def block_limit_cost(m: dict, d: dict) -> str:
 
 def block_question_cost(m: dict, d: dict) -> str:
     return (f"Open http://localhost:5173. Each new question runs all three systems and costs about "
-            f"${d['new_question_cost']:.2f} with the default models.")
+            f"${d['new_question_cost']:.3f} with the default models.")
 
 
 def block_reproduce(m: dict, d: dict) -> str:
