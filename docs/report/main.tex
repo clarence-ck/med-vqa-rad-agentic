@@ -100,13 +100,13 @@ representation for each answer class. Although framed as classification, candida
 transformer attention, incorporating aspects of generative reasoning. This hybrid achieves state-of-the-art
 performance on VQA-RAD and PathVQA.
 
-\paragraph{The gap that remains.} Despite this progress, \emph{all} prior approaches---whether
+\paragraph{The gap that remains.} These approaches---whether
 classification~\cite{benabacha2019vqamed,nguyen2019mevf,zhang2023pmcvqa}, generation~\cite{bazi2023,li2023llavamed,wu2025radfm,chen2025rllava},
-or hybrid~\cite{liu2023q2a}---treat the task as a single end-to-end model invocation, making it impossible to
-localise failures, adapt the reasoning process to what the image shows, or enforce clinical safety constraints. Even
-recent works that acknowledge the need for verification~\cite{syed2025medvctp} or knowledge
-grounding~\cite{qiu2025chain} address these as training objectives within a single model, rather than as explicit,
-auditable steps. MedVisionQuery fills this gap with an agent controller that coordinates question-aware perception,
+or hybrid~\cite{liu2023q2a}---answer in a single end-to-end model invocation, which makes it hard to localise
+failures, adapt the reasoning to what the image shows, or enforce clinical safety constraints. Recent work adds
+explicit structure: MedVCTP~\cite{syed2025medvctp} is a training-free See--Think--Confirm pipeline whose last stage
+checks cross-modal consistency, and Qiu et al.~\cite{qiu2025chain} ground answers in a chain of evidence; MedVCTP's
+stages, however, run in a fixed order. MedVisionQuery instead uses an agent controller that coordinates question-aware perception,
 answering and image-grounded verification, deciding per case whether to re-examine the image, revise, abstain or
 finish, with structured failure handling.
 
@@ -341,7 +341,7 @@ chain of evidence. \emph{Knowledge-Based Systems}. doi:10.1016/j.knosys.2025.113
 
 \bibitem{syed2025medvctp}
 Syed, A., et al. (2025). MedVCTP: Improving accuracy and explainability in medical visual reasoning. In
-\emph{NeurIPS 2025 Workshop on Human-AI Coevolution (HAIC)}.
+\emph{NeurIPS 2025 Workshop on Vision Language Models: Challenges of Real World Deployment}.
 
 \bibitem{benabacha2019vqamed}
 Ben Abacha, A., Hasan, S.A., Datla, V.V., Liu, J., Demner-Fushman, D., \& M\"uller, H. (2019). VQA-Med: Overview of
