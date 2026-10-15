@@ -69,12 +69,12 @@ async def warm_cache(skip: int, limit: int, dry_run: bool = False, status_only: 
 
     selected_samples = get_sample_cases(limit=skip + limit)
     if not selected_samples:
-        print("No curated test cases were found.")
+        print("No evaluation cases were found.")
         return
 
     samples = selected_samples[skip:skip + limit]
     if not samples:
-        print(f"No curated test cases found for skip={skip}, limit={limit}.")
+        print(f"No evaluation cases found for skip={skip}, limit={limit}.")
         return
 
     # Status-only mode
@@ -185,7 +185,7 @@ async def warm_cache(skip: int, limit: int, dry_run: bool = False, status_only: 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Run the curated Case Explorer test cases and warm the cache.")
+        description="Run all four systems on the evaluation cases and store the results in a run folder.")
     parser.add_argument(
         "--skip",
         type=int,

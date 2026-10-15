@@ -15,7 +15,7 @@ npm run build
 ## Views
 
 - **Dashboard** — upload an image and ask a question; shows the answer, explanation, verification and the agent trace.
-- **Case Explorer** — VQA-RAD test cases with all systems side by side (`CaseExplorer.jsx`, `AgentTrace.jsx`,
+- **Case Explorer** — the evaluation questions (`experiments/eval_set.json`) with all systems side by side (`CaseExplorer.jsx`, `AgentTrace.jsx`,
   `VerificationPanel.jsx`, `FailureModeDrawer.jsx`).
 - **Evaluation** (`EvaluationView.jsx`) — reads `/api/dataset/evaluation`: strict and LLM-judged accuracy, mean and
   median time per case, accuracy by question type and by controller path, disagreement, and a per-case table.

@@ -82,7 +82,7 @@ function JudgeTag({ verdict, strict }) {
       style={{ fontSize: '9px', padding: '1px 5px', marginLeft: '4px' }}
       data-tooltip={rescued
         ? 'The strict scorer rejected this wording, but the blinded LLM judge rated it as meaning the same as the ground truth.'
-        : 'The strict scorer accepted this answer (it contains the reference words), but the blinded LLM judge rated it as not giving the same answer.'}
+        : 'The strict scorer accepted this answer, but the blinded LLM judge rated it as not giving the same answer.'}
     >
       {rescued ? 'LLM-judged ✓' : 'LLM-judged ✗'}
     </span>
@@ -106,7 +106,7 @@ function SystemPerformanceCard({ title, icon, accuracy, judgedAccuracy, avgDurat
           {judgedAccuracy !== null && judgedAccuracy !== undefined && (
             <div
               className="evaluation-list-subtitle"
-              data-tooltip="Second score: every open-ended answer is graded by a blinded LLM judge (gpt-6-astra, which takes part in no system) for meaning against the ground truth; yes/no answers keep the strict score."
+              data-tooltip="Second score: every open-ended answer is graded by a blinded LLM judge (gpt-6-astra, which takes part in no system) for meaning against the ground truth; close-ended answers keep the strict score."
               data-tooltip-align="left"
             >
               LLM-judged: {formatPercent1(judgedAccuracy)}
@@ -268,7 +268,7 @@ export default function EvaluationView({ loading, evaluationData, error, onRefre
         <>
           <section className="evaluation-system-grid animate-fade-in">
             <SystemPerformanceCard
-              title="Baseline"
+              title="Baseline (single-shot)"
               judgedAccuracy={summary.baseline_judged_accuracy}
               icon="⚡"
               accuracy={summary.baseline_accuracy}

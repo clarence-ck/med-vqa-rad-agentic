@@ -5,7 +5,7 @@ from pathlib import Path
 from config import DATA_DIR
 
 
-# Excluded sample IDs (problematic test cases)
+# Excluded sample IDs (problematic cases)
 # 2070: Problematic question and answer pair (ground truth issue)
 EXCLUDED_SAMPLE_IDS = {2070}
 
