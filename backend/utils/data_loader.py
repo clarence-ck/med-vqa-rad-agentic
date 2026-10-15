@@ -91,7 +91,7 @@ def get_sample_cases(limit: int = 1000) -> list:
     pool.sort(key=lambda sample: sample["id"])
     listed = eval_set_ids()
     if listed is not None:
-        # The explicit evaluation set (experiments/eval_set.json), in its stored order.
+        # The explicit evaluation set (experiments/eval_set.json); grouped by question type below for the dropdown.
         by_id = {sample["id"]: sample for sample in pool}
         chosen = [by_id[i] for i in listed if i in by_id][:limit]
     else:
