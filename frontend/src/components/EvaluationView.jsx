@@ -410,7 +410,14 @@ export default function EvaluationView({ loading, evaluationData, error, onRefre
                         <td><span className="tag tag-gray">{item.count}</span></td>
                         <td><BreakdownAccuracyCell value={item.baseline_accuracy} color="var(--color-warning)" /></td>
                         <td><BreakdownAccuracyCell value={item.workflow_accuracy} color="var(--color-accent)" /></td>
-                        <td><BreakdownAccuracyCell value={item.agentic_accuracy} color="var(--color-success)" /></td>
+                        <td>
+                          {isControllerMode && (item.question_type || item.label) === 'abstained' ? (
+                            // The loop gave no answer on these cases, so an accuracy (0%) would be misleading.
+                            <span style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>— (abstained)</span>
+                          ) : (
+                            <BreakdownAccuracyCell value={item.agentic_accuracy} color="var(--color-success)" />
+                          )}
+                        </td>
                         {hasPipeline && (
                           <td>
                             {item.pipeline_accuracy === null || item.pipeline_accuracy === undefined
