@@ -179,7 +179,7 @@ def _stop(process: subprocess.Popen) -> None:
 def stage_screenshots(run_id, budget_left):
     node, npm = shutil.which("node"), shutil.which("npm")
     if not (node and npm):
-        raise RuntimeError("Node.js/npm not found; install Node 18+ to capture screenshots")
+        raise RuntimeError("Node.js/npm not found; install Node 20.19+ or 22.12+ to capture screenshots")
     frontend = ROOT / "frontend"
     if not (frontend / "node_modules").exists():
         run([npm, "install"], cwd=frontend)
