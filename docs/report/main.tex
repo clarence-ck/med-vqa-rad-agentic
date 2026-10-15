@@ -135,8 +135,8 @@ answer and check; the controller sees only short text results and chooses the ne
 fixed-pipeline ablation, the tool sequence depends on what verification finds: on the \NCases{} evaluation cases the controller
 finished directly in \PathDirectN{} cases, re-examined a region in \PathRelookN, revised its answer in
 \PathReanswerN{} and abstained in \PathAbstainN. Budgets
-cap the loop at two focused re-looks, three answers and 16 steps, with a safety net that checks the latest answer
-if the controller stalls.
+cap the loop at two focused re-looks, three answers and 16 steps, with a safety net that answers or checks before
+finishing if the controller stalls.
 
 \paragraph{Roles.} The \emph{controller} is the planner: it chooses every next step from the results so far.
 The per-request \emph{working memory} (image, question analysis, looks, answers, checks) is the memory; the tools
@@ -275,14 +275,15 @@ answer would have raised the loop's word-rule score by about 7 points, to the ve
 medium/low \ScMedLowRange\%, so low consistency marks uncertainty rather than certain error.
 \emph{Cross-modal agreement:} because the verifier sees the image, verification status is predictive: verified
 answers are \SigVerAcc\% correct, the rest \UnverAcc\%.
-\emph{Verifier model:} a higher-tier model verifying the answering model steers \NotDirect{} of \NCases{} episodes away from the direct path.
+\emph{Verifier model:} a higher-tier model verifies the answering model; after its checks, \NotDirect{} of \NCases{}
+episodes leave the direct path.
 \emph{Disagreement:} the three systems disagree on \DisagreePct\% of cases; when exactly one system is right, it is the
 agentic loop \WinsAg{} times, the single prompt \WinsBase{} and the workflow \WinsWf.
 \emph{Stability:} on \VarCases{} repeated cases, \VarBaseFlip\% of single-prompt answers flipped between right and
 wrong, versus \VarAgFlip\% for the agentic loop.
 Five patterns dominate the errors: (i) a shared perception blind spot: 65 questions (22\%), mostly open-ended ones
-asking for a specific location, finding or diagnosis, defeat the single prompt, the loop and the pipeline alike, and no check catches a misreading
-that looker and verifier share; (ii) abstention withholding a right answer: the verifier's review recommended 21 of the
+asking for a specific location, finding or diagnosis, defeat the single prompt, the loop and the pipeline alike; no check catches a misreading
+that looker and verifier share, and 51 of the 65 still get high self-consistency; (ii) abstention withholding a right answer: the verifier's review recommended 21 of the
 25 abstentions, 14 times although its own blind reading agreed with the loop's answer; (iii) the hardest questions resisting re-looks, with an occasional revision breaking a
 right answer; (iv) benchmark quirks---ungrammatical questions, or references needing detail an image rarely
 settles---where abstaining or hedging is scored wrong; and (v) workflow rigidity, where fixed rules answer

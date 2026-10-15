@@ -190,12 +190,16 @@ export default function CaseExplorer({
 
   const filteredSamples = useMemo(() => {
     if (!searchQuery.trim()) return flattenedSamples;
-    const query = searchQuery.toLowerCase();
-    return flattenedSamples.filter(
+    const query = searchQuery.trim().toLowerCase();
+    const matches = flattenedSamples.filter(
       (sample) =>
         String(sample.id).toLowerCase().includes(query) ||
         sample.question.toLowerCase().includes(query),
     );
+    // An exact ID match comes first (so "457" selects case 457, not 1457), in its own group.
+    const exact = matches.find((sample) => String(sample.id) === query);
+    if (!exact) return matches;
+    return [{ ...exact, groupLabel: 'Matching ID' }, ...matches.filter((sample) => sample !== exact)];
   }, [flattenedSamples, searchQuery]);
 
   const filteredGroups = useMemo(() => {
@@ -271,7 +275,7 @@ export default function CaseExplorer({
           <div className="form-group">
             <label className="form-label">Choose a dataset case</label>
             <div className="split-guidance-text" style={{ marginBottom: 'var(--space-2)' }}>
-              Dataset split: test only
+              The evaluation questions (experiments/eval_set.json)
             </div>
             <div ref={dropdownRef} style={{ position: 'relative' }}>
               <button

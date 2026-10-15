@@ -253,7 +253,7 @@ def block_blind_zoom(m: dict) -> str:
 | Mechanism | Result in this run |
 |---|---|
 | Revision (re-look or re-answer) | {mech['revised']} questions: {mech['revised_fixed']} wrong first answers fixed, {mech['revised_broken']} right ones broken |
-| Blind check | Objected to {mech['blind_flagged_first_answer']} first answers; {mech['blind_flagged_and_wrong']} of them ({flag_pct}%) were wrong. The meaning comparison decided {mech['blind_decided_by_meaning']} agreements |
+| Blind check | Objected to {mech['blind_flagged_first_answer']} first answers; {mech['blind_flagged_and_wrong']} of them ({flag_pct}%) were wrong. Where the word rules could not settle agreement, the verifier's meaning comparison decided it ({mech['blind_decided_by_meaning']} answers) |
 | Zoom | Used on the {z.get('cases', 0)} questions the loop chose to re-examine: agentic {z.get('agentic')}% vs single-shot {z.get('baseline')}% there |
 | Abstention | {mech['abstained']} questions; the loop's own last answer was right in {mech['abstained_own_answer_right']}, the single prompt in {mech['abstained_baseline_right']} |
 | Answered questions only | Agentic {mech['answered_agentic_strict']:.1f}% vs single-shot {mech['answered_baseline_strict']:.1f}% on the same {mech['answered']} questions |
@@ -274,8 +274,8 @@ def block_failure(m: dict, d: dict) -> str:
   consistency marks uncertainty, not certain error: {rounded(sc['low']['agentic'])}% of low-consistency answers were still correct.
 - **Cross-modal agreement:** the verifier sees the image, so "explanation grounded in evidence" and "no
   contradictions" are checked against the image itself, not only a text description.
-- **Verifier model:** a different, higher-tier model (`gpt-6.1-sol`) verifies `gpt-6-luna`'s answers and steers
-  {d['not_direct']} of {m['cases']} episodes away from the direct path.
+- **Verifier model:** a different, higher-tier model (`gpt-6.1-sol`) verifies `gpt-6-luna`'s answers; after its
+  checks, {d['not_direct']} of {m['cases']} episodes leave the direct path.
 - **Disagreement analysis:** the three systems disagree on {rounded(m['disagreement_pct'])}% of cases under the same matching rules;
   wins (only one system right): agentic {wins['agentic']}, single-shot {wins['baseline']}, workflow {wins['workflow']}.
 

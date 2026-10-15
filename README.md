@@ -86,7 +86,7 @@ A single model call conflates steps that fail in different ways. The system sepa
 A fresh Haystack `Agent` is created per request (`backend/agents/agentic_loop.py`). Its tools are bound to a
 per-request working memory that holds the image, the question analysis, every look, every answer and every check.
 The controller sees only short text results from each tool and chooses the next call. There is one agent (the
-controller); the five tools are functions it calls, not agents. `check` only *recommends* the next step; the
+controller); the five tools are functions it calls, not agents. `check` only *recommends* the next step and the
 controller decides whether to follow it; in the fixed-pipeline ablation every step runs in a prescribed order.
 
 | Tool | Role | Model (default) | Notes |
@@ -198,7 +198,8 @@ budgets come from the code.
   Astra neither answers (`gpt-6-luna`) nor verifies (`gpt-6.1-sol`) in any system. A 30-verdict
   spot check agreed with 29 credit decisions; the other was a strict non-credit for an agentic-loop answer
   (`judge_review_sample.md` in the run folder; AI-assisted review, not human annotation).
-- **Statistics:** 95% intervals are at most ±5.7 points at n = 300; paired comparisons use the exact McNemar test.
+- **Statistics:** 95% intervals are about ±5.6 points at n = 300 (±5.7 at most); paired comparisons use the exact
+  McNemar test.
 - **Variance:** the baseline and agentic loop are run again on 100 of the evaluated questions.
 <!-- generated:cost -->
 - **Cost:** every OpenAI call is recorded (`backend/utils/usage.py`): evaluation $6.20, repeats
@@ -271,7 +272,7 @@ Paired comparisons (cases where exactly one of the two systems is right):
 | Mechanism | Result in this run |
 |---|---|
 | Revision (re-look or re-answer) | 88 questions: 12 wrong first answers fixed, 5 right ones broken |
-| Blind check | Objected to 82 first answers; 61 of them (74%) were wrong. The meaning comparison decided 66 agreements |
+| Blind check | Objected to 82 first answers; 61 of them (74%) were wrong. Where the word rules could not settle agreement, the verifier's meaning comparison decided it (66 answers) |
 | Zoom | Used on the 63 questions the loop chose to re-examine: agentic 33.3% vs single-shot 38.1% there |
 | Abstention | 25 questions; the loop's own last answer was right in 7, the single prompt in 11 |
 | Answered questions only | Agentic 65.1% vs single-shot 65.8% on the same 275 questions |
@@ -285,15 +286,15 @@ The blind reading is the verifier model (`gpt-6.1-sol`) answering from the image
 
 ## Failure analysis
 
-The four analyses Template 1 asks for are built into every agentic run and summarised on the dashboard.
+The four analyses Template 1 asks for are computed for every run and summarised on the dashboard.
 
 <!-- generated:failure -->
 - **Self-consistency checks:** 2 independent re-answers per case; low agreement flags the case for review. Low
   consistency marks uncertainty, not certain error: 39% of low-consistency answers were still correct.
 - **Cross-modal agreement:** the verifier sees the image, so "explanation grounded in evidence" and "no
   contradictions" are checked against the image itself, not only a text description.
-- **Verifier model:** a different, higher-tier model (`gpt-6.1-sol`) verifies `gpt-6-luna`'s answers and steers
-  113 of 300 episodes away from the direct path.
+- **Verifier model:** a different, higher-tier model (`gpt-6.1-sol`) verifies `gpt-6-luna`'s answers; after its
+  checks, 113 of 300 episodes leave the direct path.
 - **Disagreement analysis:** the three systems disagree on 69% of cases under the same matching rules;
   wins (only one system right): agentic 15, single-shot 20, workflow 12.
 
@@ -311,7 +312,8 @@ Representative cases, chosen automatically by `scripts/final_metrics.py` (screen
 
 1. **Shared perception blind spot:** 65 questions (22%) defeat the single prompt, the loop and the fixed pipeline
    alike under the judge, 49 of them open-ended (mostly asking for a specific location, finding or diagnosis). When the looker and the verifier
-   misread the image the same way, no check catches it; self-consistency flags some of these cases.
+   misread the image the same way, no check catches it, and self-consistency rarely helps: 51 of the 65 still get high
+   consistency, so the models are consistently wrong rather than unsure.
 2. **Abstention withholds right answers:** the loop abstained on 25 questions, 16 of them close-ended. In 21 the
    verifier's review recommended abstaining, 14 times although its own blind reading agreed with the loop's answer.
    The single prompt was right on 11 of the 25 and the loop's own last answer on 7. This is where the loop loses to
@@ -330,8 +332,9 @@ Representative cases, chosen automatically by `scripts/final_metrics.py` (screen
 
 **When is agentic behaviour beneficial?** In this run, not for accuracy. The single prompt is more accurate than
 the agentic loop (significantly so under the judge, not on the strict score), and the loop's higher-tier verifier,
-answering alone, is significantly more accurate than the loop. The loss has one source: on the questions it
-answers, the loop matches the single prompt, but it abstains on 25 questions, which are scored wrong. Its mechanisms
+answering alone, is significantly more accurate than the loop. The loss comes almost entirely from abstention: on
+the 275 questions it answers, the loop matches the single prompt (65.1% vs 65.8%), but its 25 abstentions are scored
+wrong. Its mechanisms
 work individually: revising fixes more answers than it breaks, and when the blind check objects, the first answer is
 usually wrong. The loop does not act on that well enough. It abstains, or keeps its own answer, where the verifier's
 blind reading is often right. A post-hoc check (rule chosen after seeing these results, so not a system result)
@@ -339,7 +342,7 @@ shows the scale: taking the blind reading whenever it disagrees with the loop's 
 loop's word-rule score by about 7 points, to the verifier's own word-rule score. The loop would then be little more
 than its verifier. The loop's answers are also less stable between runs. What it adds is *calibrated confidence*: verified
 answers are far more often right than the rest, so "verified" is a usable signal for deciding which answers need
-review, and every decision is auditable. That costs roughly 60 times as much as a single prompt. The next steps this
+review, and every decision is auditable. That costs about 58 times as much as a single prompt. The next steps this
 run points to are answering with a low-confidence flag instead of abstaining, letting a disagreeing blind reading
 replace a low-confidence answer, and testing both on fresh questions.
 
@@ -368,7 +371,8 @@ replace a low-confidence answer, and testing both on fresh questions.
 
 - **Dashboard:** upload an image, ask a question, and compare the agentic loop with both baselines. The agentic view
   shows the answer, explanation, verification checks, failure categories and the full trace.
-- **Case Explorer:** browse the evaluation questions; ones in the current run open instantly, others run live.
+- **Case Explorer:** browse the evaluation questions with every system's cached answer and the loop's full trace;
+  search by question text or ID (an exact ID match is listed first). A question not in the current run runs live.
 - **Evaluation:** strict and LLM-judged accuracy for all four systems, close- and open-ended accuracy, accuracy by
   question type and by controller path, disagreement, and a filterable table of every case.
 
@@ -455,10 +459,11 @@ backend/
     difficulty_router.py       difficulty routing (ablation only)
     baseline.py                single-shot baseline
     workflow_baseline.py       hand-designed workflow baseline
+  logger.py                    session log (backend/logs/), lines tagged with the case being run
   routes/                      /api/analyze*, /api/dataset/* (samples, analysis, evaluation)
-  utils/                       scoring, answer normalisation, usage tracking, data loading
-  tests/                       unit tests (no API calls)
+  utils/                       scoring, answer normalisation, image zoom, usage tracking, data loading
   utils/runs.py                where evaluation runs live; which run is current
+  tests/                       unit tests (no API calls)
 frontend/                      React 19 + Vite UI; scripts/capture-screenshots.mjs
 scripts/                       run_all.py (one command for everything) and the stages it runs
 experiments/runs/              one folder per evaluation run (cases/, judgments, variance, metrics, cases.csv)
