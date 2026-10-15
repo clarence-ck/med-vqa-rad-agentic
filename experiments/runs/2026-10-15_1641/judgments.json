@@ -1,0 +1,3647 @@
+{
+  "judge_model": "gpt-6-astra",
+  "seed": 7,
+  "cost_usd": 1.2214,
+  "judgments": {
+    "188": {
+      "question": "why is the left hemithorax more lucent?",
+      "ground_truth": "decreased muscle bulk",
+      "verdicts": {
+        "workflow": {
+          "answer": "This is a X-ray image. of the Chest. showing No focal air-space opacity is visible.; No pleural effusion or pneumothorax is visible.; Cardiac silhouette is within normal size limits..",
+          "verdict": "incorrect",
+          "reason": "It does not explain the increased left hemithoracic lucency."
+        },
+        "agentic": {
+          "answer": "The left hemithorax appears more lucent because less soft tissue is superimposed over it on this AP portable view.",
+          "verdict": "partially_correct",
+          "reason": "It identifies reduced overlying soft tissue but does not specify decreased muscle bulk."
+        },
+        "pipeline": {
+          "answer": "The left hemithorax appears more lucent because there is less overlying breast or chest-wall soft tissue, possibly from prior left mastectomy.",
+          "verdict": "partially_correct",
+          "reason": "It identifies reduced overlying soft tissue but suggests breast tissue loss rather than decreased muscle bulk."
+        },
+        "baseline": {
+          "answer": "The left hemithorax appears more lucent because there is less overlying breast/chest-wall soft tissue on that side, likely from prior mastectomy.",
+          "verdict": "partially_correct",
+          "reason": "It identifies reduced overlying soft tissue but attributes it to mastectomy rather than decreased muscle bulk."
+        }
+      }
+    },
+    "2203": {
+      "question": "which sign do you see in the aortopulmonary window in this image?",
+      "ground_truth": "middle mogul",
+      "verdicts": {
+        "baseline": {
+          "answer": "Luftsichel sign.",
+          "verdict": "incorrect",
+          "reason": "The Luftsichel sign is a different radiological sign."
+        },
+        "agentic": {
+          "answer": "Aortopulmonary window fullness with loss of its normal concavity.",
+          "verdict": "correct",
+          "reason": "Aortopulmonary window fullness with loss of normal concavity describes the middle mogul sign."
+        },
+        "pipeline": {
+          "answer": "Mild fullness of the aortopulmonary window; no specific named sign is definite.",
+          "verdict": "partially_correct",
+          "reason": "It identifies aortopulmonary window fullness but does not affirm the middle mogul sign."
+        },
+        "workflow": {
+          "answer": "Cardiac silhouette is enlarged.; Mild prominence of the central hilar and vascular markings.",
+          "verdict": "incorrect",
+          "reason": "Cardiomegaly and central vascular prominence do not identify the middle mogul sign."
+        }
+      }
+    },
+    "553": {
+      "question": "why do you not see sulci in the image?",
+      "ground_truth": "there is massive cerebral hemisphere edema",
+      "verdicts": {
+        "agentic": {
+          "answer": "The sulci appear effaced because the brain is diffusely swollen, compressing the spaces between the gyri.",
+          "verdict": "correct",
+          "reason": "Diffuse brain swelling causing sulcal effacement is equivalent to massive cerebral edema."
+        },
+        "pipeline": {
+          "answer": "The sulci appear effaced, likely because the brain is diffusely swollen.",
+          "verdict": "correct",
+          "reason": "Diffuse brain swelling explains the absent sulci and matches cerebral edema."
+        },
+        "workflow": {
+          "answer": "This is a CT image. of the Head. showing Intracranial structures have low contrast and are difficult to assess on this image..",
+          "verdict": "incorrect",
+          "reason": "It attributes poor visualization to low contrast rather than cerebral edema."
+        },
+        "baseline": {
+          "answer": "The sulci are effaced, likely because of diffuse brain swelling (cerebral edema).",
+          "verdict": "correct",
+          "reason": "It explicitly identifies diffuse cerebral edema as the cause of sulcal effacement."
+        }
+      }
+    },
+    "83": {
+      "question": "which region of the brain is impacted?",
+      "ground_truth": "anterior surface",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Both cerebral hemispheres, with patchy signal changes near the lateral ventricles.",
+          "verdict": "incorrect",
+          "reason": "Periventricular changes in both hemispheres do not identify the anterior surface."
+        },
+        "workflow": {
+          "answer": "Brain",
+          "verdict": "partially_correct",
+          "reason": "It names the correct organ but omits the anterior surface location."
+        },
+        "agentic": {
+          "answer": "Bilateral frontal periventricular white matter",
+          "verdict": "partially_correct",
+          "reason": "Frontal overlaps with anterior, but periventricular white matter is not the surface."
+        },
+        "baseline": {
+          "answer": "The frontal region, particularly the periventricular white matter.",
+          "verdict": "partially_correct",
+          "reason": "The frontal region overlaps with anterior, but the specified periventricular location differs from the surface."
+        }
+      }
+    },
+    "1173": {
+      "question": "which ventricles are visible?",
+      "ground_truth": "lateral ventricles",
+      "verdicts": {
+        "pipeline": {
+          "answer": "The lateral ventricles.",
+          "verdict": "correct",
+          "reason": "Identifies the lateral ventricles, matching the reference."
+        },
+        "baseline": {
+          "answer": "The lateral ventricles are visible.",
+          "verdict": "correct",
+          "reason": "States that the lateral ventricles are visible, matching the reference."
+        },
+        "workflow": {
+          "answer": "Head",
+          "verdict": "incorrect",
+          "reason": "Names the head rather than identifying the visible ventricles."
+        },
+        "agentic": {
+          "answer": "Parts of the lateral ventricles (brain ventricles) are visible.",
+          "verdict": "correct",
+          "reason": "Identifies the lateral ventricles, with noncontradictory detail about partial visibility."
+        }
+      }
+    },
+    "955": {
+      "question": "which plane is the image taken?",
+      "ground_truth": "axial",
+      "verdicts": {
+        "agentic": {
+          "answer": "Axial (transverse) plane.",
+          "verdict": "correct",
+          "reason": "Axial (transverse) is the reference plane."
+        },
+        "workflow": {
+          "answer": "Abdomen",
+          "verdict": "incorrect",
+          "reason": "Abdomen names an anatomical region, not an imaging plane."
+        },
+        "baseline": {
+          "answer": "Axial (transverse) plane.",
+          "verdict": "correct",
+          "reason": "Axial (transverse) is the reference plane."
+        },
+        "pipeline": {
+          "answer": "Axial (transverse) plane",
+          "verdict": "correct",
+          "reason": "Axial (transverse) is the reference plane."
+        }
+      }
+    },
+    "22": {
+      "question": "which plane is this image taken in?",
+      "ground_truth": "pa",
+      "verdicts": {
+        "baseline": {
+          "answer": "Frontal (coronal) plane.",
+          "verdict": "partially_correct",
+          "reason": "Frontal describes the general orientation but does not specify the PA projection."
+        },
+        "agentic": {
+          "answer": "Frontal (coronal) plane.",
+          "verdict": "partially_correct",
+          "reason": "Frontal describes the general orientation but does not specify the PA projection."
+        },
+        "workflow": {
+          "answer": "Frontal chest radiograph showing both lungs, the heart and mediastinum, and the bony thorax. The lungs appear relatively expanded with low, mildly flattened diaphragmatic contours; no focal air-space opacity is evident.",
+          "verdict": "partially_correct",
+          "reason": "It identifies a frontal chest radiograph but does not distinguish PA from AP projection."
+        },
+        "pipeline": {
+          "answer": "Frontal (coronal) plane.",
+          "verdict": "partially_correct",
+          "reason": "Frontal describes the general orientation but does not specify the PA projection."
+        }
+      }
+    },
+    "132": {
+      "question": "which areas are lighting up?",
+      "ground_truth": "thalami, left occipital lobe, brainstem and left cerebellum",
+      "verdicts": {
+        "agentic": {
+          "answer": "Bright signal is seen in both medial thalami and in scattered periventricular and posterior white matter in both cerebral hemispheres.",
+          "verdict": "partially_correct",
+          "reason": "Identifies the thalami but omits the left occipital lobe, brainstem, and left cerebellum."
+        },
+        "pipeline": {
+          "answer": "Scattered areas in the bilateral cerebral white matter, including periventricular regions.",
+          "verdict": "incorrect",
+          "reason": "Names cerebral white matter rather than the specified thalamic, occipital, brainstem, and cerebellar locations."
+        },
+        "baseline": {
+          "answer": "There are patchy bright areas in the white matter on both sides of the brain, including near the ventricles and in deeper and outer regions.",
+          "verdict": "incorrect",
+          "reason": "Describes bilateral white matter abnormalities rather than the reference locations."
+        },
+        "workflow": {
+          "answer": "Brain",
+          "verdict": "partially_correct",
+          "reason": "Names the correct organ but is much vaguer than the specific brain regions required."
+        }
+      }
+    },
+    "548": {
+      "question": "what vein is occluded?",
+      "ground_truth": "portal vein",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Hepatic vein",
+          "verdict": "incorrect",
+          "reason": "The hepatic vein is different from the portal vein."
+        },
+        "baseline": {
+          "answer": "The splenic vein is occluded.",
+          "verdict": "incorrect",
+          "reason": "The splenic vein is different from the portal vein."
+        },
+        "agentic": {
+          "answer": "Unable to determine from this image.",
+          "verdict": "incorrect",
+          "reason": "It does not identify the occluded portal vein."
+        },
+        "workflow": {
+          "answer": "Upper abdomen",
+          "verdict": "incorrect",
+          "reason": "Upper abdomen does not identify the occluded vein."
+        }
+      }
+    },
+    "566": {
+      "question": "what structure in the left basal ganglia is spared?",
+      "ground_truth": "left thalamus",
+      "verdicts": {
+        "baseline": {
+          "answer": "The left caudate nucleus is spared.",
+          "verdict": "incorrect",
+          "reason": "The left caudate nucleus is a different structure from the left thalamus."
+        },
+        "agentic": {
+          "answer": "Left caudate nucleus",
+          "verdict": "incorrect",
+          "reason": "The left caudate nucleus is not the left thalamus."
+        },
+        "workflow": {
+          "answer": "Brain",
+          "verdict": "partially_correct",
+          "reason": "Brain is a much vaguer location that does not identify the left thalamus."
+        },
+        "pipeline": {
+          "answer": "The left caudate nucleus.",
+          "verdict": "incorrect",
+          "reason": "The left caudate nucleus is a different structure from the left thalamus."
+        }
+      }
+    },
+    "1073": {
+      "question": "where on the image is most obscured?",
+      "ground_truth": "right lung base",
+      "verdicts": {
+        "pipeline": {
+          "answer": "At the right lung base.",
+          "verdict": "correct",
+          "reason": "It identifies the right lung base."
+        },
+        "workflow": {
+          "answer": "Chest",
+          "verdict": "partially_correct",
+          "reason": "Chest is a much vaguer location that omits the right lung base."
+        },
+        "agentic": {
+          "answer": "The right lower lung base, obscuring the right hemidiaphragm and costophrenic angle.",
+          "verdict": "correct",
+          "reason": "It identifies the right lung base with noncontradictory anatomical detail."
+        },
+        "baseline": {
+          "answer": "The right lower lung base, especially near the right costophrenic angle, is most obscured.",
+          "verdict": "correct",
+          "reason": "It identifies the right lung base and further specifies the costophrenic region."
+        }
+      }
+    },
+    "342": {
+      "question": "what type of thrombosis is shown?",
+      "ground_truth": "basilar artery thrombosis",
+      "verdicts": {
+        "agentic": {
+          "answer": "Unable to determine from this image.",
+          "verdict": "incorrect",
+          "reason": "It does not identify the thrombosis type."
+        },
+        "baseline": {
+          "answer": "Basilar artery thrombosis.",
+          "verdict": "correct",
+          "reason": "It explicitly identifies basilar artery thrombosis."
+        },
+        "pipeline": {
+          "answer": "The thrombosis type cannot be determined from this image alone.",
+          "verdict": "incorrect",
+          "reason": "It does not identify the thrombosis type."
+        },
+        "workflow": {
+          "answer": "Patchy bright signal is visible in both cerebellar hemispheres, more conspicuous on the left side of the image.; A small dark focus is visible near the midline of the brainstem.",
+          "verdict": "incorrect",
+          "reason": "It describes imaging signals without identifying basilar artery thrombosis."
+        }
+      }
+    },
+    "595": {
+      "question": "where do you see the lesions?",
+      "ground_truth": "cerebrum and lateral ventricles",
+      "verdicts": {
+        "agentic": {
+          "answer": "In the white matter around both lateral ventricles, most conspicuously posteriorly.",
+          "verdict": "partially_correct",
+          "reason": "Identifies cerebral white matter around the lateral ventricles but not lesions in the ventricles themselves."
+        },
+        "pipeline": {
+          "answer": "In the bilateral periventricular white matter, most conspicuously posterior to the lateral ventricles.",
+          "verdict": "partially_correct",
+          "reason": "Identifies cerebral periventricular white matter but omits involvement of the lateral ventricles themselves."
+        },
+        "baseline": {
+          "answer": "The lesions are in the bilateral periventricular white matter, most prominent beside the posterior horns of the lateral ventricles.",
+          "verdict": "partially_correct",
+          "reason": "Locates lesions beside the lateral ventricles in cerebral white matter rather than also in the ventricles."
+        },
+        "workflow": {
+          "answer": "Brain",
+          "verdict": "partially_correct",
+          "reason": "Brain is a much vaguer location and does not specify the cerebrum and lateral ventricles."
+        }
+      }
+    },
+    "486": {
+      "question": "what type of modality was this image taken?",
+      "ground_truth": "mri - t2 weighted",
+      "verdicts": {
+        "workflow": {
+          "answer": "MRI",
+          "verdict": "partially_correct",
+          "reason": "Identifies MRI but omits the T2 weighting."
+        },
+        "pipeline": {
+          "answer": "MRI, axial T2-weighted",
+          "verdict": "correct",
+          "reason": "Identifies T2-weighted MRI with noncontradictory axial detail."
+        },
+        "agentic": {
+          "answer": "MRI",
+          "verdict": "partially_correct",
+          "reason": "Identifies MRI but omits the T2 weighting."
+        },
+        "baseline": {
+          "answer": "MRI",
+          "verdict": "partially_correct",
+          "reason": "Identifies MRI but omits the T2 weighting."
+        }
+      }
+    },
+    "811": {
+      "question": "what sign determines the absence of a pleural effusion?",
+      "ground_truth": "sharp costophrenic angles",
+      "verdicts": {
+        "workflow": {
+          "answer": "Cardiac silhouette is within normal size limits.; No focal pulmonary opacity is visible.",
+          "verdict": "incorrect",
+          "reason": "Normal cardiac size and absent pulmonary opacity do not describe sharp costophrenic angles."
+        },
+        "agentic": {
+          "answer": "Sharp, clear bilateral costophrenic angles.",
+          "verdict": "correct",
+          "reason": "Sharp, clear bilateral costophrenic angles match the reference finding."
+        },
+        "baseline": {
+          "answer": "Sharp costophrenic angles.",
+          "verdict": "correct",
+          "reason": "The candidate exactly states the reference finding."
+        },
+        "pipeline": {
+          "answer": "Sharp, unblunted costophrenic angles.",
+          "verdict": "correct",
+          "reason": "Sharp, unblunted costophrenic angles express the same finding as the reference."
+        }
+      }
+    },
+    "463": {
+      "question": "what muscle surrounds the vertebrae?",
+      "ground_truth": "psoas major muscle",
+      "verdicts": {
+        "agentic": {
+          "answer": "The paraspinal muscles.",
+          "verdict": "incorrect",
+          "reason": "Paraspinal muscles refer to a different muscle group than the psoas major."
+        },
+        "pipeline": {
+          "answer": "Psoas muscles",
+          "verdict": "correct",
+          "reason": "Psoas muscles is a conventional shorthand for the psoas major muscles."
+        },
+        "baseline": {
+          "answer": "The psoas major muscles flank the vertebrae.",
+          "verdict": "correct",
+          "reason": "It explicitly identifies the psoas major muscles."
+        },
+        "workflow": {
+          "answer": "Abdomen",
+          "verdict": "incorrect",
+          "reason": "Abdomen names a body region rather than the psoas major muscle."
+        }
+      }
+    },
+    "1498": {
+      "question": "what plane is this image in?",
+      "ground_truth": "axial",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Axial (transverse) plane",
+          "verdict": "correct",
+          "reason": "Axial (transverse) matches the reference plane."
+        },
+        "agentic": {
+          "answer": "Axial (transverse) plane",
+          "verdict": "correct",
+          "reason": "Axial (transverse) matches the reference plane."
+        },
+        "workflow": {
+          "answer": "Axial contrast-enhanced CT image through the upper abdomen. The liver, both kidneys, abdominal vessels, lumbar vertebra, and gas- and content-containing bowel loops are visible.",
+          "verdict": "correct",
+          "reason": "It identifies the axial plane with additional noncontradictory detail."
+        },
+        "baseline": {
+          "answer": "Axial (transverse) plane.",
+          "verdict": "correct",
+          "reason": "Axial (transverse) matches the reference plane."
+        }
+      }
+    },
+    "19": {
+      "question": "what plane is seen?",
+      "ground_truth": "pa",
+      "verdicts": {
+        "workflow": {
+          "answer": "Frontal chest radiograph showing diffuse bilateral coarse interstitial and reticular opacities, more prominent in the lower lungs. The cardiomediastinal silhouette and diaphragmatic contours are visible.",
+          "verdict": "partially_correct",
+          "reason": "Frontal identifies the general view but does not specify PA rather than AP."
+        },
+        "pipeline": {
+          "answer": "Frontal (PA) view",
+          "verdict": "correct",
+          "reason": "Explicitly identifies the PA view."
+        },
+        "agentic": {
+          "answer": "Frontal (PA) view",
+          "verdict": "correct",
+          "reason": "Explicitly identifies the PA view."
+        },
+        "baseline": {
+          "answer": "Frontal (coronal) plane.",
+          "verdict": "partially_correct",
+          "reason": "Frontal (coronal) overlaps with the orientation but does not specify the PA projection."
+        }
+      }
+    },
+    "838": {
+      "question": "what is wrong in this image?",
+      "ground_truth": "right paratracheal mass lesion",
+      "verdicts": {
+        "baseline": {
+          "answer": "No acute abnormality is evident on this chest X-ray.",
+          "verdict": "incorrect",
+          "reason": "It reports no abnormality rather than a right paratracheal mass."
+        },
+        "workflow": {
+          "answer": "Mild prominence of the right hilar and upper mediastinal contours.; Cardiac silhouette is not markedly enlarged.",
+          "verdict": "partially_correct",
+          "reason": "Right upper mediastinal prominence overlaps with the location but does not identify a paratracheal mass."
+        },
+        "pipeline": {
+          "answer": "No acute abnormality is visible on this chest radiograph.",
+          "verdict": "incorrect",
+          "reason": "It reports no abnormality rather than a right paratracheal mass."
+        },
+        "agentic": {
+          "answer": "There is a mass-like opacity at the right hilum extending into the right suprahilar region.",
+          "verdict": "partially_correct",
+          "reason": "It identifies a right-sided mass-like opacity but places it in the hilar and suprahilar regions rather than the paratracheal region."
+        }
+      }
+    },
+    "1066": {
+      "question": "what is the opacity near the left lung apex?",
+      "ground_truth": "pacemaker",
+      "verdicts": {
+        "pipeline": {
+          "answer": "No focal opacity is evident near the left lung apex; the patchy opacity is in the right perihilar region.",
+          "verdict": "incorrect",
+          "reason": "Denies a left apical opacity rather than identifying the pacemaker."
+        },
+        "workflow": {
+          "answer": "Left upper chest pacemaker generator with two leads projecting over the heart.; Patchy opacity in the right perihilar region.",
+          "verdict": "correct",
+          "reason": "Identifies the left upper chest pacemaker generator."
+        },
+        "agentic": {
+          "answer": "A thin, mild left apical pleuroparenchymal scar-like opacity, separate from the pacemaker.",
+          "verdict": "incorrect",
+          "reason": "Attributes the opacity to scarring explicitly separate from the pacemaker."
+        },
+        "baseline": {
+          "answer": "Left apical pleural thickening, likely scarring.",
+          "verdict": "incorrect",
+          "reason": "Identifies pleural thickening and scarring rather than a pacemaker."
+        }
+      }
+    },
+    "659": {
+      "question": "what is your differential diagnoses?",
+      "ground_truth": "metastases, infection/abcess, glioblastoma",
+      "verdicts": {
+        "workflow": {
+          "answer": "This is a MRI image. of the Brain. showing Multiple rounded or irregular bright-rimmed foci with darker centers are scattered through both cerebral hemispheres.; Some foci have surrounding areas of less sharply defined signal change.; The lateral ventricles are visible near the center of the image..",
+          "verdict": "incorrect",
+          "reason": "Describes imaging findings without providing the requested differential diagnoses."
+        },
+        "pipeline": {
+          "answer": "The differential includes multifocal metastases and infectious lesions, particularly toxoplasmosis, pyogenic abscesses, and tuberculomas; neurocysticercosis is another consideration. Primary CNS lymphoma may also be considered in an immunocompromised patient.",
+          "verdict": "partially_correct",
+          "reason": "Includes metastases and infection or abscesses but omits glioblastoma or an equivalent high-grade glioma."
+        },
+        "agentic": {
+          "answer": "The differential includes metastatic lesions, multifocal high-grade neoplasm, and infectious lesions such as abscesses.",
+          "verdict": "correct",
+          "reason": "Includes metastases, abscesses, and multifocal high-grade neoplasm corresponding to glioblastoma."
+        },
+        "baseline": {
+          "answer": "Differential includes multiple metastases, pyogenic abscesses, and infectious or inflammatory granulomas such as toxoplasmosis or tuberculomas; multifocal glioma is less likely.",
+          "verdict": "correct",
+          "reason": "Includes metastases, abscesses, and multifocal glioma, covering the reference differential."
+        }
+      }
+    },
+    "819": {
+      "question": "what is the organ pictured superior to the aorta?",
+      "ground_truth": "horsehoe kidney",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Pancreas",
+          "verdict": "incorrect",
+          "reason": "The pancreas is a different organ from a horseshoe kidney."
+        },
+        "agentic": {
+          "answer": "A horseshoe kidney",
+          "verdict": "correct",
+          "reason": "It identifies the horseshoe kidney stated in the reference."
+        },
+        "workflow": {
+          "answer": "Abdomen",
+          "verdict": "incorrect",
+          "reason": "Abdomen names a body region rather than the horseshoe kidney."
+        },
+        "baseline": {
+          "answer": "The pancreas.",
+          "verdict": "incorrect",
+          "reason": "The pancreas is a different organ from a horseshoe kidney."
+        }
+      }
+    },
+    "105": {
+      "question": "what is the lighter substance around the gallbladder",
+      "ground_truth": "pericholecystic fluid",
+      "verdicts": {
+        "baseline": {
+          "answer": "The lighter area around the gallbladder is contrast-enhanced liver tissue.",
+          "verdict": "incorrect",
+          "reason": "Enhanced liver tissue is not pericholecystic fluid."
+        },
+        "workflow": {
+          "answer": "Upper abdomen",
+          "verdict": "incorrect",
+          "reason": "Upper abdomen names a region rather than the fluid around the gallbladder."
+        },
+        "agentic": {
+          "answer": "Unable to determine from this image.",
+          "verdict": "incorrect",
+          "reason": "It does not identify the pericholecystic fluid."
+        },
+        "pipeline": {
+          "answer": "Liver tissue (enhanced liver parenchyma)",
+          "verdict": "incorrect",
+          "reason": "Enhanced liver parenchyma is not pericholecystic fluid."
+        }
+      }
+    },
+    "1093": {
+      "question": "what is the organ principally shown in this image?",
+      "ground_truth": "lung",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Lungs",
+          "verdict": "correct",
+          "reason": "Lungs refers to the same organ as lung."
+        },
+        "workflow": {
+          "answer": "Chest",
+          "verdict": "partially_correct",
+          "reason": "Chest is a broader anatomical region containing the lungs but does not identify the organ."
+        },
+        "agentic": {
+          "answer": "The lungs",
+          "verdict": "correct",
+          "reason": "The lungs identifies the same organ as the reference."
+        },
+        "baseline": {
+          "answer": "Lungs",
+          "verdict": "correct",
+          "reason": "Lungs refers to the same organ as lung."
+        }
+      }
+    },
+    "833": {
+      "question": "what is the observed sign of pulmonary consolidation on the right side?",
+      "ground_truth": "blunting of the costophrenic angle, loss of the right hemidiaphragm and right heart border",
+      "verdicts": {
+        "baseline": {
+          "answer": "Air bronchograms are visible within the right lower lung consolidation.",
+          "verdict": "incorrect",
+          "reason": "Air bronchograms are a different sign from the referenced costophrenic blunting and loss of right diaphragmatic and heart borders."
+        },
+        "agentic": {
+          "answer": "Air bronchograms within right basilar consolidation.",
+          "verdict": "incorrect",
+          "reason": "It identifies air bronchograms rather than the referenced blunting and obscured right-sided borders."
+        },
+        "pipeline": {
+          "answer": "Patchy air-space consolidation in the right lower lung, with visible air bronchograms.",
+          "verdict": "incorrect",
+          "reason": "It describes consolidation with air bronchograms but none of the specific signs in the reference."
+        },
+        "workflow": {
+          "answer": "Chest",
+          "verdict": "incorrect",
+          "reason": "Chest does not identify any observed sign."
+        }
+      }
+    },
+    "1287": {
+      "question": "what is the modality?",
+      "ground_truth": "cxr",
+      "verdicts": {
+        "workflow": {
+          "answer": "X-ray",
+          "verdict": "correct",
+          "reason": "X-ray is the modality used for a chest radiograph (CXR)."
+        },
+        "pipeline": {
+          "answer": "X-ray",
+          "verdict": "correct",
+          "reason": "X-ray is the modality used for a chest radiograph (CXR)."
+        },
+        "agentic": {
+          "answer": "X-ray",
+          "verdict": "correct",
+          "reason": "X-ray is the modality used for a chest radiograph (CXR)."
+        },
+        "baseline": {
+          "answer": "Chest X-ray (frontal view).",
+          "verdict": "correct",
+          "reason": "Chest X-ray matches CXR, with noncontradictory view detail."
+        }
+      }
+    },
+    "1157": {
+      "question": "what is the likely sex of this patient?",
+      "ground_truth": "female",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Likely female",
+          "verdict": "correct",
+          "reason": "States female, matching the reference."
+        },
+        "agentic": {
+          "answer": "Likely female.",
+          "verdict": "correct",
+          "reason": "States female, matching the reference."
+        },
+        "workflow": {
+          "answer": "Frontal chest radiograph showing both lungs, the heart and mediastinum, and the diaphragms. There are symmetric rounded soft-tissue contours over the lower chest and a circular radiopaque object over the right upper chest.",
+          "verdict": "incorrect",
+          "reason": "Describes radiographic features but does not state the patient's likely sex."
+        },
+        "baseline": {
+          "answer": "Likely female.",
+          "verdict": "correct",
+          "reason": "States female, matching the reference."
+        }
+      }
+    },
+    "1550": {
+      "question": "what is the modality of this mri?",
+      "ground_truth": "t2",
+      "verdicts": {
+        "pipeline": {
+          "answer": "MRI of the brain (axial image)",
+          "verdict": "partially_correct",
+          "reason": "Identifies MRI but omits the required T2 weighting."
+        },
+        "workflow": {
+          "answer": "MRI",
+          "verdict": "partially_correct",
+          "reason": "Identifies MRI but does not specify T2 weighting."
+        },
+        "baseline": {
+          "answer": "Axial T2*-weighted gradient-echo MRI.",
+          "verdict": "incorrect",
+          "reason": "Specifies T2*-weighted imaging, which is distinct from T2-weighted imaging."
+        },
+        "agentic": {
+          "answer": "Axial brain MRI, likely a susceptibility-sensitive T2*-weighted sequence (GRE/SWI).",
+          "verdict": "incorrect",
+          "reason": "Specifies a susceptibility-sensitive T2* sequence rather than T2 weighting."
+        }
+      }
+    },
+    "971": {
+      "question": "what is the modality by which the image was taken?",
+      "ground_truth": "ct",
+      "verdicts": {
+        "pipeline": {
+          "answer": "CT",
+          "verdict": "correct",
+          "reason": "CT matches the reference modality."
+        },
+        "baseline": {
+          "answer": "CT (computed tomography).",
+          "verdict": "correct",
+          "reason": "Computed tomography is the full name of CT."
+        },
+        "agentic": {
+          "answer": "CT",
+          "verdict": "correct",
+          "reason": "CT matches the reference modality."
+        },
+        "workflow": {
+          "answer": "CT",
+          "verdict": "correct",
+          "reason": "CT matches the reference modality."
+        }
+      }
+    },
+    "1493": {
+      "question": "what is seen in the occipital lobe?",
+      "ground_truth": "ring enhancing lesion",
+      "verdicts": {
+        "agentic": {
+          "answer": "A small rounded heterogeneous focus is seen near the posterior surface of the right occipital lobe.",
+          "verdict": "partially_correct",
+          "reason": "Describes an occipital focus but omits its ring enhancement."
+        },
+        "workflow": {
+          "answer": "Small rounded bright focus near the posterior peripheral margin of the cerebral hemisphere on the left side of the image.; Ventricles and cortical sulci are visible.",
+          "verdict": "partially_correct",
+          "reason": "Describes a posterior peripheral focus but does not identify ring enhancement or clearly specify the occipital lobe."
+        },
+        "baseline": {
+          "answer": "A small rounded lesion is seen in the right occipital lobe, with signal suggesting a cavernous malformation.",
+          "verdict": "partially_correct",
+          "reason": "Identifies an occipital lesion but substitutes a suggested cavernous malformation for the essential ring-enhancing appearance."
+        },
+        "pipeline": {
+          "answer": "A small rounded T2-bright focus is seen at the peripheral right occipital lobe.",
+          "verdict": "partially_correct",
+          "reason": "Identifies an occipital focus but describes T2 brightness rather than ring enhancement."
+        }
+      }
+    },
+    "1674": {
+      "question": "what is hyperdensity under the diaphragm on the left?",
+      "ground_truth": "stomach bubble",
+      "verdicts": {
+        "agentic": {
+          "answer": "Unable to determine from this image.",
+          "verdict": "incorrect",
+          "reason": "It does not identify the stomach bubble."
+        },
+        "pipeline": {
+          "answer": "The density beneath the left hemidiaphragm appears to be gastric contents within the stomach bubble.",
+          "verdict": "correct",
+          "reason": "It explicitly identifies gastric contents within the stomach bubble."
+        },
+        "baseline": {
+          "answer": "Likely gastric contents in the fundus, beneath the left hemidiaphragm.",
+          "verdict": "correct",
+          "reason": "It identifies gastric contents in the fundus beneath the left hemidiaphragm, matching the stomach bubble."
+        },
+        "workflow": {
+          "answer": "Cardiomediastinal silhouette is not visibly enlarged.; No focal air-space opacity is seen.",
+          "verdict": "incorrect",
+          "reason": "It describes unrelated chest findings rather than the stomach bubble."
+        }
+      }
+    },
+    "1381": {
+      "question": "what is one organ system seen in this image?",
+      "ground_truth": "respiratory system",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Chest",
+          "verdict": "partially_correct",
+          "reason": "Chest is a broader anatomical region, not specifically the respiratory system."
+        },
+        "baseline": {
+          "answer": "Respiratory system.",
+          "verdict": "correct",
+          "reason": "It explicitly identifies the respiratory system."
+        },
+        "workflow": {
+          "answer": "Chest",
+          "verdict": "partially_correct",
+          "reason": "Chest is a broader anatomical region, not specifically the respiratory system."
+        },
+        "agentic": {
+          "answer": "chest",
+          "verdict": "partially_correct",
+          "reason": "Chest is a broader anatomical region, not specifically the respiratory system."
+        }
+      }
+    },
+    "1373": {
+      "question": "what is represented by the black parts of the image within the large intestine?",
+      "ground_truth": "air",
+      "verdicts": {
+        "workflow": {
+          "answer": "Abdomen and pelvis",
+          "verdict": "incorrect",
+          "reason": "Abdomen and pelvis does not identify the black areas as air."
+        },
+        "agentic": {
+          "answer": "Gas (air) within the colon",
+          "verdict": "correct",
+          "reason": "Gas (air) within the colon matches the reference answer."
+        },
+        "baseline": {
+          "answer": "The black areas represent gas (air) within the large intestine.",
+          "verdict": "correct",
+          "reason": "It identifies the black areas as air within the large intestine."
+        },
+        "pipeline": {
+          "answer": "Gas (air) in the colon.",
+          "verdict": "correct",
+          "reason": "Gas (air) in the colon matches the reference answer."
+        }
+      }
+    },
+    "898": {
+      "question": "what is most alarming about the appendix?",
+      "ground_truth": "extraluminal air and small fluid collection",
+      "verdicts": {
+        "pipeline": {
+          "answer": "The appendix appears enlarged with surrounding inflammatory fat stranding, concerning for acute appendicitis.",
+          "verdict": "incorrect",
+          "reason": "Appendiceal enlargement and fat stranding do not identify extraluminal air or a fluid collection."
+        },
+        "agentic": {
+          "answer": "Possible contained perforation of an enlarged, inflamed appendix.",
+          "verdict": "partially_correct",
+          "reason": "Contained perforation overlaps with the implication of extraluminal air but omits the small fluid collection."
+        },
+        "baseline": {
+          "answer": "The appendix appears markedly inflamed, with surrounding changes concerning for perforation and a periappendiceal abscess.",
+          "verdict": "correct",
+          "reason": "Perforation with a periappendiceal abscess conveys the extraluminal air and adjacent fluid collection."
+        },
+        "workflow": {
+          "answer": "A bowel segment on the image left contains fluid with a horizontal gas-fluid level.; Contrast-density material is present in several bowel loops.",
+          "verdict": "incorrect",
+          "reason": "Intraluminal bowel fluid and gas do not describe extraluminal air or a periappendiceal fluid collection."
+        }
+      }
+    },
+    "1238": {
+      "question": "what is not pictured in this image?",
+      "ground_truth": "the extremities",
+      "verdicts": {
+        "agentic": {
+          "answer": "A lateral chest view is not shown.",
+          "verdict": "incorrect",
+          "reason": "A lateral chest view is different from the extremities."
+        },
+        "baseline": {
+          "answer": "No tubes or other medical devices are pictured.",
+          "verdict": "incorrect",
+          "reason": "Medical devices are different from the extremities."
+        },
+        "pipeline": {
+          "answer": "Pneumothorax",
+          "verdict": "incorrect",
+          "reason": "Pneumothorax does not identify the extremities as not pictured."
+        },
+        "workflow": {
+          "answer": "Yes",
+          "verdict": "incorrect",
+          "reason": "Yes does not identify what is not pictured."
+        }
+      }
+    },
+    "896": {
+      "question": "what is happening in the right lung?",
+      "ground_truth": "volume loss",
+      "verdicts": {
+        "agentic": {
+          "answer": "There is extensive hazy opacity in the right mid-to-lower lung, with blunting of the right costophrenic angle, suggesting pleural fluid with adjacent lung opacity.",
+          "verdict": "incorrect",
+          "reason": "Pleural fluid and lung opacity do not state right lung volume loss."
+        },
+        "baseline": {
+          "answer": "There is a right pleural effusion with adjacent right basilar air-space opacity.",
+          "verdict": "incorrect",
+          "reason": "Pleural effusion and basilar air-space opacity are different findings from volume loss."
+        },
+        "workflow": {
+          "answer": "Hazy opacity occupies much of the right mid-to-lower lung region.; The right costophrenic angle is blunted, with obscuration of the right hemidiaphragm.",
+          "verdict": "incorrect",
+          "reason": "Hazy opacity and costophrenic blunting do not establish right lung volume loss."
+        },
+        "pipeline": {
+          "answer": "There is extensive hazy opacity in the right mid-to-lower lung, with blunting of the right costophrenic angle, likely reflecting a right pleural effusion with adjacent lung opacity.",
+          "verdict": "incorrect",
+          "reason": "Pleural effusion with adjacent opacity does not state right lung volume loss."
+        }
+      }
+    },
+    "1991": {
+      "question": "what is better identified on a pa cxr vs a lateral cxr?",
+      "ground_truth": "right vs left sided pathology",
+      "verdicts": {
+        "baseline": {
+          "answer": "Heart size and the overall cardiomediastinal silhouette are better assessed on a PA chest radiograph.",
+          "verdict": "incorrect",
+          "reason": "It discusses heart size and cardiomediastinal silhouette rather than distinguishing right- from left-sided pathology."
+        },
+        "agentic": {
+          "answer": "A PA chest radiograph is better for assessing overall heart size and the frontal lung fields.",
+          "verdict": "incorrect",
+          "reason": "Assessing heart size and frontal lung fields does not state identification of right- versus left-sided pathology."
+        },
+        "pipeline": {
+          "answer": "Heart size is better assessed on a PA chest radiograph.",
+          "verdict": "incorrect",
+          "reason": "Heart size is a different answer from distinguishing right- and left-sided pathology."
+        },
+        "workflow": {
+          "answer": "This is a X-ray image. of the Chest. showing Cardiac silhouette is not enlarged.; Mildly prominent perihilar bronchovascular markings are visible.; No focal air-space opacity is apparent..",
+          "verdict": "incorrect",
+          "reason": "It describes chest radiograph findings without addressing identification of right- versus left-sided pathology."
+        }
+      }
+    },
+    "1013": {
+      "question": "what is denser, the lesion or the surrounding tissue?",
+      "ground_truth": "the surrounding tissue",
+      "verdicts": {
+        "agentic": {
+          "answer": "The surrounding tissue is denser.",
+          "verdict": "correct",
+          "reason": "It states that the surrounding tissue is denser."
+        },
+        "workflow": {
+          "answer": "The liver occupies much of the right side of the image and has relatively uniform attenuation.; A gas-containing portion of the stomach is visible in the upper left abdomen.",
+          "verdict": "incorrect",
+          "reason": "It does not compare the density of the lesion and surrounding tissue."
+        },
+        "pipeline": {
+          "answer": "The surrounding tissue is denser; the lesion appears relatively hypodense.",
+          "verdict": "correct",
+          "reason": "It identifies the surrounding tissue as denser and the lesion as relatively hypodense."
+        },
+        "baseline": {
+          "answer": "The lesion is less dense than the surrounding tissue.",
+          "verdict": "correct",
+          "reason": "Saying the lesion is less dense is equivalent to saying the surrounding tissue is denser."
+        }
+      }
+    },
+    "1976": {
+      "question": "what does the least dense region represent",
+      "ground_truth": "maxillary sinuses",
+      "verdicts": {
+        "workflow": {
+          "answer": "Head, including the posterior fossa",
+          "verdict": "incorrect",
+          "reason": "The head and posterior fossa do not identify the maxillary sinuses."
+        },
+        "agentic": {
+          "answer": "Air in the maxillary sinuses.",
+          "verdict": "correct",
+          "reason": "It identifies air within the maxillary sinuses."
+        },
+        "baseline": {
+          "answer": "Air in the nasal cavity and paranasal sinuses.",
+          "verdict": "partially_correct",
+          "reason": "Paranasal sinuses include the maxillary sinuses, but the location is broader and includes the nasal cavity."
+        },
+        "pipeline": {
+          "answer": "The relatively dark, likely necrotic center of the cerebellar lesion.",
+          "verdict": "incorrect",
+          "reason": "A necrotic cerebellar lesion is a different finding and location."
+        }
+      }
+    },
+    "1011": {
+      "question": "what is denser, the mass or the surrounding brain tissue?",
+      "ground_truth": "surrounding tissue",
+      "verdicts": {
+        "agentic": {
+          "answer": "The surrounding brain tissue is denser.",
+          "verdict": "correct",
+          "reason": "It explicitly states that the surrounding brain tissue is denser."
+        },
+        "workflow": {
+          "answer": "Large, well-defined low-attenuation region in one cerebral hemisphere; Small hyperdense focus near the medial edge of the low-attenuation region",
+          "verdict": "correct",
+          "reason": "Describing the large lesion as low-attenuation implies that the surrounding brain tissue is denser."
+        },
+        "baseline": {
+          "answer": "The mass is less dense than the surrounding brain tissue.",
+          "verdict": "correct",
+          "reason": "Saying the mass is less dense is equivalent to saying the surrounding brain tissue is denser."
+        },
+        "pipeline": {
+          "answer": "The surrounding brain tissue is denser.",
+          "verdict": "correct",
+          "reason": "It explicitly states that the surrounding brain tissue is denser."
+        }
+      }
+    },
+    "697": {
+      "question": "what indicates a pleural effusion?",
+      "ground_truth": "costophrenic angle blunting",
+      "verdicts": {
+        "pipeline": {
+          "answer": "A pleural effusion is typically indicated by blunting of the costophrenic angle and a meniscus-shaped opacity at the lung base; neither is evident on this image.",
+          "verdict": "incorrect",
+          "reason": "It names costophrenic angle blunting but contradicts the reference by stating that it is not evident."
+        },
+        "baseline": {
+          "answer": "Blunting of the costophrenic angle, often with a meniscus-shaped opacity, indicates a pleural effusion.",
+          "verdict": "correct",
+          "reason": "It identifies costophrenic angle blunting as indicating pleural effusion."
+        },
+        "workflow": {
+          "answer": "This is a X-ray image. of the Chest. showing Lung fields appear mildly hyperexpanded.; Cardiac silhouette is not enlarged.; No visible pleural effusion or pneumothorax..",
+          "verdict": "incorrect",
+          "reason": "It does not identify costophrenic angle blunting and instead reports no visible pleural effusion."
+        },
+        "agentic": {
+          "answer": "Subtle blunting of the right costophrenic angle with mild adjacent basilar opacity may indicate a small pleural effusion.",
+          "verdict": "correct",
+          "reason": "It identifies costophrenic angle blunting with additional compatible location and imaging detail."
+        }
+      }
+    },
+    "639": {
+      "question": "what does the brighter outer ring of the lesion represent?",
+      "ground_truth": "necrosis",
+      "verdicts": {
+        "pipeline": {
+          "answer": "The brighter outer ring cannot be reliably characterized from this image.",
+          "verdict": "incorrect",
+          "reason": "It does not identify the outer ring as necrosis."
+        },
+        "baseline": {
+          "answer": "The brighter outer ring represents surrounding vasogenic edema with increased water diffusion.",
+          "verdict": "incorrect",
+          "reason": "It identifies vasogenic edema rather than necrosis."
+        },
+        "agentic": {
+          "answer": "The brighter outer ring likely represents surrounding tissue with increased water diffusion, such as vasogenic edema.",
+          "verdict": "incorrect",
+          "reason": "It suggests vasogenic edema rather than necrosis."
+        },
+        "workflow": {
+          "answer": "This is a MRI image. of the Brain. showing Cerebral hemispheres are visible with a generally symmetric appearance.; Bright signal is visible in the ventricular spaces and along portions of the cortical sulci.; Image has pixelation and limited detail..",
+          "verdict": "incorrect",
+          "reason": "It describes general image features without identifying the outer ring as necrosis."
+        }
+      }
+    },
+    "444": {
+      "question": "what form of contrast did the patient receive?",
+      "ground_truth": "oral and iv",
+      "verdicts": {
+        "workflow": {
+          "answer": "Axial CT image through the abdomen showing multiple bowel loops, several containing high-attenuation material, anterior to the lumbar spine. A prominent ovoid area of soft-tissue attenuation is visible centrally among the bowel loops.",
+          "verdict": "incorrect",
+          "reason": "Describes the image but does not identify the forms of contrast received."
+        },
+        "pipeline": {
+          "answer": "Oral contrast",
+          "verdict": "partially_correct",
+          "reason": "Identifies oral contrast but omits IV contrast."
+        },
+        "baseline": {
+          "answer": "Oral contrast.",
+          "verdict": "partially_correct",
+          "reason": "Identifies oral contrast but omits IV contrast."
+        },
+        "agentic": {
+          "answer": "Oral contrast",
+          "verdict": "partially_correct",
+          "reason": "Identifies oral contrast but omits IV contrast."
+        }
+      }
+    },
+    "889": {
+      "question": "what does the hypodensity suggest?",
+      "ground_truth": "metastasis",
+      "verdicts": {
+        "workflow": {
+          "answer": "This is a CT image. of the Upper abdomen. showing A rounded area of lower attenuation is visible near the inferior peripheral spleen.; Several small rounded areas of differing attenuation are visible in the liver.; A small bright linear focus is present within or immediately adjacent to the stomach..",
+          "verdict": "incorrect",
+          "reason": "Describes imaging findings but does not identify metastasis."
+        },
+        "baseline": {
+          "answer": "The splenic hypodensity suggests a splenic infarct.",
+          "verdict": "incorrect",
+          "reason": "Identifies a splenic infarct rather than metastasis."
+        },
+        "agentic": {
+          "answer": "The peripheral splenic hypodensity may suggest a focal splenic infarct.",
+          "verdict": "incorrect",
+          "reason": "Suggests a focal splenic infarct rather than metastasis."
+        },
+        "pipeline": {
+          "answer": "The splenic hypodensity suggests a focal splenic infarct.",
+          "verdict": "incorrect",
+          "reason": "Identifies a focal splenic infarct rather than metastasis."
+        }
+      }
+    },
+    "510": {
+      "question": "what condition is found in the above image?",
+      "ground_truth": "right subdural hematoma",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Prominence of the ventricles and cortical sulci, consistent with generalized cerebral volume loss.",
+          "verdict": "incorrect",
+          "reason": "Describes generalized cerebral volume loss, not a right subdural hematoma."
+        },
+        "baseline": {
+          "answer": "Periventricular leukomalacia (PVL).",
+          "verdict": "incorrect",
+          "reason": "Identifies periventricular leukomalacia rather than a right subdural hematoma."
+        },
+        "agentic": {
+          "answer": "Chronic periventricular white-matter volume loss with ex-vacuo ventriculomegaly, compatible with periventricular leukomalacia.",
+          "verdict": "incorrect",
+          "reason": "Describes periventricular leukomalacia with ventriculomegaly, not a right subdural hematoma."
+        },
+        "workflow": {
+          "answer": "Lateral ventricles are visible with mild asymmetry in the posterior portions.; Cerebrospinal fluid appears bright within the ventricles and cortical sulci.",
+          "verdict": "incorrect",
+          "reason": "Describes ventricular asymmetry and cerebrospinal fluid appearance without identifying a right subdural hematoma."
+        }
+      }
+    },
+    "152": {
+      "question": "what does the blunting of the costophrenic angles indicate?",
+      "ground_truth": "pleural effusion",
+      "verdicts": {
+        "agentic": {
+          "answer": "Blunting of the costophrenic angles usually indicates pleural fluid (pleural effusions).",
+          "verdict": "correct",
+          "reason": "Pleural fluid is equivalent to pleural effusion."
+        },
+        "baseline": {
+          "answer": "Blunting of the costophrenic angles typically indicates pleural effusions.",
+          "verdict": "correct",
+          "reason": "Directly identifies pleural effusions."
+        },
+        "pipeline": {
+          "answer": "Blunting of the costophrenic angles suggests small pleural effusions.",
+          "verdict": "correct",
+          "reason": "Small pleural effusions are a more specific version of the reference finding."
+        },
+        "workflow": {
+          "answer": "This is a X-ray image. of the Chest. showing Widespread patchy and interstitial opacities in both lungs, more confluent in the lower zones.; Hazy opacity at both lung bases, with blunting of the left costophrenic angle.; Median sternotomy wires are present..",
+          "verdict": "incorrect",
+          "reason": "Describes radiographic findings but does not identify pleural effusion as the cause of the blunting."
+        }
+      }
+    },
+    "835": {
+      "question": "what does nodular liver suggest?",
+      "ground_truth": "cirrhosis",
+      "verdicts": {
+        "agentic": {
+          "answer": "A nodular liver contour can suggest cirrhosis or other chronic liver disease.",
+          "verdict": "correct",
+          "reason": "Identifies cirrhosis as a cause of nodular liver contour."
+        },
+        "baseline": {
+          "answer": "A nodular liver contour suggests cirrhosis (chronic liver disease).",
+          "verdict": "correct",
+          "reason": "Directly states that nodular liver contour suggests cirrhosis."
+        },
+        "pipeline": {
+          "answer": "A nodular liver contour suggests cirrhosis or other chronic liver disease.",
+          "verdict": "correct",
+          "reason": "Identifies cirrhosis with additional noncontradictory detail."
+        },
+        "workflow": {
+          "answer": "This is a CT image. of the Upper abdomen. showing Both kidneys show contrast enhancement.; The stomach contains high-attenuation material.; A small high-attenuation focus is visible anterior to the vertebral body..",
+          "verdict": "incorrect",
+          "reason": "Describes unrelated imaging findings without identifying cirrhosis."
+        }
+      }
+    },
+    "694": {
+      "question": "what do the dark spaces in the center show?",
+      "ground_truth": "lateral ventricles",
+      "verdicts": {
+        "workflow": {
+          "answer": "Brain",
+          "verdict": "partially_correct",
+          "reason": "Brain identifies the organ but not the lateral ventricles."
+        },
+        "pipeline": {
+          "answer": "The lateral ventricles, which contain cerebrospinal fluid.",
+          "verdict": "correct",
+          "reason": "It identifies the lateral ventricles and adds correct detail about their contents."
+        },
+        "baseline": {
+          "answer": "The dark spaces are the brain\u2019s ventricles, which contain cerebrospinal fluid.",
+          "verdict": "partially_correct",
+          "reason": "It identifies the ventricles but does not specify the lateral ventricles."
+        },
+        "agentic": {
+          "answer": "The lateral ventricles.",
+          "verdict": "correct",
+          "reason": "It explicitly identifies the lateral ventricles."
+        }
+      }
+    },
+    "753": {
+      "question": "what did the patient likely complain of?",
+      "ground_truth": "abdominal pain",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Likely abdominal or epigastric pain.",
+          "verdict": "correct",
+          "reason": "Abdominal or epigastric pain matches abdominal pain."
+        },
+        "agentic": {
+          "answer": "Unable to determine from this image.",
+          "verdict": "incorrect",
+          "reason": "It does not identify abdominal pain as the likely complaint."
+        },
+        "workflow": {
+          "answer": "Axial CT image through the upper abdomen. The liver, gallbladder, pancreas, spleen, kidneys, bowel, and abdominal aorta are visible.",
+          "verdict": "incorrect",
+          "reason": "It describes imaging anatomy rather than the patient's complaint."
+        },
+        "baseline": {
+          "answer": "Abdominal pain, likely in the upper abdomen.",
+          "verdict": "correct",
+          "reason": "It states abdominal pain with a compatible, more specific location."
+        }
+      }
+    },
+    "760": {
+      "question": "what differentiates the common bile duct and cystic duct?",
+      "ground_truth": "cystic duct is more tortuous",
+      "verdicts": {
+        "pipeline": {
+          "answer": "The cystic duct connects the gallbladder to the common hepatic duct; after joining it, the common bile duct carries bile toward the duodenum.",
+          "verdict": "incorrect",
+          "reason": "Describes duct connections rather than the cystic duct's greater tortuosity."
+        },
+        "agentic": {
+          "answer": "The cystic duct connects the gallbladder to the common hepatic duct; after they join, the downstream duct is the common bile duct, which carries bile toward the duodenum.",
+          "verdict": "incorrect",
+          "reason": "Describes duct connections rather than the cystic duct's greater tortuosity."
+        },
+        "workflow": {
+          "answer": "This is a CT image. of the Upper abdomen. showing Rounded fluid-attenuation structure in the expected gallbladder region.; Several bowel loops contain visible gas.; Aorta and vertebral body are visible centrally..",
+          "verdict": "incorrect",
+          "reason": "Describes abdominal structures without addressing duct tortuosity."
+        },
+        "baseline": {
+          "answer": "The cystic duct connects the gallbladder to the common hepatic duct; the common bile duct is formed where they join and carries bile toward the duodenum.",
+          "verdict": "incorrect",
+          "reason": "Describes duct connections rather than the cystic duct's greater tortuosity."
+        }
+      }
+    },
+    "1135": {
+      "question": "what are these hypodensities in the liver?",
+      "ground_truth": "fat accumulations",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Small scattered hepatic cysts are favored.",
+          "verdict": "incorrect",
+          "reason": "Hepatic cysts are different from fat accumulations."
+        },
+        "workflow": {
+          "answer": "The stomach is distended and contains high-attenuation material.; A small gas-filled portion of the stomach is visible.",
+          "verdict": "incorrect",
+          "reason": "The stomach findings do not explain the liver hypodensities."
+        },
+        "agentic": {
+          "answer": "The central branching hypodensities most likely represent dilated intrahepatic bile ducts.",
+          "verdict": "incorrect",
+          "reason": "Dilated intrahepatic bile ducts are different from fat accumulations."
+        },
+        "baseline": {
+          "answer": "They are likely small hepatic cysts.",
+          "verdict": "incorrect",
+          "reason": "Hepatic cysts are different from fat accumulations."
+        }
+      }
+    },
+    "388": {
+      "question": "what cut of the brain is this image taken?",
+      "ground_truth": "axial",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Axial (transverse) plane.",
+          "verdict": "correct",
+          "reason": "Axial (transverse) plane matches the reference."
+        },
+        "workflow": {
+          "answer": "Head and brain",
+          "verdict": "incorrect",
+          "reason": "Names the anatomy but does not specify the imaging plane."
+        },
+        "baseline": {
+          "answer": "Axial (transverse) cut.",
+          "verdict": "correct",
+          "reason": "Axial (transverse) cut matches the reference."
+        },
+        "agentic": {
+          "answer": "Axial (transverse) section",
+          "verdict": "correct",
+          "reason": "Axial (transverse) section matches the reference."
+        }
+      }
+    },
+    "1077": {
+      "question": "what are those densities in the wall of the aorta?",
+      "ground_truth": "calcifications",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Atherosclerotic calcification of the aortic wall.",
+          "verdict": "correct",
+          "reason": "Identifies calcification in the aortic wall."
+        },
+        "workflow": {
+          "answer": "Prominent fluid- or contrast-filled gastric lumen with a small amount of gas.; Both kidneys are visible on this slice.",
+          "verdict": "incorrect",
+          "reason": "Describes the stomach and kidneys rather than aortic wall calcifications."
+        },
+        "agentic": {
+          "answer": "Focal atherosclerotic calcifications along the aortic wall.",
+          "verdict": "correct",
+          "reason": "Identifies aortic wall calcifications with additional compatible detail."
+        },
+        "baseline": {
+          "answer": "Atherosclerotic calcifications in the aortic wall.",
+          "verdict": "correct",
+          "reason": "Identifies atherosclerotic calcifications in the aortic wall."
+        }
+      }
+    },
+    "457": {
+      "question": "what brain region demonstrates edema?",
+      "ground_truth": "basal ganglia",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Bilateral deep and periventricular cerebral white matter",
+          "verdict": "incorrect",
+          "reason": "Deep and periventricular white matter is distinct from the basal ganglia."
+        },
+        "baseline": {
+          "answer": "Both thalami demonstrate edema.",
+          "verdict": "incorrect",
+          "reason": "The thalami are distinct from the basal ganglia."
+        },
+        "workflow": {
+          "answer": "Brain",
+          "verdict": "partially_correct",
+          "reason": "Brain is a much vaguer location that does not identify the basal ganglia."
+        },
+        "agentic": {
+          "answer": "Bilateral basal ganglia",
+          "verdict": "correct",
+          "reason": "Bilateral basal ganglia matches the reference with noncontradictory laterality detail."
+        }
+      }
+    },
+    "516": {
+      "question": "what cancer does this patient have?",
+      "ground_truth": "hepatocellular carcioma",
+      "verdicts": {
+        "workflow": {
+          "answer": "Large heterogeneous low-attenuation region in the central to left hepatic parenchyma.; The abdominal aorta is opacified with contrast.",
+          "verdict": "partially_correct",
+          "reason": "Describes a hepatic abnormality but does not identify hepatocellular carcinoma."
+        },
+        "agentic": {
+          "answer": "Unable to determine from this image.",
+          "verdict": "incorrect",
+          "reason": "Does not identify the cancer."
+        },
+        "baseline": {
+          "answer": "The scan shows a large liver mass, concerning for hepatocellular carcinoma.",
+          "verdict": "correct",
+          "reason": "Identifies hepatocellular carcinoma, matching the reference."
+        },
+        "pipeline": {
+          "answer": "No specific cancer can be identified from this image alone.",
+          "verdict": "incorrect",
+          "reason": "Does not identify the cancer."
+        }
+      }
+    },
+    "670": {
+      "question": "what are the structures near the vertebral column?",
+      "ground_truth": "psoas muscles",
+      "verdicts": {
+        "workflow": {
+          "answer": "Abdomen and pelvis",
+          "verdict": "incorrect",
+          "reason": "It names broad body regions rather than the psoas muscles."
+        },
+        "baseline": {
+          "answer": "The paired psoas muscles lie beside the vertebral column; the aorta and inferior vena cava are just in front of it.",
+          "verdict": "correct",
+          "reason": "It identifies the paired psoas muscles beside the vertebral column with noncontradictory extra detail."
+        },
+        "pipeline": {
+          "answer": "The psoas muscles lie on either side of the lumbar vertebral column.",
+          "verdict": "correct",
+          "reason": "It identifies the psoas muscles on either side of the lumbar vertebral column."
+        },
+        "agentic": {
+          "answer": "The bilateral psoas muscles flank the vertebral body; paraspinal muscles lie posteriorly, and the great vessels are anteriorly.",
+          "verdict": "correct",
+          "reason": "It identifies the bilateral psoas muscles flanking the vertebral body with noncontradictory extra detail."
+        }
+      }
+    },
+    "1001": {
+      "question": "what are the two major organs present in this image?",
+      "ground_truth": "heart \tlungs",
+      "verdicts": {
+        "workflow": {
+          "answer": "Chest",
+          "verdict": "partially_correct",
+          "reason": "Chest gives a much vaguer location without identifying the heart and lungs."
+        },
+        "pipeline": {
+          "answer": "The lungs and heart.",
+          "verdict": "correct",
+          "reason": "Identifies both the lungs and heart."
+        },
+        "agentic": {
+          "answer": "The lungs and heart.",
+          "verdict": "correct",
+          "reason": "Identifies both the lungs and heart."
+        },
+        "baseline": {
+          "answer": "The lungs and heart.",
+          "verdict": "correct",
+          "reason": "Identifies both the lungs and heart."
+        }
+      }
+    },
+    "1635": {
+      "question": "what are the hyperdensities on the periphery of the left side",
+      "ground_truth": "ribs",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Small hyperdense foci along the left lateral abdominal wall, likely calcific.",
+          "verdict": "incorrect",
+          "reason": "It describes likely calcific foci rather than ribs."
+        },
+        "baseline": {
+          "answer": "They are likely cross-sections of the left ribs.",
+          "verdict": "correct",
+          "reason": "It identifies the hyperdensities as cross-sections of the left ribs."
+        },
+        "agentic": {
+          "answer": "Cross-sections of the left lateral ribs",
+          "verdict": "correct",
+          "reason": "It identifies the hyperdensities as cross-sections of the left lateral ribs."
+        },
+        "workflow": {
+          "answer": "Abdomen",
+          "verdict": "incorrect",
+          "reason": "Abdomen does not identify the hyperdensities as ribs."
+        }
+      }
+    },
+    "1465": {
+      "question": "what are the hyperdensities indicative of?",
+      "ground_truth": "infarct",
+      "verdicts": {
+        "baseline": {
+          "answer": "The bright white-matter lesions are most suggestive of chronic small-vessel ischemic change.",
+          "verdict": "partially_correct",
+          "reason": "Chronic small-vessel ischemic change overlaps with ischemic pathology but does not specifically identify an infarct."
+        },
+        "pipeline": {
+          "answer": "The white-matter hyperintensities are most consistent with chronic small-vessel ischemic changes.",
+          "verdict": "partially_correct",
+          "reason": "Chronic small-vessel ischemic changes are related to ischemia but are not equivalent to an infarct."
+        },
+        "agentic": {
+          "answer": "The white-matter hyperintensities may indicate chronic small-vessel ischemic change.",
+          "verdict": "partially_correct",
+          "reason": "Small-vessel ischemic change overlaps with ischemic pathology but does not state infarction."
+        },
+        "workflow": {
+          "answer": "This is a MRI, axial FLAIR image. of the Brain. showing Confluent increased signal adjacent to the lateral ventricles, more extensive on the image-left side; Additional scattered small areas of increased signal in the deep white matter of both hemispheres; Lateral ventricles are visible and mildly asymmetric in appearance.",
+          "verdict": "incorrect",
+          "reason": "Describes imaging signal abnormalities without identifying them as indicative of an infarct."
+        }
+      }
+    },
+    "781": {
+      "question": "what are the lesions consistent with?",
+      "ground_truth": "infection",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Mild pulmonary vascular congestion, which may be consistent with early congestive heart failure.",
+          "verdict": "incorrect",
+          "reason": "It attributes the findings to vascular congestion or heart failure, not infection."
+        },
+        "workflow": {
+          "answer": "This is a X-ray image. of the Chest. showing Cardiac silhouette mildly enlarged.; Mild bilateral perihilar and basilar linear opacities.; Costophrenic angles are sharp..",
+          "verdict": "incorrect",
+          "reason": "It describes chest findings without identifying the lesions as infection."
+        },
+        "baseline": {
+          "answer": "The bilateral hilar prominence and interstitial nodular opacities are most consistent with sarcoidosis.",
+          "verdict": "incorrect",
+          "reason": "It identifies sarcoidosis rather than infection."
+        },
+        "agentic": {
+          "answer": "Bilateral hilar lymphadenopathy, classically associated with sarcoidosis.",
+          "verdict": "incorrect",
+          "reason": "It associates the findings with sarcoidosis rather than infection."
+        }
+      }
+    },
+    "588": {
+      "question": "we see mesenteric lymphadenopathy in the above image, where else is there cancer?",
+      "ground_truth": "peritoneum",
+      "verdicts": {
+        "pipeline": {
+          "answer": "The cecum/right colon appears abnormal, with focal wall thickening.",
+          "verdict": "incorrect",
+          "reason": "The cecum/right colon is a different location from the peritoneum."
+        },
+        "agentic": {
+          "answer": "Irregular thickening of the right colon, concerning for a tumor.",
+          "verdict": "incorrect",
+          "reason": "A right colon tumor does not identify cancer in the peritoneum."
+        },
+        "baseline": {
+          "answer": "There is likely cancer involving the bowel, possibly the small intestine.",
+          "verdict": "incorrect",
+          "reason": "Bowel or small intestinal cancer is not peritoneal cancer."
+        },
+        "workflow": {
+          "answer": "Abdomen",
+          "verdict": "partially_correct",
+          "reason": "The abdomen includes the peritoneum but is a much vaguer location."
+        }
+      }
+    },
+    "569": {
+      "question": "what are key characteristics of the lesion?",
+      "ground_truth": "ring-enhancing lesion",
+      "verdicts": {
+        "agentic": {
+          "answer": "A large, rounded, well-defined lesion in the right temporal region has predominantly T2-bright, mildly heterogeneous contents and a darker rim, with extensive surrounding bright signal and substantial mass effect.",
+          "verdict": "partially_correct",
+          "reason": "Describes a rimmed lesion but does not establish ring enhancement."
+        },
+        "pipeline": {
+          "answer": "There is a large, rounded, well-defined lesion in the image-left cerebral hemisphere with heterogeneous, predominantly bright signal and surrounding bright signal, causing mass effect and displacement of nearby midline structures.",
+          "verdict": "incorrect",
+          "reason": "Describes lesion signal and mass effect without identifying ring enhancement."
+        },
+        "baseline": {
+          "answer": "There is a large, well-circumscribed, predominantly cystic T2-bright lesion in the right temporal region, with heterogeneous internal signal and a thin darker rim. It is associated with surrounding edema and substantial local mass effect.",
+          "verdict": "partially_correct",
+          "reason": "Describes a thin rim but not the essential finding of rim enhancement."
+        },
+        "workflow": {
+          "answer": "Large, well-defined oval T2-bright structure in the left side of the image at the temporal region.; Heterogeneous signal is present in adjacent brain tissue.",
+          "verdict": "incorrect",
+          "reason": "Describes T2-bright signal without identifying ring enhancement."
+        }
+      }
+    },
+    "756": {
+      "question": "what are defining radiological features of large bowel?",
+      "ground_truth": "air?",
+      "verdicts": {
+        "baseline": {
+          "answer": "The large bowel is identified by its peripheral course, larger caliber, haustral folds that do not extend across the full lumen, and often visible fecal material or gas.",
+          "verdict": "correct",
+          "reason": "It identifies gas in the large bowel, matching the reference air finding."
+        },
+        "agentic": {
+          "answer": "The large bowel is identified by its peripheral course, relatively larger caliber, and haustral folds that incompletely cross the lumen; it may contain gas, stool, and oral contrast.",
+          "verdict": "correct",
+          "reason": "It includes large bowel gas, which is equivalent to air."
+        },
+        "workflow": {
+          "answer": "This is a CT image. of the Abdomen. showing Several bowel loops contain bright contrast material, with gas visible in some loops.; A small rounded contrast-filled vessel is visible anterior to the lumbar vertebra.; A small midline contour irregularity is visible along the anterior abdominal wall..",
+          "verdict": "correct",
+          "reason": "It describes gas visible in bowel loops, matching the reference finding of air."
+        },
+        "pipeline": {
+          "answer": "The large bowel is typically identified by its relatively wide caliber, peripheral course, and haustra\u2014short sac-like segments whose folds do not usually cross the entire lumen. It commonly contains gas and fecal material; on this CT slice, bowel segments containing contrast and gas are visible, though the full course and haustral pattern cannot be assessed.",
+          "verdict": "correct",
+          "reason": "It explicitly describes bowel gas, consistent with the reference air finding."
+        }
+      }
+    },
+    "693": {
+      "question": "the dark space in the central portion of the image represents what structure(s)?",
+      "ground_truth": "lateral ventricles",
+      "verdicts": {
+        "workflow": {
+          "answer": "Brain",
+          "verdict": "incorrect",
+          "reason": "Brain does not identify the lateral ventricles."
+        },
+        "pipeline": {
+          "answer": "The lateral ventricles (CSF-filled spaces).",
+          "verdict": "correct",
+          "reason": "It identifies the lateral ventricles with accurate additional detail."
+        },
+        "agentic": {
+          "answer": "Lateral ventricles and third ventricle",
+          "verdict": "partially_correct",
+          "reason": "It identifies the lateral ventricles but also includes the third ventricle, which is not in the reference."
+        },
+        "baseline": {
+          "answer": "The lateral ventricles, which contain cerebrospinal fluid.",
+          "verdict": "correct",
+          "reason": "It identifies the lateral ventricles and correctly describes their contents."
+        }
+      }
+    },
+    "1104": {
+      "question": "in which lobe is the enhancement?",
+      "ground_truth": "right frontal lobe",
+      "verdicts": {
+        "workflow": {
+          "answer": "Brain",
+          "verdict": "partially_correct",
+          "reason": "Brain is a much vaguer location that omits the right frontal lobe."
+        },
+        "baseline": {
+          "answer": "Parietal lobe.",
+          "verdict": "incorrect",
+          "reason": "The parietal lobe is different from the right frontal lobe."
+        },
+        "agentic": {
+          "answer": "Unable to determine from this image.",
+          "verdict": "incorrect",
+          "reason": "It does not identify the enhancement location."
+        },
+        "pipeline": {
+          "answer": "No single lobe can be confidently identified; the sulcal enhancement appears broadly over the high convexities.",
+          "verdict": "incorrect",
+          "reason": "It denies a specific lobar location rather than identifying the right frontal lobe."
+        }
+      }
+    },
+    "1536": {
+      "question": "the patient's left contains a bright round organ, what is it?",
+      "ground_truth": "left kidney",
+      "verdicts": {
+        "workflow": {
+          "answer": "Abdomen",
+          "verdict": "incorrect",
+          "reason": "The abdomen is a body region, not the left kidney."
+        },
+        "agentic": {
+          "answer": "The left kidney.",
+          "verdict": "correct",
+          "reason": "It identifies the left kidney."
+        },
+        "pipeline": {
+          "answer": "The left kidney.",
+          "verdict": "correct",
+          "reason": "It identifies the left kidney."
+        },
+        "baseline": {
+          "answer": "The left kidney.",
+          "verdict": "correct",
+          "reason": "It identifies the left kidney."
+        }
+      }
+    },
+    "679": {
+      "question": "the internal gas and enhancing rim suggests what type of lesion?",
+      "ground_truth": "abcess",
+      "verdicts": {
+        "pipeline": {
+          "answer": "A gas-containing hepatic abscess.",
+          "verdict": "correct",
+          "reason": "It identifies an abscess, matching the reference."
+        },
+        "workflow": {
+          "answer": "Large rounded low-attenuation area within the right hepatic lobe.; Several small gas foci are visible within the low-attenuation area.",
+          "verdict": "incorrect",
+          "reason": "It describes imaging features but does not identify the lesion as an abscess."
+        },
+        "agentic": {
+          "answer": "A gas-containing hepatic abscess.",
+          "verdict": "correct",
+          "reason": "It identifies an abscess, matching the reference."
+        },
+        "baseline": {
+          "answer": "A hepatic abscess, likely pyogenic.",
+          "verdict": "correct",
+          "reason": "It identifies a hepatic abscess with a compatible pyogenic etiology."
+        }
+      }
+    },
+    "60": {
+      "question": "the imaging modality is...?",
+      "ground_truth": "mri/flair",
+      "verdicts": {
+        "baseline": {
+          "answer": "MRI (axial FLAIR sequence).",
+          "verdict": "correct",
+          "reason": "Identifies MRI with a FLAIR sequence, matching the reference."
+        },
+        "agentic": {
+          "answer": "Axial brain MRI, likely FLAIR",
+          "verdict": "correct",
+          "reason": "Identifies MRI and FLAIR, matching the reference despite hedging."
+        },
+        "workflow": {
+          "answer": "MRI (axial FLAIR)",
+          "verdict": "correct",
+          "reason": "Identifies MRI with FLAIR, matching the reference."
+        },
+        "pipeline": {
+          "answer": "MRI, axial FLAIR",
+          "verdict": "correct",
+          "reason": "Identifies MRI with FLAIR, matching the reference."
+        }
+      }
+    },
+    "1523": {
+      "question": "in what plane is the above taken?",
+      "ground_truth": "pa",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Frontal (coronal) plane.",
+          "verdict": "partially_correct",
+          "reason": "Frontal describes the general view but does not specify the PA projection."
+        },
+        "workflow": {
+          "answer": "Frontal chest radiograph showing the lungs and cardiomediastinal silhouette. Patchy bilateral lung opacities are visible, most conspicuous in the mid and lower lung zones and greater on the right.",
+          "verdict": "partially_correct",
+          "reason": "Identifies a frontal chest radiograph but does not distinguish PA from AP."
+        },
+        "agentic": {
+          "answer": "Frontal (coronal) plane.",
+          "verdict": "partially_correct",
+          "reason": "Frontal describes the general view but does not specify the PA projection."
+        },
+        "baseline": {
+          "answer": "Frontal (coronal) plane.",
+          "verdict": "partially_correct",
+          "reason": "Frontal describes the general view but does not specify the PA projection."
+        }
+      }
+    },
+    "308": {
+      "question": "in what plane is the above image?",
+      "ground_truth": "axial",
+      "verdicts": {
+        "agentic": {
+          "answer": "Axial",
+          "verdict": "correct",
+          "reason": "States the axial plane."
+        },
+        "workflow": {
+          "answer": "Axial MRI image through the upper brain. Several small bright foci are visible within the white matter of both cerebral hemispheres.",
+          "verdict": "correct",
+          "reason": "Identifies the image as axial, with extra detail that does not contradict the reference."
+        },
+        "baseline": {
+          "answer": "Axial (transverse) plane.",
+          "verdict": "correct",
+          "reason": "Axial and transverse refer to the same plane."
+        },
+        "pipeline": {
+          "answer": "Axial plane",
+          "verdict": "correct",
+          "reason": "States the axial plane."
+        }
+      }
+    },
+    "558": {
+      "question": "how would you describe the lesion?",
+      "ground_truth": "ring-enhancing lesion",
+      "verdicts": {
+        "workflow": {
+          "answer": "Large, well-circumscribed, ovoid T2-bright structure in the left side of the image with a darker peripheral rim.; Adjacent brain tissue is heterogeneous in signal.",
+          "verdict": "partially_correct",
+          "reason": "Describes a peripheral rim but does not identify ring enhancement."
+        },
+        "agentic": {
+          "answer": "There is a large, well-defined, heterogeneous T2-hyperintense lesion in the right temporal region with a thin hypointense rim, extensive surrounding edema, and marked mass effect causing leftward midline displacement.",
+          "verdict": "partially_correct",
+          "reason": "Describes a thin hypointense rim but not an enhancing ring."
+        },
+        "baseline": {
+          "answer": "A large, well-circumscribed, oval cystic lesion in the left cerebral hemisphere, with a thin rim and surrounding edema causing mass effect.",
+          "verdict": "partially_correct",
+          "reason": "Describes a rimmed cystic lesion but omits ring enhancement."
+        },
+        "pipeline": {
+          "answer": "A large, well-defined, rounded, heterogeneous T2-bright lesion occupies the image-left temporal region, with surrounding signal abnormality and substantial mass effect.",
+          "verdict": "incorrect",
+          "reason": "Describes T2 signal and mass effect without identifying a ring or enhancement."
+        }
+      }
+    },
+    "1551": {
+      "question": "imaging modality used to take this image?",
+      "ground_truth": "pa xray",
+      "verdicts": {
+        "workflow": {
+          "answer": "X-ray",
+          "verdict": "correct",
+          "reason": "X-ray correctly identifies the modality of a PA X-ray."
+        },
+        "pipeline": {
+          "answer": "X-ray (frontal chest radiograph)",
+          "verdict": "correct",
+          "reason": "A frontal chest radiograph is consistent with the referenced PA X-ray modality."
+        },
+        "baseline": {
+          "answer": "Chest X-ray (radiograph).",
+          "verdict": "correct",
+          "reason": "Chest X-ray correctly identifies the referenced imaging modality."
+        },
+        "agentic": {
+          "answer": "X-ray (frontal chest radiograph)",
+          "verdict": "correct",
+          "reason": "A frontal chest radiograph is consistent with the referenced PA X-ray modality."
+        }
+      }
+    },
+    "1748": {
+      "question": "describe the borders of the lesion.",
+      "ground_truth": "smooth",
+      "verdicts": {
+        "baseline": {
+          "answer": "The focal opacity appears relatively well-circumscribed, with smooth, fairly well-defined borders.",
+          "verdict": "correct",
+          "reason": "It explicitly describes smooth borders, matching the reference."
+        },
+        "workflow": {
+          "answer": "No focal air-space opacity is visible.; No pleural effusion or pneumothorax is visible.",
+          "verdict": "incorrect",
+          "reason": "It does not describe the lesion's borders and instead reports no focal opacity."
+        },
+        "agentic": {
+          "answer": "The left retrocardiac opacity has a partly visible, smooth, gently convex lateral contour; its medial and inferior margins blend with the heart and diaphragm and are not separately traceable.",
+          "verdict": "correct",
+          "reason": "It describes a smooth visible contour, with additional margin-visibility details that do not contradict the reference."
+        },
+        "pipeline": {
+          "answer": "No focal lesion is visible, so its borders cannot be described.",
+          "verdict": "incorrect",
+          "reason": "It denies a visible lesion rather than describing smooth borders."
+        }
+      }
+    },
+    "631": {
+      "question": "how would you describe the r heart border?",
+      "ground_truth": "partial silhouetting",
+      "verdicts": {
+        "workflow": {
+          "answer": "Relatively low lung volumes.; Mild linear opacities at both lung bases.",
+          "verdict": "incorrect",
+          "reason": "It describes lung findings without addressing partial silhouetting of the right heart border."
+        },
+        "baseline": {
+          "answer": "The right heart border is partially obscured and indistinct.",
+          "verdict": "correct",
+          "reason": "Partial obscuration and indistinctness are equivalent to partial silhouetting."
+        },
+        "agentic": {
+          "answer": "The right heart border is partially indistinct inferiorly, blending with adjacent right mid-to-lower lung opacity.",
+          "verdict": "correct",
+          "reason": "It describes partial silhouetting of the right heart border with compatible additional detail."
+        },
+        "pipeline": {
+          "answer": "The lower right heart border is mildly indistinct.",
+          "verdict": "correct",
+          "reason": "Indistinctness of the lower right heart border describes partial silhouetting."
+        }
+      }
+    },
+    "1758": {
+      "question": "how would you describe the lesion?",
+      "ground_truth": "ring-enhancing",
+      "verdicts": {
+        "workflow": {
+          "answer": "Rounded lesion in the left cerebral hemisphere with peripheral enhancement.; Two central regions within the lesion appear less bright than its rim.",
+          "verdict": "correct",
+          "reason": "Peripheral enhancement with a less bright center describes ring enhancement."
+        },
+        "agentic": {
+          "answer": "A multilobulated, multiloculated lesion in the deep left cerebral hemisphere has a thick, irregular enhancing rim, central nonenhancing components, and surrounding signal abnormality.",
+          "verdict": "correct",
+          "reason": "An enhancing rim surrounding nonenhancing components describes ring enhancement."
+        },
+        "pipeline": {
+          "answer": "A rounded lesion in the left cerebral hemisphere (right side of the image) has an irregular, bright peripheral rim with two darker central components and surrounding increased signal.",
+          "verdict": "correct",
+          "reason": "A bright peripheral rim surrounding darker central components conveys the ring-enhancing appearance."
+        },
+        "baseline": {
+          "answer": "A multilobulated, ring-enhancing intra-axial lesion with central nonenhancing areas, consistent with necrosis or cystic change.",
+          "verdict": "correct",
+          "reason": "The lesion is explicitly described as ring-enhancing."
+        }
+      }
+    },
+    "1960": {
+      "question": "how is the patient positioned for this scan?",
+      "ground_truth": "supine (see air-fluid level)",
+      "verdicts": {
+        "agentic": {
+          "answer": "Supine (lying on their back).",
+          "verdict": "correct",
+          "reason": "States the patient is supine, matching the reference."
+        },
+        "pipeline": {
+          "answer": "Supine (lying on their back).",
+          "verdict": "correct",
+          "reason": "States the patient is supine, matching the reference."
+        },
+        "baseline": {
+          "answer": "The patient is positioned supine, lying on their back.",
+          "verdict": "correct",
+          "reason": "States the patient is supine, matching the reference."
+        },
+        "workflow": {
+          "answer": "Axial contrast-enhanced CT image through the upper abdomen. The liver, stomach, bowel, kidneys, major vessels, and vertebra are visible.",
+          "verdict": "incorrect",
+          "reason": "Describes the scan and anatomy but does not state the patient's position."
+        }
+      }
+    },
+    "1425": {
+      "question": "how do you tell which side is r vs l?",
+      "ground_truth": "imagine the patient is laying down and you are looking from the feet",
+      "verdicts": {
+        "baseline": {
+          "answer": "On this axial CT, the patient\u2019s right is on the image\u2019s left, and the patient\u2019s left is on the image\u2019s right.",
+          "verdict": "correct",
+          "reason": "The right-left mapping is equivalent to viewing the patient from the feet."
+        },
+        "workflow": {
+          "answer": "Upper abdomen",
+          "verdict": "incorrect",
+          "reason": "Upper abdomen does not explain how to distinguish right from left."
+        },
+        "pipeline": {
+          "answer": "Axial CT is conventionally viewed from the patient\u2019s feet: the patient\u2019s right is on the image\u2019s left, and the patient\u2019s left is on the image\u2019s right.",
+          "verdict": "correct",
+          "reason": "It explicitly describes viewing from the patient's feet and gives the corresponding right-left mapping."
+        },
+        "agentic": {
+          "answer": "On this axial CT, the patient's right is on the image's left; the patient's left is on the image's right.",
+          "verdict": "correct",
+          "reason": "The right-left mapping is equivalent to viewing the patient from the feet."
+        }
+      }
+    },
+    "700": {
+      "question": "how do you know if contrast was used?",
+      "ground_truth": "enhancement of vessels",
+      "verdicts": {
+        "workflow": {
+          "answer": "This is a CT image. of the Abdomen. showing The kidneys show contrast enhancement, with somewhat heterogeneous attenuation in the right kidney on this slice.; Gas is present in the stomach and bowel, with dense contrast material visible in bowel loops.; A small fluid-density structure is visible in the gallbladder region..",
+          "verdict": "partially_correct",
+          "reason": "Describes kidney enhancement but does not identify enhancement of vessels."
+        },
+        "pipeline": {
+          "answer": "Contrast was used: the kidneys and blood vessels appear enhanced, and bright oral contrast is visible in the bowel.",
+          "verdict": "correct",
+          "reason": "Explicitly identifies enhanced blood vessels as evidence of contrast use."
+        },
+        "agentic": {
+          "answer": "Contrast was used: the kidneys and blood vessels appear enhanced, and dense contrast is visible in the bowel.",
+          "verdict": "correct",
+          "reason": "Explicitly identifies enhanced blood vessels as evidence of contrast use."
+        },
+        "baseline": {
+          "answer": "Yes. The kidneys and blood vessels are enhanced, and there is also bright contrast in the bowel.",
+          "verdict": "correct",
+          "reason": "Explicitly identifies enhanced blood vessels as evidence of contrast use."
+        }
+      }
+    },
+    "741": {
+      "question": "how can you tell the mass is hemorrhagic and pushing the optic chiasm?",
+      "ground_truth": "not sure",
+      "verdicts": {
+        "agentic": {
+          "answer": "You cannot tell from this image alone: this slice does not show a definite mass, hemorrhage, or optic-chiasm displacement.",
+          "verdict": "correct",
+          "reason": "Expresses that the requested findings cannot be determined from the image, consistent with the reference uncertainty."
+        },
+        "baseline": {
+          "answer": "This is an MRI, but this axial slice alone does not clearly show a hemorrhagic mass or the optic chiasm. Hemorrhage is assessed by blood-product signal on appropriate sequences, while chiasmal displacement is best seen on coronal or sagittal images.",
+          "verdict": "correct",
+          "reason": "Expresses uncertainty about the requested findings and adds noncontradictory explanatory detail."
+        },
+        "workflow": {
+          "answer": "This is a MRI image. of the Brain. showing Small rounded focus of signal near the posterior left cerebral hemisphere, close to the outer brain margin.; No obvious midline shift on this slice..",
+          "verdict": "incorrect",
+          "reason": "Describes unrelated imaging findings rather than uncertainty about hemorrhage or optic-chiasm displacement."
+        },
+        "pipeline": {
+          "answer": "This image alone does not show that the mass is hemorrhagic or pushing the optic chiasm.",
+          "verdict": "correct",
+          "reason": "States that the image does not establish the requested findings, consistent with the reference uncertainty."
+        }
+      }
+    },
+    "1309": {
+      "question": "what pathology is shown?",
+      "ground_truth": "left apical pneumothorax",
+      "verdicts": {
+        "agentic": {
+          "answer": "Bilateral hilar prominence, suspicious for hilar lymphadenopathy, greater on the right.",
+          "verdict": "incorrect",
+          "reason": "Hilar prominence and suspected lymphadenopathy are different findings from a left apical pneumothorax."
+        },
+        "pipeline": {
+          "answer": "Mild pulmonary hyperinflation; no acute cardiopulmonary abnormality.",
+          "verdict": "incorrect",
+          "reason": "Hyperinflation does not identify the left apical pneumothorax, and no acute abnormality contradicts it."
+        },
+        "baseline": {
+          "answer": "Pulmonary hyperinflation consistent with emphysema/COPD.",
+          "verdict": "incorrect",
+          "reason": "Emphysema/COPD with hyperinflation is not the referenced left apical pneumothorax."
+        },
+        "workflow": {
+          "answer": "Cardiac silhouette is within normal size limits.; Lung fields are clear without focal opacity.",
+          "verdict": "incorrect",
+          "reason": "Normal cardiac size and clear lung fields do not identify the left apical pneumothorax."
+        }
+      }
+    },
+    "1329": {
+      "question": "what pathology is demonstrated?",
+      "ground_truth": "cardiomegaly",
+      "verdicts": {
+        "baseline": {
+          "answer": "Bilateral perihilar peribronchial thickening, consistent with viral bronchiolitis or reactive airway disease.",
+          "verdict": "incorrect",
+          "reason": "Describes airway disease rather than cardiomegaly."
+        },
+        "agentic": {
+          "answer": "Mild bilateral perihilar interstitial and peribronchial opacities.",
+          "verdict": "incorrect",
+          "reason": "Describes perihilar opacities without identifying cardiomegaly."
+        },
+        "workflow": {
+          "answer": "Mild bilateral prominence of the central and perihilar bronchovascular markings; Cardiomediastinal contours are not enlarged",
+          "verdict": "incorrect",
+          "reason": "Explicitly denies cardiac enlargement, contradicting cardiomegaly."
+        },
+        "pipeline": {
+          "answer": "No acute cardiopulmonary pathology is demonstrated.",
+          "verdict": "incorrect",
+          "reason": "Reports no acute pathology and does not identify cardiomegaly."
+        }
+      }
+    },
+    "1476": {
+      "question": "which side is abnormal?",
+      "ground_truth": "left",
+      "verdicts": {
+        "workflow": {
+          "answer": "Chest",
+          "verdict": "incorrect",
+          "reason": "Chest does not specify which side is abnormal."
+        },
+        "agentic": {
+          "answer": "Left side (left hemithorax).",
+          "verdict": "correct",
+          "reason": "Identifies the left side as abnormal."
+        },
+        "pipeline": {
+          "answer": "Left side (left hemithorax).",
+          "verdict": "correct",
+          "reason": "Identifies the left side as abnormal."
+        },
+        "baseline": {
+          "answer": "The left side is abnormal.",
+          "verdict": "correct",
+          "reason": "Identifies the left side as abnormal."
+        }
+      }
+    },
+    "529": {
+      "question": "what side is the pathology?",
+      "ground_truth": "right sided pleural effusion",
+      "verdicts": {
+        "baseline": {
+          "answer": "Right side.",
+          "verdict": "correct",
+          "reason": "Correctly identifies the pathology as right-sided."
+        },
+        "workflow": {
+          "answer": "Chest",
+          "verdict": "partially_correct",
+          "reason": "Identifies the general chest region but omits the required side."
+        },
+        "pipeline": {
+          "answer": "Right lung",
+          "verdict": "correct",
+          "reason": "Identifies the right side, matching the requested laterality."
+        },
+        "agentic": {
+          "answer": "Right lung",
+          "verdict": "correct",
+          "reason": "Identifies the right side, matching the requested laterality."
+        }
+      }
+    },
+    "1236": {
+      "question": "what is the secondary abnormality in this image?",
+      "ground_truth": "moderate edema",
+      "verdicts": {
+        "agentic": {
+          "answer": "Patchy periventricular white-matter hyperintensity, most noticeable around the frontal horns.",
+          "verdict": "incorrect",
+          "reason": "Periventricular white-matter hyperintensity is not equivalent to moderate edema."
+        },
+        "workflow": {
+          "answer": "Large heterogeneous area of increased signal in the posterior hemisphere on the right side of the image, extending around the posterior lateral ventricle.; Small darker areas are present within the region of increased signal.",
+          "verdict": "incorrect",
+          "reason": "The heterogeneous signal abnormality does not identify edema."
+        },
+        "pipeline": {
+          "answer": "Prominence of the lateral ventricles with surrounding periventricular FLAIR hyperintensity.",
+          "verdict": "incorrect",
+          "reason": "Ventricular prominence with periventricular hyperintensity does not establish moderate edema."
+        },
+        "baseline": {
+          "answer": "Surrounding vasogenic edema with local mass effect.",
+          "verdict": "correct",
+          "reason": "Surrounding vasogenic edema identifies the referenced edema with additional compatible detail."
+        }
+      }
+    },
+    "1786": {
+      "question": "what is the abnormality?",
+      "ground_truth": "single lung nodule",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Mild pulmonary hyperinflation with subtle bibasilar linear markings.",
+          "verdict": "incorrect",
+          "reason": "Hyperinflation and bibasilar linear markings do not identify a single lung nodule."
+        },
+        "baseline": {
+          "answer": "Mild lung hyperinflation, consistent with COPD.",
+          "verdict": "incorrect",
+          "reason": "Hyperinflation consistent with COPD is a different finding from a single lung nodule."
+        },
+        "agentic": {
+          "answer": "Mild linear, somewhat coarse opacity in the right perihilar to mid-lung region, with mild lung hyperinflation.",
+          "verdict": "incorrect",
+          "reason": "A linear perihilar opacity is not the same finding as a single lung nodule."
+        },
+        "workflow": {
+          "answer": "Cardiomediastinal silhouette is within normal size limits.; Mildly increased lung volumes with slight flattening of the diaphragms.",
+          "verdict": "incorrect",
+          "reason": "Increased lung volumes and flattened diaphragms do not identify a single lung nodule."
+        }
+      }
+    },
+    "789": {
+      "question": "what is the pathology seen in this image?",
+      "ground_truth": "pulmonary nodules",
+      "verdicts": {
+        "baseline": {
+          "answer": "Bilateral multifocal air-space opacities, consistent with pneumonia.",
+          "verdict": "incorrect",
+          "reason": "Air-space opacities attributed to pneumonia are a different finding from pulmonary nodules."
+        },
+        "pipeline": {
+          "answer": "Patchy bilateral mid-to-lower lung airspace opacities, greater on the right, compatible with multifocal pneumonia.",
+          "verdict": "incorrect",
+          "reason": "Multifocal pneumonia with airspace opacities does not identify pulmonary nodules."
+        },
+        "workflow": {
+          "answer": "Patchy opacities are present throughout both lungs, greater in the mid and lower zones.; The lung apices are relatively more lucent than the mid and lower lung regions.",
+          "verdict": "partially_correct",
+          "reason": "Bilateral pulmonary opacities overlap broadly but lack the essential nodular characterization."
+        },
+        "agentic": {
+          "answer": "Multiple bilateral nodular pulmonary opacities, more extensive on the right.",
+          "verdict": "correct",
+          "reason": "Multiple bilateral nodular pulmonary opacities describe pulmonary nodules."
+        }
+      }
+    },
+    "606": {
+      "question": "what lung pathology is this image concerning for?",
+      "ground_truth": "pneumonia",
+      "verdicts": {
+        "agentic": {
+          "answer": "Left mid-to-lower lung air-space opacity concerning for pneumonia.",
+          "verdict": "correct",
+          "reason": "Explicitly identifies pneumonia with additional location detail."
+        },
+        "workflow": {
+          "answer": "Dense opacity in the left lower lung extending toward the base.; The left hemidiaphragm and part of the left heart border are obscured.",
+          "verdict": "partially_correct",
+          "reason": "Describes an air-space opacity compatible with pneumonia but does not identify pneumonia."
+        },
+        "pipeline": {
+          "answer": "Left mid-to-lower lung air-space opacity, concerning for pneumonia.",
+          "verdict": "correct",
+          "reason": "Explicitly identifies pneumonia with additional location detail."
+        },
+        "baseline": {
+          "answer": "Left-sided pneumonia, likely involving the lower lung.",
+          "verdict": "correct",
+          "reason": "Identifies pneumonia and adds a noncontradictory location."
+        }
+      }
+    },
+    "714": {
+      "question": "what is abnormal in this image?",
+      "ground_truth": "hydropneumothorax",
+      "verdicts": {
+        "agentic": {
+          "answer": "A left basilar air\u2013fluid level with adjacent opacity, consistent with a left hydropneumothorax.",
+          "verdict": "correct",
+          "reason": "Explicitly identifies a hydropneumothorax with compatible additional detail."
+        },
+        "baseline": {
+          "answer": "A left-sided hydropneumothorax.",
+          "verdict": "correct",
+          "reason": "Explicitly states hydropneumothorax."
+        },
+        "pipeline": {
+          "answer": "There is a left basilar pleural air\u2013fluid level with adjacent left lower-lung opacity, consistent with a left hydropneumothorax and mild adjacent atelectatic opacity.",
+          "verdict": "correct",
+          "reason": "Identifies hydropneumothorax with noncontradictory adjacent atelectatic opacity."
+        },
+        "workflow": {
+          "answer": "Horizontal air-fluid interface in the left lower hemithorax.; Opacity occupies the left lung base below the air-fluid interface.",
+          "verdict": "correct",
+          "reason": "Describes the hemithoracic air-fluid level and dependent opacity characteristic of hydropneumothorax."
+        }
+      }
+    },
+    "658": {
+      "question": "what can be done to get to a diagnosis?",
+      "ground_truth": "biopsy",
+      "verdicts": {
+        "workflow": {
+          "answer": "This is a X-ray image. of the Chest. showing Lung fields are well expanded without a focal air-space opacity.; Cardiomediastinal silhouette is not enlarged.; Costophrenic angles are sharp..",
+          "verdict": "incorrect",
+          "reason": "It describes imaging findings without recommending biopsy."
+        },
+        "pipeline": {
+          "answer": "A clinician should interpret this X-ray alongside the person\u2019s symptoms, history, and examination, and compare it with prior images. If symptoms or the small left perihilar opacity remain concerning, further evaluation\u2014such as a repeat chest X-ray or chest CT\u2014may be considered.",
+          "verdict": "incorrect",
+          "reason": "It recommends clinical correlation and further imaging rather than biopsy."
+        },
+        "agentic": {
+          "answer": "Correlate the X-ray with symptoms, medical history, and examination; compare with prior images, and consider a lateral chest X-ray or chest CT if concern persists. Any laboratory tests or further evaluation should be guided by the clinical findings.",
+          "verdict": "incorrect",
+          "reason": "It suggests clinical correlation, imaging, and laboratory testing but not biopsy."
+        },
+        "baseline": {
+          "answer": "A chest CT can better characterize the finding; if it identifies a suspicious abnormality, bronchoscopy or biopsy may be needed for a definitive diagnosis.",
+          "verdict": "correct",
+          "reason": "It explicitly identifies biopsy as a means of obtaining a definitive diagnosis."
+        }
+      }
+    },
+    "456": {
+      "question": "what are the findings in the sigmoid colon?",
+      "ground_truth": "diverticuli",
+      "verdicts": {
+        "pipeline": {
+          "answer": "The visible sigmoid/left-colonic segment contains gas and fecal material, without an obvious focal inflammatory change on this image.",
+          "verdict": "incorrect",
+          "reason": "Describes gas and fecal material but does not identify sigmoid diverticuli."
+        },
+        "baseline": {
+          "answer": "No focal abnormality of the sigmoid colon is evident on this image.",
+          "verdict": "incorrect",
+          "reason": "Reports no sigmoid abnormality rather than diverticuli."
+        },
+        "workflow": {
+          "answer": "Multiple bowel loops contain high-attenuation contrast.; A rounded soft-tissue attenuation area is present centrally among the bowel loops.",
+          "verdict": "incorrect",
+          "reason": "Describes bowel contrast and a soft-tissue area, not sigmoid diverticuli."
+        },
+        "agentic": {
+          "answer": "The sigmoid colon contains gas and fecal material, without a definite focal abnormality on this image.",
+          "verdict": "incorrect",
+          "reason": "Reports gas and fecal material without a focal abnormality rather than sigmoid diverticuli."
+        }
+      }
+    },
+    "893": {
+      "question": "what is abnormal about the hila?",
+      "ground_truth": "enlarged",
+      "verdicts": {
+        "baseline": {
+          "answer": "Both hila are prominent/enlarged, more so on the right.",
+          "verdict": "correct",
+          "reason": "Explicitly describes both hila as enlarged."
+        },
+        "workflow": {
+          "answer": "Cardiac silhouette is enlarged.; No focal airspace opacity is evident.",
+          "verdict": "incorrect",
+          "reason": "Describes cardiac enlargement rather than hilar enlargement."
+        },
+        "pipeline": {
+          "answer": "The hila are mildly prominent bilaterally, more so on the right.",
+          "verdict": "correct",
+          "reason": "Bilateral hilar prominence conveys enlargement with additional severity detail."
+        },
+        "agentic": {
+          "answer": "The hila are prominent bilaterally, more so on the right.",
+          "verdict": "correct",
+          "reason": "Bilateral hilar prominence is equivalent to enlarged hila."
+        }
+      }
+    },
+    "947": {
+      "question": "what does the abnormality suggest?",
+      "ground_truth": "ischemia",
+      "verdicts": {
+        "pipeline": {
+          "answer": "The bright focus may suggest an acute ischemic infarct.",
+          "verdict": "correct",
+          "reason": "An acute ischemic infarct is a more specific manifestation of ischemia."
+        },
+        "workflow": {
+          "answer": "This is a MRI (diffusion-weighted image) image. of the Brain. showing Focal bright signal in the deep central brain, predominantly on the image-left side; Image is blurred and low in detail.",
+          "verdict": "incorrect",
+          "reason": "It describes the bright signal but does not identify ischemia."
+        },
+        "baseline": {
+          "answer": "The abnormality suggests an acute ischemic infarct.",
+          "verdict": "correct",
+          "reason": "An acute ischemic infarct is consistent with ischemia."
+        },
+        "agentic": {
+          "answer": "The bright focus may indicate restricted diffusion, which can be seen with acute ischemia, but the image alone is not diagnostic.",
+          "verdict": "correct",
+          "reason": "It identifies acute ischemia as the suggested cause despite diagnostic uncertainty."
+        }
+      }
+    },
+    "911": {
+      "question": "what abnormalities are in the right upper quadrant?",
+      "ground_truth": "gallstones",
+      "verdicts": {
+        "workflow": {
+          "answer": "Three rounded structures with dense peripheral rims are visible along the right side of the abdomen, lateral to the right kidney.; The abdominal aorta and inferior vena cava are opacified with contrast.",
+          "verdict": "partially_correct",
+          "reason": "Describes rim-dense structures in the right abdomen but does not identify them as gallstones."
+        },
+        "agentic": {
+          "answer": "Several rounded calcific densities are seen in the right upper abdomen near the inferior liver margin, likely representing gallstones.",
+          "verdict": "correct",
+          "reason": "Identifies the right upper abdominal calcific densities as gallstones."
+        },
+        "baseline": {
+          "answer": "Multiple calcified gallstones are present in the right upper quadrant.",
+          "verdict": "correct",
+          "reason": "Explicitly states that calcified gallstones are present in the right upper quadrant."
+        },
+        "pipeline": {
+          "answer": "Approximately three rounded, peripherally calcified structures are visible in the right lateral abdomen near the right kidney.",
+          "verdict": "partially_correct",
+          "reason": "Describes peripherally calcified structures in the right abdomen without identifying them as gallstones."
+        }
+      }
+    },
+    "177": {
+      "question": "which lung are the nodules located in?",
+      "ground_truth": "bilateral",
+      "verdicts": {
+        "workflow": {
+          "answer": "Chest",
+          "verdict": "partially_correct",
+          "reason": "Chest is a much vaguer location and does not specify both lungs."
+        },
+        "baseline": {
+          "answer": "The nodules are in the left lung.",
+          "verdict": "partially_correct",
+          "reason": "It identifies the left lung but omits the right lung."
+        },
+        "agentic": {
+          "answer": "Both lungs.",
+          "verdict": "correct",
+          "reason": "Both lungs means bilateral."
+        },
+        "pipeline": {
+          "answer": "Both lungs.",
+          "verdict": "correct",
+          "reason": "Both lungs means bilateral."
+        }
+      }
+    },
+    "113": {
+      "question": "where is the pathology in this image?",
+      "ground_truth": "vasculature",
+      "verdicts": {
+        "baseline": {
+          "answer": "The pathology is in the right cerebral hemisphere, in the right middle cerebral artery territory.",
+          "verdict": "incorrect",
+          "reason": "An arterial territory in the cerebral hemisphere is not the vasculature itself."
+        },
+        "pipeline": {
+          "answer": "Right cerebral hemisphere, near the lateral ventricle.",
+          "verdict": "incorrect",
+          "reason": "It locates the pathology near the lateral ventricle rather than in the vasculature."
+        },
+        "workflow": {
+          "answer": "Brain",
+          "verdict": "incorrect",
+          "reason": "Brain does not identify the vasculature as the affected structure."
+        },
+        "agentic": {
+          "answer": "Right deep periventricular white matter, adjacent to the lateral ventricle.",
+          "verdict": "incorrect",
+          "reason": "Periventricular white matter is brain tissue, not vasculature."
+        }
+      }
+    },
+    "935": {
+      "question": "which hemisphere is the ischemia located?",
+      "ground_truth": "right hemisphere",
+      "verdicts": {
+        "agentic": {
+          "answer": "Right cerebral hemisphere",
+          "verdict": "correct",
+          "reason": "Right cerebral hemisphere is equivalent to right hemisphere."
+        },
+        "workflow": {
+          "answer": "Brain",
+          "verdict": "partially_correct",
+          "reason": "Brain is a much vaguer location and does not specify the right hemisphere."
+        },
+        "pipeline": {
+          "answer": "Right cerebral hemisphere",
+          "verdict": "correct",
+          "reason": "Right cerebral hemisphere is equivalent to right hemisphere."
+        },
+        "baseline": {
+          "answer": "Right hemisphere.",
+          "verdict": "correct",
+          "reason": "It states the right hemisphere, matching the reference."
+        }
+      }
+    },
+    "481": {
+      "question": "which half the cerebellum is the largest mass located?",
+      "ground_truth": "right",
+      "verdicts": {
+        "workflow": {
+          "answer": "Brain",
+          "verdict": "partially_correct",
+          "reason": "Brain is a much vaguer location and does not specify the right half of the cerebellum."
+        },
+        "baseline": {
+          "answer": "The largest mass is in the right half of the cerebellum.",
+          "verdict": "correct",
+          "reason": "It locates the largest mass in the right half of the cerebellum."
+        },
+        "pipeline": {
+          "answer": "Right cerebellar hemisphere",
+          "verdict": "correct",
+          "reason": "Right cerebellar hemisphere means the right half of the cerebellum."
+        },
+        "agentic": {
+          "answer": "Right cerebellar hemisphere",
+          "verdict": "correct",
+          "reason": "Right cerebellar hemisphere means the right half of the cerebellum."
+        }
+      }
+    },
+    "1776": {
+      "question": "where is the lesion?",
+      "ground_truth": "abdomen and pelvis",
+      "verdicts": {
+        "pipeline": {
+          "answer": "In the liver.",
+          "verdict": "partially_correct",
+          "reason": "The liver is in the abdomen, but the pelvic location is omitted."
+        },
+        "agentic": {
+          "answer": "In the right upper abdomen, centered in or adjacent to the liver.",
+          "verdict": "partially_correct",
+          "reason": "The right upper abdomen overlaps with the reference, but the pelvis is omitted."
+        },
+        "baseline": {
+          "answer": "The lesion is in the liver, predominantly in the right upper abdomen.",
+          "verdict": "partially_correct",
+          "reason": "The hepatic abdominal location overlaps with the reference, but the pelvis is omitted."
+        },
+        "workflow": {
+          "answer": "Abdomen",
+          "verdict": "partially_correct",
+          "reason": "It identifies the abdomen but omits the pelvis."
+        }
+      }
+    },
+    "184": {
+      "question": "where is the spleen located?",
+      "ground_truth": "on the left",
+      "verdicts": {
+        "baseline": {
+          "answer": "The spleen is in the upper left abdomen, on the right side of this image, beside the stomach and above the left kidney.",
+          "verdict": "correct",
+          "reason": "It places the spleen in the left abdomen, with compatible image-orientation detail."
+        },
+        "agentic": {
+          "answer": "The spleen is in the left upper abdomen, lateral to the stomach and above the left kidney.",
+          "verdict": "correct",
+          "reason": "It specifies the left upper abdomen, consistent with the reference."
+        },
+        "pipeline": {
+          "answer": "In the left upper abdomen, lateral to the stomach and above the left kidney.",
+          "verdict": "correct",
+          "reason": "It specifies the left upper abdomen, consistent with the reference."
+        },
+        "workflow": {
+          "answer": "Upper abdomen",
+          "verdict": "partially_correct",
+          "reason": "It gives a broader abdominal location but omits the essential left-sided location."
+        }
+      }
+    },
+    "1785": {
+      "question": "where is the nodule?",
+      "ground_truth": "below the 7th rib in the right lung.",
+      "verdicts": {
+        "baseline": {
+          "answer": "The nodule is in the right midlung, near the hilum.",
+          "verdict": "partially_correct",
+          "reason": "Identifies the right lung but does not specify the location below the 7th rib."
+        },
+        "agentic": {
+          "answer": "In the right mid lung, just lateral to the right hilum.",
+          "verdict": "partially_correct",
+          "reason": "Identifies the right lung but the hilar landmark does not establish the location below the 7th rib."
+        },
+        "pipeline": {
+          "answer": "Right mid-to-lower lung",
+          "verdict": "partially_correct",
+          "reason": "Gives a broadly overlapping right lung location but omits the specific rib landmark."
+        },
+        "workflow": {
+          "answer": "Chest",
+          "verdict": "partially_correct",
+          "reason": "The chest encompasses the location but omits the right lung and rib landmark."
+        }
+      }
+    },
+    "8": {
+      "question": "where is the mass?",
+      "ground_truth": "pineal region",
+      "verdicts": {
+        "agentic": {
+          "answer": "Around the posterior third ventricle, extending into both medial thalami.",
+          "verdict": "partially_correct",
+          "reason": "Describes the nearby posterior third ventricular area but does not clearly localize the mass to the pineal region."
+        },
+        "workflow": {
+          "answer": "Brain",
+          "verdict": "partially_correct",
+          "reason": "Brain is a much vaguer location than the pineal region."
+        },
+        "baseline": {
+          "answer": "The mass is in the midline pineal region, just behind the third ventricle.",
+          "verdict": "correct",
+          "reason": "Explicitly locates the mass in the pineal region."
+        },
+        "pipeline": {
+          "answer": "No discrete mass is identifiable on this image.",
+          "verdict": "incorrect",
+          "reason": "Denies a mass rather than identifying its pineal location."
+        }
+      }
+    },
+    "642": {
+      "question": "where is the mass located in relation to the left kidney?",
+      "ground_truth": "posteriorly",
+      "verdicts": {
+        "agentic": {
+          "answer": "Superior and medial to the left kidney, near its upper pole.",
+          "verdict": "incorrect",
+          "reason": "Superior and medial does not specify the posterior relationship to the left kidney."
+        },
+        "baseline": {
+          "answer": "The mass is superior and medial to the left kidney, in the left adrenal region.",
+          "verdict": "incorrect",
+          "reason": "The superior-medial adrenal location differs from the reference posterior location."
+        },
+        "pipeline": {
+          "answer": "Just above and medial to the left kidney.",
+          "verdict": "incorrect",
+          "reason": "Above and medial is not the same as posterior to the left kidney."
+        },
+        "workflow": {
+          "answer": "Upper abdomen",
+          "verdict": "incorrect",
+          "reason": "Upper abdomen does not describe the mass's position relative to the left kidney."
+        }
+      }
+    },
+    "1024": {
+      "question": "where is the lesion?",
+      "ground_truth": "right lower lobe",
+      "verdicts": {
+        "baseline": {
+          "answer": "The lesion is in the peripheral right mid-lung.",
+          "verdict": "partially_correct",
+          "reason": "Identifies the right lung but places the lesion in the mid-lung rather than specifying the right lower lobe."
+        },
+        "pipeline": {
+          "answer": "Right mid-to-lower lung zone, peripherally.",
+          "verdict": "partially_correct",
+          "reason": "The right mid-to-lower lung zone overlaps the reference but does not specifically identify the lower lobe."
+        },
+        "workflow": {
+          "answer": "Chest",
+          "verdict": "partially_correct",
+          "reason": "The chest contains the referenced location but is much too vague to identify the right lower lobe."
+        },
+        "agentic": {
+          "answer": "Peripheral right mid-to-lower lung.",
+          "verdict": "partially_correct",
+          "reason": "Identifies an overlapping right lung region but does not specify the right lower lobe."
+        }
+      }
+    },
+    "2180": {
+      "question": "where is obstruction present, if any?",
+      "ground_truth": "proximal aspect of the appendix",
+      "verdicts": {
+        "baseline": {
+          "answer": "Obstruction appears to be in the small bowel, with a likely transition point in the right lower quadrant.",
+          "verdict": "incorrect",
+          "reason": "It locates obstruction in the small bowel rather than the proximal appendix."
+        },
+        "workflow": {
+          "answer": "Lower abdomen and pelvis",
+          "verdict": "partially_correct",
+          "reason": "It gives a broadly overlapping abdominal region but omits the proximal appendix."
+        },
+        "agentic": {
+          "answer": "No definite site of obstruction is visible.",
+          "verdict": "incorrect",
+          "reason": "It does not identify the obstruction in the proximal appendix."
+        },
+        "pipeline": {
+          "answer": "No definite obstruction or transition point is visible on this image.",
+          "verdict": "incorrect",
+          "reason": "It denies visible obstruction rather than locating it in the proximal appendix."
+        }
+      }
+    },
+    "1706": {
+      "question": "where is the lesion located?",
+      "ground_truth": "left kidney",
+      "verdicts": {
+        "workflow": {
+          "answer": "Abdomen",
+          "verdict": "partially_correct",
+          "reason": "The abdomen includes the left kidney but is much less specific."
+        },
+        "pipeline": {
+          "answer": "Left renal region",
+          "verdict": "correct",
+          "reason": "Left renal region conveys the left kidney location."
+        },
+        "baseline": {
+          "answer": "The lesion is located in the left kidney.",
+          "verdict": "correct",
+          "reason": "It explicitly identifies the left kidney."
+        },
+        "agentic": {
+          "answer": "Left renal region (left retroperitoneum)",
+          "verdict": "correct",
+          "reason": "Left renal region matches the reference, and the retroperitoneal detail is consistent."
+        }
+      }
+    },
+    "2243": {
+      "question": "where is the lesion located?",
+      "ground_truth": "anterior mediastinum",
+      "verdicts": {
+        "agentic": {
+          "answer": "Right perihilar region, extending into the mid lung.",
+          "verdict": "incorrect",
+          "reason": "The right perihilar and mid-lung regions are not the anterior mediastinum."
+        },
+        "workflow": {
+          "answer": "Chest",
+          "verdict": "partially_correct",
+          "reason": "The chest includes the anterior mediastinum but is much less specific."
+        },
+        "baseline": {
+          "answer": "The lesion is in the right perihilar region, extending into the right mid lung.",
+          "verdict": "incorrect",
+          "reason": "The right perihilar region and right mid lung are different locations from the anterior mediastinum."
+        },
+        "pipeline": {
+          "answer": "Right perihilar region, extending into the mid-to-lower right lung.",
+          "verdict": "incorrect",
+          "reason": "The right perihilar and mid-to-lower lung regions do not match the anterior mediastinum."
+        }
+      }
+    },
+    "735": {
+      "question": "where is the cavitary lesion?",
+      "ground_truth": "right upper lobe",
+      "verdicts": {
+        "workflow": {
+          "answer": "Chest",
+          "verdict": "partially_correct",
+          "reason": "Chest is a much vaguer location that omits the right upper lobe."
+        },
+        "baseline": {
+          "answer": "The cavitary lesion is in the right upper lobe, near the apex.",
+          "verdict": "correct",
+          "reason": "It specifies the right upper lobe with noncontradictory apical detail."
+        },
+        "pipeline": {
+          "answer": "Right upper lung (right upper lobe).",
+          "verdict": "correct",
+          "reason": "It explicitly identifies the right upper lobe."
+        },
+        "agentic": {
+          "answer": "In the right upper lobe, near the apex.",
+          "verdict": "correct",
+          "reason": "It specifies the right upper lobe with noncontradictory apical detail."
+        }
+      }
+    },
+    "975": {
+      "question": "where is the aortic arch?",
+      "ground_truth": "right side",
+      "verdicts": {
+        "agentic": {
+          "answer": "Along the upper right mediastinal border, on the left side of the image.",
+          "verdict": "correct",
+          "reason": "The right mediastinal border corresponds to the patient's right side, shown on the image's left."
+        },
+        "workflow": {
+          "answer": "Chest",
+          "verdict": "partially_correct",
+          "reason": "Chest is a much vaguer location and omits the essential right-sided position."
+        },
+        "pipeline": {
+          "answer": "In the left upper mediastinum, just left of the trachea and above the left main bronchus.",
+          "verdict": "incorrect",
+          "reason": "It places the arch on the left rather than the right."
+        },
+        "baseline": {
+          "answer": "The aortic arch is in the upper left side of the chest, forming the aortic knob just left of the spine (on the right side of the image).",
+          "verdict": "incorrect",
+          "reason": "It specifies the patient's left side, contradicting the right-sided reference."
+        }
+      }
+    },
+    "598": {
+      "question": "where is the abnormality located?",
+      "ground_truth": "right convexity",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Anterior frontal region, on the image-left side (patient\u2019s right on a standard axial CT).",
+          "verdict": "correct",
+          "reason": "The patient\u2019s right anterior frontal region is compatible with a more specific right convexity location."
+        },
+        "baseline": {
+          "answer": "The abnormality is in the right frontal region of the brain.",
+          "verdict": "correct",
+          "reason": "The right frontal region is compatible with the referenced right convexity location."
+        },
+        "agentic": {
+          "answer": "Right posterior parasagittal parieto-occipital region, near the falx.",
+          "verdict": "partially_correct",
+          "reason": "It preserves right-sided laterality but places the abnormality near the falx rather than the convexity."
+        },
+        "workflow": {
+          "answer": "Head",
+          "verdict": "partially_correct",
+          "reason": "Head is broadly compatible but omits both the right side and the convexity location."
+        }
+      }
+    },
+    "1952": {
+      "question": "where is the abnormal mass located with respect to the lungs?",
+      "ground_truth": "right upper lobe",
+      "verdicts": {
+        "pipeline": {
+          "answer": "In the right upper lung, near the hilum.",
+          "verdict": "correct",
+          "reason": "Right upper lung matches the right upper lobe, with noncontradictory hilar detail."
+        },
+        "baseline": {
+          "answer": "The mass is in the upper part of the right lung.",
+          "verdict": "correct",
+          "reason": "The upper part of the right lung matches the right upper lobe."
+        },
+        "workflow": {
+          "answer": "Chest",
+          "verdict": "partially_correct",
+          "reason": "Chest is a much vaguer location that omits the right side and upper lobe."
+        },
+        "agentic": {
+          "answer": "In the right upper lung, near the hilum (suprahilar region).",
+          "verdict": "correct",
+          "reason": "Right upper lung matches the right upper lobe, with noncontradictory suprahilar detail."
+        }
+      }
+    },
+    "138": {
+      "question": "where are the kidneys located?",
+      "ground_truth": "adjacent to vertebrae",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Retroperitoneally on either side of the spine in the upper posterior abdomen.",
+          "verdict": "correct",
+          "reason": "On either side of the spine matches adjacent to the vertebrae."
+        },
+        "agentic": {
+          "answer": "Unable to determine from this image.",
+          "verdict": "incorrect",
+          "reason": "It does not provide the kidney location."
+        },
+        "baseline": {
+          "answer": "The kidneys are on either side of the spine, toward the back of the abdomen.",
+          "verdict": "correct",
+          "reason": "On either side of the spine matches adjacent to the vertebrae."
+        },
+        "workflow": {
+          "answer": "Abdomen",
+          "verdict": "partially_correct",
+          "reason": "Abdomen is a much vaguer location and omits adjacency to the vertebrae."
+        }
+      }
+    },
+    "1869": {
+      "question": "what is the location of the mass?",
+      "ground_truth": "head of the pancreas",
+      "verdicts": {
+        "agentic": {
+          "answer": "Pancreatic head/uncinate region",
+          "verdict": "correct",
+          "reason": "The pancreatic head/uncinate region matches the head of the pancreas."
+        },
+        "pipeline": {
+          "answer": "The pancreatic head region.",
+          "verdict": "correct",
+          "reason": "The pancreatic head region is the reference location."
+        },
+        "baseline": {
+          "answer": "The mass is in the head of the pancreas.",
+          "verdict": "correct",
+          "reason": "It explicitly identifies the head of the pancreas."
+        },
+        "workflow": {
+          "answer": "Abdomen",
+          "verdict": "partially_correct",
+          "reason": "The abdomen contains the pancreas but is much vaguer than the pancreatic head."
+        }
+      }
+    },
+    "727": {
+      "question": "what deficits are suggested by the location of the lesion?",
+      "ground_truth": "motor weakness, sensory deficits, and left neglect",
+      "verdicts": {
+        "agentic": {
+          "answer": "A right temporal-lobe lesion may impair nonverbal or visual memory and recognition; if it involves the optic radiations, it may cause a left superior visual-field defect.",
+          "verdict": "incorrect",
+          "reason": "Memory impairment and a visual-field defect do not match motor weakness, sensory deficits, and left neglect."
+        },
+        "pipeline": {
+          "answer": "The bilateral temporal-lobe location suggests possible memory impairment, especially difficulty forming new memories.",
+          "verdict": "incorrect",
+          "reason": "Memory impairment does not match any of the specified deficits."
+        },
+        "workflow": {
+          "answer": "This is a MRI image. of the Brain. showing Bright fluid-signal spaces are visible around the brain and within the ventricles.; Bilateral bright fluid-signal regions are present along the temporal lobes and appear asymmetric.; The image is a single slice with visible grain and overlay text..",
+          "verdict": "incorrect",
+          "reason": "The candidate describes imaging appearances without identifying the suggested deficits."
+        },
+        "baseline": {
+          "answer": "The temporal-lobe location may cause memory problems and seizures; involvement of nearby visual pathways can produce a visual-field deficit.",
+          "verdict": "incorrect",
+          "reason": "Memory problems, seizures, and visual-field deficits do not match the specified neurological deficits."
+        }
+      }
+    },
+    "17": {
+      "question": "what is the location of the abnormality?",
+      "ground_truth": "right colon",
+      "verdicts": {
+        "baseline": {
+          "answer": "Right lower quadrant, adjacent to the cecum.",
+          "verdict": "partially_correct",
+          "reason": "Localizes to the right cecal region but does not identify the right colon itself."
+        },
+        "agentic": {
+          "answer": "Right lower abdomen, adjacent to the cecum.",
+          "verdict": "partially_correct",
+          "reason": "Localizes to the right cecal region but does not identify the right colon itself."
+        },
+        "workflow": {
+          "answer": "Abdomen",
+          "verdict": "partially_correct",
+          "reason": "The abdomen contains the right colon, but this location is much too vague."
+        },
+        "pipeline": {
+          "answer": "Right lower abdomen (right lower quadrant), in a bowel loop.",
+          "verdict": "partially_correct",
+          "reason": "Identifies right lower abdominal bowel but does not specify the right colon."
+        }
+      }
+    },
+    "1458": {
+      "question": "the air fluid level is in which location?",
+      "ground_truth": "cardiac region",
+      "verdicts": {
+        "agentic": {
+          "answer": "In the retrocardiac left lower mediastinum, above the diaphragm.",
+          "verdict": "correct",
+          "reason": "The retrocardiac left lower mediastinum is a more specific location in the cardiac region."
+        },
+        "baseline": {
+          "answer": "In the retrocardiac lower mediastinum, within a hiatal hernia.",
+          "verdict": "correct",
+          "reason": "The retrocardiac location matches the cardiac region, with noncontradictory added detail."
+        },
+        "pipeline": {
+          "answer": "The retrocardiac lower mediastinum.",
+          "verdict": "correct",
+          "reason": "The retrocardiac lower mediastinum corresponds to the cardiac region."
+        },
+        "workflow": {
+          "answer": "Chest",
+          "verdict": "partially_correct",
+          "reason": "Chest includes the cardiac region but is much less specific."
+        }
+      }
+    },
+    "1783": {
+      "question": "how would you describe the location of the lesion?",
+      "ground_truth": "retrocardiac",
+      "verdicts": {
+        "agentic": {
+          "answer": "The opacity is in the left retrocardiac region, at the medial left lung base just above the left hemidiaphragm.",
+          "verdict": "correct",
+          "reason": "It explicitly locates the opacity in the retrocardiac region."
+        },
+        "workflow": {
+          "answer": "Chest",
+          "verdict": "partially_correct",
+          "reason": "Chest is a compatible but much vaguer location than retrocardiac."
+        },
+        "pipeline": {
+          "answer": "No focal lesion is visible to localize.",
+          "verdict": "incorrect",
+          "reason": "It denies a localizable lesion rather than identifying a retrocardiac location."
+        },
+        "baseline": {
+          "answer": "The lesion is in the right perihilar region, in the medial midlung.",
+          "verdict": "incorrect",
+          "reason": "The right perihilar region is a different location from retrocardiac."
+        }
+      }
+    },
+    "186": {
+      "question": "how many gallstones are identified?",
+      "ground_truth": "4",
+      "verdicts": {
+        "workflow": {
+          "answer": "2",
+          "verdict": "incorrect",
+          "reason": "States 2 gallstones instead of 4."
+        },
+        "pipeline": {
+          "answer": "3",
+          "verdict": "incorrect",
+          "reason": "States 3 gallstones instead of 4."
+        },
+        "agentic": {
+          "answer": "3",
+          "verdict": "incorrect",
+          "reason": "States 3 gallstones instead of 4."
+        },
+        "baseline": {
+          "answer": "Three gallstones are identified.",
+          "verdict": "incorrect",
+          "reason": "States three gallstones instead of four."
+        }
+      }
+    },
+    "1936": {
+      "question": "in which brain area is the lesion located?",
+      "ground_truth": "right cerebellopontine angle",
+      "verdicts": {
+        "baseline": {
+          "answer": "The lesion is in the left cerebellopontine angle.",
+          "verdict": "partially_correct",
+          "reason": "Correct cerebellopontine angle location but wrong side: left instead of right."
+        },
+        "agentic": {
+          "answer": "Left cerebellopontine angle",
+          "verdict": "partially_correct",
+          "reason": "Correct cerebellopontine angle location but wrong side: left instead of right."
+        },
+        "workflow": {
+          "answer": "Head, posterior fossa",
+          "verdict": "partially_correct",
+          "reason": "Posterior fossa overlaps anatomically but omits the specific cerebellopontine angle location and right side."
+        },
+        "pipeline": {
+          "answer": "Left cerebellopontine angle",
+          "verdict": "partially_correct",
+          "reason": "Correct cerebellopontine angle location but wrong side: left instead of right."
+        }
+      }
+    },
+    "321": {
+      "question": "how many masses are there?",
+      "ground_truth": "one",
+      "verdicts": {
+        "baseline": {
+          "answer": "One mass.",
+          "verdict": "correct",
+          "reason": "One mass matches the reference."
+        },
+        "pipeline": {
+          "answer": "1",
+          "verdict": "correct",
+          "reason": "1 matches the reference count of one."
+        },
+        "workflow": {
+          "answer": "3",
+          "verdict": "incorrect",
+          "reason": "3 contradicts the reference count of one."
+        },
+        "agentic": {
+          "answer": "1",
+          "verdict": "correct",
+          "reason": "1 matches the reference count of one."
+        }
+      }
+    },
+    "782": {
+      "question": "is this an infectious process?",
+      "ground_truth": "maybe",
+      "verdicts": {
+        "agentic": {
+          "answer": "Unable to determine from this image.",
+          "verdict": "correct",
+          "reason": "It expresses uncertainty about infection, consistent with 'maybe'."
+        },
+        "pipeline": {
+          "answer": "no",
+          "verdict": "incorrect",
+          "reason": "It rules out infection rather than leaving it possible."
+        },
+        "workflow": {
+          "answer": "Yes",
+          "verdict": "incorrect",
+          "reason": "It definitively affirms infection rather than expressing possibility."
+        },
+        "baseline": {
+          "answer": "Yes, an infectious process is possible, but it cannot be confirmed from this image alone.",
+          "verdict": "correct",
+          "reason": "It describes infection as possible but unconfirmed, matching 'maybe'."
+        }
+      }
+    },
+    "396": {
+      "question": "is this an ap or pa film?",
+      "ground_truth": "ap",
+      "verdicts": {
+        "baseline": {
+          "answer": "PA.",
+          "verdict": "incorrect",
+          "reason": "States PA rather than AP."
+        },
+        "agentic": {
+          "answer": "PA",
+          "verdict": "incorrect",
+          "reason": "States PA rather than AP."
+        },
+        "pipeline": {
+          "answer": "PA",
+          "verdict": "incorrect",
+          "reason": "States PA rather than AP."
+        },
+        "workflow": {
+          "answer": "Frontal chest radiograph showing the lungs, heart, mediastinum, and upper abdomen. A small radiopaque object projects over the upper abdomen just below the central diaphragm.",
+          "verdict": "incorrect",
+          "reason": "Does not specify whether the film is AP or PA."
+        }
+      }
+    },
+    "196": {
+      "question": "is the mass in the left or right side?",
+      "ground_truth": "left",
+      "verdicts": {
+        "baseline": {
+          "answer": "Left side.",
+          "verdict": "correct",
+          "reason": "It identifies the left side, matching the reference."
+        },
+        "workflow": {
+          "answer": "Abdomen and pelvis",
+          "verdict": "incorrect",
+          "reason": "It does not specify whether the mass is on the left or right side."
+        },
+        "pipeline": {
+          "answer": "Left side of the pelvis.",
+          "verdict": "correct",
+          "reason": "It specifies the left side with additional location detail that does not contradict the reference."
+        },
+        "agentic": {
+          "answer": "The mass is on the patient's left side.",
+          "verdict": "correct",
+          "reason": "It identifies the patient's left side, matching the reference."
+        }
+      }
+    },
+    "265": {
+      "question": "is the mass heterogeneous or homogeneous in appearance?",
+      "ground_truth": "heterogeneous",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Heterogeneous.",
+          "verdict": "correct",
+          "reason": "States that the mass is heterogeneous."
+        },
+        "baseline": {
+          "answer": "The mass appears heterogeneous.",
+          "verdict": "correct",
+          "reason": "Describes the mass as heterogeneous."
+        },
+        "workflow": {
+          "answer": "Single axial CT image through the upper abdomen with intravenous contrast. The liver and spleen occupy much of the image, with the stomach, major vessels, vertebral body, and portions of the lung bases also visible.",
+          "verdict": "incorrect",
+          "reason": "Does not describe whether the mass is heterogeneous or homogeneous."
+        },
+        "agentic": {
+          "answer": "Heterogeneous.",
+          "verdict": "correct",
+          "reason": "States that the mass is heterogeneous."
+        }
+      }
+    },
+    "1487": {
+      "question": "is the lesion seen in the gray or white matter?",
+      "ground_truth": "white matter",
+      "verdicts": {
+        "pipeline": {
+          "answer": "White matter.",
+          "verdict": "correct",
+          "reason": "Identifies the lesion as being in white matter."
+        },
+        "agentic": {
+          "answer": "White matter, near the gray-white junction.",
+          "verdict": "correct",
+          "reason": "Identifies white matter with additional noncontradictory location detail."
+        },
+        "baseline": {
+          "answer": "White matter.",
+          "verdict": "correct",
+          "reason": "Identifies the lesion as being in white matter."
+        },
+        "workflow": {
+          "answer": "Axial T2-weighted MRI image through the upper cerebral hemispheres. The hemispheres appear broadly symmetric, with bright signal in the cortical sulci.",
+          "verdict": "incorrect",
+          "reason": "Does not specify whether the lesion is in gray or white matter."
+        }
+      }
+    },
+    "392": {
+      "question": "is the csf enhanced or non enhanced?",
+      "ground_truth": "non-enhanced",
+      "verdicts": {
+        "baseline": {
+          "answer": "The CSF is non-enhanced and appears suppressed.",
+          "verdict": "correct",
+          "reason": "Explicitly states that the CSF is non-enhanced."
+        },
+        "agentic": {
+          "answer": "CSF appears non-enhanced.",
+          "verdict": "correct",
+          "reason": "States that the CSF is non-enhanced."
+        },
+        "pipeline": {
+          "answer": "The CSF appears dark and suppressed (non-enhanced).",
+          "verdict": "correct",
+          "reason": "Describes the CSF as non-enhanced with noncontradictory detail."
+        },
+        "workflow": {
+          "answer": "Axial fluid-sensitive MRI image through the deep cerebral structures. A focal area of increased signal is visible beside the central deep gray structures on one side.",
+          "verdict": "incorrect",
+          "reason": "Does not answer whether the CSF is enhanced or non-enhanced."
+        }
+      }
+    },
+    "537": {
+      "question": "is the abnormality hyperintense or hypointense?",
+      "ground_truth": "hyperintense",
+      "verdicts": {
+        "workflow": {
+          "answer": "No obvious focal abnormality is apparent on this single image.",
+          "verdict": "incorrect",
+          "reason": "It denies an obvious abnormality rather than identifying it as hyperintense."
+        },
+        "pipeline": {
+          "answer": "Hyperintense.",
+          "verdict": "correct",
+          "reason": "It identifies the abnormality as hyperintense."
+        },
+        "baseline": {
+          "answer": "The abnormality is hyperintense.",
+          "verdict": "correct",
+          "reason": "It states that the abnormality is hyperintense."
+        },
+        "agentic": {
+          "answer": "Hyperintense.",
+          "verdict": "correct",
+          "reason": "It identifies the abnormality as hyperintense."
+        }
+      }
+    },
+    "521": {
+      "question": "is a pneumonia or pleural effusion seen in this image?",
+      "ground_truth": "pleural effusion",
+      "verdicts": {
+        "baseline": {
+          "answer": "Yes\u2014there is a right pleural effusion with adjacent right basilar opacity; pneumonia cannot be excluded.",
+          "verdict": "correct",
+          "reason": "Explicitly identifies a pleural effusion without contradicting the reference."
+        },
+        "workflow": {
+          "answer": "Frontal chest radiograph with monitoring leads over the upper chest. There is increased opacity at the right lung base with blunting of the right costophrenic angle, and the cardiac silhouette appears enlarged.",
+          "verdict": "partially_correct",
+          "reason": "Describes findings suggestive of pleural effusion but does not identify the effusion itself."
+        },
+        "agentic": {
+          "answer": "Yes\u2014there is a moderate right pleural effusion; pneumonia is not definite.",
+          "verdict": "correct",
+          "reason": "Explicitly identifies a right pleural effusion."
+        },
+        "pipeline": {
+          "answer": "A right pleural effusion is present; pneumonia is uncertain.",
+          "verdict": "correct",
+          "reason": "States that a pleural effusion is present."
+        }
+      }
+    },
+    "831": {
+      "question": "are the lines in the image inside or outside of the patient?",
+      "ground_truth": "outside",
+      "verdicts": {
+        "workflow": {
+          "answer": "Single frontal chest radiograph with monitoring leads and thin catheter-like lines projecting over the right hemithorax. There is a dense opacity in the right lower lung with blunting of the right costophrenic angle; the left lung is relatively clear.",
+          "verdict": "incorrect",
+          "reason": "It describes the lines but does not state whether they are inside or outside the patient."
+        },
+        "agentic": {
+          "answer": "Both: the monitoring wires are outside, while a tube-like line appears to lie inside the right side of the chest.",
+          "verdict": "partially_correct",
+          "reason": "It identifies external monitoring wires but also places a line inside the chest."
+        },
+        "baseline": {
+          "answer": "The visible lines are mostly outside the patient, lying over the chest as monitoring leads.",
+          "verdict": "correct",
+          "reason": "It locates the lines outside the patient as overlying monitoring leads."
+        },
+        "pipeline": {
+          "answer": "The lines are mostly outside the patient, lying over the chest.",
+          "verdict": "correct",
+          "reason": "It states that the lines are outside the patient, overlying the chest."
+        }
+      }
+    },
+    "724": {
+      "question": "which organ has the abnormality?",
+      "ground_truth": "pancreas",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Stomach",
+          "verdict": "incorrect",
+          "reason": "Stomach is a different organ from the pancreas."
+        },
+        "workflow": {
+          "answer": "Upper abdomen",
+          "verdict": "partially_correct",
+          "reason": "Upper abdomen broadly includes the pancreas but does not identify the organ."
+        },
+        "agentic": {
+          "answer": "Stomach",
+          "verdict": "incorrect",
+          "reason": "Stomach is a different organ from the pancreas."
+        },
+        "baseline": {
+          "answer": "Stomach.",
+          "verdict": "incorrect",
+          "reason": "Stomach is a different organ from the pancreas."
+        }
+      }
+    },
+    "1442": {
+      "question": "what modality is this?",
+      "ground_truth": "chest x ray",
+      "verdicts": {
+        "pipeline": {
+          "answer": "X-ray (frontal chest radiograph)",
+          "verdict": "correct",
+          "reason": "Identifies a chest X-ray with additional frontal-view detail."
+        },
+        "workflow": {
+          "answer": "X-ray",
+          "verdict": "correct",
+          "reason": "Identifies X-ray as the requested modality."
+        },
+        "agentic": {
+          "answer": "Frontal chest X-ray (radiograph).",
+          "verdict": "correct",
+          "reason": "Identifies a chest X-ray with additional frontal-view detail."
+        },
+        "baseline": {
+          "answer": "Chest X-ray (radiograph).",
+          "verdict": "correct",
+          "reason": "Directly matches the reference chest X-ray."
+        }
+      }
+    },
+    "382": {
+      "question": "what modality is this image taken?",
+      "ground_truth": "mri",
+      "verdicts": {
+        "agentic": {
+          "answer": "MRI, axial T2-weighted FLAIR",
+          "verdict": "correct",
+          "reason": "It identifies the modality as MRI, matching the reference."
+        },
+        "workflow": {
+          "answer": "MRI (axial FLAIR)",
+          "verdict": "correct",
+          "reason": "It identifies the modality as MRI, matching the reference."
+        },
+        "pipeline": {
+          "answer": "MRI, axial FLAIR-type sequence",
+          "verdict": "correct",
+          "reason": "It identifies the modality as MRI, matching the reference."
+        },
+        "baseline": {
+          "answer": "MRI (axial FLAIR brain image).",
+          "verdict": "correct",
+          "reason": "It identifies the modality as MRI, matching the reference."
+        }
+      }
+    },
+    "77": {
+      "question": "what imaging modality was used?",
+      "ground_truth": "x-ray",
+      "verdicts": {
+        "agentic": {
+          "answer": "X-ray (frontal chest radiograph)",
+          "verdict": "correct",
+          "reason": "Identifies X-ray as the imaging modality."
+        },
+        "pipeline": {
+          "answer": "Chest X-ray (frontal radiograph)",
+          "verdict": "correct",
+          "reason": "Chest X-ray is the same modality as the reference."
+        },
+        "workflow": {
+          "answer": "X-ray",
+          "verdict": "correct",
+          "reason": "Exactly matches the reference modality."
+        },
+        "baseline": {
+          "answer": "Chest X-ray (radiograph).",
+          "verdict": "correct",
+          "reason": "Chest radiograph identifies the same X-ray modality."
+        }
+      }
+    },
+    "68": {
+      "question": "what imaging modality was used",
+      "ground_truth": "ct",
+      "verdicts": {
+        "workflow": {
+          "answer": "CT",
+          "verdict": "correct",
+          "reason": "CT exactly matches the reference modality."
+        },
+        "baseline": {
+          "answer": "CT (computed tomography) of the abdomen.",
+          "verdict": "correct",
+          "reason": "Computed tomography matches CT, and the added anatomical detail does not contradict it."
+        },
+        "agentic": {
+          "answer": "CT with contrast",
+          "verdict": "correct",
+          "reason": "CT with contrast identifies the same modality with additional detail."
+        },
+        "pipeline": {
+          "answer": "Contrast-enhanced CT.",
+          "verdict": "correct",
+          "reason": "Contrast-enhanced CT identifies the same modality with additional detail."
+        }
+      }
+    },
+    "780": {
+      "question": "what part of the liver is the mass located in?",
+      "ground_truth": "left hepatic lobe",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Right hepatic lobe",
+          "verdict": "partially_correct",
+          "reason": "Identifies the liver but gives the right lobe instead of the left."
+        },
+        "workflow": {
+          "answer": "Abdomen",
+          "verdict": "partially_correct",
+          "reason": "The abdomen is a much vaguer location that does not identify the left hepatic lobe."
+        },
+        "baseline": {
+          "answer": "The mass is in the right lobe of the liver.",
+          "verdict": "partially_correct",
+          "reason": "Identifies the liver but gives the right lobe instead of the left."
+        },
+        "agentic": {
+          "answer": "Right hepatic lobe",
+          "verdict": "partially_correct",
+          "reason": "Identifies the liver but gives the right lobe instead of the left."
+        }
+      }
+    },
+    "276": {
+      "question": "what imaging modality is used?",
+      "ground_truth": "xray",
+      "verdicts": {
+        "workflow": {
+          "answer": "X-ray",
+          "verdict": "correct",
+          "reason": "X-ray matches the reference modality."
+        },
+        "pipeline": {
+          "answer": "Chest X-ray (frontal radiograph)",
+          "verdict": "correct",
+          "reason": "Chest X-ray specifies the same modality with noncontradictory detail."
+        },
+        "agentic": {
+          "answer": "Chest X-ray (frontal radiograph).",
+          "verdict": "correct",
+          "reason": "Chest X-ray specifies the same modality with noncontradictory detail."
+        },
+        "baseline": {
+          "answer": "Chest X-ray (radiograph).",
+          "verdict": "correct",
+          "reason": "Chest X-ray identifies the same modality as the reference."
+        }
+      }
+    },
+    "514": {
+      "question": "what organ is edematous in this image?",
+      "ground_truth": "appendix",
+      "verdicts": {
+        "pipeline": {
+          "answer": "The mesentery.",
+          "verdict": "incorrect",
+          "reason": "The mesentery is a different structure from the appendix."
+        },
+        "workflow": {
+          "answer": "Abdomen",
+          "verdict": "partially_correct",
+          "reason": "The abdomen includes the appendix but is too vague to identify the edematous organ."
+        },
+        "agentic": {
+          "answer": "The pancreas is the most likely edematous organ.",
+          "verdict": "incorrect",
+          "reason": "The candidate identifies the pancreas rather than the appendix."
+        },
+        "baseline": {
+          "answer": "The pancreas is edematous.",
+          "verdict": "incorrect",
+          "reason": "The candidate identifies the pancreas rather than the appendix."
+        }
+      }
+    },
+    "1365": {
+      "question": "what region of the brain shows hyperintensity?",
+      "ground_truth": "right lenticular nucleus",
+      "verdicts": {
+        "pipeline": {
+          "answer": "Right basal ganglia region",
+          "verdict": "partially_correct",
+          "reason": "The right basal ganglia include the lenticular nucleus but are a broader location."
+        },
+        "workflow": {
+          "answer": "Brain",
+          "verdict": "incorrect",
+          "reason": "Brain does not identify the requested region or laterality."
+        },
+        "baseline": {
+          "answer": "The right basal ganglia region shows hyperintensity.",
+          "verdict": "partially_correct",
+          "reason": "The right basal ganglia overlap with the reference but do not specify the lenticular nucleus."
+        },
+        "agentic": {
+          "answer": "Right basal ganglia, particularly the lentiform region.",
+          "verdict": "correct",
+          "reason": "The right lentiform region is equivalent to the right lenticular nucleus."
+        }
+      }
+    },
+    "512": {
+      "question": "in what organ do you see swelling?",
+      "ground_truth": "appendix",
+      "verdicts": {
+        "baseline": {
+          "answer": "The pancreas.",
+          "verdict": "incorrect",
+          "reason": "The pancreas is a different organ from the appendix."
+        },
+        "agentic": {
+          "answer": "The pancreas.",
+          "verdict": "incorrect",
+          "reason": "The pancreas is a different organ from the appendix."
+        },
+        "workflow": {
+          "answer": "Abdomen",
+          "verdict": "partially_correct",
+          "reason": "The abdomen contains the appendix but is too vague to identify the organ."
+        },
+        "pipeline": {
+          "answer": "The mesentery",
+          "verdict": "incorrect",
+          "reason": "The mesentery is a different anatomical structure from the appendix."
+        }
+      }
+    },
+    "1033": {
+      "question": "what organ system is primarily present in this image?",
+      "ground_truth": "gastrointestinal",
+      "verdicts": {
+        "workflow": {
+          "answer": "Abdomen",
+          "verdict": "partially_correct",
+          "reason": "Abdomen names a broader anatomical region rather than the gastrointestinal organ system."
+        },
+        "pipeline": {
+          "answer": "Abdomen",
+          "verdict": "partially_correct",
+          "reason": "Abdomen names a broader anatomical region rather than the gastrointestinal organ system."
+        },
+        "baseline": {
+          "answer": "Digestive system",
+          "verdict": "correct",
+          "reason": "Digestive system is equivalent to the gastrointestinal system."
+        },
+        "agentic": {
+          "answer": "Digestive system.",
+          "verdict": "correct",
+          "reason": "Digestive system is equivalent to the gastrointestinal system."
+        }
+      }
+    },
+    "446": {
+      "question": "what organ system is pictured?",
+      "ground_truth": "the brain",
+      "verdicts": {
+        "agentic": {
+          "answer": "Brain",
+          "verdict": "correct",
+          "reason": "Identifies the brain, matching the reference."
+        },
+        "workflow": {
+          "answer": "Brain",
+          "verdict": "correct",
+          "reason": "Identifies the brain, matching the reference."
+        },
+        "pipeline": {
+          "answer": "Nervous system (brain)",
+          "verdict": "correct",
+          "reason": "Explicitly identifies the brain and correctly places it within the nervous system."
+        },
+        "baseline": {
+          "answer": "Nervous system (brain).",
+          "verdict": "correct",
+          "reason": "Explicitly identifies the brain and correctly places it within the nervous system."
+        }
+      }
+    }
+  }
+}

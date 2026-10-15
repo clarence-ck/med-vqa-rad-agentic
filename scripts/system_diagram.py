@@ -130,7 +130,7 @@ def main():
          ls=(0, (4, 3)), label="answer + explanation + trace + signals → UI", label_xy=(9.0, 3.3))
 
     # ---- Evaluation ----------------------------------------------------------------------
-    frame(ax, 3.8, 0.5, 14.9, 2.45, "Evaluation (scripts/run_all.py: 300 VQA-RAD test questions, experiments/eval_set.json)", BLUE)
+    frame(ax, 3.8, 0.5, 14.9, 2.45, "Evaluation (scripts/run_all.py: the VQA-RAD questions in experiments/eval_set.json)", BLUE)
     evals = [
         (4.1, "Single-shot baseline", "one vision prompt · gpt-6-luna"),
         (7.05, "Workflow baseline", "fixed rules over image +\nquestion analysis"),

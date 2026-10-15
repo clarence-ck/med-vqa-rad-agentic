@@ -123,7 +123,7 @@ def block_glance(m: dict, d: dict) -> str:
         verdict = "agentic ahead, significant on both scores" if ahead else "single-shot ahead, significant on both scores"
     elif abj["p"] < 0.05 or ab["p"] < 0.05:
         which = "judged" if abj["p"] < 0.05 else "strict"
-        verdict = f"agentic ahead, significant on the {which} score only" if ahead else f"single-shot ahead on the {which} score only"
+        verdict = f"agentic ahead, significant on the {which} score only" if ahead else f"single-shot ahead, significant on the {which} score only"
     else:
         verdict = "no significant difference"
     blind = m.get("blind_reading")

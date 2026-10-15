@@ -43,14 +43,15 @@ answer synthesis and verification---steps that fail in different ways and are hi
 We present MedVisionQuery, an agentic system in which a Haystack Agent controller decides, case by case, how to
 look at the image, answer, verify the answer \emph{against the image}, and whether to re-examine a specific region,
 revise, abstain or finish. Perception is question-aware, the answerer and the verifier both see the image, and a
-different, larger model verifies. We evaluate on \NCases{} randomly sampled VQA-RAD test questions against a single-prompt
-baseline, a hand-designed workflow and a fixed-pipeline ablation, all on the same answering model, scoring with a
-strict rule-based scorer and a blinded LLM judge. The agentic loop is not more accurate than
-the single prompt (\AgStrict\% vs.\ \BaseStrict\% strict, \AgJudged\% vs.\ \BaseJudged\% judged; McNemar $p=\PairBaseP$
-and $p=\PairBaseJP$) or the fixed pipeline ($p=\PairPlP$), and its larger verifier answering alone is significantly
-more accurate (\BlindStrict\%, $p=\BlindAgP$). Its revisions fix \RevFixed{} wrong answers and break \RevBroken, but its
-abstentions withhold about as many correct ones. Its value is calibrated confidence: answers its check verifies are
-\SigVerAcc\% correct, the rest \UnverAcc\%---at about \CostRatio$\times$ the cost of a single prompt. Code is available at
+different, larger model verifies. We evaluate on \NCases{} questions sampled at random from the whole VQA-RAD
+dataset against a single-prompt baseline, a hand-designed workflow and a fixed-pipeline ablation, all on the same
+answering model, scoring with a strict rule-based scorer and a blinded LLM judge. The single prompt is more accurate
+than the agentic loop (\BaseStrict\% vs.\ \AgStrict\% strict, \BaseJudged\% vs.\ \AgJudged\% judged; McNemar
+$p=\PairBaseP$ and $p=\PairBaseJP$, significant only under the judge), the loop and the fixed pipeline do not differ significantly ($p=\PairPlP$), and
+the loop's larger verifier answering alone beats it (\BlindStrict\%, $p=\BlindAgP$). On the questions it answers, the
+loop matches the single prompt (\AnsweredAgAcc\% vs.\ \AnsweredBaseAcc\%); its \PathAbstainN{} abstentions account for
+the gap. Its value is calibrated confidence: answers its check verifies are \SigVerAcc\% correct, the
+rest \UnverAcc\%---at about \CostRatio$\times$ the cost of a single prompt. Code is available at
 \url{https://github.com/clarence-ck/med-vqa-rad-agentic}.
 \end{abstract}
 
@@ -110,8 +111,9 @@ answering and image-grounded verification, deciding per case whether to re-exami
 finish, with structured failure handling.
 
 We target the \textbf{VQA-RAD} benchmark~\cite{lau2018vqarad}, a clinically generated radiology VQA dataset; its
-Hugging Face release contains 2,244 image--question pairs (1,793 train / 451 test) across close-ended and open-ended
-question types. We evaluate on a seeded, stratified sample of \NCases{} test questions; no training data is used.
+Hugging Face release contains 2,244 image--question pairs, each with a reference answer, across close-ended and
+open-ended question types. Because no system is trained, we sample the evaluation questions from the whole dataset
+rather than only its test split (Section~\ref{sec:eval}).
 
 % ============================================================================
 \section{Agent Architecture}
@@ -200,10 +202,12 @@ adds a disclaimer and a review flag for low-confidence, unsupported, high-severi
 non-radiology or unreadable images are rejected before any answer is produced.
 
 % ============================================================================
-\section{Evaluation}
+\section{Evaluation}\label{sec:eval}
 % ============================================================================
-\paragraph{Setup.} \NCases{} VQA-RAD test questions drawn at random, keeping the split's close/open-ended mix (seed 42;
-\NClose{} close-ended, \NOpen{} open-ended); all four
+\paragraph{Setup.} \NCases{} questions drawn at random from the whole VQA-RAD dataset, keeping its close/open-ended
+mix (seed 51511; \NClose{} close-ended, \NOpen{} open-ended; one known-bad item and an earlier evaluation's 300
+questions excluded). 277 carry the train label, so scores are not directly comparable with published test-split
+results. All four
 systems run on the same cases with the same answering model. \emph{Strict scoring}: yes/no answers must start with
 the correct word; binary terms must name the correct term and not its opposite; counts must match; open-ended answers
 must contain every content word of the reference (aliases and plurals folded; $\geq$60\% for references longer than
@@ -211,7 +215,7 @@ three words), with left/right conflicts and denials counted wrong and embedding 
 only as a strict fallback. Because word matching both rejects correct paraphrases and accepts vague answers that
 contain the reference word, a \emph{blinded LLM judge} (\texttt{gpt-6-astra}, a model that neither answers nor
 verifies in any system; answers shuffled and anonymised) scores every open-ended answer as a second, independent
-measure; a 30-verdict spot check agreed with 29 credit decisions (the other, lenient, on a workflow answer). Paired comparisons use the exact McNemar test; 95\% intervals are about
+measure; a 30-verdict spot check agreed with 29 credit decisions (the other, strict, on an agentic answer). Paired comparisons use the exact McNemar test; 95\% intervals are about
 $\pm$\CIHalf{} points. The baseline and agentic loop were re-run on \VarCases{} cases to measure stability. API cost of the
 evaluation: \$\CostTotal{} (\$\CostRun{} runs, \$\CostRepeats{} repeats, \$\CostJudge{} judge). Wall-clock time:
 \MinEval\,min for the main run (four cases at a time), \MinRepeats\,min for the sequential repeats and
@@ -219,7 +223,7 @@ evaluation: \$\CostTotal{} (\$\CostRun{} runs, \$\CostRepeats{} repeats, \$\Cost
 
 \begin{table}[t]
   \centering
-  \caption{Accuracy (\%) on \NCases{} random VQA-RAD test questions (same answering model for all systems). Open-ended accuracy is strict/judged. Time is per-case latency in seconds (mean/median), measured with four cases running concurrently; the whole run of all four systems took \MinEval{} minutes of wall-clock time. Cost is the mean API cost per case.}
+  \caption{Accuracy (\%) on \NCases{} random VQA-RAD questions (same answering model for all systems). Open-ended accuracy is strict/judged. Time is per-case latency in seconds (mean/median), measured with four cases running concurrently; the whole run of all four systems took \MinEval{} minutes of wall-clock time. Cost is the mean API cost per case.}
   \label{tab:main}
   \small
   \begin{tabular}{lcccccc}
@@ -234,17 +238,19 @@ evaluation: \$\CostTotal{} (\$\CostRun{} runs, \$\CostRepeats{} repeats, \$\Cost
   \end{tabular}
 \end{table}
 
-\paragraph{Results.} Table~\ref{tab:main}. The agentic loop and the single prompt are statistically
-indistinguishable (\PairBaseA{} vs.\ \PairBaseB{} discordant cases, $p=\PairBaseP$; judged \PairBaseJA{} vs.\
-\PairBaseJB, $p=\PairBaseJP$), as are the loop and the fixed pipeline ($p=\PairPlP$; judged $p=\PairPlJP$); all three
-far exceed the workflow. The verifier model answering alone---the check's blind reading---scores \BlindStrict\%
-strict and beats the loop ($p=\BlindAgP$). The loop's mechanisms work individually: revision fixed \RevFixed{} wrong
-first answers and broke \RevBroken{} (\RevN{} revised episodes), and when the blind check objected to a first answer it
-was wrong in \BlindFlagWrong{} of \BlindFlagN{} cases. Re-answered cases score \PathReanswerAg\% versus
-\PathReanswerBase\% for the single prompt, but zoomed re-looks, used on the \ZoomN{} hardest cases, do not beat it
-(\ZoomAg\% vs.\ \ZoomBase\%). Abstention offsets the gain: in \AbstainOwnRight{} of \PathAbstainN{} abstentions the loop's
-own answer was right, and on the questions it answered it scores \AnsweredAgAcc\% versus \AnsweredBaseAcc\% for the
-single prompt (Table~\ref{tab:paths}).
+\paragraph{Results.} Table~\ref{tab:main}. The single prompt is ahead of the agentic loop (\PairBaseB{} vs.\
+\PairBaseA{} discordant cases, $p=\PairBaseP$; judged \PairBaseJB{} vs.\ \PairBaseJA, $p=\PairBaseJP$); the loop and
+the fixed pipeline do not differ significantly ($p=\PairPlP$; judged $p=\PairPlJP$); all three far exceed the
+workflow. The verifier model answering alone---the check's blind reading---scores \BlindStrict\% strict and beats the
+loop ($p=\BlindAgP$). The gap to the single prompt comes from abstention: on the \AnsweredN{} questions it answered,
+the loop scores \AnsweredAgAcc\% versus \AnsweredBaseAcc\%, while on its \PathAbstainN{} abstentions the single prompt
+was right in \AbstainBaseRight{} and the loop's own last answer in \AbstainOwnRight. The loop's mechanisms work
+individually: revision fixed \RevFixed{} wrong first answers and broke \RevBroken{} (\RevN{} revised episodes), and when
+the blind check objected to a first answer it was wrong in \BlindFlagWrong{} of \BlindFlagN{} cases. They do not lift
+the hardest cases above the single prompt: zoomed re-looks score \ZoomAg\% vs.\ \ZoomBase\% and re-answered cases
+\PathReanswerAg\% vs.\ \PathReanswerBase\% (Table~\ref{tab:paths}). A post-hoc check (rule chosen after seeing these
+results, not a system result) locates the loss: taking the blind reading whenever it disagreed with the loop's final
+answer would have raised the loop's word-rule score by about 7 points, to the verifier's own.
 
 \begin{table}[t]
   \centering
@@ -274,33 +280,37 @@ answers are \SigVerAcc\% correct, the rest \UnverAcc\%.
 agentic loop \WinsAg{} times, the single prompt \WinsBase{} and the workflow \WinsWf.
 \emph{Stability:} on \VarCases{} repeated cases, \VarBaseFlip\% of single-prompt answers flipped between right and
 wrong, versus \VarAgFlip\% for the agentic loop.
-Five patterns dominate the errors: (i) a shared perception blind spot, where looker and verifier misread the image
-the same way; (ii) abstention withholding a right answer when the blind reading disagrees or one image is judged
-insufficient; (iii) the hardest questions resisting re-looks, with an occasional revision breaking a right answer;
-(iv) questions the image cannot answer, where abstaining or hedging is scored wrong; and (v) workflow rigidity, where fixed rules answer
-``Brain'' or ``X-ray'' when a specific finding is needed.
+Five patterns dominate the errors: (i) a shared perception blind spot: 65 questions (22\%), mostly open-ended ones
+asking for a specific location, finding or diagnosis, defeat the single prompt, the loop and the pipeline alike, and no check catches a misreading
+that looker and verifier share; (ii) abstention withholding a right answer: the verifier's review recommended 21 of the
+25 abstentions, 14 times although its own blind reading agreed with the loop's answer; (iii) the hardest questions resisting re-looks, with an occasional revision breaking a
+right answer; (iv) benchmark quirks---ungrammatical questions, or references needing detail an image rarely
+settles---where abstaining or hedging is scored wrong; and (v) workflow rigidity, where fixed rules answer
+``Abdomen'' or ``Chest'' when a specific finding or side is needed.
 
 % ============================================================================
 \section{User Interface}\label{sec:ui}
 % ============================================================================
 A React frontend exposes three views: \textbf{Dashboard} (upload an image, compare the agentic loop with both
-baselines, inspect the trace, verification checks and failure categories), \textbf{Case Explorer} (browse the \NCases
+baselines, inspect the trace, verification checks and failure categories), \textbf{Case Explorer} (browse the \NCases{}
 evaluation cases with full agent traces) and \textbf{Evaluation} (strict and judged accuracy for all four systems,
 accuracy by question type and by controller path, disagreement and a per-case table).
 
 % ============================================================================
 \section{Reflection}
 % ============================================================================
-\paragraph{When agentic behaviour is beneficial.} On this benchmark, not for accuracy: the loop matches a single
-prompt and trails its own verifier answering alone. Its mechanisms help where they act---revision fixes far more
-answers than it breaks, and the blind check's objections are usually right---but abstention withholds about as many
-correct answers, and its answers are not more stable between runs. Its benefit is \emph{calibrated confidence}: the
-verified label separates answers that are \SigVerAcc\% correct from the rest at \UnverAcc\%, and every decision is
-auditable, which suits review workflows that can act on that signal. Answering with a low-confidence flag instead of
-abstaining, and a cheaper verifier, are the natural next steps.
+\paragraph{When agentic behaviour is beneficial.} On this benchmark, not for accuracy: the single prompt is more
+accurate (significantly under the judge) and the loop trails its own verifier answering alone. Its checking finds
+errors---revision fixes more answers than it breaks, and the blind check's objections are usually right---but its
+decisions waste that signal: it abstains, or keeps its own answer, where the verifier's blind reading is often right,
+and a loop repaired by deferring to that reading would be little more than its verifier. Its answers are also less
+stable between runs. Its benefit is \emph{calibrated confidence}: the verified label separates answers that are
+\SigVerAcc\% correct from the rest at \UnverAcc\%, and every decision is auditable, which suits review workflows that
+can act on that signal. Answering with a low-confidence flag instead of abstaining, and letting a disagreeing blind
+reading replace a low-confidence answer, tested on fresh questions, are the natural next steps.
 
 \paragraph{Limitations.} About \CostRatio$\times$ the cost and \LatRatio$\times$ the median latency of a single prompt,
-without an accuracy gain on this benchmark. Abstentions are scored as wrong, so the abstention policy lowers accuracy
+for lower accuracy on this benchmark. Abstentions are scored as wrong, so the abstention policy lowers accuracy
 by design.
 The verifier shares the perception weaknesses of vision models, so agreement is not correctness, and because its
 guidance may suggest answers, the loop's contribution cannot be fully separated from the verifier's (a critique-only

@@ -5,4 +5,5 @@ The README and the report show the current run (the latest completed one).
 
 | Run | Status | Code | Wall clock | Cost | Agentic strict / judged | Single-shot strict / judged |
 |---|---|---|---|---|---|---|
+| [`2026-10-15_1641`](2026-10-15_1641/) | completed | `2b1d54f` | 161 min 7 s | $8.73 | 59.7% / 64.7% | 64.0% / 70.0% |
 | [`2026-10-15_1308`](2026-10-15_1308/) | completed | `2058688` | 163 min 59 s | $8.62 | 66.3% / 70.3% | 68.3% / 70.7% |
