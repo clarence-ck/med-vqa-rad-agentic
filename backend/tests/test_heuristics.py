@@ -86,12 +86,12 @@ class VerifierCountingTests(unittest.TestCase):
 
 
 class ScorerTests(unittest.TestCase):
-    def lenient_similarity(self, *_):
+    def high_similarity(self, *_):
         return 0.99  # simulate an embedding model that rates everything as similar
 
     def test_laterality_mismatch_is_wrong_even_if_embeddings_agree(self):
-        self.assertFalse(scoring.answers_match("left lung", "right lung", False, None, self.lenient_similarity))
-        self.assertFalse(scoring.answers_match("left cerebral hemisphere", "right temporal lobe", False, None, self.lenient_similarity))
+        self.assertFalse(scoring.answers_match("left lung", "right lung", False, None, self.high_similarity))
+        self.assertFalse(scoring.answers_match("left cerebral hemisphere", "right temporal lobe", False, None, self.high_similarity))
 
     def test_short_answers_need_content_match(self):
         self.assertFalse(scoring.answers_match("liver", "brain", False, None, lambda *_: 0.91))
@@ -102,7 +102,7 @@ class ScorerTests(unittest.TestCase):
     def test_negated_prediction_cannot_match_positive_finding(self):
         self.assertFalse(scoring.answers_match(
             "No ventricular abnormality seen; the lateral ventricles appear normal",
-            "lateral and third ventricular hydrocephalus", False, None, self.lenient_similarity))
+            "lateral and third ventricular hydrocephalus", False, None, self.high_similarity))
 
     def test_close_ended(self):
         self.assertTrue(scoring.is_close_ended("yes"))

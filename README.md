@@ -35,7 +35,7 @@ Built for SUTD 51.511 Multimodal Generative AI (Template 1: Agentic Multimodal S
 ## Results at a glance
 
 <!-- generated:glance -->
-Run `2026-10-15_1641`: a seeded, stratified sample of 300 questions from the full VQA-RAD dataset (160 close-ended, 140 open-ended), all systems on the same answering model
+Run `2026-10-15_1641`: a seeded, stratified sample of 300 VQA-RAD questions (160 close-ended, 140 open-ended), all systems on the same answering model
 (`gpt-6-luna`; the agentic loop and the fixed pipeline also use `gpt-6.1-sol` as verifier). Per-case times were
 measured with four cases running at once; the mean is pulled up by a few long re-look cases (actual run times are in
 [Run timings](#run-timings)). "Strict" uses the rule-based scorer; "judged" scores open-ended answers with a blinded LLM
