@@ -304,7 +304,8 @@ class LoopBlindReadingTests(unittest.TestCase):
             self.assertIn("verification_status=partially_verified", text)
             self.assertNotIn("clearly visible", text)
         self.assertEqual(result["verification_status"], "partially_verified")
-        self.assertEqual(result["blind_reading"], {"answer": "Yes, clearly visible", "agrees_with_final": False})
+        self.assertEqual(result["blind_reading"], {"answer": "Yes, clearly visible", "agrees_with_final": False,
+                                                   "agreement_method": "rules"})
         self.assertIn("Blind Reading", [step["agent"] for step in result["agent_trace"]])
 
 
@@ -336,6 +337,48 @@ class JudgedScoreTests(unittest.TestCase):
                "agentic_answer": "no", "agentic_correct": False}
         _apply_judgments(row, {})
         self.assertEqual((row["baseline_judged_correct"], row["agentic_judged_correct"]), (True, False))
+
+
+
+class BlindMeaningTests(unittest.TestCase):
+    """Open-ended blind agreement falls back to a meaning comparison when word rules disagree."""
+    QA_OPEN = {"question_type": "location", "expected_answer_format": "short_phrase", "target_entity": "lesion side"}
+
+    def _check(self):
+        return {"verification_status": "verified", "confidence_label": "High", "recommended_action": "accept",
+                "issues_found": []}
+
+    def test_paraphrase_counts_as_agreement(self):
+        from unittest import mock
+        from agents.agentic_loop import apply_blind_agreement
+        same = mock.Mock(return_value=True)
+        check = apply_blind_agreement(self._check(), "Left cerebral hemisphere",
+                                      {"status": "success", "answer": "Left side of the brain"}, self.QA_OPEN, same)
+        same.assert_called_once_with("Left side of the brain", "Left cerebral hemisphere")
+        self.assertEqual((check["verification_status"], check["blind_agreement"], check["blind_agreement_method"]),
+                         ("verified", True, "meaning"))
+
+    def test_real_difference_stays_a_disagreement(self):
+        from agents.agentic_loop import apply_blind_agreement
+        check = apply_blind_agreement(self._check(), "Right frontal lobe", {"status": "success", "answer": "Left parietal lobe"},
+                                      self.QA_OPEN, lambda a, b: False)
+        self.assertEqual((check["verification_status"], check["blind_agreement"]), ("partially_verified", False))
+
+    def test_yes_no_and_rule_agreement_never_call_the_comparison(self):
+        from unittest import mock
+        from agents.agentic_loop import apply_blind_agreement
+        same = mock.Mock(return_value=True)
+        apply_blind_agreement(self._check(), "no", {"status": "success", "answer": "yes"},
+                              {"question_type": "yes_no", "expected_answer_format": "yes_no"}, same)
+        apply_blind_agreement(self._check(), "Right frontal lobe", {"status": "success", "answer": "right frontal lobe"},
+                              self.QA_OPEN, same)
+        same.assert_not_called()
+
+    def test_failed_comparison_stays_cautious(self):
+        from agents.agentic_loop import apply_blind_agreement
+        check = apply_blind_agreement(self._check(), "Left cerebral hemisphere",
+                                      {"status": "success", "answer": "Left side of the brain"}, self.QA_OPEN, lambda a, b: None)
+        self.assertEqual((check["blind_agreement"], check["blind_agreement_method"]), (False, "rules"))
 
 
 if __name__ == "__main__":

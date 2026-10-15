@@ -354,3 +354,30 @@ Return ONLY a JSON object: {{"answer": "<concise answer>", "explanation": "<one 
     except Exception as e:
         _log.error("Blind reading failed: %s: %s", type(e).__name__, e)
         return {"status": "error", "answer": "", "explanation": "", "error": str(e)}
+
+
+def answers_equivalent(question: str, first: str, second: str) -> bool | None:
+    """Do two answers to the same question give the same answer? A short text-only call to the verifier model,
+    used by the blind check when word matching says they differ. None if the call fails."""
+    prompt = f"""Two answers were given to the same question about a radiology image.
+
+QUESTION: "{question}"
+ANSWER A: "{first}"
+ANSWER B: "{second}"
+
+Do A and B give the same answer: the same finding, location (including side), value or category? Ignore wording,
+level of detail and hedging. Different sides, organs, findings or values mean they differ.
+
+Return ONLY a JSON object: {{"same": true}} or {{"same": false}}"""
+    try:
+        generator = OpenAIChatGenerator(api_key=Secret.from_token(OPENAI_API_KEY), model=MODELS["check"])
+        response = generator.run(messages=[ChatMessage.from_user(prompt)], generation_kwargs=generation_kwargs("check"))
+        record_usage("check", MODELS["check"], response["replies"][0].meta.get("usage"))
+        same = json.loads(strip_json_fences(response["replies"][0].text or "")).get("same")
+        if not isinstance(same, bool):
+            raise ValueError(f"unexpected reply {same!r}")
+        _log.info("Answer comparison  %r vs %r -> %s", first[:40], second[:40], "same" if same else "different")
+        return same
+    except Exception as e:
+        _log.error("Answer comparison failed: %s: %s", type(e).__name__, e)
+        return None

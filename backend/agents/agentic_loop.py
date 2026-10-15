@@ -34,7 +34,7 @@ from agents.orchestrator import (
 )
 from agents.question_analyzer import QuestionAnalyzer
 from agents.reasoning_agent import ReasoningAgent
-from agents.verification_agent import VerificationAgent, blind_read
+from agents.verification_agent import VerificationAgent, answers_equivalent, blind_read
 from config import AGENT_MODE, MODELS, OPENAI_API_KEY, SELF_CONSISTENCY_SAMPLES, generation_kwargs
 from logger import get_logger
 from utils import scoring
@@ -70,12 +70,17 @@ def controller_path(actions: list[str], abstained: bool = False) -> str:
 BLIND_DISAGREEMENT = "an independent blind reading of the image disagrees with this answer"
 
 
-def apply_blind_agreement(check: dict, answer: str, blind: dict, question_analysis: dict) -> dict:
+def apply_blind_agreement(check: dict, answer: str, blind: dict, question_analysis: dict,
+                          same_meaning=None) -> dict:
     """Combine the answer-aware check with the blind reading (in place).
 
     The check only stays "verified" if an independent reading of the image, made without seeing the answer,
     agrees with it. On disagreement the status drops to at most partially_verified and an "accept" becomes a
     focused re-look. The blind answer itself is stored but never put in the text the controller sees.
+
+    Agreement is decided by the scorer's word rules first (exact for yes/no). If they say "disagree" on an open-ended
+    question, `same_meaning(blind_answer, answer)` (a short text-only call to the verifier model) decides, so
+    paraphrases such as "left side of the brain" / "left cerebral hemisphere" are not counted as disagreements.
     """
     if not blind or blind.get("status") != "success":
         check["blind_agreement"] = None
@@ -83,6 +88,12 @@ def apply_blind_agreement(check: dict, answer: str, blind: dict, question_analys
     qa = question_analysis or {}
     close_ended = qa.get("expected_answer_format") == "yes_no" or qa.get("question_type") in {"yes_no", "presence_absence"}
     agree = scoring.answers_agree(str(blind.get("answer", "")), str(answer or ""), close_ended, qa.get("question_type"))
+    check["blind_agreement_method"] = "rules"
+    if not agree and not close_ended and same_meaning is not None:
+        verdict = same_meaning(str(blind.get("answer", "")), str(answer or ""))
+        if verdict is not None:
+            agree = bool(verdict)
+            check["blind_agreement_method"] = "meaning"
     check["blind_agreement"] = agree
     if agree:
         return check
@@ -279,7 +290,8 @@ class LoopContext:
             image_bytes_b64=self.image_b64,
             mime_type=self.mime_type,
         )["result"]
-        apply_blind_agreement(result, self.answers[-1].get("answer", ""), self.blind_reading(), self.question_analysis)
+        apply_blind_agreement(result, self.answers[-1].get("answer", ""), self.blind_reading(), self.question_analysis,
+                              same_meaning=lambda first, second: answers_equivalent(self.question, first, second))
         self.checks.append(result)
         status = result.get("verification_status", "unknown")
         action = result.get("recommended_action", "accept" if status == "verified" else "reanswer")
@@ -500,7 +512,8 @@ def run_agentic_loop(image_bytes: bytes, question: str, mime_type: str = "image/
         "agent_mode": "loop",
         "controller_actions": ctx.actions,
         "blind_reading": {"answer": (ctx.blind or {}).get("answer", ""),
-                          "agrees_with_final": verification_result.get("blind_agreement")},
+                          "agrees_with_final": verification_result.get("blind_agreement"),
+                          "agreement_method": verification_result.get("blind_agreement_method")},
         "zoomed_looks": sum(1 for look in ctx.looks if look.get("zoom_box")),
         "abstained": ctx.abstained,
         "controller_path": controller_path(ctx.actions, ctx.abstained),

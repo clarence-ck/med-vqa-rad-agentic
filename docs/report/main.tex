@@ -148,7 +148,8 @@ non-radiology images.
 verifier's guidance on revisions.
 \textbf{\texttt{check}} (evaluator) first reads the image \emph{blind}---the verifier answers from the image and
 question alone, without the proposed answer or the looker's notes---then verifies the answer against the image with
-five checks; an answer is only verified if the blind reading agrees. It returns a status
+five checks; an answer is only verified if the blind reading agrees---by word rules, or for open-ended answers
+by meaning, judged by the verifier model, so paraphrases do not count as disagreement. It returns a status
 (verified, partially verified, low confidence, unsupported) and recommends \emph{accept}, \emph{relook} with a
 focus, \emph{reanswer} with guidance, or \emph{abstain}.
 \textbf{\texttt{finish(abstain)}} ends the episode and is refused while the latest answer is unchecked.
