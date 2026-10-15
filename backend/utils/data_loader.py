@@ -68,7 +68,7 @@ def _resolve_split(item: dict, image_name: str) -> str:
 
 
 def get_sample_cases(limit: int = 1000) -> list:
-    """Return a curated set of sample cases for the UI dropdown."""
+    """Return the evaluation questions (experiments/eval_set.json) for the Case Explorer and the evaluation scripts."""
     data = load_dataset()
     if not data:
         return _get_fallback_samples()

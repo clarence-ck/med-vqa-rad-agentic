@@ -53,7 +53,7 @@ def _show_cache_status(selected_samples: list) -> None:
     print("Case Explorer Cache Status")
     print("=" * 50)
     print(f"Run folder: {CASES_DIR}")
-    print(f"Total curated samples: {total}")
+    print(f"Evaluation questions: {total}")
     print(f"Cached: {cached} ({coverage_pct:.1f}%)")
     print(f"Missing: {missing} ({100 - coverage_pct:.1f}%)")
     print("=" * 50)
@@ -83,7 +83,7 @@ async def warm_cache(skip: int, limit: int, dry_run: bool = False, status_only: 
         return
 
     # Show header
-    print(f"Loaded {len(samples)} curated Case Explorer samples (skip={skip}, limit={limit})")
+    print(f"Loaded {len(samples)} evaluation questions (skip={skip}, limit={limit})")
     print(f"Run folder: {CASES_DIR}")
     print(f"Dry-run mode: {'on' if dry_run else 'off'}")
     print()
@@ -190,7 +190,7 @@ def parse_args() -> argparse.Namespace:
         "--skip",
         type=int,
         default=0,
-        help="Number of curated UI cases to skip before processing (default: 0).",
+        help="Number of evaluation questions to skip before processing (default: 0).",
     )
     parser.add_argument(
         "--limit",

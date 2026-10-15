@@ -77,11 +77,11 @@ def main() -> None:
     output = Path(args.out).resolve()
 
     if args.from_eval_sample:
-        test_ids = sorted(sample["id"] for sample in get_sample_cases(limit=args.from_eval_sample))
+        pool_ids = sorted(sample["id"] for sample in get_sample_cases(limit=args.from_eval_sample))
     else:
-        test_ids = [item["id"] for item in load_dataset()
+        pool_ids = [item["id"] for item in load_dataset()
                     if item.get("split") == "test" and item["id"] not in EXCLUDED_SAMPLE_IDS]
-    sample_ids = random.Random(args.seed).sample(test_ids, args.n)
+    sample_ids = random.Random(args.seed).sample(pool_ids, args.n)
 
     previous = json.loads(output.read_text(encoding="utf-8")) if output.exists() else {}
     rows = previous.get("rows", [])
