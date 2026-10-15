@@ -50,7 +50,7 @@ than the agentic loop (\BaseStrict\% vs.\ \AgStrict\% strict, \BaseJudged\% vs.\
 $p=\PairBaseP$ and $p=\PairBaseJP$, significant only under the judge), the loop and the fixed pipeline do not differ significantly ($p=\PairPlP$), and
 the loop's higher-tier verifier answering alone beats it (\BlindStrict\%, $p=\BlindAgP$). On the questions it answers, the
 loop matches the single prompt (\AnsweredAgAcc\% vs.\ \AnsweredBaseAcc\%); its \PathAbstainN{} abstentions account for
-the gap. Its value is calibrated confidence: answers its check verifies are \SigVerAcc\% correct, its
+most of the gap. Its value is calibrated confidence: answers its check verifies are \SigVerAcc\% correct, its
 other answers \UnverAcc\%---at about \CostRatio$\times$ the cost of a single prompt. Code is available at
 \url{https://github.com/clarence-ck/med-vqa-rad-agentic}.
 \end{abstract}
@@ -190,7 +190,7 @@ LLM judge compares answers with the reference as text. Because the verifier sees
 % ============================================================================
 \textbf{Detection.} Image-grounded verification (five checks and a status), seven failure categories
 (\emph{unsupported claim}, \emph{low confidence}, \emph{visual contradiction}, \emph{partially verified},
-\emph{question--answer mismatch}, \emph{generation unstable}, \emph{parser failure}) and an eighth,
+\emph{question--answer mismatch}, \emph{reasoning generation unstable}, \emph{parser failure}) and an eighth,
 \emph{self-inconsistent}, from resampling.
 \textbf{Recovery.} Instead of re-running the whole pipeline, the controller zooms into the region the verifier
 names or revises the answer with the verifier's guidance. When the blind reading disagrees, the controller is told
@@ -243,10 +243,11 @@ evaluation: \$\CostTotal{} (\$\CostRun{} runs, \$\CostRepeats{} repeats, \$\Cost
 \PairBaseA{} discordant cases, $p=\PairBaseP$; judged \PairBaseJB{} vs.\ \PairBaseJA, $p=\PairBaseJP$); the loop and
 the fixed pipeline do not differ significantly ($p=\PairPlP$; judged $p=\PairPlJP$); all three far exceed the
 workflow. The verifier model answering alone---the check's blind reading---scores \BlindStrict\% strict and beats the
-loop ($p=\BlindAgP$). The gap to the single prompt comes from abstention: on the \AnsweredN{} questions it answered,
+loop ($p=\BlindAgP$). The gap to the single prompt comes mostly from abstention: on the \AnsweredN{} questions it answered,
 the loop scores \AnsweredAgAcc\% versus \AnsweredBaseAcc\%, while on its \PathAbstainN{} abstentions the single prompt
-was right in \AbstainBaseRight{} and the loop's own last answer in \AbstainOwnRight. The loop's mechanisms work
-individually: revision fixed \RevFixed{} wrong first answers and broke \RevBroken{} (\RevN{} revised episodes), and when
+was right in \AbstainBaseRight{} and the loop's own last answer in \AbstainOwnRight. Revision fixed
+\RevFixed{} wrong first answers and broke \RevBroken{} (\RevN{} revised episodes; not significant), partly by adopting
+answers the verifier's guidance suggested, and when
 the blind check objected to a first answer it was wrong in \BlindFlagWrong{} of \BlindFlagN{} cases. They do not lift
 the hardest cases above the single prompt: answered questions with a zoomed look score \ZoomAg\% vs.\ \ZoomBase\%
 and re-answered cases \PathReanswerAg\% vs.\ \PathReanswerBase\% (Table~\ref{tab:paths}). A post-hoc check (rule
@@ -282,10 +283,10 @@ episodes leave the direct path.
 \emph{Disagreement:} the three systems disagree on \DisagreePct\% of cases; when exactly one system is right, it is the
 agentic loop \WinsAg{} times, the single prompt \WinsBase{} and the workflow \WinsWf.
 \emph{Stability:} on \VarCases{} repeated cases, \VarBaseFlip\% of single-prompt answers flipped between right and
-wrong, versus \VarAgFlip\% for the agentic loop.
-Five patterns dominate the errors: (i) a shared perception blind spot: under the judge, 65 questions (22\%), mostly open-ended
+wrong, versus \VarAgFlip\% for the agentic loop (not significant).
+Five recurring error patterns: (i) a shared perception blind spot: under the judge, 65 questions (22\%), mostly open-ended
 ones asking for a specific location, finding or diagnosis, defeat the single prompt, the loop and the pipeline alike;
-no check catches a misreading that looker and verifier share, and 51 of the 59 the loop answered still get high
+no check catches a misreading that looker and verifier share (the blind reading was right on only 16), and 51 of the 59 the loop answered still get high
 self-consistency; (ii) abstention withholding a right answer: the verifier's review recommended 21 of the
 25 abstentions, 14 times although its own blind reading agreed with the loop's best-verified answer; (iii) the hardest questions resisting re-looks, with an occasional revision breaking a
 right answer; (iv) benchmark quirks---ungrammatical questions, or references needing detail an image rarely
@@ -305,13 +306,12 @@ accuracy by question type and by controller path, disagreement and a per-case ta
 % ============================================================================
 \paragraph{When agentic behaviour is beneficial.} On this benchmark, not for accuracy: the single prompt is more
 accurate (significantly under the judge) and the loop trails its own verifier answering alone. Its checking finds
-errors---revision fixes more answers than it breaks, and the blind check's objections are usually right---but its
-decisions waste that signal: it abstains, or keeps its own answer, where the verifier's blind reading is often right,
-and a loop repaired by deferring to that reading would be little more than its verifier. Its answers are also less
-stable between runs. Its benefit is \emph{calibrated confidence}: the verified label separates answers that are
+errors---the blind check's objections are usually right---but the controller abstains where the blind reading is
+usually right (18 of 25), and a loop repaired by deferring to that reading would be little more than its verifier.
+Its answers also flipped more often between runs (not significant). Its benefit is \emph{calibrated confidence}: the verified label separates answers that are
 \SigVerAcc\% correct from its other answers at \UnverAcc\%, and every decision is auditable, which suits review workflows that
-can act on that signal. Answering with a low-confidence flag instead of abstaining, and letting a disagreeing blind
-reading replace a low-confidence answer, tested on fresh questions, are the natural next steps.
+can act on that signal. Answering with a low-confidence flag instead of abstaining, tested on fresh questions, is the
+natural next step.
 
 \paragraph{Limitations.} About \CostRatio$\times$ the cost and \LatRatio$\times$ the median latency of a single prompt,
 for lower accuracy on this benchmark. Abstentions are scored as wrong (one is judged correct, its reference being ``maybe''), so the

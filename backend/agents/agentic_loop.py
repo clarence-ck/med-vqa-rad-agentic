@@ -310,8 +310,8 @@ class LoopContext:
     def blind_reading(self) -> dict:
         """The verifier model's own answer from the image and question alone, read once per episode.
 
-        Kept out of everything the controller and the answerer see, so the loop has to resolve a
-        disagreement by looking again with its own model, not by copying the verifier's answer.
+        Kept out of everything the controller and the answerer see; only agreement is reported. The review's
+        guidance, however, may still suggest a corrected answer.
         """
         if self.blind is None:
             if not self.question_analysis:

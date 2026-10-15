@@ -30,7 +30,7 @@ _JUDGED_SYSTEMS = ("baseline", "workflow", "agentic", "pipeline")
 
 
 def _load_judgments(run_id: str | None) -> dict:
-    """LLM-judge verdicts for open-ended answers the strict scorer marked wrong (scripts/judge_open_ended.py)."""
+    """LLM-judge verdicts for every open-ended answer (scripts/judge_open_ended.py)."""
     if not run_id:
         return {}
     try:
@@ -305,7 +305,7 @@ def _build_accuracy_breakdown(rows: list[dict], group_key: str, preferred_order:
 
 
 def _median_durations(rows: list[dict]) -> dict:
-    """Median per-case latency per system (typical case; the mean is pulled up by a few long re-look cases)."""
+    """Median per-case latency per system (typical case; the mean is pulled up by the long re-look episodes)."""
     medians = {}
     for system in _JUDGED_SYSTEMS:
         values = [row[f"{system}_duration_ms"] for row in rows if row.get(f"{system}_duration_ms") is not None]
@@ -314,7 +314,7 @@ def _median_durations(rows: list[dict]) -> dict:
 
 
 def _judged_summary(rows: list[dict]) -> dict:
-    """Accuracy when LLM-judged paraphrases count as correct (upper bound to the strict scorer)."""
+    """Second score: open-ended answers scored by the LLM judge, close-ended answers by the strict scorer."""
     if not any(row.get("judged") for row in rows):
         return {"judge_available": False}
     summary = {"judge_available": True, "judged_cases": sum(1 for row in rows if row.get("judged"))}
@@ -532,8 +532,8 @@ async def analyze_case(sample_id: int, refresh: bool = False, ablation: bool = F
             return result, int((time.time() - t0) * 1000), usage
 
         def run_ablation(image: bytes, text: str, mime: str) -> dict:
-            # Fixed six-stage pipeline with the image passed to the reasoner: isolates what
-            # the controller loop adds over a fixed chain with the same image access.
+            # Fixed six-stage ablation: question-agnostic image description, no zoom or blind check,
+            # text-only verifier; compared with the loop it measures the agentic design as a whole.
             return run_pipeline(image, text, mime)
 
         if cached_payload is not None:

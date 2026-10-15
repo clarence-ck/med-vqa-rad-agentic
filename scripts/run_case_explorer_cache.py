@@ -1,4 +1,4 @@
-"""Run all four systems on the evaluation cases and store each result in a run folder.
+"""Run the systems on the evaluation cases (all four with --ablation) and store each result in a run folder.
 
 Results go to experiments/runs/<run_id>/cases/ (one JSON per case). A new run starts with an empty folder;
 running again with the same --run-id only processes cases that are still missing, so an interrupted run
@@ -165,7 +165,7 @@ async def warm_cache(skip: int, limit: int, dry_run: bool = False, status_only: 
 
     await asyncio.gather(*(process(index, sample) for index, sample in pending))
 
-    # One automatic retry for cases that failed (API errors are not cached, so they are still pending).
+    # Retry cases that failed (--retries times; API errors are not cached, so they are still pending).
     for attempt in range(retries):
         failed = [(index, sample) for index, sample in pending if needs_run(sample)]
         if not failed or stats["stopped"]:

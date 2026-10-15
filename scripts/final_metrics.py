@@ -82,7 +82,7 @@ def showcase_cases(rows, cache=()):
     picks = [
         ("relook_win", "A focused re-look got it right; the single prompt did not",
          lambda r: r["controller_path"] == "relook" and r["agentic_correct"] and not r["baseline_correct"]),
-        ("reanswer_win", "The verifier's guidance fixed the answer; the single prompt was wrong",
+        ("reanswer_win", "A re-answer guided by the verifier got it right; the single prompt was wrong",
          lambda r: r["controller_path"] == "reanswer" and r["agentic_correct"] and not r["baseline_correct"]),
         ("recovery_failure", "The loop re-examined or revised and still ended wrong, while the single prompt was right",
          lambda r: r["controller_path"] in ("relook", "reanswer") and not r["agentic_correct"] and r["baseline_correct"]),

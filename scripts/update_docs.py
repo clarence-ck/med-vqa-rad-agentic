@@ -124,7 +124,7 @@ def block_glance(m: dict, d: dict) -> str:
     verified = m["verification_signal"]["verified"]
     return f"""Run `{m['run']['run_id']}`: a seeded, stratified sample of {m['cases']} VQA-RAD questions ({m['close_ended_cases']} close-ended, {m['open_ended_cases']} open-ended), all systems on the same answering model
 (`gpt-6-luna`; the agentic loop and the fixed pipeline also use `gpt-6.1-sol` as verifier). Per-case times were
-measured with four cases running at once; the mean is pulled up by the {m['controller_paths'].get('relook', {}).get('cases', 0)} re-look episodes, which take longest (actual run times are in
+measured with four cases running at once; the mean is pulled up by the {m['controller_paths'].get('relook', {}).get('cases', 0)} re-look-path episodes, which take longest (actual run times are in
 [Run timings](#run-timings)). "Strict" uses the rule-based scorer; "judged" scores open-ended answers with a blinded LLM
 judge, `gpt-6-astra` (see [Evaluation design](#evaluation-design)).
 

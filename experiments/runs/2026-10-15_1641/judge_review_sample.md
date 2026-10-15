@@ -1,7 +1,7 @@
 # LLM-judge spot check (run 2026-10-15_1641)
 
 Judge: `gpt-6-astra` (low reasoning effort), blinded to which system produced each answer. 30 verdicts drawn at
-random (seed 7) from all 560 judged answers and reviewed against the reference answer (AI-assisted review, not
+random (Python `random.Random(7).sample`, over the answers ordered by case ID and system) from all 560 judged answers and reviewed against the reference answer (AI-assisted review, not
 human annotation). A verdict counts as agreed when its credit decision (correct vs not) is right; a
 `partially_correct` verdict earns no credit.
 

@@ -237,7 +237,7 @@
     },
     {
       "kind": "reanswer_win",
-      "story": "The verifier's guidance fixed the answer; the single prompt was wrong",
+      "story": "A re-answer guided by the verifier got it right; the single prompt was wrong",
       "sample_id": 457,
       "question": "what brain region demonstrates edema?",
       "ground_truth": "basal ganglia",

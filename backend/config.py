@@ -29,7 +29,7 @@ if not OPENAI_API_KEY:
 # Per-role model configuration.
 #
 # Each role reads MODEL_<ROLE> and REASONING_EFFORT_<ROLE> from the environment.
-# Roles that need image input (look, answer, baseline) must use a vision-capable
+# Roles that need image input (look, answer, check, baseline) must use a vision-capable
 # model. The baseline should match the `answer` model so the comparison measures
 # architecture rather than model choice.
 # ---------------------------------------------------------------------------

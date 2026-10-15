@@ -6,7 +6,7 @@ where it stopped. scripts/run_all.py uses it to measure how often answers change
 Systems: baseline, workflow, agentic_loop, pipeline.
 
 Usage (run from repo root):
-    python scripts/repeat_cases.py --from-eval-sample 300 --n 50 --out experiments/runs/<run_id>/variance.json
+    python scripts/repeat_cases.py --from-eval-sample 300 --n 100 --out experiments/runs/<run_id>/variance.json
 """
 from __future__ import annotations
 

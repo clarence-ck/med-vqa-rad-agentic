@@ -9,8 +9,8 @@ experiments/runs/<run_id>/
     cases.csv           per-case answers and correctness, for reading without the app
 
 The "current" run is the one named by MEDVQA_RUN (scripts/run_all.py sets it for every stage), else the latest
-completed run, else the latest run. Analyses started from the UI for cases outside the current run go to
-backend/.live_cache/, so they never change a run's record.
+completed run, else the latest run. Every analysis started from the UI (a new case, or "Refresh analysis") goes to
+backend/.live_cache/, so it never changes a run's record.
 """
 from __future__ import annotations
 

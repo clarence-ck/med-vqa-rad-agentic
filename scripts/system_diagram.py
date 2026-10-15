@@ -98,7 +98,7 @@ def main():
         ("look(focus)", "examine the image, or zoom into one region · gpt-6-luna", BLUE_SOFT, BLUE),
         ("answer(guidance)", "answer from image + all observations · gpt-6-luna", BLUE_SOFT, BLUE),
         ("check() · gpt-6.1-sol", "blind reading + answer review; suggests the next step", AMBER_SOFT, AMBER),
-        ("finish(abstain)", "end with the latest checked answer, or abstain", PURPLE_SOFT, PURPLE),
+        ("finish(abstain)", "end with the best-verified checked answer, or abstain", PURPLE_SOFT, PURPLE),
     ]
     for i, (title, sub, fc, ec) in enumerate(tools):
         y = 8.45 - i * 0.85
@@ -122,7 +122,7 @@ def main():
     box(ax, 14.9, 6.9, 3.5, 1.1, RED_SOFT, RED, "Self-consistency", "2 independent re-answers;\nlow agreement → review flag")
     box(ax, 14.9, 5.4, 3.5, 1.1, RED_SOFT, RED, "Guardrail", "failure categories, disclaimer,\nflag for review")
     box(ax, 14.9, 3.9, 3.5, 1.1, "white", RED, "Final state",
-        "verified · partially verified\n· low confidence · unsupported · review\n· abstained · rejected (non-radiology)", fs2=7.6)
+        "verified · partially verified\n· low confidence · unsupported · abstained\n· rejected (non-radiology) · error", fs2=7.6)
     path(ax, [(13.65, 5.5), (14.45, 5.5), (14.45, 8.95), (14.9, 8.95)], color=RED, label="final", label_xy=(14.45, 7.2), lc=RED)
     for y0, y1 in [(8.4, 8.0), (6.9, 6.5), (5.4, 5.0)]:
         arrow(ax, (16.65, y0), (16.65, y1), color=RED)

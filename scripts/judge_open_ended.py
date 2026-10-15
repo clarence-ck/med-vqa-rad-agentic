@@ -3,8 +3,8 @@
 The strict scorer (backend/utils/scoring.py) checks words: it rejects correct paraphrases ("frontal radiograph"
 for "posterior-anterior") and accepts vague answers that happen to contain the reference word ("the central
 nervous system, specifically the brain"). The judge reads every open-ended answer of every system, right or
-wrong by the strict rules, and decides whether it means the same as the ground truth. Close-ended (yes/no)
-answers stay rule-based.
+wrong by the strict rules, and decides whether it means the same as the ground truth. Close-ended answers (yes/no
+or a single binary term) stay rule-based.
 
 - The judge model (gpt-6-astra by default) neither answers nor verifies in any system, so it favours none.
 - One call per case; candidate answers are shuffled and labelled A, B, C... so the
@@ -90,7 +90,7 @@ def judge_case(generator: OpenAIChatGenerator, row: dict, seed: int) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--max-cost", type=float, default=0.6)
+    parser.add_argument("--max-cost", type=float, default=2.0, help="Stop once spend reaches this (USD)")
     parser.add_argument("--seed", type=int, default=7, help="Seed for shuffling candidate labels")
     parser.add_argument("--fresh", action="store_true", help="Discard earlier verdicts and judge every case again")
     parser.add_argument("--run-id", default=None, help="Run under experiments/runs/ (default: the current run)")

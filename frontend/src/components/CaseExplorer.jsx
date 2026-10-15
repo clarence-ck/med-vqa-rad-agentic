@@ -585,7 +585,7 @@ export default function CaseExplorer({
                             </span>
                           </div>
                           <div className="summary-stat-row summary-stat-row-inline">
-                            <span className="summary-stat-label" data-tooltip="Based on the Verification Agent's checks. 'Verified' requires the review to pass its checks (question matched, evidence grounded, strength appropriate, no contradictions, format correct) and an independent blind reading of the image to agree with the answer. 'Partially_verified' means the review found problems or the blind reading disagrees.">Verification</span>
+                            <span className="summary-stat-label" data-tooltip="Based on the Verification Agent's checks. 'Verified' means the verifier returned verified, no format or question-type check failed, and an independent blind reading of the image agrees with the answer. 'Partially_verified' means the review found problems or the blind reading disagrees.">Verification</span>
                             <span className={`tag ${getVerificationTagClass(overallVerification)}`}>
                               {overallVerification.replace(/_/g, ' ')}
                             </span>

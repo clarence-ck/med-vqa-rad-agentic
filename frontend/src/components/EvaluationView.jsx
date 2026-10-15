@@ -559,7 +559,7 @@ export default function EvaluationView({ loading, evaluationData, error, onRefre
                         <td>{row.sample_id}</td>
                         <td>
                           <div className="evaluation-question-cell" style={{ maxWidth: '280px' }}>
-                            <div className="evaluation-list-title">{row.question || '—'}</div>
+                            <div className="evaluation-list-title" style={{ textTransform: 'none' }}>{row.question || '—'}</div>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', margin: '6px 0 4px 0' }}>
                               <span className="tag tag-gray" style={{ fontSize: '10px' }}>
                                 Question Type (keyword rules): {formatLabel(row.original_question_type)}
@@ -571,7 +571,7 @@ export default function EvaluationView({ loading, evaluationData, error, onRefre
                                 Ground Truth Answer Style: {formatLabel(row.answer_style)}
                               </span>
                             </div>
-                            <div className="evaluation-list-title" style={{ fontSize: '11px', color: 'var(--color-success)' }}>
+                            <div className="evaluation-list-title" style={{ fontSize: '11px', color: 'var(--color-success)', textTransform: 'none' }}>
                               GT: {row.ground_truth_answer}
                             </div>
                           </div>
@@ -642,7 +642,7 @@ export default function EvaluationView({ loading, evaluationData, error, onRefre
                     ))}
                     {filteredRows.length === 0 && (
                       <tr>
-                        <td colSpan="9" style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                        <td colSpan="8" style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>
                           No evaluated cases match the selected sample IDs.
                         </td>
                       </tr>
