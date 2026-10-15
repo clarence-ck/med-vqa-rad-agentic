@@ -96,8 +96,14 @@ async def warm_cache(skip: int, limit: int, dry_run: bool = False, status_only: 
         sample_id = int(sample["id"])
         question = str(sample.get("question", ""))
         cache_path = _cache_path_for(sample_id, question)
+        done = cache_path.exists()
+        if done and ablation:  # the ablation needs a pipeline result too
+            try:
+                done = bool(json.loads(cache_path.read_text(encoding="utf-8")).get("pipeline_result"))
+            except (OSError, ValueError):
+                done = False
 
-        if cache_path.exists():
+        if done:
             already_cached.append(sample)
         else:
             to_process.append(sample)

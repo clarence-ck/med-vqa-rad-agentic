@@ -190,7 +190,13 @@ function App() {
             <div className="panel-header panel-header-action">
               <h2><span className="icon">🖼️</span> Image Workspace</h2>
               {hasAnyResult && (
-                <ComparisonToggle mode={comparisonMode} onToggle={handleComparisonToggle} />
+                <ComparisonToggle
+                  mode={comparisonMode}
+                  onToggle={handleComparisonToggle}
+                  agenticMs={result?.total_duration_ms}
+                  workflowMs={workflowResult?.duration_ms}
+                  baselineMs={baselineResult?.duration_ms}
+                />
               )}
             </div>
             <ImageViewer imageSrc={imageSrc} result={result} />

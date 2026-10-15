@@ -30,7 +30,7 @@ from agents.orchestrator import run_pipeline  # noqa: E402
 from config import model_manifest  # noqa: E402
 from routes.dataset import _get_cached_embedding, _normalize_answer  # noqa: E402
 from utils import scoring  # noqa: E402
-from utils.data_loader import EXCLUDED_SAMPLE_IDS, get_image_bytes, get_sample_by_id, get_sample_cases, load_dataset  # noqa: E402
+from utils.data_loader import get_image_bytes, get_sample_by_id, get_sample_cases  # noqa: E402
 from utils.usage import summarize, track_usage  # noqa: E402
 
 ALL_SYSTEMS = ("baseline", "workflow", "agentic_loop", "pipeline")
@@ -78,9 +78,8 @@ def main() -> None:
 
     if args.from_eval_sample:
         pool_ids = sorted(sample["id"] for sample in get_sample_cases(limit=args.from_eval_sample))
-    else:
-        pool_ids = [item["id"] for item in load_dataset()
-                    if item.get("split") == "test" and item["id"] not in EXCLUDED_SAMPLE_IDS]
+    else:  # the whole evaluation set (experiments/eval_set.json)
+        pool_ids = sorted(sample["id"] for sample in get_sample_cases())
     sample_ids = random.Random(args.seed).sample(pool_ids, args.n)
 
     previous = json.loads(output.read_text(encoding="utf-8")) if output.exists() else {}

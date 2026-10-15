@@ -94,8 +94,21 @@ controller decides whether to follow it; in the fixed-pipeline ablation every st
 | `analyze_question()` | Task understanding | gpt-6-luna | Question type and expected answer format; keyword rules use whole-word matching |
 | `look(focus)` | Perception (executor) | gpt-6-luna, vision | Looks *with the question in mind*; with `focus` it **zooms**: the named region is located, cropped and enlarged, and examined next to the full image (if it cannot be located, a plain re-look). The first look also rejects non-radiology images |
 | `answer(guidance)` | Synthesis (executor) | gpt-6-luna, vision | Receives the image plus all observations; `guidance` carries what the verifier asked to fix |
-| `check()` | Evaluator (a higher-tier model) | gpt-6.1-sol, vision | Two parts, in this order. **Blind reading** (independent): once per episode, the verifier answers from the image and question alone, without the proposed answer or the looker's notes. **Review** (critic): it checks the answer against the image (grounding, contradictions, format) and returns a status, the issues found and a next step (`accept`, `relook` with a focus, `reanswer` with guidance, `abstain`); the guidance may include a suggested corrected answer. An answer is *verified* only if the verifier returns `verified`, no format or question-type check fails, **and** the blind reading agrees (word rules first, exact for yes/no; for open-ended answers the verifier judges whether the two mean the same). The controller learns only whether they agree, never the blind answer, though the review's guidance may still name a corrected answer |
+| `check()` | Evaluator (a higher-tier model) | gpt-6.1-sol, vision | A blind reading, then an answer-aware review; returns a status and recommends the next step (details below) |
 | `finish(abstain)` | Decision | — | Ends the episode; a normal finish is refused while the latest answer is unchecked (abstaining is not) |
+
+**How `check` works.** Two parts, in this order:
+
+1. **Blind reading** (independent): once per episode, the verifier answers from the image and question alone, without
+   the proposed answer or the looker's notes.
+2. **Review** (critic): it checks the answer against the image (grounding, contradictions, format) and returns a status,
+   the issues found and a next step (`accept`, `relook` with a focus, `reanswer` with guidance, `abstain`); the
+   guidance may include a suggested corrected answer.
+
+An answer is *verified* only if the verifier returns `verified`, no format or question-type check fails, **and** the
+blind reading agrees (word rules first, exact for yes/no; for open-ended answers the verifier judges whether the two
+mean the same). The controller learns only whether they agree, never the blind answer, though the review's guidance
+may still name a corrected answer.
 
 Budgets: at most 2 focused re-looks, 3 answers and 16 agent steps. If the controller stalls, a safety net answers
 and/or checks before finishing. Paths observed in the current run:

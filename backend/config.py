@@ -15,7 +15,7 @@ BACKEND_CORS_ORIGINS = [
     origin.strip()
     for origin in os.getenv(
         "BACKEND_CORS_ORIGINS",
-        "",
+        "http://localhost:5173",
     ).split(",")
     if origin.strip()
 ]

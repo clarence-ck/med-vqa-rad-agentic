@@ -466,10 +466,11 @@ def _write_cache(cache_path: str, payload: dict) -> None:
     os.replace(tmp_path, cache_path)
 
 
-def _with_sample_image(payload: dict, sample: dict) -> dict:
+def _with_sample_image(payload: dict, sample: dict, source: str) -> dict:
     result = dict(payload)
     result["sample"] = {**(payload.get("sample") or {}), **sample}
     result["cached"] = True
+    result["source"] = source
     return result
 
 
@@ -503,6 +504,7 @@ async def analyze_case(sample_id: int, refresh: bool = False, ablation: bool = F
         question = sample.get("question", "")
         mime_type = sample.get("image_mime", "image/png")
         file_name = case_file_name(sample_id, question)
+        current = None
         if cache_dir is not None:
             cache_path = os.path.join(cache_dir, file_name)
             candidates = [cache_path]
@@ -519,7 +521,9 @@ async def analyze_case(sample_id: int, refresh: bool = False, ablation: bool = F
                 cached_payload = json.load(f)
             if not ablation or cached_payload.get("pipeline_result"):
                 _log.info("Cache HIT for sample %d (question=%r)", sample_id, question[:80])
-                return _with_sample_image(cached_payload, sample)
+                # "live": a UI analysis in backend/.live_cache/; otherwise the stored result of a run
+                source = "live" if cache_dir is None and existing == cache_path else f"run {current or 'cache'}"
+                return _with_sample_image(cached_payload, sample, source)
 
         def run_with_usage(fn, *args, **kwargs):
             with track_usage() as records:
@@ -551,7 +555,7 @@ async def analyze_case(sample_id: int, refresh: bool = False, ablation: bool = F
             })
             cached_payload.setdefault("usage", {})["pipeline"] = pipeline_usage
             _write_cache(cache_path, cached_payload)
-            return _with_sample_image(cached_payload, sample)
+            return _with_sample_image(cached_payload, sample, "live" if cache_dir is None else "run")
 
         _log.info(
             "Cache MISS for sample %d  question=%r  refresh=%s  ablation=%s  running systems in parallel",
@@ -626,7 +630,7 @@ async def analyze_case(sample_id: int, refresh: bool = False, ablation: bool = F
             payload["usage"]["pipeline"] = pipeline_outcome[2]
 
         _write_cache(cache_path, payload)
-        return payload
+        return {**payload, "source": "live" if cache_dir is None else "run"}
     finally:
         sample_id_var.reset(token)
 

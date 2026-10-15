@@ -505,6 +505,14 @@ export default function CaseExplorer({
               <div className="card-header">
                 <span className="card-title">📊 Case Summary</span>
                 <div className="case-summary-header-tags">
+                  {analysisData?.source === 'live' && (
+                    <span
+                      className="tag tag-amber"
+                      data-tooltip="A new analysis run from the UI, stored in backend/.live_cache/. It is not part of the evaluation run, so it may differ from the published results."
+                    >
+                      Live result, not from the evaluation run
+                    </span>
+                  )}
                   <span className={`tag ${summaryBadge.className}`}>
                     {summaryBadge.label}
                   </span>
