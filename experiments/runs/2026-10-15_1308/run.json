@@ -1,0 +1,61 @@
+{
+  "run_id": "2026-10-15_1308",
+  "status": "completed",
+  "started": "2026-10-15T13:08:44",
+  "finished": "2026-10-15T15:52:46",
+  "code_version": "2058688",
+  "models": {
+    "controller": {
+      "model": "gpt-6-luna",
+      "reasoning_effort": "none"
+    },
+    "look": {
+      "model": "gpt-6-luna",
+      "reasoning_effort": "medium"
+    },
+    "analyze": {
+      "model": "gpt-6-luna",
+      "reasoning_effort": "low"
+    },
+    "answer": {
+      "model": "gpt-6-luna",
+      "reasoning_effort": "medium"
+    },
+    "check": {
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "low"
+    },
+    "baseline": {
+      "model": "gpt-6-luna",
+      "reasoning_effort": "medium"
+    },
+    "judge": {
+      "model": "gpt-6-astra",
+      "reasoning_effort": "low"
+    }
+  },
+  "budget_usd": 9.2,
+  "stages": {
+    "eval": {
+      "started": "2026-10-15T13:08:44",
+      "finished": "2026-10-15T14:19:23",
+      "wall_clock_s": 4238,
+      "cost_usd": 6.2516,
+      "note": "300 cases x 4 systems, 4 at a time"
+    },
+    "judge": {
+      "started": "2026-10-15T14:19:23",
+      "finished": "2026-10-15T14:29:48",
+      "wall_clock_s": 624,
+      "cost_usd": 1.0934,
+      "note": "131 open-ended cases"
+    },
+    "variance": {
+      "started": "2026-10-15T14:29:48",
+      "finished": "2026-10-15T15:52:46",
+      "wall_clock_s": 4977,
+      "cost_usd": 1.2782,
+      "note": "100 cases, one at a time"
+    }
+  }
+}

@@ -1,4 +1,4 @@
-"""Regenerate system_diagram.png: the agentic controller loop and the evaluation setup.
+"""Regenerate docs/report/system_diagram.png (used by the README and the report): the agentic loop and evaluation.
 
 Usage (from repo root): python scripts/system_diagram.py
 """
@@ -7,7 +7,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
-OUT = Path(__file__).resolve().parents[1] / "system_diagram.png"
+OUT = Path(__file__).resolve().parents[1] / "docs" / "report" / "system_diagram.png"
 
 BG = "#F8FAFC"
 TEXT = "#0F172A"
@@ -134,7 +134,7 @@ def main():
     evals = [
         (4.1, "Single-shot baseline", "one vision prompt · gpt-6-luna"),
         (7.05, "Workflow baseline", "fixed rules over image +\nquestion analysis"),
-        (10.0, "Fixed pipeline (ablation)", "original six stages,\nreasoner sees image"),
+        (10.0, "Fixed pipeline (ablation)", "six tools in a\nprescribed order"),
         (12.95, "Strict scorer + LLM judge", "content-word rules; blinded\ngpt-6-astra judge (open-ended)"),
         (15.9, "Dashboard", "accuracy, controller paths,\nsignals, disagreement"),
     ]

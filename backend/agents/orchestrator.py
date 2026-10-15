@@ -888,7 +888,9 @@ def _payload_score(payload: dict) -> tuple[int, int, int, int, int]:
 
 
 def run_pipeline(image_bytes: bytes, question: str, mime_type: str = "image/png") -> dict:
-    """Fixed six-stage pipeline (the ablation): the same stages in a fixed order, with the image given to the reasoner."""
+    """Fixed-pipeline ablation: a controller instructed to call six tools in a prescribed order (interpret_image,
+    analyze_question, filter_image_context, route_difficulty, reason_answer, verify_answer), with the image given to
+    the reasoner; the whole sequence re-runs once when verification flags a fixable problem."""
     pipeline_start = time.time()
     _log.info(
         "=== Agentic pipeline START  question=%r  mime_type=%s  size=%d bytes ===",

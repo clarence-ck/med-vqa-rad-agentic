@@ -25,7 +25,7 @@ sys.path.insert(0, str(ROOT_DIR / "backend"))
 from scipy.stats import binomtest  # noqa: E402
 
 from routes import dataset as ds  # noqa: E402
-from utils import runs  # noqa: E402
+from utils import runs, scoring  # noqa: E402
 
 SYSTEMS = ("baseline", "workflow", "agentic", "pipeline")
 CSV_COLUMNS = ["sample_id", "question", "ground_truth_answer", "answer_style", "controller_path",
@@ -78,6 +78,53 @@ def showcase_cases(rows):
                         "baseline_answer": row["baseline_answer"], "controller_path": row["controller_path"],
                         "verification_status": row["verification_status"]})
     return out
+
+
+def mechanisms(rows: list[dict], cache: list[dict]) -> dict:
+    """What the loop's own mechanisms did: revisions, the blind check, abstention (strict word rules, no embeddings)."""
+    by_id = {p["sample"]["id"]: p for p in cache}
+
+    def right(payload, answer):
+        gt = ds._normalize_answer(payload.get("ground_truth_answer", ""))
+        return scoring.answers_match(ds._normalize_answer(str(answer)), gt, scoring.is_close_ended(gt),
+                                     payload["sample"].get("question_type"), None)
+
+    def trace(payload, agent):
+        return [s.get("output") or {} for s in payload["agentic_result"].get("agent_trace", []) if s.get("agent") == agent]
+
+    revised = fixed = broken = 0
+    flagged = flagged_wrong = 0
+    abstained = abstained_own_right = abstained_baseline_right = 0
+    for r in rows:
+        payload = by_id.get(r["sample_id"])
+        if not payload:
+            continue
+        answers = [o.get("answer", "") for o in trace(payload, "Reasoning & Answer")]
+        checks = trace(payload, "Verification")
+        if r["controller_path"] in ("relook", "reanswer") and answers:
+            revised += 1
+            first = right(payload, answers[0])
+            fixed += (not first) and bool(r["agentic_correct"])
+            broken += first and not r["agentic_correct"]
+        if checks and answers and "independent blind reading" in " ".join(checks[0].get("issues_found") or []):
+            flagged += 1
+            flagged_wrong += not right(payload, answers[0])
+        if r["controller_path"] == "abstained":
+            abstained += 1
+            abstained_own_right += bool(answers) and right(payload, answers[-1])
+            abstained_baseline_right += bool(r["baseline_correct"])
+    answered = [r for r in rows if r["controller_path"] != "abstained"]
+    meaning = sum(1 for p in cache if (p["agentic_result"].get("blind_reading") or {}).get("agreement_method") == "meaning")
+    return {
+        "revised": revised, "revised_fixed": fixed, "revised_broken": broken,
+        "blind_flagged_first_answer": flagged, "blind_flagged_and_wrong": flagged_wrong,
+        "blind_decided_by_meaning": meaning,
+        "abstained": abstained, "abstained_own_answer_right": abstained_own_right,
+        "abstained_baseline_right": abstained_baseline_right,
+        "answered": len(answered),
+        "answered_agentic_strict": pct2(sum(bool(r["agentic_correct"]) for r in answered) / len(answered)) if answered else None,
+        "answered_baseline_strict": pct2(sum(bool(r["baseline_correct"]) for r in answered) / len(answered)) if answered else None,
+    }
 
 
 def main() -> None:
@@ -145,6 +192,7 @@ def main() -> None:
                        "baseline": pct(sum(r["baseline_correct"] for r in zoomed) / len(zoomed)) if zoomed else None}
     answered = [r for r in rows if r["controller_path"] != "abstained"]
     metrics["agentic_answered"] = {"cases": len(answered), "strict": pct2(sum(r["agentic_correct"] for r in answered) / len(answered))}
+    metrics["mechanisms"] = mechanisms(rows, cache)
 
     variance_file = run_dir / "variance.json"
     if variance_file.exists():

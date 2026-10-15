@@ -45,13 +45,12 @@ look at the image, answer, verify the answer \emph{against the image}, and wheth
 revise, abstain or finish. Perception is question-aware, the answerer and the verifier both see the image, and a
 different, larger model verifies. We evaluate on \NCases{} randomly sampled VQA-RAD test questions against a single-prompt
 baseline, a hand-designed workflow and a fixed-pipeline ablation, all on the same answering model, scoring with a
-strict rule-based scorer and a blinded LLM judge. The agentic loop is the most accurate system on
-the same answering model: \AgStrict\% vs.\ \BaseStrict\% strict and \AgJudged\% vs.\ \BaseJudged\% judged for the
-single prompt (McNemar $p=\PairBaseP$ strict, $p=\PairBaseJP$ judged), ahead of the fixed pipeline
-(\VsPlStrict{} points, $p=\PairPlP$) and the workflow (\WfStrict\%). It does not beat its larger verifier model
-answering alone (\BlindStrict\%), so part of its lead may come from that model. It is more reliable---verification and
-self-consistency signals predict errors, it can abstain, and \VarAgFlip\% of its answers change across re-runs versus
-\VarBaseFlip\% for the single prompt---at about \CostRatio$\times$ the cost. Code is available at
+strict rule-based scorer and a blinded LLM judge. The agentic loop is not more accurate than
+the single prompt (\AgStrict\% vs.\ \BaseStrict\% strict, \AgJudged\% vs.\ \BaseJudged\% judged; McNemar $p=\PairBaseP$
+and $p=\PairBaseJP$) or the fixed pipeline ($p=\PairPlP$), and its larger verifier answering alone is significantly
+more accurate (\BlindStrict\%, $p=\BlindAgP$). Its revisions fix \RevFixed{} wrong answers and break \RevBroken, but its
+abstentions withhold about as many correct ones. Its value is calibrated confidence: answers its check verifies are
+\SigVerAcc\% correct, the rest \UnverAcc\%---at about \CostRatio$\times$ the cost of a single prompt. Code is available at
 \url{https://github.com/clarence-ck/med-vqa-rad-agentic}.
 \end{abstract}
 
@@ -70,7 +69,7 @@ visual evidence, a stage explicitly modelled in recent work as a ``Confirm'' mod
 validation~\cite{syed2025medvctp}; and (5)~\emph{control}---deciding, from what verification finds, whether to
 re-examine the image, revise the answer, abstain or stop.
 
-These sub-tasks interact in non-trivial ways that make single-prompt approaches insufficient: what to look at depends
+These sub-tasks interact in non-trivial ways, which motivates making them explicit steps: what to look at depends
 on the question; the verifier must check cross-modal consistency between the image and the generated answer; and
 clinical safety requires explicit guardrails, abstention and disclaimers when confidence is low.
 
@@ -130,8 +129,8 @@ question types. We evaluate on a seeded random sample of \NCases{} test question
 
 \paragraph{Controller loop.} A fresh Haystack \texttt{Agent} is created per request (Figure~\ref{fig:arch}). Its
 five tools are bound to per-request working memory holding the image, the question analysis, and every look,
-answer and check; the controller sees only short text results and chooses the next call. Unlike our earlier
-fixed pipeline, the tool sequence depends on what verification finds: on the \NCases{} evaluation cases the controller
+answer and check; the controller sees only short text results and chooses the next call. Unlike the
+fixed-pipeline ablation, the tool sequence depends on what verification finds: on the \NCases{} evaluation cases the controller
 finished directly in \PathDirectN{} cases, re-examined a region in \PathRelookN, revised its answer in
 \PathReanswerN{} and abstained in \PathAbstainN. Budgets
 cap the loop at two focused re-looks, three answers and 16 steps, with a safety net that checks the latest answer
@@ -162,15 +161,15 @@ text description loses the visual detail many questions depend on. Verification 
 (\texttt{gpt-6.1-sol}) so that the answering model never verifies itself; since its guidance can suggest answers,
 we also score it answering alone as a reference. Haystack's \texttt{Agent}/\texttt{Tool}
 abstraction provides the tool-calling loop and exit conditions; keeping the image in per-request memory rather than
-in the controller's context keeps the controller cheap. An earlier retrieval stage over SLAKE~\cite{liu2021slake} was
-removed: it returned other patients' question--answer pairs, which contradicted yes/no and location answers and gave
-no measurable benefit on perception-bound questions.
+in the controller's context keeps the controller cheap.
 
 \paragraph{Baselines and ablation.} The \emph{single-shot baseline} sends the image and question in one prompt. The
 \emph{workflow baseline} is a fixed chain---a question-agnostic image description, question analysis, then
-hand-written rules per question type. The \emph{fixed-pipeline ablation} runs our original six stages (interpret,
-analyse, filter, route, reason, verify, with retry) in a fixed order with the image given to the reasoner, isolating
-what the controller's decisions add. A demo UI (Section~\ref{sec:ui}) exposes all systems.
+hand-written rules per question type. The \emph{fixed-pipeline ablation} is a controller instructed to call six tools in a prescribed
+order---\texttt{interpret\_image}, \texttt{analyze\_question}, \texttt{filter\_image\_context},
+\texttt{route\_difficulty}, \texttt{reason\_answer}, \texttt{verify\_answer}---re-running the sequence once when
+verification flags a fixable problem. It uses the same models but a question-agnostic image description, no zoom and
+no blind check, so comparing against it measures the agentic design as a whole, not control alone. A demo UI (Section~\ref{sec:ui}) exposes all systems.
 
 % ============================================================================
 \section{Multimodal Grounding}
@@ -178,9 +177,8 @@ what the controller's decisions add. A demo UI (Section~\ref{sec:ui}) exposes al
 The system uses two modalities, the radiology image and the text question, and they interact at every step that
 determines the answer: the question (and any focus) steers what \texttt{look} examines; \texttt{answer} and
 \texttt{check} receive the image directly alongside the text observations; only the controller works purely in
-text. Our earlier design described the image once, \emph{without} the question, and passed only that text downstream,
-so many answers came back as ``cannot be determined from the image description''; every model that answers or
-judges now sees the image itself. Because the verifier sees the image, its
+text. Every model that answers or judges sees the image itself, because a text description of the image loses
+the visual detail many questions depend on. Because the verifier sees the image, its
 ``explanation grounded in evidence'' and ``no contradictions'' checks are genuine cross-modal agreement checks.
 
 % ============================================================================
@@ -212,7 +210,7 @@ three words), with left/right conflicts and denials counted wrong and embedding 
 only as a strict fallback. Because word matching both rejects correct paraphrases and accepts vague answers that
 contain the reference word, a \emph{blinded LLM judge} (\texttt{gpt-6-astra}, a model that neither answers nor
 verifies in any system; answers shuffled and anonymised) scores every open-ended answer as a second, independent
-measure; a 30-verdict spot check agreed with 28 credit decisions (the other two lenient, on workflow answers). Paired comparisons use the exact McNemar test; 95\% intervals are about
+measure; a 30-verdict spot check agreed with 29 credit decisions (the other, lenient, on a workflow answer). Paired comparisons use the exact McNemar test; 95\% intervals are about
 $\pm$\CIHalf{} points. The baseline and agentic loop were re-run on \VarCases{} cases to measure stability. API cost of the
 evaluation: \$\CostTotal{} (\$\CostRun{} runs, \$\CostRepeats{} repeats, \$\CostJudge{} judge). Wall-clock time:
 \MinEval\,min for the main run (four cases at a time), \MinRepeats\,min for the sequential repeats and
@@ -229,20 +227,23 @@ evaluation: \$\CostTotal{} (\$\CostRun{} runs, \$\CostRepeats{} repeats, \$\Cost
     \midrule
     Single-shot baseline      & \BaseStrict & \BaseJudged & \BaseClose & \BaseOpen{} / \BaseOpenJ & \BaseTmean{} / \BaseTmed & \$\BaseCost \\
     Workflow baseline         & \WfStrict & \WfJudged & \WfClose & \WfOpen{} / \WfOpenJ & \WfTmean{} / \WfTmed & \$\WfCost \\
-    \textbf{Agentic loop}     & \textbf{\AgStrict} & \textbf{\AgJudged} & \AgClose & \AgOpen{} / \AgOpenJ & \AgTmean{} / \AgTmed & \$\AgCost \\
+    \textbf{Agentic loop}     & \AgStrict & \AgJudged & \AgClose & \AgOpen{} / \AgOpenJ & \AgTmean{} / \AgTmed & \$\AgCost \\
     Fixed pipeline (ablation) & \PlStrict & \PlJudged & \PlClose & \PlOpen{} / \PlOpenJ & \PlTmean{} / \PlTmed & \$\PlCost \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-\paragraph{Results.} Table~\ref{tab:main}. The agentic loop leads the single prompt (\PairBaseA{} vs.\ \PairBaseB{}
-discordant cases, $p=\PairBaseP$); under the judge the lead is significant (\PairBaseJA{} vs.\ \PairBaseJB,
-$p=\PairBaseJP$). Against the same models in a fixed order it leads but not significantly (\PairPlA{} vs.\
-\PairPlB, $p=\PairPlP$; judged $p=\PairPlJP$), and both far exceed the hand-designed workflow. Gains concentrate
-where the controller acts: on re-examined cases the loop scored \PathRelookAg\% versus \PathRelookBase\% for the
-single prompt, and on revised cases \PathReanswerAg\% versus \PathReanswerBase\% (Table~\ref{tab:paths}). The verifier
-model answering alone---the check's blind reading---scores \BlindStrict\% strict ($p=\BlindAgP$ against the loop),
-so the loop does not exceed, and numerically trails, the larger model it consults.
+\paragraph{Results.} Table~\ref{tab:main}. The agentic loop and the single prompt are statistically
+indistinguishable (\PairBaseA{} vs.\ \PairBaseB{} discordant cases, $p=\PairBaseP$; judged \PairBaseJA{} vs.\
+\PairBaseJB, $p=\PairBaseJP$), as are the loop and the fixed pipeline ($p=\PairPlP$; judged $p=\PairPlJP$); all three
+far exceed the workflow. The verifier model answering alone---the check's blind reading---scores \BlindStrict\%
+strict and beats the loop ($p=\BlindAgP$). The loop's mechanisms work individually: revision fixed \RevFixed{} wrong
+first answers and broke \RevBroken{} (\RevN{} revised episodes), and when the blind check objected to a first answer it
+was wrong in \BlindFlagWrong{} of \BlindFlagN{} cases. Re-answered cases score \PathReanswerAg\% versus
+\PathReanswerBase\% for the single prompt, but zoomed re-looks, used on the \ZoomN{} hardest cases, do not beat it
+(\ZoomAg\% vs.\ \ZoomBase\%). Abstention offsets the gain: in \AbstainOwnRight{} of \PathAbstainN{} abstentions the loop's
+own answer was right, and on the questions it answered it scores \AnsweredAgAcc\% versus \AnsweredBaseAcc\% for the
+single prompt (Table~\ref{tab:paths}).
 
 \begin{table}[t]
   \centering
@@ -266,16 +267,17 @@ so the loop does not exceed, and numerically trails, the larger model it consult
 \emph{Self-consistency:} two independent re-answers per case; high consistency means \ScHighAcc\% accuracy,
 medium/low \ScMedLowRange\%, so low consistency marks uncertainty rather than certain error.
 \emph{Cross-modal agreement:} because the verifier sees the image, verification status is predictive: verified
-answers are \SigVerAcc\% correct, unsupported or low-confidence answers \SigLowAcc\%.
+answers are \SigVerAcc\% correct, the rest \UnverAcc\%.
 \emph{Verifier model:} a larger model verifying a smaller one steers \NotDirect{} of \NCases{} episodes away from the direct path.
 \emph{Disagreement:} the three systems disagree on \DisagreePct\% of cases; when exactly one system is right, it is the
 agentic loop \WinsAg{} times, the single prompt \WinsBase{} and the workflow \WinsWf.
 \emph{Stability:} on \VarCases{} repeated cases, \VarBaseFlip\% of single-prompt answers flipped between right and
 wrong, versus \VarAgFlip\% for the agentic loop.
-Four patterns dominate the errors: (i) a shared perception blind spot, where looker and verifier misread the image the
-same way; (ii) over-reading on re-looks, limited by
-keeping the best-verified answer; (iii) benchmark items whose question does not match the image, which every system
-fails; and (iv) workflow rigidity, where fixed rules answer ``Brain'' or ``X-ray'' when a specific finding is needed.
+Five patterns dominate the errors: (i) a shared perception blind spot, where looker and verifier misread the image
+the same way; (ii) abstention withholding a right answer when the blind reading disagrees or one image is judged
+insufficient; (iii) the hardest questions resisting re-looks, with an occasional revision breaking a right answer;
+(iv) questions the image cannot answer, which every system fails; and (v) workflow rigidity, where fixed rules answer
+``Brain'' or ``X-ray'' when a specific finding is needed.
 
 % ============================================================================
 \section{User Interface}\label{sec:ui}
@@ -288,23 +290,22 @@ accuracy by question type and by controller path, disagreement and a per-case ta
 % ============================================================================
 \section{Reflection}
 % ============================================================================
-\paragraph{When agentic behaviour is beneficial.} The loop is the most accurate system built on the same answering
-model, and its gains sit exactly where the controller intervenes (revised and re-examined cases). The accuracy gain
-over a single prompt is modest and not significant on every score, and the loop does not beat its larger verifier
-answering alone: part of the gain is the verifier's, which checks every answer and may propose corrections, while the
-loop's own contribution is deciding when to look again, revise or abstain. Its clearer benefit is
-\emph{trustworthiness}: verification and consistency signals identify likely errors, it abstains rather than guess,
-its answers change less between runs, and every decision is auditable---valuable in clinical review, at a
-substantial cost.
+\paragraph{When agentic behaviour is beneficial.} On this benchmark, not for accuracy: the loop matches a single
+prompt and trails its own verifier answering alone. Its mechanisms help where they act---revision fixes far more
+answers than it breaks, and the blind check's objections are usually right---but abstention withholds about as many
+correct answers, and its answers are not more stable between runs. Its benefit is \emph{calibrated confidence}: the
+verified label separates answers that are \SigVerAcc\% correct from the rest at \UnverAcc\%, and every decision is
+auditable, which suits review workflows that can act on that signal. Answering with a low-confidence flag instead of
+abstaining, and a cheaper verifier, are the natural next steps.
 
-\paragraph{Limitations.} About \CostRatio$\times$ the cost and \LatRatio$\times$ the median latency of a single prompt for a
-modest accuracy gain.
+\paragraph{Limitations.} About \CostRatio$\times$ the cost and \LatRatio$\times$ the median latency of a single prompt,
+without an accuracy gain on this benchmark. Abstentions are scored as wrong, so the abstention policy lowers accuracy
+by design.
 The verifier shares the perception weaknesses of vision models, so agreement is not correctness, and because its
 guidance may suggest answers, the loop's contribution cannot be fully separated from the verifier's (a critique-only
 verifier would isolate it). \NCases{} questions
 give $\pm$\CIHalf-point intervals and noisy per-type estimates; the LLM judge is itself a model, spot-checked but not
-human-annotated. A retrieval stage did not help perception-bound questions and was removed; retrieval may still
-help questions that need knowledge not visible in the image, which VQA-RAD rarely contains.
+human-annotated. The system uses no retrieval, so it cannot draw on knowledge that is not visible in the image.
 
 % ============================================================================
 \begin{thebibliography}{15}
@@ -369,11 +370,6 @@ and answers about radiology images. \emph{Scientific Data}, 5:180251.
 Deka, P., Jurek-Loughrey, A., \& Deepak, P. (2022). Improved methods to aid unsupervised evidence-based fact checking
 for online health news. \emph{Journal of Data Intelligence}, 3(4), 474--504.
 \url{https://huggingface.co/pritamdeka/S-PubMedBert-MS-MARCO}.
-
-\bibitem{liu2021slake}
-Liu, B., Zhan, L.M., Xu, L., Ma, L., Yang, Y., \& Wu, X.M. (2021). SLAKE: A semantically-labeled knowledge-enhanced
-dataset for medical visual question answering. In \emph{Proceedings of the IEEE 18th International Symposium on
-Biomedical Imaging (ISBI 2021)}, pp.~1650--1654. IEEE.
 
 \end{thebibliography}
 

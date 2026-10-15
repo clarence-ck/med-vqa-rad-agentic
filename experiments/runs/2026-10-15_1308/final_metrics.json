@@ -1,0 +1,276 @@
+{
+  "cases": 300,
+  "close_ended_cases": 169,
+  "open_ended_cases": 131,
+  "systems": {
+    "baseline": {
+      "strict": 68.3,
+      "judged": 70.7,
+      "close_ended": 81.7,
+      "open_ended": 51.1,
+      "open_ended_judged": 56.5,
+      "mean_time_s": 4.7,
+      "median_time_s": 3.8,
+      "mean_cost_usd": 0.0002
+    },
+    "workflow": {
+      "strict": 32.7,
+      "judged": 34.0,
+      "close_ended": 46.2,
+      "open_ended": 15.3,
+      "open_ended_judged": 18.3,
+      "mean_time_s": 9.7,
+      "median_time_s": 9.4,
+      "mean_cost_usd": 0.0005
+    },
+    "agentic": {
+      "strict": 66.3,
+      "judged": 70.3,
+      "close_ended": 78.7,
+      "open_ended": 50.4,
+      "open_ended_judged": 59.5,
+      "mean_time_s": 51.7,
+      "median_time_s": 36.6,
+      "mean_cost_usd": 0.0135
+    },
+    "pipeline": {
+      "strict": 67.0,
+      "judged": 68.7,
+      "close_ended": 77.5,
+      "open_ended": 53.4,
+      "open_ended_judged": 57.3,
+      "mean_time_s": 36.5,
+      "median_time_s": 29.6,
+      "mean_cost_usd": 0.0066
+    }
+  },
+  "paired": {
+    "agentic_vs_baseline_strict": {
+      "only_first": 27,
+      "only_second": 33,
+      "p": 0.519
+    },
+    "agentic_vs_baseline_judged": {
+      "only_first": 30,
+      "only_second": 31,
+      "p": 1.0
+    },
+    "agentic_vs_pipeline_strict": {
+      "only_first": 26,
+      "only_second": 28,
+      "p": 0.892
+    },
+    "agentic_vs_pipeline_judged": {
+      "only_first": 26,
+      "only_second": 21,
+      "p": 0.56
+    }
+  },
+  "wins": {
+    "baseline": 24,
+    "workflow": 13,
+    "agentic": 23,
+    "ties": 240
+  },
+  "disagreement_pct": 67.67,
+  "controller_paths": {
+    "direct": {
+      "cases": 186,
+      "agentic": 82.26,
+      "baseline": 81.18,
+      "workflow": 34.95,
+      "pipeline": 80.65
+    },
+    "relook": {
+      "cases": 57,
+      "agentic": 38.6,
+      "baseline": 38.6,
+      "workflow": 28.07,
+      "pipeline": 35.09
+    },
+    "reanswer": {
+      "cases": 35,
+      "agentic": 68.57,
+      "baseline": 54.29,
+      "workflow": 40.0,
+      "pipeline": 57.14
+    },
+    "abstained": {
+      "cases": 22,
+      "agentic": 0.0,
+      "baseline": 59.09,
+      "workflow": 13.64,
+      "pipeline": 50.0
+    }
+  },
+  "verification_signal": {
+    "verified": {
+      "cases": 225,
+      "agentic": 78.67
+    },
+    "partially_verified": {
+      "cases": 66,
+      "agentic": 31.82
+    },
+    "unsupported_or_low": {
+      "cases": 9,
+      "agentic": 11.11
+    }
+  },
+  "self_consistency_signal": {
+    "high": {
+      "cases": 238,
+      "agentic": 74.79
+    },
+    "medium": {
+      "cases": 10,
+      "agentic": 40.0
+    },
+    "low": {
+      "cases": 30,
+      "agentic": 56.67
+    },
+    "not_run": {
+      "cases": 22,
+      "agentic": 0.0
+    }
+  },
+  "blind_reading": {
+    "cases": 300,
+    "strict": 72.0,
+    "agentic_vs_blind": {
+      "only_first": 17,
+      "only_second": 34,
+      "p": 0.024
+    },
+    "blind_vs_baseline": {
+      "only_first": 37,
+      "only_second": 26,
+      "p": 0.207
+    }
+  },
+  "zoom": {
+    "cases": 66,
+    "agentic": 33.3,
+    "baseline": 40.9
+  },
+  "agentic_answered": {
+    "cases": 278,
+    "strict": 71.58
+  },
+  "mechanisms": {
+    "revised": 92,
+    "revised_fixed": 23,
+    "revised_broken": 5,
+    "blind_flagged_first_answer": 85,
+    "blind_flagged_and_wrong": 64,
+    "blind_decided_by_meaning": 44,
+    "abstained": 22,
+    "abstained_own_answer_right": 11,
+    "abstained_baseline_right": 13,
+    "answered": 278,
+    "answered_agentic_strict": 71.58,
+    "answered_baseline_strict": 69.06
+  },
+  "variance": {
+    "baseline": {
+      "run1": 71,
+      "run2": 76,
+      "cases": 100,
+      "flips": 9
+    },
+    "agentic": {
+      "run1": 74,
+      "run2": 75,
+      "cases": 100,
+      "flips": 15
+    }
+  },
+  "costs_usd": {
+    "evaluation_run": 6.25,
+    "variance_repeats": 1.28,
+    "judge": 1.09
+  },
+  "run": {
+    "run_id": "2026-10-15_1308",
+    "status": "completed",
+    "started": "2026-10-15T13:08:44",
+    "finished": "2026-10-15T15:52:46",
+    "code_version": "2058688"
+  },
+  "run_timings": {
+    "eval": {
+      "started": "2026-10-15T13:08:44",
+      "finished": "2026-10-15T14:19:23",
+      "wall_clock_s": 4238,
+      "cost_usd": 6.2516,
+      "note": "300 cases x 4 systems, 4 at a time"
+    },
+    "judge": {
+      "started": "2026-10-15T14:19:23",
+      "finished": "2026-10-15T14:29:48",
+      "wall_clock_s": 624,
+      "cost_usd": 1.0934,
+      "note": "131 open-ended cases"
+    },
+    "variance": {
+      "started": "2026-10-15T14:29:48",
+      "finished": "2026-10-15T15:52:46",
+      "wall_clock_s": 4977,
+      "cost_usd": 1.2782,
+      "note": "100 cases, one at a time"
+    }
+  },
+  "showcase": [
+    {
+      "kind": "relook_win",
+      "story": "A focused re-look got it right; the single prompt did not",
+      "sample_id": 1895,
+      "question": "is the lesion on the left or right side of the brain?",
+      "ground_truth": "left",
+      "agentic_answer": "The lesion is on the patient's left side of the brain.",
+      "baseline_answer": "The lesion is on the right side of the brain.",
+      "controller_path": "relook",
+      "verification_status": "verified"
+    },
+    {
+      "kind": "reanswer_win",
+      "story": "The verifier's guidance fixed the answer; the single prompt was wrong",
+      "sample_id": 1794,
+      "question": "is there airspace consolidation on the left side?",
+      "ground_truth": "yes",
+      "agentic_answer": "Yes, there is left perihilar airspace consolidation.",
+      "baseline_answer": "No, there is no definite airspace consolidation on the left.",
+      "controller_path": "reanswer",
+      "verification_status": "verified"
+    },
+    {
+      "kind": "recovery_failure",
+      "story": "The loop re-examined or revised and still ended wrong, while the single prompt was right",
+      "sample_id": 1806,
+      "question": "is there evidence of any abnormalities of the lung parenchyma?",
+      "ground_truth": "no",
+      "agentic_answer": "yes",
+      "baseline_answer": "No, there is no focal lung parenchymal abnormality.",
+      "controller_path": "relook",
+      "verification_status": "partially_verified"
+    },
+    {
+      "kind": "flagged_correct",
+      "story": "Low self-consistency flagged the case for review, though the final answer was right",
+      "sample_id": 1851,
+      "question": "is there fluid in the lung?",
+      "ground_truth": "yes",
+      "agentic_answer": "yes",
+      "baseline_answer": "Yes, there is fluid at the left lung base.",
+      "controller_path": "direct",
+      "verification_status": "verified"
+    }
+  ],
+  "agentic_vs_baseline": {
+    "cost_ratio": 58.6,
+    "mean_latency_ratio": 11.0,
+    "median_latency_ratio": 9.6
+  },
+  "case_wall_time_mean_s": 55.8
+}

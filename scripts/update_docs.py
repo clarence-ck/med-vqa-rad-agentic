@@ -60,6 +60,20 @@ def short(text: str, limit: int = 60) -> str:
     return text if len(text) <= limit else text[: limit - 1] + "…"
 
 
+def vs_unverified_n(m: dict) -> int:
+    vs = m["verification_signal"]
+    return vs["partially_verified"]["cases"] + vs["unsupported_or_low"]["cases"]
+
+
+def vs_unverified_acc(m: dict) -> float:
+    """Agentic accuracy on answers the check did not verify."""
+    vs = m["verification_signal"]
+    n = vs_unverified_n(m)
+    right = (vs["partially_verified"]["cases"] * (vs["partially_verified"]["agentic"] or 0)
+             + vs["unsupported_or_low"]["cases"] * (vs["unsupported_or_low"]["agentic"] or 0)) / 100
+    return round(100 * right / n, 1) if n else 0.0
+
+
 def derived(m: dict) -> dict:
     """Numbers computed from the metrics that several blocks share."""
     s = m["systems"]
@@ -69,6 +83,8 @@ def derived(m: dict) -> dict:
     costs = m["costs_usd"]
     return {
         "not_direct": sum(v["cases"] for k, v in paths.items() if k != "direct"),
+        "unverified_n": vs_unverified_n(m),
+        "unverified_acc": vs_unverified_acc(m),
         "sc_medlow_n": sc["medium"]["cases"] + sc["low"]["cases"],
         "sc_medlow_range": value_range([sc["medium"]["agentic"], sc["low"]["agentic"]]),
         "vs_pipeline_strict": round(s["agentic"]["strict"] - s["pipeline"]["strict"], 1),
@@ -86,8 +102,7 @@ def derived(m: dict) -> dict:
 def block_glance(m: dict, d: dict) -> str:
     s, pair = m["systems"], m["paired"]
     rows = "\n".join(
-        f"| {SYSTEM_LABELS[k]} | {'**' if k == 'agentic' else ''}{s[k]['strict']}%{'**' if k == 'agentic' else ''} | "
-        f"{'**' if k == 'agentic' else ''}{s[k]['judged']}%{'**' if k == 'agentic' else ''} | "
+        f"| {SYSTEM_LABELS[k]} | {s[k]['strict']}% | {s[k]['judged']}% | "
         f"{s[k]['mean_time_s']} s · {s[k]['median_time_s']} s | ${s[k]['mean_cost_usd']:.4f} |"
         for k in ("baseline", "workflow", "agentic", "pipeline"))
     ab, ap = pair["agentic_vs_baseline_strict"], pair["agentic_vs_pipeline_strict"]
@@ -102,10 +117,10 @@ def block_glance(m: dict, d: dict) -> str:
     else:
         verdict = "no significant difference"
     blind = m.get("blind_reading")
-    blind_line = (f"\n- **Agentic vs its verifier model alone** (`gpt-6.1-sol` answering in one shot, the check's blind reading): "
-                  f"{s['agentic']['strict']}% vs {blind['strict']}% strict (p = {p_value(blind['agentic_vs_blind']['p'])}), "
-                  f"so the loop's lead over the single prompt may come partly from its larger verifier."
+    blind_line = (f"\n- **Agentic vs its verifier model alone** (`gpt-6.1-sol` answering once, the check's blind reading): "
+                  f"{s['agentic']['strict']}% vs {blind['strict']}% strict (p = {p_value(blind['agentic_vs_blind']['p'])})."
                   if blind else "")
+    verified = m["verification_signal"]["verified"]
     return f"""Run `{m['run']['run_id']}`: {m['cases']} seeded-random VQA-RAD test questions ({m['close_ended_cases']} close-ended, {m['open_ended_cases']} open-ended), all systems on the same answering model
 (`gpt-6-luna`; the agentic loop and the fixed pipeline also use `gpt-6.1-sol` as verifier). Per-case times were
 measured with four cases running at once; the mean is pulled up by a few long re-look cases (actual run times are in
@@ -118,8 +133,10 @@ judge, `gpt-6-astra` (see [Evaluation design](#evaluation-design)).
 
 - **Agentic vs single-shot: {verdict}** ({s['agentic']['strict'] - s['baseline']['strict']:+.1f} points strict, p = {p_value(ab['p'])}; {s['agentic']['judged'] - s['baseline']['judged']:+.1f} judged, p = {p_value(abj['p'])}; exact McNemar).
 - **Agentic vs fixed pipeline:** {d['vs_pipeline_strict']:+} points strict (p = {p_value(ap['p'])}), {d['vs_pipeline_judged']:+} judged (p = {p_value(apj['p'])}).
-- **Reliability:** verification and self-consistency signals predict errors, the loop can abstain, and
-  {flips.get('agentic', '–')}% of its answers flip between runs vs {flips.get('baseline', '–')}% for the single prompt.{blind_line}"""
+{blind_line.lstrip(chr(10))}
+- **Confidence and stability:** answers the check verified are {rounded(verified['agentic'])}% correct, the rest
+  {rounded(d['unverified_acc'])}%; between two runs, {flips.get('agentic', '–')}% of the loop's answers change right ↔ wrong vs
+  {flips.get('baseline', '–')}% for the single prompt."""
 
 
 def block_paths(m: dict, d: dict) -> str:
@@ -165,11 +182,8 @@ def block_results(m: dict, d: dict) -> str:
     s, pair, paths = m["systems"], m["paired"], m["controller_paths"]
     label = {"baseline": "Single-shot baseline", "workflow": "Workflow baseline", "agentic": "**Agentic loop**",
              "pipeline": "Fixed pipeline (ablation)"}
-    def bold(k, text):
-        return f"**{text}**" if k == "agentic" else text
-
     overall = "\n".join(
-        f"| {label[k]} | {bold(k, str(s[k]['strict']) + '%')} | {bold(k, str(s[k]['judged']) + '%')} | {s[k]['close_ended']}% | "
+        f"| {label[k]} | {s[k]['strict']}% | {s[k]['judged']}% | {s[k]['close_ended']}% | "
         f"{s[k]['open_ended']}% → {s[k]['open_ended_judged']}% |" for k in label)
 
     def pair_cell(key):
@@ -229,16 +243,25 @@ def block_blind_zoom(m: dict) -> str:
     if not b:
         return ""
     ab, bb = b["agentic_vs_blind"], b["blind_vs_baseline"]
-    zoom_line = (f"Zoomed re-looks happened on {z['cases']} cases (agentic {z['agentic']}% vs single-shot {z['baseline']}% there)."
-                 if z.get("cases") else "No re-look used the zoom in this run.")
+    mech = m.get("mechanisms") or {}
+    if not mech:
+        return ""
+    flag_pct = rounded(100 * mech["blind_flagged_and_wrong"] / mech["blind_flagged_first_answer"]) if mech["blind_flagged_first_answer"] else "–"
     return f"""
 
-### Blind check and zoom
+### What the loop's mechanisms did
 
-The check's blind reading is the verifier model (`gpt-6.1-sol`) answering from the image alone. Scored as a system
-of its own it reaches {b['strict']}% strict: a reference for how much of the agentic result could come from the
-larger verifier model (agentic vs blind reading {ab['only_first']} vs {ab['only_second']}, p = {p_value(ab['p'])}; blind reading vs
-single-shot {bb['only_first']} vs {bb['only_second']}, p = {p_value(bb['p'])}). {zoom_line}"""
+| Mechanism | Result in this run |
+|---|---|
+| Revision (re-look or re-answer) | {mech['revised']} questions: {mech['revised_fixed']} wrong first answers fixed, {mech['revised_broken']} right ones broken |
+| Blind check | Objected to {mech['blind_flagged_first_answer']} first answers; {mech['blind_flagged_and_wrong']} of them ({flag_pct}%) were wrong. The meaning comparison decided {mech['blind_decided_by_meaning']} agreements |
+| Zoom | Used on {z.get('cases', 0)} questions, the hardest: agentic {z.get('agentic')}% vs single-shot {z.get('baseline')}% there |
+| Abstention | {mech['abstained']} questions; the loop's own last answer was right in {mech['abstained_own_answer_right']}, the single prompt in {mech['abstained_baseline_right']} |
+| Answered questions only | Agentic {mech['answered_agentic_strict']:.1f}% vs single-shot {mech['answered_baseline_strict']:.1f}% on the same {mech['answered']} questions |
+
+The blind reading is the verifier model (`gpt-6.1-sol`) answering from the image alone. Scored on its own it reaches
+{b['strict']}% strict (agentic vs blind reading {ab['only_first']} vs {ab['only_second']}, p = {p_value(ab['p'])}; blind reading vs single-shot
+{bb['only_first']} vs {bb['only_second']}, p = {p_value(bb['p'])})."""
 
 
 def block_failure(m: dict, d: dict) -> str:
@@ -267,7 +290,7 @@ Representative cases, chosen automatically by `scripts/final_metrics.py` (screen
 def block_limit_cost(m: dict, d: dict) -> str:
     r = m["agentic_vs_baseline"]
     return (f"- About {rounded(r['cost_ratio'])}× the cost and {rounded(r['median_latency_ratio'])}× the (median) latency "
-            f"of a single prompt, for {m['systems']['agentic']['strict'] - m['systems']['baseline']['strict']:+.1f} points of strict accuracy.")
+            f"of a single prompt.")
 
 
 def block_question_cost(m: dict, d: dict) -> str:
@@ -290,7 +313,7 @@ python scripts/run_all.py --stages metrics,docs,diagram,report   # rebuild outpu
 | `judge` | `judge_open_ended.py` | ${c['judge']:.2f} | ~{mins.get('judge', '?')} min |
 | `metrics` | `final_metrics.py` → `final_metrics.json` and `cases.csv` in the run folder | free | seconds |
 | `docs` | `update_docs.py` → README blocks and `docs/report/results.tex` | free | seconds |
-| `diagram` | `system_diagram.py` → `system_diagram.png` (+ copy for the report) | free | seconds |
+| `diagram` | `system_diagram.py` → `docs/report/system_diagram.png` (README and report) | free | seconds |
 | `screenshots` | starts backend + frontend, `capture-screenshots.mjs` for the showcase cases | free | ~1 min |
 | `report` | `tectonic main.tex` → `docs/report/MGAI_Final_Report_Group9_revised.pdf` | free | ~1 min |"""
 
@@ -365,6 +388,22 @@ def latex_macros(m: dict, d: dict) -> str:
         "BlindStrict": (m.get("blind_reading") or {}).get("strict", "--"),
         "BlindAgP": p_value((m.get("blind_reading") or {}).get("agentic_vs_blind", {}).get("p", 1.0)).replace("< ", "<"),
         "ZoomN": (m.get("zoom") or {}).get("cases") or 0,
+        "ZoomAg": rounded((m.get("zoom") or {}).get("agentic") or 0),
+        "ZoomBase": rounded((m.get("zoom") or {}).get("baseline") or 0),
+        "RevN": (m.get("mechanisms") or {}).get("revised", 0),
+        "RevFixed": (m.get("mechanisms") or {}).get("revised_fixed", 0),
+        "RevBroken": (m.get("mechanisms") or {}).get("revised_broken", 0),
+        "BlindFlagN": (m.get("mechanisms") or {}).get("blind_flagged_first_answer", 0),
+        "BlindFlagWrong": (m.get("mechanisms") or {}).get("blind_flagged_and_wrong", 0),
+        "MeaningN": (m.get("mechanisms") or {}).get("blind_decided_by_meaning", 0),
+        "AbstainOwnRight": (m.get("mechanisms") or {}).get("abstained_own_answer_right", 0),
+        "AbstainBaseRight": (m.get("mechanisms") or {}).get("abstained_baseline_right", 0),
+        "AnsweredAgAcc": rounded((m.get("mechanisms") or {}).get("answered_agentic_strict") or 0),
+        "AnsweredBaseAcc": rounded((m.get("mechanisms") or {}).get("answered_baseline_strict") or 0),
+        "UnverN": d["unverified_n"],
+        "UnverAcc": rounded(d["unverified_acc"]),
+        "VsBaseStrict": f"{s['agentic']['strict'] - s['baseline']['strict']:+.1f}",
+        "VsBaseJudged": f"{s['agentic']['judged'] - s['baseline']['judged']:+.1f}",
     })
     lines = [f"% Generated by scripts/update_docs.py from run {m['run']['run_id']} -- do not edit by hand."]
     lines += [f"\\newcommand{{\\{name}}}{{{value}}}" for name, value in macros.items()]

@@ -10,7 +10,7 @@ Stages, in order (each can be run on its own with --stages):
   variance     baseline + agentic loop again on 100 of the questions (--repeats)       paid
   metrics      final_metrics.json + cases.csv in the run folder                        free
   docs         README number blocks, docs/report/results.tex, experiments/runs/README.md free
-  diagram      system_diagram.png (+ the report's copy)                                free
+  diagram      docs/report/system_diagram.png (used by the README and the report)      free
   screenshots  start backend + frontend, capture the dashboard                         free (Node + Chrome/Edge)
   report       compile the LaTeX report with tectonic                                  free (tectonic)
 
@@ -154,7 +154,6 @@ def stage_docs(run_id, budget_left):
 
 def stage_diagram(run_id, budget_left):
     python("system_diagram.py")
-    shutil.copyfile(ROOT / "system_diagram.png", REPORT_DIR / "system_diagram.png")
 
 
 def _wait_for(url: str, timeout: float) -> None:
