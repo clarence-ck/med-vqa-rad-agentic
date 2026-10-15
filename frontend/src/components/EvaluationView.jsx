@@ -434,7 +434,7 @@ export default function EvaluationView({ loading, evaluationData, error, onRefre
 
             <div className="card">
               <div className="card-header">
-                <span className="card-title">Recent Evaluated Cases</span>
+                <span className="card-title">Evaluated Cases</span>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className="tag tag-gray">
                     {filteredRows.length} of {rows.length} shown

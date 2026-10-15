@@ -83,6 +83,10 @@ def _configure_root() -> None:
     plain_formatter = logging.Formatter(_LOG_FORMAT_PLAIN, datefmt=_DATE_FORMAT)
 
     # ── Console handler (coloured if colorlog is available) ──────────────────
+    # Redirected output on Windows uses a legacy code page that cannot encode "→" and similar characters;
+    # escape them instead of failing the whole log line.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(errors="backslashreplace")
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.DEBUG)
 
